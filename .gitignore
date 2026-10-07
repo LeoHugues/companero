@@ -23,3 +23,13 @@
 /phpunit.xml
 /.phpunit.cache/
 ###< phpunit/phpunit ###
+
+###> local dev environment (.\dev) ###
+/.tools/
+/dist/
+###< local dev environment ###
+
+###> symfony/ux-native ###
+# Written by `bin/console ux:native:build-configs` at deploy time
+/public/native/
+###< symfony/ux-native ###

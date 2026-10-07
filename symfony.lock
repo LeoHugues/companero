@@ -245,6 +245,9 @@
             "ref": "0df5844274d871b37fc3816c57a768ffc60a43a5"
         }
     },
+    "symfony/ux-native": {
+        "version": "v3.5.0"
+    },
     "symfony/ux-turbo": {
         "version": "2.36",
         "recipe": {

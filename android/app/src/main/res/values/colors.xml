@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Design tokens from docs/direction-artistique.md (assets/styles/app.css). -->
+<resources>
+    <color name="cream">#FFF6E9</color>
+    <color name="surface">#FFFCF6</color>
+    <color name="ink">#2E1E14</color>
+    <color name="muted">#7A6555</color>
+    <color name="clay">#E8692C</color>
+    <color name="clay_dark">#B4521F</color>
+    <color name="sun">#F6C453</color>
+</resources>

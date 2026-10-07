@@ -5,7 +5,7 @@
 {% block body %}
     <header class="flex items-center justify-between">
         <h1 class="text-[22px]">Modifier la tâche</h1>
-        <a href="{{ path('task_index') }}" aria-label="Fermer" class="flex size-11 items-center justify-center rounded-full text-ink"><twig:Icon name="close" size="22" stroke="2.2"/></a>
+        <a href="{{ ux_is_native() ? '/recede_historical_location' : path('task_index') }}" aria-label="Fermer" class="flex size-11 items-center justify-center rounded-full text-ink"><twig:Icon name="close" size="22" stroke="2.2"/></a>
     </header>
 
     <p class="meta -mt-2">Ajoutée par {{ task.createdBy.name }} le {{ task.createdAt|date('d/m/Y') }}{% if task.lastCompletedAt %} · faite pour la dernière fois le {{ task.lastCompletedAt|date('d/m à H\\hi') }}{% endif %}.</p>
@@ -18,4 +18,5 @@
     </form>
 {% endblock %}
 
-{% block nav %}<twig:BottomNav active="tasks"/>{% endblock %}
+{# In the Android app this form is a modal (see App\Native\NativeConfiguration): no bottom navigation. #}
+{% block nav %}{% if not ux_is_native() %}<twig:BottomNav active="tasks"/>{% endif %}{% endblock %}

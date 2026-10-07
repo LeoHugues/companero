@@ -5,7 +5,7 @@
 {% block body %}
     <header class="flex items-center justify-between">
         <h1 class="text-[22px]">Nouvelle tâche</h1>
-        <a href="{{ path('app_home') }}" aria-label="Fermer" class="flex size-11 items-center justify-center rounded-full text-ink"><twig:Icon name="close" size="22" stroke="2.2"/></a>
+        <a href="{{ ux_is_native() ? '/recede_historical_location' : path('app_home') }}" aria-label="Fermer" class="flex size-11 items-center justify-center rounded-full text-ink"><twig:Icon name="close" size="22" stroke="2.2"/></a>
     </header>
 
     <div class="flex items-end gap-2.5">
@@ -33,4 +33,5 @@
     {{ include('task/_form.html.twig', {submit_label: 'Ajouter la tâche'}) }}
 {% endblock %}
 
-{% block nav %}<twig:BottomNav active="new"/>{% endblock %}
+{# In the Android app this form is a modal (see App\Native\NativeConfiguration): no bottom navigation. #}
+{% block nav %}{% if not ux_is_native() %}<twig:BottomNav active="new"/>{% endif %}{% endblock %}

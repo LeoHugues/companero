@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Companero</string>
+    <string name="error_title">La Casa ne répond pas</string>
+    <string name="error_detail">Impossible de joindre %1$s.\nLe serveur tourne-t-il sur le PC, et le téléphone est-il sur le même Wi-Fi ?\n\n(%2$s)</string>
+    <string name="retry">Réessayer</string>
+    <string name="change_server">Changer l\'adresse du serveur</string>
+    <string name="server_title">Adresse du serveur</string>
+    <string name="server_message">Par exemple http://192.168.1.34:8000</string>
+    <string name="server_save">Enregistrer</string>
+</resources>

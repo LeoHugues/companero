@@ -10,12 +10,14 @@ de **la Casa**, la maison-personnage dont l'humeur suit la propreté du foyer.
 
 ## Stack
 
-- **Symfony 7.4 LTS** (PHP ≥ 8.2), Doctrine ORM, **SQLite** par défaut
+- **Symfony 7.4 LTS** (PHP ≥ 8.4), Doctrine ORM, **SQLite** par défaut
   (une coloc = un petit fichier ; PostgreSQL possible via `DATABASE_URL`).
 - Front sans build Node : **Twig** + Twig Components, **Turbo** (rafraîchissements
   par morphing) et **Stimulus** via AssetMapper, **Tailwind CSS v4** via
   `symfonycasts/tailwind-bundle`.
 - PWA installable (`public/manifest.webmanifest`).
+- Appli Android **Hotwire Native** (`android/`), pilotée par **Symfony UX Native**
+  (expérimental) : voir [Appli Android](#appli-android).
 
 ## Démarrer
 
@@ -33,6 +35,24 @@ Coloc de démo : `leo@example.com` / `companero` (aussi `ines@`, `max@`, `sam@`)
 Sinon, ouvrez `/bienvenue` pour créer votre coloc, puis partagez le lien
 d'invitation affiché dans *Profil › La coloc*.
 
+### Sous Windows, sans rien installer
+
+`dev.cmd` télécharge PHP 8.4, Composer, Java et le SDK Android dans `.tools/`
+(supprimer ce dossier désinstalle tout) :
+
+```bat
+.\dev setup          :: PHP, dépendances, base de démo, CSS
+.\dev serve          :: l'appli sur http://localhost:8000 et sur le Wi-Fi (+ Tailwind en watch)
+.\dev test           :: PHPUnit
+.\dev apk            :: compile dist\companero.apk
+.\dev console …      :: bin/console
+.\dev composer …     :: Composer
+```
+
+Au premier `.\dev serve`, autorisez `php.exe` dans le pare-feu Windows (réseaux
+privés **et** publics si le Wi-Fi est classé « public »), sinon le téléphone ne
+joint pas le PC.
+
 ### Clôture de la semaine
 
 Les titres de la semaine et le bonus collectif sont distribués par une commande à
@@ -40,6 +60,35 @@ lancer chaque lundi peu après minuit :
 
 ```cron
 5 0 * * 1  php /chemin/vers/companero/bin/console app:week:close
+```
+
+## Appli Android
+
+Une coquille [Hotwire Native](https://native.hotwired.dev/android/) (Kotlin,
+`android/`) affiche les pages du serveur avec une navigation native. Côté Symfony,
+[UX Native](https://symfony.com/bundles/ux-native/current/index.html) détecte
+l'appli (`ux_is_native()` dans Twig) et sert ses règles de navigation,
+déclarées dans `src/Native/NativeConfiguration.php` :
+
+- Accueil, Tâches, Bilan, Profil et la connexion **remplacent** l'écran au lieu de
+  s'empiler ;
+- les formulaires de tâche s'ouvrent en **modale** (sans barre du bas, la croix
+  ferme la modale) ;
+- tirer vers le bas rafraîchit la page.
+
+```bat
+.\dev apk                              :: serveur proposé : http://<IP du PC>:8000
+.\dev apk https://companero.example    :: ou une autre adresse
+```
+
+Pendant que `.\dev serve` tourne, l'APK se télécharge depuis le téléphone sur
+`http://<IP du PC>:8000/companero.apk` (autoriser l'installation d'applis inconnues).
+Si le serveur ne répond pas, l'appli propose de réessayer ou de changer d'adresse.
+
+En production, écrire la configuration dans `public/native/` à chaque déploiement :
+
+```bash
+php bin/console ux:native:build-configs
 ```
 
 ## Qualité
@@ -61,6 +110,8 @@ php bin/console lint:twig templates
 | `src/Review` | Bilan de la semaine, titres, clôture |
 | `src/Household` | Création de la coloc et inscription des membres |
 | `src/Controller`, `src/Form`, `templates/` | Interface web |
+| `src/Native`, `android/` | Appli Android : règles de navigation et coquille Hotwire Native |
+| `scripts/`, `dev.cmd` | Environnement local sous Windows |
 
 Le statut d'une tâche n'est jamais stocké : il est **calculé** à partir de ses
 règles et de sa dernière réalisation. Les points forment un **journal** : chaque
