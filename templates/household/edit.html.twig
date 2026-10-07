@@ -1,0 +1,59 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}La coloc · Companero{% endblock %}
+
+{% block body %}
+    <header class="flex items-center justify-between">
+        <h1 class="text-[26px]">La coloc</h1>
+        <a href="{{ path('profile_show') }}" aria-label="Retour au profil" class="flex size-11 items-center justify-center rounded-full text-ink"><twig:Icon name="close" size="22" stroke="2.2"/></a>
+    </header>
+
+    {{ form_start(household_form, {attr: {class: 'flex flex-col gap-5'}}) }}
+        {{ form_row(household_form.name) }}
+        {{ form_row(household_form.cleaningDay, {help: 'Le rendez-vous de la semaine : les engagements sont attendus ce jour-là.'}) }}
+        <button type="submit" class="btn-primary self-start">Enregistrer</button>
+    {{ form_end(household_form) }}
+
+    <section class="flex flex-col gap-2" aria-labelledby="members-title">
+        <h2 id="members-title" class="section-title">Les colocs</h2>
+        <ul class="card divide-y divide-line px-3.5 py-1">
+            {% for member in household.members %}
+                <li class="flex items-center gap-2.5 py-2.5"><twig:Avatar :member="member"/><span class="text-[15px] font-bold">{{ member.name }}</span></li>
+            {% endfor %}
+        </ul>
+        <div class="card flex flex-col gap-2 p-3.5" data-controller="copy">
+            <p class="field-label">Inviter quelqu’un</p>
+            <p class="meta">Envoie ce lien à ton nouveau coloc :</p>
+            <input type="text" readonly class="input text-sm" value="{{ url('onboarding_join', {token: household.inviteToken}) }}" data-copy-target="source" aria-label="Lien d’invitation">
+            <div class="flex items-center gap-3">
+                <button type="button" class="btn-primary" data-action="copy#copy"><twig:Icon name="link" size="18"/> <span data-copy-target="label">Copier le lien</span></button>
+                <form method="post" action="{{ path('household_invite_reset') }}" data-turbo-confirm="L’ancien lien ne marchera plus. Continuer ?">
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
+                    <button type="submit" class="btn-link">Nouveau lien</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <section class="flex flex-col gap-2" aria-labelledby="zones-title">
+        <h2 id="zones-title" class="section-title">Zones</h2>
+        <ul class="card divide-y divide-line px-3.5 py-1">
+            {% for zone in household.zones %}
+                <li class="flex items-center gap-2.5 py-2">
+                    <span class="flex-1 text-[15px] font-bold">{{ zone.name }}{% if zone.private %} <span class="text-xs font-semibold text-muted">· privée</span>{% endif %}</span>
+                    <form method="post" action="{{ path('zone_delete', {id: zone.id}) }}" data-turbo-confirm="Supprimer la zone « {{ zone.name }} » ? Ses tâches restent, pour toute la coloc.">
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
+                        <button type="submit" aria-label="Supprimer la zone {{ zone.name }}" class="flex size-10 cursor-pointer items-center justify-center rounded-full text-muted hover:bg-track hover:text-ink"><twig:Icon name="trash" size="18"/></button>
+                    </form>
+                </li>
+            {% endfor %}
+        </ul>
+        {{ form_start(zone_form, {attr: {class: 'card flex flex-col gap-3 p-3.5'}}) }}
+            {{ form_row(zone_form.name) }}
+            {{ form_row(zone_form.private) }}
+            <button type="submit" class="btn-primary self-start"><twig:Icon name="plus" size="18" stroke="2.6"/> Ajouter la zone</button>
+        {{ form_end(zone_form) }}
+    </section>
+{% endblock %}
+
+{% block nav %}<twig:BottomNav active="profile"/>{% endblock %}

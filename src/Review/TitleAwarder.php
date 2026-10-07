@@ -23,8 +23,8 @@ final class TitleAwarder
         return match (true) {
             !$progress->wasPresent() => new AwardedTitle('En vadrouille', 'absent toute la semaine'),
             $progress->goal > 0 && $progress->points >= 1.5 * $progress->goal => new AwardedTitle('Tornade ménagère', \sprintf('%d pts pour un objectif de %d', $progress->points, $progress->goal)),
-            $rescues > 0 => new AwardedTitle('As du rattrapage', \sprintf('%d %s sauvée%s du retard', $rescues, $rescues > 1 ? 'tâches' : 'tâche', $rescues > 1 ? 's' : '')),
             $onCleaningDay >= 2 => new AwardedTitle('Pilier du jour de ménage', \sprintf('%d tâches pile le bon jour', $onCleaningDay)),
+            $rescues >= 2 => new AwardedTitle('As du rattrapage', \sprintf('%d tâches sauvées du retard', $rescues)),
             $favouriteCount >= 3 => new AwardedTitle('Spécialiste '.$favourite, \sprintf('%d fois cette semaine', $favouriteCount)),
             $progress->reached() => new AwardedTitle('Fidèle au poste', 'objectif atteint'),
             $count > 0 => new AwardedTitle('Petit pas, grand cœur', \sprintf('%d %s cette semaine', $count, $count > 1 ? 'tâches' : 'tâche')),

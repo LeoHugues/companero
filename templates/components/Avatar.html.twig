@@ -1,0 +1,4 @@
+{% props member, size = 30 %}
+<span {{ attributes.defaults({class: 'inline-flex shrink-0 items-center justify-center rounded-full font-extrabold'}) }}
+      style="width: {{ size }}px; height: {{ size }}px; font-size: {{ (size * 0.45)|round }}px; background: {{ member.color }}; color: {{ member.color|ink }}"
+      aria-hidden="true">{{ member.initial }}</span>

@@ -1,0 +1,93 @@
+<?php
+
+namespace App\Form;
+
+use App\Entity\Household;
+use App\Entity\Task;
+use App\Entity\Zone;
+use App\Enum\TaskCategory;
+use App\Enum\TaskKind;
+use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\QueryBuilder;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
+use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
+use Symfony\Component\Form\Extension\Core\Type\EnumType;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\TimeType;
+use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
+
+/** @extends AbstractType<Task> */
+class TaskType extends AbstractType
+{
+    public function buildForm(FormBuilderInterface $builder, array $options): void
+    {
+        /** @var Household $household */
+        $household = $options['household'];
+
+        $builder
+            ->add('title', TextType::class, [
+                'empty_data' => '',
+                'label' => 'Quoi ?',
+                'attr' => ['placeholder' => 'Ex. Appeler le proprio pour la fuite'],
+            ])
+            ->add('kind', EnumType::class, [
+                'class' => TaskKind::class,
+                'label' => 'Elle revient ?',
+                'expanded' => true,
+                'choice_label' => static fn (TaskKind $kind): string => $kind->label(),
+            ])
+            ->add('category', EnumType::class, [
+                'class' => TaskCategory::class,
+                'label' => 'Type',
+                'expanded' => true,
+                'choice_label' => static fn (TaskCategory $category): string => $category->label(),
+            ])
+            ->add('zone', EntityType::class, [
+                'class' => Zone::class,
+                'label' => 'Où ?',
+                'required' => false,
+                'expanded' => true,
+                'placeholder' => 'Toute la coloc',
+                'choice_label' => 'name',
+                'query_builder' => static fn (EntityRepository $zones): QueryBuilder => $zones->createQueryBuilder('z')
+                    ->andWhere('z.household = :household')
+                    ->setParameter('household', $household)
+                    ->orderBy('z.name', 'ASC'),
+            ])
+            ->add('points', IntegerType::class, ['label' => 'Ça vaut combien ?', 'attr' => ['min' => 1, 'max' => 50]])
+            ->add('rhythmDays', IntegerType::class, ['label' => 'Tous les combien de jours ?', 'required' => false, 'attr' => ['min' => 1]])
+            ->add('weeklyCommitment', IntegerType::class, [
+                'label' => 'Au moins combien de fois par semaine ?',
+                'help' => 'Facultatif : l’engagement de la coloc, vérifié au bilan.',
+                'required' => false,
+                'attr' => ['min' => 1],
+            ])
+            ->add('scheduledWeekday', WeekdayType::class, ['label' => 'Quel jour ?', 'required' => false, 'placeholder' => 'Choisir…'])
+            ->add('scheduledTime', TimeType::class, ['label' => 'À quelle heure ?', 'required' => false, 'widget' => 'single_text', 'input' => 'datetime_immutable'])
+            ->add('dueAt', DateTimeType::class, ['label' => 'Pour quand ?', 'help' => 'Laisse vide si ce n’est pas pressé.', 'required' => false, 'widget' => 'single_text', 'input' => 'datetime_immutable']);
+
+        if ($options['allow_reservation']) {
+            $builder->add('reserve', CheckboxType::class, [
+                'label' => 'Je m’en occupe',
+                'help' => 'Sinon, elle part dans la liste de la coloc.',
+                'mapped' => false,
+                'required' => false,
+            ]);
+        }
+    }
+
+    public function configureOptions(OptionsResolver $resolver): void
+    {
+        $resolver->setDefaults([
+            'data_class' => Task::class,
+            'allow_reservation' => false,
+        ]);
+        $resolver->setRequired('household');
+        $resolver->setAllowedTypes('household', Household::class);
+        $resolver->setAllowedTypes('allow_reservation', 'bool');
+    }
+}

@@ -1,0 +1,23 @@
+{% props view, member %}
+{% set task = view.task %}
+{% set status = view.status %}
+{% set barColor = status.freshness >= 60 ? 'var(--color-sand)' : (status.freshness >= 30 ? 'var(--color-sun)' : 'var(--color-clay)') %}
+<article {{ attributes.defaults({class: 'card card-hover flex items-center gap-3 py-3 pr-3 pl-3.5', id: 'task-' ~ task.id}) }}>
+    <div class="flex min-w-0 flex-1 flex-col gap-1.5">
+        <div class="flex items-baseline justify-between gap-2">
+            <h3 class="text-base font-bold">
+                <a href="{{ path('task_edit', {id: task.id}) }}" class="text-ink no-underline hover:text-clay-dark">{{ task.title }}</a>
+            </h3>
+            <span class="text-xs font-bold whitespace-nowrap {{ status.urgency.isPressing ? 'text-clay-dark' : 'text-muted' }}">{{ task_status_label(task, status) }}</span>
+        </div>
+        {% if task.kind.value == 'rolling' %}
+            <twig:ProgressBar :value="status.freshness" height="8" :color="barColor" label="Fraîcheur de « {{ task.title }} »"/>
+        {% endif %}
+        <p class="text-xs text-muted">
+            {{ task.zone.name ?? 'Toute la coloc' }} · {{ task_rule_label(task) }}
+            {% if status.weeklyCommitment %}· {{ status.doneThisWeek }}/{{ status.weeklyCommitment }} cette sem.{% endif %}
+            {% if view.reservedBy %}· {{ view.isReservedBy(member) ? 'tu t’en occupes' : view.reservedBy.name ~ ' s’en occupe' }}{% endif %}
+        </p>
+    </div>
+    <twig:TaskActions :view="view" back="tasks" :member="member" compact/>
+</article>

@@ -1,0 +1,18 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Rejoindre {{ household.name }} · Companero{% endblock %}
+{% block main_class %}pb-10{% endblock %}
+
+{% block body %}
+    <twig:Casa :mood="enum('App\\Enum\\CasaMood').Radiant" speech="Bienvenue ! On t’attendait." class="mt-4"/>
+
+    <h1 class="text-[26px]">Rejoindre {{ household.name }}</h1>
+    <p class="meta -mt-2">{{ household.members|map(m => m.name)|join(', ', ' et ') }} {{ household.members|length > 1 ? 'sont' : 'est' }} déjà là.</p>
+
+    {{ form_start(form, {attr: {class: 'flex flex-col gap-5'}}) }}
+        {{ form_row(form.name) }}
+        {{ form_row(form.email) }}
+        {{ form_row(form.plainPassword) }}
+        <button type="submit" class="btn-primary h-[52px] w-full text-[17px]">Je rejoins la coloc</button>
+    {{ form_end(form) }}
+{% endblock %}

@@ -1,0 +1,23 @@
+{% props team %}
+<section {{ attributes.defaults({class: 'card card-hover flex flex-col gap-2.5 p-3.5'}) }} aria-labelledby="team-title">
+    <div class="flex items-baseline justify-between">
+        <h2 id="team-title" class="text-[15px]">Ensemble cette semaine</h2>
+        <p class="text-[15px] font-extrabold">{{ team.points }} <span class="font-semibold text-muted">/ {{ team.goal }} pts</span></p>
+    </div>
+    <div class="track flex h-3.5">
+        {% for progress in team.members %}
+            <div class="h-full transition-[width] duration-700" style="width: {{ team.shareOf(progress) }}%; background: {{ progress.member.color }}"></div>
+        {% endfor %}
+    </div>
+    <ul class="grid grid-cols-2 gap-x-2 gap-y-1 sm:grid-cols-4">
+        {% for progress in team.members %}
+            <li class="flex items-center gap-1.5 text-xs font-semibold">
+                <span class="size-2.5 shrink-0 rounded-full" style="background: {{ progress.member.color }}"></span>
+                {{ progress.member.name }} {{ progress.points }}
+            </li>
+        {% endfor %}
+    </ul>
+    {% if team.reached %}
+        <p class="text-[13px] font-bold text-clay-dark">Objectif collectif atteint : +5 pts pour chacun dimanche soir</p>
+    {% endif %}
+</section>

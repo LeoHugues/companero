@@ -1,0 +1,40 @@
+<div {{ attributes.defaults({class: 'relative flex flex-col items-center justify-end'}) }}
+     data-controller="casa"
+     data-casa-reacting-value="{{ reacting ? 'true' : 'false' }}"
+     data-casa-rest-speech-value="{{ this.restSpeech }}">
+    {% if showSpeech %}
+        <p class="bubble animate-pop relative z-10 mb-2 ml-16 max-w-[230px] self-start" data-casa-target="speech" aria-live="polite">{{ speech ?? this.restSpeech }}</p>
+    {% endif %}
+    <div class="relative h-[180px] w-[200px] origin-bottom {{ reacting ? 'animate-bounce-joy' : 'animate-breathe' }}" data-casa-target="body">
+        <svg width="200" height="180" viewBox="0 0 200 180" role="img" aria-label="La Casa, propre à {{ cleanliness }} %">
+            <ellipse cx="100" cy="171" rx="62" ry="7" fill="#F0DFC6"/>
+            <rect x="128" y="34" width="16" height="30" rx="3" fill="#B4521F"/>
+            <path d="M42 84 L100 36 L158 84 V156 Q158 166 148 166 H52 Q42 166 42 156 Z" fill="#F6C453"/>
+            <path d="M32 88 L100 30 L168 88" fill="none" stroke="#E8692C" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+            {% if this.blushing %}
+                <circle cx="68" cy="128" r="9" fill="#F2A27A"/>
+                <circle cx="132" cy="128" r="9" fill="#F2A27A"/>
+            {% endif %}
+            <ellipse cx="78" cy="110" rx="7" ry="{{ reacting ? 2.5 : 7 }}" fill="#2E1E14"/>
+            <ellipse cx="122" cy="110" rx="7" ry="{{ reacting ? 2.5 : 7 }}" fill="#2E1E14"/>
+            {% if not reacting %}
+                <circle cx="80.5" cy="107" r="2" fill="#FFFFFF"/>
+                <circle cx="124.5" cy="107" r="2" fill="#FFFFFF"/>
+            {% endif %}
+            <path d="{{ this.mouthPath }}" fill="{{ this.mouthFilled ? '#2E1E14' : 'none' }}" stroke="#2E1E14" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        {% for spot in this.dust %}
+            <span class="absolute rounded-full bg-dust/75" style="left: {{ spot.x }}px; top: {{ spot.y }}px; width: {{ spot.size }}px; height: {{ spot.size }}px"></span>
+        {% endfor %}
+        {% if mood.value == 'radiant' %}
+            {% for sparkle in [{x: 14, y: 38, size: 22, color: '#E8692C', delay: 0}, {x: 166, y: 108, size: 17, color: '#F6C453', delay: 600}, {x: 172, y: 34, size: 14, color: '#E8692C', delay: 1100}] %}
+                <svg class="animate-twinkle absolute" style="left: {{ sparkle.x }}px; top: {{ sparkle.y }}px; animation-delay: {{ sparkle.delay }}ms" width="{{ sparkle.size }}" height="{{ sparkle.size }}" viewBox="0 0 22 22" aria-hidden="true"><path d="M11 0 l3 8 8 3 -8 3 -3 8 -3 -8 -8 -3 8 -3z" fill="{{ sparkle.color }}"/></svg>
+            {% endfor %}
+        {% endif %}
+        {% if reacting %}
+            {% for heart in [{x: 36, y: 40, size: 22, color: '#E8692C', delay: 0}, {x: 150, y: 56, size: 16, color: '#F6C453', delay: 180}, {x: 92, y: 4, size: 18, color: '#E8692C', delay: 320}] %}
+                <svg class="animate-float-up absolute" style="left: {{ heart.x }}px; top: {{ heart.y }}px; animation-delay: {{ heart.delay }}ms" width="{{ heart.size }}" height="{{ heart.size }}" viewBox="0 0 24 22" aria-hidden="true"><path d="M12 21 C5 15 1 11 1 6.5 A5.5 5.5 0 0 1 12 4 A5.5 5.5 0 0 1 23 6.5 C23 11 19 15 12 21 Z" fill="{{ heart.color }}"/></svg>
+            {% endfor %}
+        {% endif %}
+    </div>
+</div>

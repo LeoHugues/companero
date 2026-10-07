@@ -1,0 +1,77 @@
+{% extends 'form_div_layout.html.twig' %}
+
+{%- block form_row -%}
+    {%- set row_attr = row_attr|merge({class: (row_attr.class|default('') ~ ' flex flex-col gap-2')|trim}) -%}
+    {%- set widget_attr = {} -%}
+    {%- if help is not empty -%}
+        {%- set widget_attr = {attr: {'aria-describedby': id ~ '_help'}} -%}
+    {%- endif -%}
+    <div{% with {attr: row_attr} %}{{ block('attributes') }}{% endwith %}>
+        {{- form_label(form) -}}
+        {{- form_widget(form, widget_attr) -}}
+        {{- form_help(form) -}}
+        {{- form_errors(form) -}}
+    </div>
+{%- endblock form_row -%}
+
+{%- block form_label -%}
+    {%- if label is not same as(false) -%}
+        {%- set label_attr = label_attr|merge({class: (label_attr.class|default('') ~ ' field-label')|trim}) -%}
+        {%- if compound -%}
+            {%- set element = 'legend' -%}
+        {%- endif -%}
+        {{- parent() -}}
+    {%- endif -%}
+{%- endblock form_label -%}
+
+{%- block form_help -%}
+    {%- if help is not empty -%}
+        <p id="{{ id }}_help" class="meta">{{ help|trans(help_translation_parameters, translation_domain) }}</p>
+    {%- endif -%}
+{%- endblock form_help -%}
+
+{%- block form_errors -%}
+    {%- for error in errors -%}
+        <p class="text-sm font-bold text-clay-dark">{{ error.message }}</p>
+    {%- endfor -%}
+{%- endblock form_errors -%}
+
+{%- block form_widget_simple -%}
+    {%- set attr = attr|merge({class: (attr.class|default('') ~ ' input')|trim}) -%}
+    {{- parent() -}}
+{%- endblock form_widget_simple -%}
+
+{%- block choice_widget_collapsed -%}
+    {%- set attr = attr|merge({class: (attr.class|default('') ~ ' input')|trim}) -%}
+    {{- parent() -}}
+{%- endblock choice_widget_collapsed -%}
+
+{# Radios and checkboxes of a choice field are rendered as chips. #}
+{%- block choice_widget_expanded -%}
+    <div {{ block('widget_container_attributes') }} class="choice-chips">
+        {%- for child in form -%}
+            {{- form_widget(child) -}}
+            <label for="{{ child.vars.id }}">{{ child.vars.label }}</label>
+        {%- endfor -%}
+    </div>
+{%- endblock choice_widget_expanded -%}
+
+{%- block radio_widget -%}
+    <input type="radio" {{ block('widget_attributes') }}{% if value is defined %} value="{{ value }}"{% endif %}{% if checked %} checked="checked"{% endif %} />
+{%- endblock radio_widget -%}
+
+{# A lone checkbox is a switch. #}
+{%- block checkbox_row -%}
+    <div class="flex items-center justify-between gap-3 py-1">
+        <label for="{{ id }}" class="flex flex-col gap-0.5">
+            <span class="text-[15px] font-extrabold">{{ label }}</span>
+            {%- if help is not empty -%}<span class="text-xs text-muted">{{ help }}</span>{%- endif -%}
+        </label>
+        <span class="relative inline-flex shrink-0">
+            <input type="checkbox" {{ block('widget_attributes') }} value="{{ value }}"{% if checked %} checked="checked"{% endif %}
+                   class="peer h-[30px] w-[50px] cursor-pointer appearance-none rounded-full bg-switch-off transition checked:bg-clay" role="switch" />
+            <span class="pointer-events-none absolute top-[3px] left-[3px] size-6 rounded-full bg-surface shadow transition peer-checked:translate-x-5" aria-hidden="true"></span>
+        </span>
+    </div>
+    {{- form_errors(form) -}}
+{%- endblock checkbox_row -%}

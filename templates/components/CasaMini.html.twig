@@ -1,0 +1,15 @@
+{% props size = 64, happy = false %}
+<svg {{ attributes }} width="{{ size }}" height="{{ (size * 0.9)|round }}" viewBox="0 0 200 180" aria-hidden="true">
+    <ellipse cx="100" cy="171" rx="62" ry="7" fill="#F0DFC6"/>
+    <path d="M42 84 L100 36 L158 84 V156 Q158 166 148 166 H52 Q42 166 42 156 Z" fill="#F6C453"/>
+    <path d="M32 88 L100 30 L168 88" fill="none" stroke="#E8692C" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+    {% if happy %}
+        <circle cx="68" cy="128" r="9" fill="#F2A27A"/>
+        <circle cx="132" cy="128" r="9" fill="#F2A27A"/>
+        <path d="M84 127 Q100 150 116 127 Z" fill="#2E1E14" stroke="#2E1E14" stroke-width="3.5" stroke-linejoin="round"/>
+    {% else %}
+        <path d="M86 130 Q100 140 114 130" fill="none" stroke="#2E1E14" stroke-width="5" stroke-linecap="round"/>
+    {% endif %}
+    <ellipse cx="78" cy="110" rx="8" ry="8" fill="#2E1E14"/>
+    <ellipse cx="122" cy="110" rx="8" ry="8" fill="#2E1E14"/>
+</svg>

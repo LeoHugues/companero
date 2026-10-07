@@ -1,0 +1,80 @@
+<?php
+
+namespace App\Controller;
+
+use App\Entity\Member;
+use App\Entity\Zone;
+use App\Form\HouseholdType;
+use App\Form\ZoneType;
+use App\Security\HouseholdVoter;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\CurrentUser;
+use Symfony\Component\Security\Http\Attribute\IsCsrfTokenValid;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
+
+#[Route('/coloc')]
+final class HouseholdController extends AbstractController
+{
+    public function __construct(
+        private readonly EntityManagerInterface $entityManager,
+    ) {
+    }
+
+    #[Route('', name: 'household_edit', methods: ['GET', 'POST'])]
+    public function edit(#[CurrentUser] Member $member, Request $request): Response
+    {
+        $household = $member->getHousehold();
+
+        $householdForm = $this->createForm(HouseholdType::class, $household)->handleRequest($request);
+        if ($householdForm->isSubmitted() && $householdForm->isValid()) {
+            $this->entityManager->flush();
+            $this->addFlash('success', 'C’est enregistré.');
+
+            return $this->redirectToRoute('household_edit', status: Response::HTTP_SEE_OTHER);
+        }
+
+        $zoneForm = $this->createForm(ZoneType::class, options: ['household' => $household])->handleRequest($request);
+        if ($zoneForm->isSubmitted() && $zoneForm->isValid()) {
+            $this->entityManager->persist($zoneForm->getData());
+            $this->entityManager->flush();
+
+            return $this->redirectToRoute('household_edit', status: Response::HTTP_SEE_OTHER);
+        }
+
+        $status = $householdForm->isSubmitted() || $zoneForm->isSubmitted() ? Response::HTTP_UNPROCESSABLE_ENTITY : Response::HTTP_OK;
+
+        return $this->render('household/edit.html.twig', [
+            'household' => $household,
+            'household_form' => $householdForm,
+            'zone_form' => $zoneForm,
+        ], new Response(status: $status));
+    }
+
+    #[Route('/zones/{id}/supprimer', name: 'zone_delete', requirements: ['id' => '\d+'], methods: ['POST'])]
+    #[IsGranted(HouseholdVoter::ACCESS, subject: 'zone')]
+    #[IsCsrfTokenValid('submit', tokenKey: '_csrf_token')]
+    public function deleteZone(Zone $zone): RedirectResponse
+    {
+        // Its tasks are kept and become "toute la coloc".
+        $zone->getHousehold()->removeZone($zone);
+        $this->entityManager->flush();
+
+        return $this->redirectToRoute('household_edit', status: Response::HTTP_SEE_OTHER);
+    }
+
+    #[Route('/invitation', name: 'household_invite_reset', methods: ['POST'])]
+    #[IsCsrfTokenValid('submit', tokenKey: '_csrf_token')]
+    public function resetInvitation(#[CurrentUser] Member $member): RedirectResponse
+    {
+        $member->getHousehold()->regenerateInviteToken();
+        $this->entityManager->flush();
+        $this->addFlash('success', 'Nouveau lien d’invitation créé : l’ancien ne marche plus.');
+
+        return $this->redirectToRoute('household_edit', status: Response::HTTP_SEE_OTHER);
+    }
+}

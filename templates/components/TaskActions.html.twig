@@ -1,0 +1,32 @@
+{% props view, back, member, compact = false %}
+{% set task = view.task %}
+<div {{ attributes.defaults({class: 'flex items-center gap-3.5'}) }}>
+    <form method="post" action="{{ path('task_complete', {id: task.id}) }}">
+        <input type="hidden" name="_back" value="{{ back }}">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
+        {% if compact %}
+            <button type="submit" aria-label="Marquer « {{ task.title }} » comme fait"
+                    class="flex size-11 cursor-pointer items-center justify-center rounded-full {{ view.status.urgency.isPressing ? 'bg-clay hover:bg-clay-hover' : 'bg-track hover:bg-sand' }} text-ink transition active:scale-90">
+                <twig:Icon name="check" size="20" stroke="2.6"/>
+            </button>
+        {% else %}
+            <button type="submit" class="btn-primary">C’est fait</button>
+        {% endif %}
+    </form>
+    {% if not compact %}
+        {% if view.reservedBy is null %}
+            <form method="post" action="{{ path('task_reserve', {id: task.id}) }}">
+                <input type="hidden" name="_back" value="{{ back }}">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
+                <button type="submit" class="btn-link">Je m’en occupe</button>
+            </form>
+        {% elseif view.isReservedBy(member) %}
+            <span class="text-sm font-bold">Tu t’en occupes</span>
+        {% else %}
+            <span class="flex items-center gap-1.5 text-sm font-bold">
+                <twig:Avatar :member="view.reservedBy" size="22"/>
+                {{ view.reservedBy.name }} s’en occupe
+            </span>
+        {% endif %}
+    {% endif %}
+</div>

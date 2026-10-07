@@ -1,0 +1,40 @@
+{{ form_start(form, {attr: {class: 'flex flex-col gap-5', 'data-controller': 'task-form'}}) }}
+    {{ form_row(form.title) }}
+    {{ form_row(form.kind, {attr: {'data-action': 'change->task-form#toggle'}}) }}
+
+    <fieldset class="flex flex-col gap-5" data-task-form-target="section" data-kind="rolling">
+        {{ form_row(form.rhythmDays) }}
+        {{ form_row(form.weeklyCommitment) }}
+    </fieldset>
+    <fieldset class="grid grid-cols-2 gap-3" data-task-form-target="section" data-kind="scheduled">
+        {{ form_row(form.scheduledWeekday) }}
+        {{ form_row(form.scheduledTime) }}
+    </fieldset>
+    <fieldset class="flex flex-col gap-5" data-task-form-target="section" data-kind="one_off">
+        {{ form_row(form.dueAt) }}
+    </fieldset>
+
+    {{ form_row(form.category) }}
+    {{ form_row(form.zone) }}
+
+    <div class="card flex items-center justify-between gap-3 px-3.5 py-3" data-controller="stepper">
+        <div class="flex flex-col gap-0.5">
+            {{ form_label(form.points) }}
+            <span class="text-xs text-muted" data-stepper-target="hint">5 min d’effort ≈ 1 pt</span>
+        </div>
+        <div class="flex items-center gap-1.5">
+            <button type="button" class="flex size-11 cursor-pointer items-center justify-center rounded-full border-[1.5px] border-line bg-cream transition hover:bg-track active:scale-90" data-action="stepper#decrement" aria-label="Un point de moins"><twig:Icon name="minus"/></button>
+            {{ form_widget(form.points, {attr: {class: 'w-12 border-0 bg-transparent text-center text-2xl font-extrabold text-clay-dark [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none', 'data-stepper-target': 'input', 'data-action': 'input->stepper#describe'}}) }}
+            <button type="button" class="flex size-11 cursor-pointer items-center justify-center rounded-full border-[1.5px] border-line bg-cream transition hover:bg-track active:scale-90" data-action="stepper#increment" aria-label="Un point de plus"><twig:Icon name="plus"/></button>
+        </div>
+    </div>
+    {{ form_errors(form.points) }}
+
+    {% if form.reserve is defined %}
+        {{ form_row(form.reserve) }}
+    {% endif %}
+
+    <div class="sticky bottom-[88px] -mx-5 border-t-[1.5px] border-line bg-cream px-5 py-3">
+        <button type="submit" class="btn-primary h-[52px] w-full text-[17px]">{{ submit_label }}</button>
+    </div>
+{{ form_end(form) }}

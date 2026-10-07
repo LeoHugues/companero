@@ -187,6 +187,24 @@ zone : la salle de bain privée compte autant que la salle de bain partagée.
 - **Objectif collectif** : la somme des points de la coloc sur la semaine, avec
   la contribution de chacun, mise en avant avant l'objectif personnel.
 
+### Titres de la semaine
+
+Au bilan, chaque membre reçoit un titre drôle (« Pilier du jour de ménage »,
+« As du rattrapage », « Tornade ménagère »…), **révélé au toucher** comme une
+carte à retourner. Les titres gagnés forment une collection dans le profil ;
+des titres secrets viendront plus tard.
+
+### Bonus collectif
+
+Quand la coloc atteint son objectif commun (la somme des objectifs de chacun),
+chaque membre présent gagne **+5 points** à la clôture de la semaine.
+
+### Rappels
+
+Trois rappels, réglables par chacun : le matin du jour de ménage, quand une tâche
+traîne (au plus un par jour), et le bilan du dimanche soir. *Les réglages existent ;
+l'envoi des notifications (Web Push) reste à faire.*
+
 ### Cartons (à garder en mémoire, pas en V1)
 
 Un système de pénalités légères et drôles : chaque membre dispose par exemple de

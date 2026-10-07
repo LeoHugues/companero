@@ -1,0 +1,94 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Profil · Companero{% endblock %}
+
+{% block body %}
+    <header class="flex items-center gap-3.5">
+        <twig:Avatar :member="member" size="64"/>
+        <div class="flex flex-1 flex-col gap-0.5">
+            <h1 class="text-[26px] leading-tight">{{ member.name }}</h1>
+            <p class="text-sm font-bold text-clay-dark">Niveau {{ level.number }} · {{ level.rank }}</p>
+        </div>
+        <a href="{{ path('household_edit') }}" aria-label="Réglages de la coloc" class="flex size-11 items-center justify-center rounded-full text-ink hover:bg-track"><twig:Icon name="settings"/></a>
+    </header>
+
+    <section class="card flex flex-col gap-2 p-3.5" aria-label="Expérience">
+        <div class="flex justify-between text-sm font-bold">
+            <span>Expérience</span>
+            <span>{{ level.xp }} / {{ level.ceiling }} XP</span>
+        </div>
+        <twig:ProgressBar :value="level.progress" label="Progression vers le niveau suivant"/>
+        <p class="meta">Encore {{ level.xpToNext }} XP pour devenir <strong class="text-ink">{{ level.nextRank }}</strong>.</p>
+    </section>
+
+    {{ form_start(profile_form, {attr: {class: 'flex flex-col gap-5'}}) }}
+        <section class="flex flex-col gap-2">
+            {{ form_row(profile_form.weeklyGoal, {label_attr: {class: 'section-title'}, help: 'Réduit automatiquement pendant tes absences.'}) }}
+        </section>
+        <section class="flex flex-col gap-2" aria-labelledby="reminders-title">
+            <h2 id="reminders-title" class="section-title">Rappels</h2>
+            <div class="card flex flex-col divide-y divide-line px-3.5 py-1">
+                {{ form_row(profile_form.notifyCleaningDay) }}
+                {{ form_row(profile_form.notifyOverdue) }}
+                {{ form_row(profile_form.notifyWeeklyReview) }}
+            </div>
+        </section>
+        <button type="submit" class="btn-primary self-start">Enregistrer</button>
+    {{ form_end(profile_form) }}
+
+    <section class="flex flex-col gap-2" aria-labelledby="absences-title">
+        <h2 id="absences-title" class="section-title">Mes absences</h2>
+        {% if absences is not empty %}
+            <ul class="card divide-y divide-line px-3.5 py-1">
+                {% for absence in absences %}
+                    <li class="flex items-center gap-2.5 py-2.5">
+                        <twig:Icon name="calendar" size="20" class="shrink-0 text-clay-dark"/>
+                        <div class="flex flex-1 flex-col">
+                            <span class="text-[15px] font-bold">{{ absence.label }}</span>
+                            <span class="text-xs text-muted">du {{ absence.startsOn|format_date(pattern: 'd MMM', locale: 'fr') }} au {{ absence.endsOn|format_date(pattern: 'd MMM', locale: 'fr') }}</span>
+                        </div>
+                        <form method="post" action="{{ path('absence_delete', {id: absence.id}) }}">
+                            <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
+                            <button type="submit" aria-label="Supprimer l’absence « {{ absence.label }} »" class="flex size-10 cursor-pointer items-center justify-center rounded-full text-muted hover:bg-track hover:text-ink"><twig:Icon name="trash" size="18"/></button>
+                        </form>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+        <details class="card px-3.5 py-1"{% if absence_form.vars.submitted %} open{% endif %}>
+            <summary class="flex h-12 cursor-pointer items-center gap-1.5 text-[15px] font-extrabold"><twig:Icon name="plus" size="18" stroke="2.6"/> Déclarer une absence</summary>
+            {{ form_start(absence_form, {attr: {class: 'flex flex-col gap-4 pb-4'}}) }}
+                {{ form_row(absence_form.label) }}
+                <div class="grid grid-cols-2 gap-3">
+                    {{ form_row(absence_form.startsOn) }}
+                    {{ form_row(absence_form.endsOn) }}
+                </div>
+                <button type="submit" class="btn-primary self-start">Ajouter</button>
+            {{ form_end(absence_form) }}
+        </details>
+    </section>
+
+    <section class="flex flex-col gap-2" aria-labelledby="titles-title">
+        <div class="flex items-baseline justify-between">
+            <h2 id="titles-title" class="section-title">Mes titres</h2>
+            <p class="meta font-semibold">{{ titles|length }} gagné{{ titles|length > 1 ? 's' }}</p>
+        </div>
+        {% if titles is not empty %}
+            <ul class="grid grid-cols-3 gap-2">
+                {% for title in titles %}
+                    <li class="flex min-h-[92px] flex-col justify-between gap-1.5 rounded-2xl bg-ink p-2.5 text-cream transition hover:-translate-y-0.5 hover:-rotate-1">
+                        <twig:Spark size="18" color="#F6C453"/>
+                        <span class="text-[13px] leading-tight font-extrabold">{{ title.name }}</span>
+                        <span class="text-[11px] leading-tight text-[#D9C8B0]">sem. {{ title.weekStart|date('W') }}</span>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="card p-4 text-sm text-muted">Ton premier titre t’attend au bilan de lundi.</p>
+        {% endif %}
+    </section>
+
+    <a href="{{ path('app_logout') }}" class="btn-link self-center text-muted" data-turbo="false"><twig:Icon name="logout" size="18"/>&nbsp;Se déconnecter</a>
+{% endblock %}
+
+{% block nav %}<twig:BottomNav active="profile"/>{% endblock %}

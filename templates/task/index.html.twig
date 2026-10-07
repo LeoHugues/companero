@@ -1,0 +1,57 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Toutes les tâches · Companero{% endblock %}
+
+{% block body %}
+    {% set completion = app.flashes('completion')|first %}
+
+    <header class="flex flex-col gap-0.5">
+        <h1 class="text-[26px]">Toutes les tâches</h1>
+        <p class="text-sm text-muted">Plus la barre est vide, plus la Casa en a besoin.</p>
+    </header>
+
+    {% if completion %}
+        <p class="animate-pop rounded-2xl bg-ink px-4 py-3 text-[15px] font-semibold text-cream" role="status">« {{ completion.title }} » : +{{ completion.points }} pts, merci !</p>
+    {% endif %}
+
+    <nav class="-mx-5 flex gap-2 overflow-x-auto px-5 pb-1" aria-label="Filtrer par zone">
+        <a href="{{ path('task_index') }}" class="chip shrink-0 {{ current_zone is null ? 'chip-active' : '' }}"{% if current_zone is null %} aria-current="page"{% endif %}>Tout</a>
+        {% for zone in zones %}
+            <a href="{{ path('task_index', {zone: zone.id}) }}" class="chip shrink-0 {{ current_zone == zone.id ? 'chip-active' : '' }}"{% if current_zone == zone.id %} aria-current="page"{% endif %}>{{ zone.name }}</a>
+        {% endfor %}
+    </nav>
+
+    <section class="flex flex-col gap-2.5" aria-labelledby="recurring-title">
+        <h2 id="recurring-title" class="section-title">Récurrentes</h2>
+        {% for view in recurring %}
+            <twig:TaskRow :view="view" :member="app.user"/>
+        {% else %}
+            <p class="meta py-2">Aucune tâche récurrente ici. <a href="{{ path('task_new') }}">En créer une</a></p>
+        {% endfor %}
+    </section>
+
+    <section class="flex flex-col gap-2.5" aria-labelledby="oneoff-title">
+        <h2 id="oneoff-title" class="section-title mt-1.5">Ponctuelles</h2>
+        {% for view in one_off %}
+            <twig:TaskRow :view="view" :member="app.user"/>
+        {% else %}
+            <p class="meta py-2">Rien de prévu en dehors du quotidien.</p>
+        {% endfor %}
+    </section>
+
+    {% if catalog is not empty %}
+        <section class="flex flex-col gap-2.5" aria-labelledby="catalog-title">
+            <div class="mt-1.5 flex items-baseline justify-between">
+                <h2 id="catalog-title" class="section-title">Catalogue</h2>
+                <p class="meta font-semibold">à lancer quand il faut</p>
+            </div>
+            <ul class="flex flex-wrap gap-2">
+                {% for item in catalog %}
+                    <li><a href="{{ path('task_new', {modele: item.id}) }}" class="flex h-[38px] items-center rounded-xl bg-track px-3.5 text-sm font-bold text-ink no-underline transition hover:bg-sun hover:text-ink">{{ item.title }}</a></li>
+                {% endfor %}
+            </ul>
+        </section>
+    {% endif %}
+{% endblock %}
+
+{% block nav %}<twig:BottomNav active="tasks"/>{% endblock %}

@@ -1,0 +1,54 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    {% set completion = app.flashes('completion')|first %}
+
+    <header class="flex items-center justify-between">
+        {% if is_cleaning_day %}
+            <p class="rounded-full bg-sun px-3 py-1.5 text-[13px] font-bold">{{ weekday_name(now|date('N'))|capitalize }} · jour de ménage</p>
+        {% else %}
+            <p class="rounded-full bg-track px-3 py-1.5 text-[13px] font-bold">{{ weekday_name(now|date('N'))|capitalize }} · ménage {{ weekday_name(app.user.household.cleaningDay) }}</p>
+        {% endif %}
+        <a href="{{ path('profile_show') }}" class="rounded-full border-[1.5px] border-ink px-3 py-1 text-[13px] font-bold text-ink no-underline">Niv. {{ level.number }}</a>
+    </header>
+
+    <twig:Casa
+        :mood="mood"
+        :cleanliness="cleanliness"
+        :reacting="completion is not same as(false)"
+        :speech="completion ? 'Merci ' ~ app.user.name ~ ' ! +' ~ completion.points ~ ' pts pour toi.' : null"
+        class="min-h-[262px]"
+    />
+
+    <section class="flex flex-col gap-1.5" aria-label="Propreté de la Casa">
+        <div class="flex items-baseline justify-between">
+            <h1 class="text-lg">La Casa</h1>
+            <p class="text-sm font-bold">Propreté {{ cleanliness }} %</p>
+        </div>
+        <twig:ProgressBar :value="cleanliness" label="Propreté de la Casa"/>
+    </section>
+
+    <twig:TeamBar :team="team"/>
+
+    <section class="flex flex-col gap-2.5" aria-labelledby="todo-title">
+        <h2 id="todo-title" class="pt-0.5 text-xl">Prendre soin de la Casa</h2>
+        {% for view in pressing %}
+            <twig:TaskCard :view="view" :member="app.user"/>
+        {% else %}
+            <p class="card p-4 text-[15px]">Rien d’urgent : la Casa est contente. Profites-en !</p>
+        {% endfor %}
+    </section>
+
+    {% if upcoming is not empty %}
+        <section class="flex flex-col gap-2.5" aria-labelledby="soon-title">
+            <h2 id="soon-title" class="section-title">Bientôt</h2>
+            {% for view in upcoming %}
+                <twig:TaskCard :view="view" :member="app.user"/>
+            {% endfor %}
+        </section>
+    {% endif %}
+
+    <a href="{{ path('task_index') }}" class="btn-link self-center">Voir toutes les tâches</a>
+{% endblock %}
+
+{% block nav %}<twig:BottomNav active="home"/>{% endblock %}

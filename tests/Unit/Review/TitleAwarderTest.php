@@ -22,12 +22,15 @@ final class TitleAwarderTest extends TestCase
         self::assertSame('En vadrouille', $title->name);
     }
 
-    public function testRescuingALateTaskIsCelebrated(): void
+    public function testRescuingLateTasksIsCelebrated(): void
     {
         $member = $this->member();
-        $completion = new Completion($this->task(), $member, new \DateTimeImmutable('2026-10-07'), Urgency::Late);
+        $completions = [
+            new Completion($this->task(), $member, new \DateTimeImmutable('2026-10-06'), Urgency::Late),
+            new Completion($this->task(), $member, new \DateTimeImmutable('2026-10-07'), Urgency::Late),
+        ];
 
-        $title = (new TitleAwarder())->award(new MemberProgress($member, 4, 20, 0), [$completion], self::SATURDAY);
+        $title = (new TitleAwarder())->award(new MemberProgress($member, 8, 20, 0), $completions, self::SATURDAY);
 
         self::assertSame('As du rattrapage', $title->name);
     }

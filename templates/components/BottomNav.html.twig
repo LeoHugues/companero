@@ -1,0 +1,27 @@
+{% props active %}
+{% set items = [
+    {key: 'home', route: 'app_home', icon: 'home', label: 'Accueil'},
+    {key: 'tasks', route: 'task_index', icon: 'list', label: 'Toutes les tâches'},
+    {key: 'new', route: 'task_new', icon: 'plus', label: 'Nouvelle tâche'},
+    {key: 'review', route: 'review_show', icon: 'chart', label: 'Bilan de la semaine'},
+    {key: 'profile', route: 'profile_show', icon: 'user', label: 'Profil'},
+] %}
+<nav {{ attributes.defaults({class: 'fixed inset-x-0 bottom-0 z-20 border-t-[1.5px] border-line bg-surface pb-[env(safe-area-inset-bottom)]'}) }} aria-label="Navigation principale">
+    <ul class="mx-auto flex h-[72px] max-w-md items-center justify-around px-2">
+        {% for item in items %}
+            <li>
+                {% if item.key == 'new' %}
+                    <a href="{{ path(item.route) }}" aria-label="{{ item.label }}" class="flex size-[54px] items-center justify-center rounded-full bg-clay text-ink no-underline transition hover:bg-clay-hover hover:text-ink active:scale-95">
+                        <twig:Icon name="plus" stroke="2.6"/>
+                    </a>
+                {% else %}
+                    <a href="{{ path(item.route) }}" aria-label="{{ item.label }}"{% if item.key == active %} aria-current="page"{% endif %}
+                       class="flex size-12 flex-col items-center justify-center gap-[3px] no-underline {{ item.key == active ? 'text-ink' : 'text-muted' }} hover:text-ink">
+                        <twig:Icon :name="item.icon"/>
+                        {% if item.key == active %}<span class="size-[5px] rounded-full bg-clay"></span>{% endif %}
+                    </a>
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+</nav>
