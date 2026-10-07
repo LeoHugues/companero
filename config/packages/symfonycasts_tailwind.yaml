@@ -1,0 +1,4 @@
+symfonycasts_tailwind:
+    binary_version: 'v4.3.3'
+    # Optional: use a local Tailwind CLI instead of downloading the standalone binary
+    binary: '%env(default::TAILWIND_BINARY)%'
