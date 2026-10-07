@@ -182,6 +182,10 @@ zone : la salle de bain privée compte autant que la salle de bain partagée.
   ordonner les membres.
 - **Jauge de la maison** : une moyenne de « fraîcheur » des tâches récurrentes
   des zones communes, affichée en permanence.
+  Elle est incarnée par **la Casa**, la maison-personnage dont l'humeur suit la
+  jauge (voir [direction artistique](direction-artistique.md)).
+- **Objectif collectif** : la somme des points de la coloc sur la semaine, avec
+  la contribution de chacun, mise en avant avant l'objectif personnel.
 
 ### Cartons (à garder en mémoire, pas en V1)
 

@@ -7,3 +7,4 @@ Projet en phase de conception :
 
 - [Vision produit](docs/vision.md)
 - [Inventaire des tâches](docs/inventaire-taches.md)
+- [Direction artistique](docs/direction-artistique.md)
