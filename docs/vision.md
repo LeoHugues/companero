@@ -84,7 +84,8 @@ reste le cadre qui fixe l'objectif, et le glissant dicte le quotidien.
 
 ### 4.2 Le jour de ménage
 
-Un jour par semaine, fixé au niveau du foyer, sert de **rendez-vous** commun.
+**Un seul** jour par semaine, fixé au niveau du foyer, sert de **rendez-vous**
+commun.
 Il n'est pas impératif : tout ce qui est fait avant ou après compte normalement.
 Ce jour-là :
 
@@ -136,7 +137,8 @@ Les pourcentages sont exprimés par rapport au rythme ou à l'échéance. La
   +1 point par jour de retard, plafonné). Les corvées impopulaires s'équilibrent
   d'elles-mêmes.
 - **Bonus de ponctualité** : une tâche faite au bon moment rapporte un petit
-  bonus. « Au bon moment », c'est le jour de ménage pour une tâche avec
+  bonus, **+1 point pour une petite tâche, +2 pour une grosse** (valeurs de
+  départ, à ajuster à l'usage). « Au bon moment », c'est le jour de ménage pour une tâche avec
   engagement, le jour de l'échéance pour une tâche calendaire, et la fenêtre
   « due » pour une glissante.
 - **Équilibre entre les deux bonus** : il ne faut pas qu'attendre rapporte plus
@@ -236,7 +238,5 @@ Il est généré le dimanche soir et consultable le lundi :
    agaçant ?
 6. Début et fin de semaine : du lundi 00:00 au dimanche 23:59 ? Heure du bilan ?
 7. Formule de la jauge de la maison.
-8. Jour de ménage : un seul par semaine, ou plusieurs possibles (par exemple
-   mercredi soir et samedi) ?
-9. Valeur du bonus de ponctualité (+1 point fixe ? +20 % ?) et courbe exacte du
-   bonus de retard, pour respecter l'équilibre décrit au § 5.
+8. Seuil entre « petite » et « grosse » tâche pour le bonus de ponctualité, et
+   courbe exacte du bonus de retard, pour respecter l'équilibre décrit au § 5.
