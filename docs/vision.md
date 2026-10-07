@@ -43,6 +43,7 @@ Elle est d'abord construite pour une coloc de 4 personnes. Elle pourra ensuite
 | **Catalogue** | Des modèles de tâches ponctuelles prêts à l'emploi (tailler la haie, nettoyer les gouttières, faire une course…), instanciés à la main quand le besoin se présente. |
 | **Rythme** | Pour une tâche récurrente glissante : l'intervalle idéal entre deux réalisations (« environ tous les 3 jours »). |
 | **Engagement** | Optionnel : le nombre minimum de réalisations par semaine sur lequel le foyer s'engage (« au moins 1 fois par semaine »). |
+| **Jour de ménage** | Un jour de la semaine choisi par le foyer (par exemple le samedi). C'est le rendez-vous où l'on sait que c'est le moment de faire le ménage. Il n'est ni obligatoire ni exclusif : on peut faire les tâches avant ou après. |
 | **Échéance** | Date ou heure limite d'une tâche : récurrente calendaire (« poubelles le mardi soir ») ou ponctuelle (« appeler le proprio avant vendredi »). |
 | **Urgence** | L'état calculé d'une tâche : *fraîche*, *à prévoir*, *due*, *en retard*. |
 | **Réservation** | « Je vais le faire » : un membre s'attribue une tâche pour une durée limitée. Passé ce délai, la tâche est de nouveau libre. |
@@ -60,7 +61,7 @@ Elle est d'abord construite pour une coloc de 4 personnes. Elle pourra ensuite
 | Type | Exemple | Comportement |
 |---|---|---|
 | **Glissante** | Aspirateur salon, rythme 3 j | L'urgence monte depuis la dernière réalisation. Chaque réalisation remet le compteur à zéro. |
-| **Glissante + engagement** | Serpillière salon, rythme 7 j, engagement 1/sem | Comme la glissante, mais si l'engagement de la semaine n'est pas tenu, l'urgence monte aussi à l'approche de dimanche. |
+| **Glissante + engagement** | Serpillière salon, rythme 7 j, engagement 1/sem | Comme la glissante, mais si l'engagement de la semaine n'est pas tenu, l'urgence monte aussi à l'approche du jour de ménage, puis de la fin de semaine. |
 | **Calendaire** | Sortir les poubelles, mardi 20 h | Elle réapparaît à date fixe et a une échéance précise. |
 
 **Concilier le glissant et l'hebdomadaire.** Une tâche avec engagement a deux
@@ -69,16 +70,35 @@ sources d'urgence, et c'est **la plus forte des deux** qui s'affiche :
 - l'urgence de **rythme** : le temps écoulé depuis la dernière réalisation,
   rapporté au rythme ;
 - l'urgence d'**engagement** : le nombre de réalisations qui manquent cette
-  semaine, rapporté aux jours qui restent avant dimanche.
+  semaine, rapporté au temps qui reste. Le **jour de ménage** sert d'échéance
+  douce : la tâche est « due » ce jour-là. Elle ne passe « en retard » qu'à la
+  fin de la semaine.
 
-Exemple : serpillière, rythme 7 j, engagement 1/sem. Elle a été faite le jeudi
-de la semaine passée. Lundi, l'urgence de rythme est faible (4 j sur 7), mais
-l'engagement de la semaine n'est pas encore tenu. Si elle n'est toujours pas
-faite samedi, elle passe en « due » même si le rythme seul ne l'exigeait pas
-encore. La semaine reste le cadre qui fixe l'objectif ; le glissant dicte le
-quotidien.
+Exemple : la serpillière a un rythme de 7 j et un engagement de 1 fois par
+semaine, et le jour de ménage est le samedi. Elle a été faite le jeudi de la
+semaine passée. Lundi, l'urgence de rythme est faible (4 j sur 7), mais
+l'engagement de la semaine n'est pas encore tenu. Samedi, elle apparaît
+« due », même si le rythme seul ne l'exigeait pas encore. Si elle n'est
+toujours pas faite dimanche soir, l'engagement n'est pas tenu. La semaine
+reste le cadre qui fixe l'objectif, et le glissant dicte le quotidien.
 
-### 4.2 États d'urgence (proposition)
+### 4.2 Le jour de ménage
+
+Un jour par semaine, fixé au niveau du foyer, sert de **rendez-vous** commun.
+Il n'est pas impératif : tout ce qui est fait avant ou après compte normalement.
+Ce jour-là :
+
+- **les tâches avec engagement passent « dues »** si elles ne sont pas encore
+  faites dans la semaine ;
+- **une notification le matin** présente la liste du jour : les tâches dues,
+  les plus urgentes et celles qui ne sont pas réservées ;
+- **un bonus de ponctualité** s'applique aux tâches dues réalisées ce jour-là
+  (voir § 5) ;
+- *(idée)* un **défi collectif** : si la jauge de la maison dépasse un seuil à
+  la fin du jour de ménage, tous les membres présents gagnent un petit bonus.
+  C'est un moteur coopératif, qui complète l'objectif personnel.
+
+### 4.3 États d'urgence (proposition)
 
 ```
 fraîche ──► à prévoir ──► due ──► en retard
@@ -88,7 +108,7 @@ fraîche ──► à prévoir ──► due ──► en retard
 Les pourcentages sont exprimés par rapport au rythme ou à l'échéance. La
 **marge** (24 h par défaut) se règle tâche par tâche.
 
-### 4.3 Tâches ponctuelles et catalogue
+### 4.4 Tâches ponctuelles et catalogue
 
 - N'importe quel membre peut créer une tâche ponctuelle en quelques secondes :
   un titre, et éventuellement une zone, des points et une échéance.
@@ -99,7 +119,7 @@ Les pourcentages sont exprimés par rapport au rythme ou à l'échéance. La
   papier toilette »). La gestion des stocks et des consommables est hors
   périmètre.
 
-### 4.4 Cycle de vie
+### 4.5 Cycle de vie
 
 - **Libre** → **Réservée** (« je vais le faire », avec un délai) → **Faite**.
 - On peut passer directement de *Libre* à *Faite*, **même si la tâche n'est pas
@@ -115,6 +135,16 @@ Les pourcentages sont exprimés par rapport au rythme ou à l'échéance. La
 - **Bonus de retard** : une tâche en retard prend de la valeur (par exemple
   +1 point par jour de retard, plafonné). Les corvées impopulaires s'équilibrent
   d'elles-mêmes.
+- **Bonus de ponctualité** : une tâche faite au bon moment rapporte un petit
+  bonus. « Au bon moment », c'est le jour de ménage pour une tâche avec
+  engagement, le jour de l'échéance pour une tâche calendaire, et la fenêtre
+  « due » pour une glissante.
+- **Équilibre entre les deux bonus** : il ne faut pas qu'attendre rapporte plus
+  que faire à l'heure. Proposition : le bonus de retard ne démarre qu'après la
+  marge et reste faible au début. Ainsi, faire la tâche à l'heure rapporte
+  toujours au moins autant que la faire avec un ou deux jours de retard. Le
+  bonus de retard sert à faire *reprendre* une tâche abandonnée, pas à
+  récompenser l'attente.
 - **Ajustement ponctuel** : sur une réalisation, n'importe qui peut dire « cette
   fois c'était plus, ou moins » (±).
 - Les points sont stockés comme un **journal d'événements** (réalisations,
@@ -176,7 +206,8 @@ Il est généré le dimanche soir et consultable le lundi :
 | Tâches récurrentes (glissante, engagement, calendaire) | Cartons |
 | Tâches ponctuelles + catalogue | Services entre membres / mini-économie |
 | Réserver / faire / ajuster les points | Classes de personnage |
-| Urgence + bonus de retard | Vue Kanban |
+| Urgence, bonus de retard et de ponctualité | Vue Kanban |
+| Jour de ménage (rendez-vous + notification) | Défi collectif du jour de ménage |
 | Objectif hebdo + absences | Statistiques avancées |
 | Bilan hebdo, XP, niveaux, quelques titres | |
 | Jauge de la maison | |
@@ -205,3 +236,7 @@ Il est généré le dimanche soir et consultable le lundi :
    agaçant ?
 6. Début et fin de semaine : du lundi 00:00 au dimanche 23:59 ? Heure du bilan ?
 7. Formule de la jauge de la maison.
+8. Jour de ménage : un seul par semaine, ou plusieurs possibles (par exemple
+   mercredi soir et samedi) ?
+9. Valeur du bonus de ponctualité (+1 point fixe ? +20 % ?) et courbe exacte du
+   bonus de retard, pour respecter l'équilibre décrit au § 5.
