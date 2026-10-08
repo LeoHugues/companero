@@ -38,7 +38,7 @@
         </div>
         <div class="flex items-center gap-1.5">
             <button type="button" class="flex size-11 cursor-pointer items-center justify-center rounded-full border-[1.5px] border-line bg-cream transition hover:bg-track active:scale-90" data-action="stepper#decrement" aria-label="5 points de moins"><twig:Icon name="minus"/></button>
-            {{ form_widget(form.points, {attr: {class: 'w-12 border-0 bg-transparent text-center text-2xl font-extrabold text-clay-dark [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none', 'data-stepper-target': 'input', 'data-action': 'input->stepper#describe'}}) }}
+            {{ form_widget(form.points, {attr: {class: 'w-[4.5rem] border-0 bg-transparent px-0 text-center text-2xl font-extrabold text-clay-dark [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none', 'data-stepper-target': 'input', 'data-action': 'input->stepper#describe'}}) }}
             <button type="button" class="flex size-11 cursor-pointer items-center justify-center rounded-full border-[1.5px] border-line bg-cream transition hover:bg-track active:scale-90" data-action="stepper#increment" aria-label="5 points de plus"><twig:Icon name="plus"/></button>
         </div>
     </div>
