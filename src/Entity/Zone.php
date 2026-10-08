@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Plan\RoomShape;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -25,6 +26,12 @@ class Zone
     /** A private zone (someone's bedroom or own bathroom) counts for points, not for the Casa's mood. */
     #[ORM\Column]
     private bool $private;
+
+    /** Its outline on the plan of the house, see App\Plan\RoomShape. */
+    #[ORM\Column(length: 500, nullable: true)]
+    #[Assert\Regex(pattern: RoomShape::PATTERN, message: 'Des points « x,y » séparés par des espaces, au moins trois, et éventuellement « @x,y » pour le nom.')]
+    #[Assert\Length(max: 500)]
+    private ?string $planShape = null;
 
     public function __construct(Household $household, string $name, bool $private = false)
     {
@@ -62,5 +69,15 @@ class Zone
     public function setPrivate(bool $private): void
     {
         $this->private = $private;
+    }
+
+    public function getPlanShape(): ?string
+    {
+        return $this->planShape;
+    }
+
+    public function setPlanShape(?string $planShape): void
+    {
+        $this->planShape = null !== $planShape && '' !== trim($planShape) ? trim($planShape) : null;
     }
 }

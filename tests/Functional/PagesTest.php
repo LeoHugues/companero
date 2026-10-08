@@ -118,6 +118,23 @@ final class PagesTest extends AppTestCase
         self::assertSelectorTextContains('[aria-labelledby=zone-done-title]', 'Plans de travail');
     }
 
+    public function testARoomGetsItsPlaceOnThePlan(): void
+    {
+        $this->client->loginUser($this->foundHousehold());
+        $this->client->request('GET', '/coloc');
+        $this->client->click($this->client->getCrawler()->filter('a[aria-label="Réglages de la zone Cuisine"]')->link());
+
+        $this->client->submitForm('Enregistrer', ['zone[planShape]' => 'n’importe quoi']);
+        self::assertResponseStatusCodeSame(422);
+        $this->client->submitForm('Enregistrer', ['zone[planShape]' => '0,0 20,0 20,15 0,15']);
+        self::assertResponseRedirects('/coloc');
+
+        $this->client->request('GET', '/plan');
+        self::assertSelectorExists('svg[aria-label="Plan de la maison"] a[aria-label^="Cuisine"] polygon[points="0,0 20,0 20,15 0,15"]');
+        // The rooms without a shape stay below, as tiles.
+        self::assertSelectorTextContains('[aria-label="Les autres zones"]', 'Salon');
+    }
+
     public function testAddingAZone(): void
     {
         $this->client->loginUser($this->foundHousehold());

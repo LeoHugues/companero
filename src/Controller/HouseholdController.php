@@ -72,6 +72,21 @@ final class HouseholdController extends AbstractController
         ], new Response(status: $status));
     }
 
+    #[Route('/zones/{id}', name: 'zone_edit', requirements: ['id' => '\d+'], methods: ['GET', 'POST'])]
+    #[IsGranted(HouseholdVoter::ACCESS, subject: 'zone')]
+    public function editZone(Zone $zone, Request $request): Response
+    {
+        $form = $this->createForm(ZoneType::class, $zone, ['household' => $zone->getHousehold(), 'with_plan' => true])->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $this->entityManager->flush();
+            $this->addFlash('success', 'C’est enregistré.');
+
+            return $this->redirectToRoute('household_edit', status: Response::HTTP_SEE_OTHER);
+        }
+
+        return $this->render('household/zone.html.twig', ['zone' => $zone, 'form' => $form], new Response(status: $form->isSubmitted() ? Response::HTTP_UNPROCESSABLE_ENTITY : Response::HTTP_OK));
+    }
+
     #[Route('/zones/{id}/supprimer', name: 'zone_delete', requirements: ['id' => '\d+'], methods: ['POST'])]
     #[IsGranted(HouseholdVoter::ACCESS, subject: 'zone')]
     #[IsCsrfTokenValid('submit', tokenKey: '_csrf_token')]

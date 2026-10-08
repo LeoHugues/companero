@@ -5,7 +5,8 @@
 
 ## Colocs
 
-Léo, Léa, Robin et Gab. Léa n'est pas là en ce moment (0 jour par semaine).
+Léo, Léa, Robin et Gab, avec chacun un objectif de 70 pts par semaine (5 min par jour).
+Léa n'est pas là en ce moment (0 jour par semaine). Objectif de la maison : 250 pts.
 
 ## Animaux
 
@@ -21,7 +22,10 @@ Léo, Léa, Robin et Gab. Léa n'est pas là en ce moment (0 jour par semaine).
 | Cuisine, Salon, Bureau, Couloir, Entrée | commune |
 | Salle de bain, WC | commune |
 | Grande terrasse, Petite terrasse, Terrasse de l'entrée, Jardin | commune |
-| Chambre de Léo et Léa, Chambre de Robin, Chambre de Gab | privée |
+| Chambre de Léo et Léa, Chambre de Robin, Chambre de Gab, Salle de bain de Gab | privée |
+
+Le plan de la maison suit [l'esquisse](esquisse-plan-maison.svg), rendue rectangulaire
+(la petite terrasse rentre dans le rectangle) avec le jardin tout autour.
 
 ## Le ménage du dimanche
 
@@ -66,11 +70,11 @@ Régulières, tous les 7 jours, avec l'engagement d'au moins une fois par semain
 
 ## Express (en un appui)
 
-| Tâche | Points |
-|---|---|
-| Vider le lave-vaisselle | 10 |
-| Ranger la vaisselle de l'égouttoir | 5 |
-| Faire le verre (sortir la poubelle de verre) | 10 |
+| Tâche | Points | Pas avant |
+|---|---|---|
+| Vider le lave-vaisselle | 10 | 6 h |
+| Ranger la vaisselle de l'égouttoir | 5 | 3 h |
+| Faire le verre (sortir la poubelle de verre) | 10 | 2 jours |
 
 ## Catalogue (ponctuelles, lancées à la main)
 

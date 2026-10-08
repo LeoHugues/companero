@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Member;
 use App\Entity\Zone;
+use App\Plan\HousePlan;
 use App\Repository\CompletionRepository;
 use App\Security\HouseholdVoter;
 use App\Task\TaskBoardBuilder;
@@ -27,7 +28,7 @@ final class PlanController extends AbstractController
         $household = $member->getHousehold();
 
         return $this->render('plan/show.html.twig', [
-            'rooms' => $boards->build($household)->byZone($household->getZones()),
+            'plan' => HousePlan::of($boards->build($household)->byZone($household->getZones())),
         ]);
     }
 

@@ -68,7 +68,7 @@ Elle est d'abord construite pour une coloc de 4 personnes. Elle pourra ensuite
 | **Glissante** | Aspirateur salon, rythme 3 j | L'urgence monte depuis la dernière réalisation. Chaque réalisation remet le compteur à zéro. |
 | **Glissante + engagement** | Serpillière salon, rythme 7 j, engagement 1/sem | Comme la glissante, mais si l'engagement de la semaine n'est pas tenu, l'urgence monte aussi à l'approche du jour de ménage, puis de la fin de semaine. |
 | **Calendaire** | Sortir les poubelles, mardi 20 h ; nourrir les chats, tous les jours à 19 h | Elle réapparaît à date fixe (un jour de la semaine, ou tous les jours) et a une échéance précise. |
-| **Express** | Vider le lave-vaisselle | Jamais planifiée, jamais urgente : on la signale en un appui depuis l'accueil quand on l'a faite. Elle ne compte pas dans la jauge de la maison. |
+| **Express** | Vider le lave-vaisselle | Jamais planifiée, jamais urgente : on la signale en un appui depuis l'accueil quand on l'a faite. Un délai minimal (en heures ou en jours) empêche de la refaire juste après. Elle ne compte pas dans la jauge de la maison. |
 
 **Concilier le glissant et l'hebdomadaire.** Une tâche avec engagement a deux
 sources d'urgence, et c'est **la plus forte des deux** qui s'affiche :
@@ -174,7 +174,8 @@ zone : la salle de bain privée compte autant que la salle de bain partagée.
 
 ## 6. Membres, présence, objectifs
 
-- Chaque membre a un **objectif hebdo** en points (150, 200, 250 ou 300).
+- Chaque membre a un **objectif hebdo** en points : 70, 140, 210 ou 280
+  (5, 10, 15 ou 20 minutes par jour).
 - Plutôt que des dates d'absence, chacun règle dans son profil un **curseur cranté
   de 0 à 7 jours de présence par semaine**. Il vaut pour la semaine en cours et les
   suivantes (les semaines passées gardent le leur). L'objectif est **proratisé** :
@@ -206,11 +207,16 @@ zone : la salle de bain privée compte autant que la salle de bain partagée.
   des zones communes, affichée en permanence.
   Elle est incarnée par **la Casa**, la maison-personnage dont l'humeur suit la
   jauge (voir [direction artistique](direction-artistique.md)).
-- **Objectif collectif** : la somme des points de la coloc sur la semaine, avec
-  la contribution de chacun, mise en avant avant l'objectif personnel.
-- **Plan de la maison** : une vue d'en haut, une tuile par pièce dont le sol fonce
-  quand elle a besoin d'attention, avec une petite Casa à son humeur. Une pièce
-  montre ses tâches et ce qui y a été fait.
+- **Objectif de la maison** : un objectif hebdomadaire propre à la coloc (250 pts
+  par défaut, réglable), atteint avec les points de tout le monde. La contribution
+  de chacun est affichée, avant l'objectif personnel.
+- **Deux séries** : la série personnelle (son objectif atteint) et la **série de la
+  coloc** (l'objectif de la maison atteint), coopérative.
+- **Plan de la maison** : le vrai plan, vu d'en haut, dessiné d'après
+  [l'esquisse](esquisse-plan-maison.svg) : chaque pièce a sa forme (des points sur
+  une grille, réglables dans les réglages de la zone), le sol fonce quand elle a
+  besoin d'attention, le jardin fait le tour. Les zones sans forme s'affichent en
+  tuiles. Une pièce montre ses tâches et ce qui y a été fait.
 
 ### Cadeaux de niveau
 
@@ -229,7 +235,7 @@ des titres secrets viendront plus tard.
 
 ### Bonus collectif
 
-Quand la coloc atteint son objectif commun (la somme des objectifs de chacun),
+Quand la coloc atteint l'objectif de la maison,
 chaque membre présent gagne **+50 points** à la clôture de la semaine.
 
 ### Rappels

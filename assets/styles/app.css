@@ -102,6 +102,15 @@
   .choice-chips input:focus-visible + label { @apply outline-2 outline-offset-2 outline-ink; }
 }
 
+/* A room of the plan of the house: an SVG link. */
+@layer components {
+  .plan-room { @apply cursor-pointer; }
+  .plan-room polygon, .plan-room rect { transition: filter 150ms; }
+  .plan-room:hover polygon, .plan-room:hover rect, .plan-room:focus-visible polygon { filter: brightness(.93); }
+  .plan-room:focus-visible { outline: none; }
+  .plan-room:focus-visible polygon { stroke-width: 1.4; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }

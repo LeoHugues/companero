@@ -1,0 +1,21 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ zone.name }} · Companero{% endblock %}
+
+{% block body %}
+    <header class="flex items-center justify-between">
+        <h1 class="text-[22px]">Réglages de la zone</h1>
+        <a href="{{ path('household_edit') }}" aria-label="Retour aux réglages de la coloc" class="flex size-11 items-center justify-center rounded-full text-ink"><twig:Icon name="close" size="22" stroke="2.2"/></a>
+    </header>
+
+    {{ form_start(form, {attr: {class: 'flex flex-col gap-5'}}) }}
+        {{ form_row(form.name) }}
+        <div class="card px-3.5 py-1">{{ form_row(form.private) }}</div>
+        {{ form_row(form.planShape) }}
+        <button type="submit" class="btn-primary self-start">Enregistrer</button>
+    {{ form_end(form) }}
+
+    <a href="{{ path('plan_zone', {id: zone.id}) }}" class="btn-link self-center">Voir la pièce et ses tâches</a>
+{% endblock %}
+
+{% block nav %}<twig:BottomNav active="profile"/>{% endblock %}

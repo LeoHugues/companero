@@ -1,0 +1,27 @@
+{# Rooms as simple tiles: when there is no plan, or for the rooms that are not on it. #}
+{% set cells = 0 %}
+{% for room in rooms %}{% set cells = cells + (room.tasks|length >= 5 ? 2 : 1) %}{% endfor %}
+<ul class="grid grid-flow-dense grid-cols-2 gap-[3px] overflow-hidden rounded-[14px] border-[3px] border-ink bg-ink" aria-label="{{ label }}">
+    {% for room in rooms %}
+        {% set clean = room.cleanliness %}
+        {% set floor = clean >= 92 ? 'bg-surface' : (clean >= 80 ? 'bg-[#FBEFD9]' : (clean >= 50 ? 'bg-[#F8DDA6]' : 'bg-[#F4C6A6]')) %}
+        {# A big room takes the whole width, and the last one fills the gap if any. #}
+        <li class="{{ room.tasks|length >= 5 or (loop.last and cells is odd) ? 'col-span-2' : '' }}">
+            <a href="{{ path('plan_zone', {id: room.zone.id}) }}" class="flex h-full min-h-[96px] flex-col justify-between gap-2 p-3 text-ink no-underline transition hover:brightness-95 hover:text-ink {{ floor }}"
+               aria-label="{{ room.zone.name }} : propre à {{ clean }} %{{ room.pressingCount ? ', ' ~ room.pressingCount ~ ' à faire' }}">
+                <span class="flex items-start justify-between gap-2">
+                    <span class="text-[15px] leading-tight font-extrabold">{{ room.zone.name }}</span>
+                    <twig:CasaMini :size="36" :mood="room.mood" class="shrink-0"/>
+                </span>
+                <span class="flex items-center justify-between text-xs font-bold">
+                    <span>{{ clean }} %{{ room.zone.private ? ' · privée' }}</span>
+                    {% if room.pressingCount %}
+                        <span class="rounded-full bg-clay px-2 py-0.5 text-ink">{{ room.pressingCount }} à faire</span>
+                    {% elseif room.tasks is empty %}
+                        <span class="text-muted">rien de prévu</span>
+                    {% endif %}
+                </span>
+            </a>
+        </li>
+    {% endfor %}
+</ul>
