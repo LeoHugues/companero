@@ -25,7 +25,7 @@ export default class extends Controller {
     cheer(toast) {
         const box = toast.getBoundingClientRect();
         burst(document.body, box.left + 26 + window.scrollX, box.top + box.height / 2 + window.scrollY, { count: 8, spread: 46, kinds: ['star'] });
-        buzz([14, 40, 14]);
+        buzz('success');
     }
 
     next() {
@@ -57,7 +57,6 @@ export default class extends Controller {
         const box = event.currentTarget.getBoundingClientRect();
         const origin = card.getBoundingClientRect();
         dialog.classList.add('is-opening');
-        buzz(20);
         setTimeout(() => {
             this.reveal(dialog);
             if (!calm()) {
@@ -72,7 +71,7 @@ export default class extends Controller {
         if (dialog.dataset.confetti) {
             confetti({ parent: dialog });
         }
-        buzz([20, 60, 20, 60, 40]);
+        buzz(dialog.dataset.hapticOnOpen ?? 'reward');
         dialog.querySelector('form button[type=submit]')?.focus();
     }
 }

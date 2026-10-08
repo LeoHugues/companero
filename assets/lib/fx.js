@@ -6,10 +6,43 @@
 
 export const calm = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-/** A short vibration on phones that allow it (Android, the app's WebView). */
-export function buzz(pattern = 12) {
-    if (!calm() && 'vibrate' in navigator) {
-        try { navigator.vibrate(pattern); } catch { /* not allowed: never mind */ }
+/*
+ * Haptics: every feedback has its own feel, by name. In the Android app they are played natively
+ * (android/…/HapticsComponent.kt: real taps, rises and thuds, with their strength); in a phone's
+ * browser, the same rhythm with navigator.vibrate.
+ */
+const PATTERNS = {
+    tick: 8, // a button, a chip, a link
+    toggle: [10, 40, 16], // a switch
+    press: [14, 30, 22], // "C'est fait", pressed
+    success: [16, 50, 16, 50, 32], // points earned
+    rise: [6, 40, 8, 40, 10, 40, 14], // a gauge going up
+    reward: [30, 60, 20, 40, 20, 40, 60], // a box that opens
+    levelup: [40, 60, 20, 40, 20, 40, 20, 40, 80], // a new level
+    card: [70, 80, 30], // a yellow card received
+    alert: [24, 80, 24], // "ça arrive !"
+    giggle: [8, 40, 8, 40, 8, 40, 8], // the Casa tickled
+    dust: 5, // the feather duster
+    sparkle: [10, 30, 10, 30, 10, 30, 40], // the Casa dusted all over
+    purr: [25, 35, 25, 35, 25, 35, 25, 35, 25, 35, 25], // a cat
+    sneeze: [6, 60, 30], // the Casa sneezes
+};
+let lastBuzz = 0;
+
+/** A vibration, by name (see PATTERNS). Light ticks never pile up on a stronger feedback. */
+export function buzz(effect = 'tick') {
+    if (calm()) {
+        return;
+    }
+    const now = performance.now();
+    if ((effect === 'tick' || effect === 'dust') && now - lastBuzz < 120) {
+        return;
+    }
+    lastBuzz = now;
+    if (window.companeroHaptics?.enabled) {
+        window.companeroHaptics.play(effect);
+    } else if ('vibrate' in navigator) {
+        try { navigator.vibrate(PATTERNS[effect] ?? PATTERNS.tick); } catch { /* not allowed: never mind */ }
     }
 }
 

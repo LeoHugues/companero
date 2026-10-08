@@ -7,7 +7,8 @@ export default class extends Controller {
 
     connect() {
         this.timers = [
-            setTimeout(() => buzz([30, 50, 30, 50, 30, 50, 30, 50, 30]), 1300),
+            setTimeout(() => buzz('purr'), 1300),
+            setTimeout(() => buzz('purr'), 2200),
             setTimeout(() => this.hearts(), 2000),
         ];
         this.stageTarget.addEventListener('pointerup', this.tap);
@@ -21,7 +22,7 @@ export default class extends Controller {
     tap = (event) => {
         const box = this.stageTarget.getBoundingClientRect();
         burst(this.stageTarget, event.clientX - box.left, event.clientY - box.top, { count: 6, spread: 50, kinds: ['heart'] });
-        buzz([20, 40, 20]);
+        buzz('purr');
     };
 
     hearts() {
@@ -30,5 +31,6 @@ export default class extends Controller {
         }
         const box = this.stageTarget.getBoundingClientRect();
         burst(this.stageTarget, box.width / 2, box.height * 0.45, { count: 12, spread: 110, kinds: ['heart', 'star'], colors: ['#F2A27A', '#F6C453', '#E8692C'] });
+        buzz('sparkle');
     }
 }

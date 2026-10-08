@@ -34,11 +34,11 @@
             <input type="hidden" name="_back" value="{{ back }}">
             <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
             {% if compact %}
-                <button type="submit" aria-label="Marquer « {{ task.title }} » comme fait" class="done-round">
+                <button type="submit" aria-label="Marquer « {{ task.title }} » comme fait" class="done-round" data-haptic="press">
                     <twig:Icon name="check" size="20" stroke="2.8"/>
                 </button>
             {% else %}
-                <button type="submit" class="done-button">
+                <button type="submit" class="done-button" data-haptic="press">
                     <span class="done-button-check" aria-hidden="true"><twig:Icon name="check" size="16" stroke="3"/></span>
                     C’est fait
                     <span class="done-button-points">+{{ points }}{% if boost %}<twig:Icon name="bolt" size="11" stroke="2.8"/>{% endif %}</span>

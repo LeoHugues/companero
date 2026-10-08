@@ -58,8 +58,8 @@ export default class extends Controller {
 
     reactingValueChanged(reacting) {
         if (reacting) {
+            // Her joy is felt with the points (the celebration's "success"): no second buzz.
             this.later(() => this.calmDown(), this.durationValue);
-            buzz([18, 60, 18]);
         }
     }
 
@@ -83,6 +83,7 @@ export default class extends Controller {
 
     sneeze() {
         this.animateBody('casa-sneeze', 650);
+        buzz('sneeze');
         const { x, y } = this.toStage(170, 150);
         for (let i = 0; i < 6; i++) {
             particle(this.stageTarget, x + (Math.random() - 0.5) * 30, y, { size: 8 + Math.random() * 8, dx: (Math.random() - 0.5) * 60, dy: -10 - Math.random() * 25 });
@@ -142,7 +143,7 @@ export default class extends Controller {
             this.say(line);
         }
         this.animateBody('casa-giggle', 700);
-        buzz(10);
+        buzz('giggle');
         const { x, y } = this.pointIn(event);
         for (let i = 0; i < 3; i++) {
             particle(this.stageTarget, x + (i - 1) * 14, y - 6, { kind: 'heart', size: 14 + i * 3, color: i % 2 ? '#F6C453' : '#E8692C', dx: (i - 1) * 18 });
@@ -170,6 +171,8 @@ export default class extends Controller {
         if (this.dusting.since > 16) {
             this.dusting.since = 0;
             particle(this.stageTarget, x + 10, y - 14, { size: 6 + Math.random() * 9, dx: (Math.random() - 0.5) * 50, dy: -12 - Math.random() * 30 });
+            // The feather duster's grain under the finger.
+            buzz('dust');
             if (Math.random() < 0.25) {
                 particle(this.stageTarget, x + 14, y - 20, { kind: 'star', size: 10, color: '#F6C453', dx: (Math.random() - 0.5) * 40, dy: -30 });
             }
@@ -185,7 +188,7 @@ export default class extends Controller {
             this.dusting.giggled = true;
             this.say('Hihi, ça chatouille !');
             this.animateBody('casa-giggle', 700);
-            buzz(8);
+            buzz('giggle');
         }
         if (this.dusting.total > 650 && !this.dusting.done) {
             this.dusting.done = true;
@@ -208,7 +211,7 @@ export default class extends Controller {
         burst(this.stageTarget, x, y, { count: 14, spread: 90 });
         this.say(DUSTED[Math.floor(Math.random() * DUSTED.length)]);
         this.animateBody('animate-cat-hop', 620);
-        buzz([12, 50, 12, 50, 24]);
+        buzz('sparkle');
         this.later(() => this.dustTargets.forEach((spot) => spot.classList.remove('is-dusted')), 30000);
     }
 
@@ -234,7 +237,7 @@ export default class extends Controller {
             const { x, y } = this.pointIn(event);
             particle(this.stageTarget, x, y - 10, { kind: 'heart', size: 14, color: '#F2A27A', dx: 6 });
         }
-        buzz([6, 30, 6, 30, 6]);
+        buzz(this.asleepValue ? 'tick' : 'purr');
     }
 
     // ——— Helpers ———

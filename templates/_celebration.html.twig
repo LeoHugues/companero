@@ -53,7 +53,7 @@
         {% endif %}
 
         {% if gifts %}
-            <dialog class="reward-dialog reward-dialog-level" data-celebration-target="dialog" data-confetti="true" aria-labelledby="level-title">
+            <dialog class="reward-dialog reward-dialog-level" data-celebration-target="dialog" data-haptic-on-open="levelup" data-confetti="true" aria-labelledby="level-title">
                 <div class="reward-card">
                     <p class="reward-kicker"><twig:Icon name="trophy" size="14" stroke="2.6"/> Nouveau niveau</p>
                     <p class="reward-level" aria-hidden="true">{{ gifts.level }}</p>
@@ -84,7 +84,7 @@
         {% endif %}
 
         {% for card in cards %}
-            <dialog class="reward-dialog reward-dialog-card" data-celebration-target="dialog" aria-labelledby="card-title-{{ card.id }}">
+            <dialog class="reward-dialog reward-dialog-card" data-celebration-target="dialog" data-haptic-on-open="card" aria-labelledby="card-title-{{ card.id }}">
                 <div class="reward-card">
                     <p class="reward-kicker reward-kicker-card">Coup de sifflet</p>
                     <div class="yellow-card yellow-card-big" aria-hidden="true">

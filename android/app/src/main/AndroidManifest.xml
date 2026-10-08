@@ -2,6 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- The pages' feedback: a tick under the finger, points earned, a box that opens, a cat that purrs. -->
+    <uses-permission android:name="android.permission.VIBRATE" />
 
     <!-- usesCleartextTraffic: the self-hosted server is plain HTTP on the home Wi-Fi. -->
     <application

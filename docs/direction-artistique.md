@@ -177,8 +177,28 @@ compris dans l'appli Android.
 L'accueil a un raccourci vers **le plan de la maison** : un petit plan de quatre pièces colorées
 dans une pastille à bord encre, à côté de la propreté.
 
-Sur téléphone, les moments forts vibrent légèrement (une tâche faite, une boîte ouverte,
-un chat caressé).
+### Vibrations
+
+Chaque retour se sent dans la main, chacun avec son toucher (`buzz()` dans `assets/lib/fx.js`).
+Dans l'appli Android, ce sont les vraies vibrations du téléphone (clics, montées, coups sourds,
+avec leur intensité : `HapticsComponent.kt`) ; dans un navigateur, le même rythme.
+
+| Effet | Quand |
+|---|---|
+| tick | chaque appui : bouton, puce, lien, onglet, volet |
+| toggle | un interrupteur (Là / Pas là) |
+| press | « C'est fait », une tâche express |
+| success | les points gagnés, un boost activé |
+| rise | une jauge qui monte après un gain |
+| reward | une boîte surprise qui s'ouvre |
+| levelup | un nouveau niveau |
+| card | un carton jaune sifflé ou reçu |
+| alert | « Ça arrive ! » |
+| giggle, dust, sparkle, sneeze | la Casa chatouillée, le grain du plumeau, la Casa qui brille, qui éternue |
+| purr | un chat caressé, une friandise |
+
+Un élément choisit son effet avec `data-haptic="…"` (ou `none`). Rien ne vibre si le téléphone
+demande moins d'animations.
 
 Toutes les animations sont coupées avec `prefers-reduced-motion`.
 

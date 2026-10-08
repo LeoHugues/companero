@@ -1,5 +1,5 @@
 import { Controller } from '@hotwired/stimulus';
-import { calm, remember } from '../lib/fx.js';
+import { buzz, calm, remember } from '../lib/fx.js';
 
 /*
  * A progress bar that rises when the page shows: from where it was last time (a gauge with a
@@ -39,6 +39,9 @@ export default class extends Controller {
             fill.style.transition = `width ${slow ? 1300 : 900}ms cubic-bezier(.25, 1, .35, 1)`;
             fill.style.width = `${to}%`;
             this.element.classList.add('is-filling');
+            if (slow && gain > 0) {
+                buzz('rise');
+            }
         }, this.delayValue + (slow ? 450 : 120));
         fill.addEventListener('transitionend', () => {
             this.element.classList.remove('is-filling');

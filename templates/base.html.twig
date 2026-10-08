@@ -25,6 +25,8 @@
     {% set level_gifts = app.flashes('gifts')|first %}
     {% set card_given = app.flashes('card_given')|first %}
     <body class="min-h-dvh">
+        {# The Android app's own vibrations (Hotwire Native bridge); nothing in a browser. #}
+        <div data-controller="haptics" hidden></div>
         <main class="mx-auto flex max-w-md flex-col gap-4 px-5 pt-5 {% block main_class %}pb-28{% endblock %}">
             {% for message in app.flashes('success') %}
                 <p class="animate-pop rounded-2xl bg-ink px-4 py-3 text-[15px] font-semibold text-cream" role="status" data-controller="dismiss">{{ message }}</p>

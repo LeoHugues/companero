@@ -15,7 +15,7 @@
             <form method="post" action="{{ path('presence_toggle') }}" class="flex">
                 <input type="hidden" name="_back" value="home">
                 <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
-                <button type="submit" aria-pressed="{{ app.user.atHome ? 'true' : 'false' }}" aria-label="{{ app.user.atHome ? 'Je suis à la maison : signaler que je pars' : 'Je ne suis pas là : signaler mon retour' }}"
+                <button type="submit" data-haptic="toggle" aria-pressed="{{ app.user.atHome ? 'true' : 'false' }}" aria-label="{{ app.user.atHome ? 'Je suis à la maison : signaler que je pars' : 'Je ne suis pas là : signaler mon retour' }}"
                         class="flex cursor-pointer items-center gap-1 pr-2.5 pl-2 transition active:scale-95 {{ app.user.atHome ? 'bg-ink text-cream' : 'text-muted' }}">
                     <twig:Icon :name="app.user.atHome ? 'home' : 'door'" size="16" stroke="2.4"/>{{ app.user.atHome ? 'Là' : 'Pas là' }}
                 </button>

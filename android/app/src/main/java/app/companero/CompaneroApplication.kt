@@ -1,9 +1,11 @@
 package app.companero
 
 import android.app.Application
+import dev.hotwire.core.bridge.BridgeComponentFactory
 import dev.hotwire.core.config.Hotwire
 import dev.hotwire.core.logging.HotwireLogLevel
 import dev.hotwire.navigation.config.defaultFragmentDestination
+import dev.hotwire.navigation.config.registerBridgeComponents
 import dev.hotwire.navigation.config.registerFragmentDestinations
 
 class CompaneroApplication : Application() {
@@ -17,6 +19,10 @@ class CompaneroApplication : Application() {
 
         Hotwire.defaultFragmentDestination = WebFragment::class
         Hotwire.registerFragmentDestinations(WebFragment::class)
+        // The phone's vibrations for the pages' feedback (assets/controllers/haptics_controller.js).
+        Hotwire.registerBridgeComponents(
+            BridgeComponentFactory("haptics", ::HapticsComponent),
+        )
 
         Server.loadPathConfiguration(this)
     }

@@ -16,7 +16,7 @@
                 <form method="post" action="{{ path('task_complete', {id: view.task.id}) }}" data-controller="done" data-action="submit->done#celebrate">
                     <input type="hidden" name="_back" value="{{ back }}">
                     <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
-                    <button type="submit" aria-label="J’ai fait « {{ view.task.title }} »"
+                    <button type="submit" data-haptic="press" aria-label="J’ai fait « {{ view.task.title }} »"
                             class="flex h-[42px] cursor-pointer items-center gap-2 rounded-full border-[1.5px] border-line bg-surface pr-3.5 pl-2.5 text-sm font-bold text-ink transition hover:border-ink active:scale-95 active:bg-sun">
                         <span class="flex size-6 items-center justify-center rounded-full bg-track"><twig:Icon name="check" size="14" stroke="3"/></span>
                         {{ view.task.title }}

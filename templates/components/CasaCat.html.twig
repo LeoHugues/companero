@@ -9,7 +9,7 @@
 {% set tail = look.fluffy ? 12 : 8 %}
 {% set delay = index * 1700 %}
 <g transform="translate({{ x }} {{ y }}) scale({{ look.scale }})">
-    <g class="casa-cat {{ reacting ? 'animate-cat-hop' }}" data-casa-target="cat" data-name="{{ look.name }}" data-action="pointerup->casa#pet" role="button" tabindex="0" aria-label="{{ look.name }}"
+    <g class="casa-cat {{ reacting ? 'animate-cat-hop' }}" data-casa-target="cat" data-name="{{ look.name }}" data-action="pointerup->casa#pet" data-haptic="none" role="button" tabindex="0" aria-label="{{ look.name }}"
        style="animation-delay: {{ 120 + index * 160 }}ms">
         {% if look.loaf %}
             {# Lying down, paws tucked in: a big loaf. #}

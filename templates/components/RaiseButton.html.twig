@@ -4,14 +4,14 @@
     <input type="hidden" name="_back" value="{{ back }}">
     <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
     {% if compact %}
-        <button type="submit" aria-label="Ça arrive : « {{ task.title }} »"
+        <button type="submit" data-haptic="alert" aria-label="Ça arrive : « {{ task.title }} »"
                 class="raise-chip">
             <span class="raise-chip-icon"><twig:Icon name="siren" size="15" stroke="2.4"/></span>
             {{ task.title }}
         </button>
     {% elseif round %}
-        <button type="submit" class="raise-round" aria-label="Ça arrive : « {{ task.title }} »" title="Ça arrive !"><twig:Icon name="siren" size="18" stroke="2.4"/></button>
+        <button type="submit" data-haptic="alert" class="raise-round" aria-label="Ça arrive : « {{ task.title }} »" title="Ça arrive !"><twig:Icon name="siren" size="18" stroke="2.4"/></button>
     {% else %}
-        <button type="submit" class="raise-button"><twig:Icon name="siren" size="18" stroke="2.4"/> Ça arrive !</button>
+        <button type="submit" data-haptic="alert" class="raise-button"><twig:Icon name="siren" size="18" stroke="2.4"/> Ça arrive !</button>
     {% endif %}
 </form>

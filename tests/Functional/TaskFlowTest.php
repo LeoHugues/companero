@@ -263,7 +263,7 @@ final class TaskFlowTest extends AppTestCase
         $this->client->followRedirect();
         // Done: no more button until the cooldown is over.
         self::assertSelectorNotExists('form[action="/taches/'.$task->getId().'/fait"]');
-        self::assertSelectorTextContains('#task-'.$task->getId(), 'Léo · possible à');
+        self::assertSelectorTextContains('#task-'.$task->getId(), 'Léo · possible ');
 
         $this->client->request('POST', '/taches/'.$task->getId().'/fait', ['_csrf_token' => 'csrf-token']);
         $this->client->followRedirect();

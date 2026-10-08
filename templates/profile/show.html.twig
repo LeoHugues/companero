@@ -87,7 +87,7 @@
                 {% if kind in ['team_boost', 'xp_boost'] %}
                     <form method="post" action="{{ path('gift_activate', {id: gift.id}) }}">
                         <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
-                        <button type="submit" class="btn-primary"><twig:Icon name="bolt" size="18"/> Activer</button>
+                        <button type="submit" class="btn-primary" data-haptic="success"><twig:Icon name="bolt" size="18"/> Activer</button>
                     </form>
                 {% elseif kind == 'friend_boost' and friends is not empty %}
                     <form method="post" action="{{ path('gift_activate', {id: gift.id}) }}" class="flex flex-wrap items-center gap-2">
@@ -131,16 +131,16 @@
                                 {% endfor %}
                             </datalist>
                         </label>
-                        <button type="submit" class="btn-primary self-start"><span class="yellow-card yellow-card-mini" aria-hidden="true"></span> Siffler le carton</button>
+                        <button type="submit" class="btn-primary self-start" data-haptic="card"><span class="yellow-card yellow-card-mini" aria-hidden="true"></span> Siffler le carton</button>
                     </form>
                 {% elseif kind == 'treat' and member.household.pets is not empty %}
                     <form method="post" action="{{ path('gift_treat', {id: gift.id}) }}" class="flex flex-wrap items-center gap-2">
                         <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
                         <span class="text-sm font-bold">Pour</span>
                         {% for pet in member.household.pets %}
-                            <button type="submit" name="animal" value="{{ pet.id }}" class="chip">{{ pet.name }}</button>
+                            <button type="submit" name="animal" value="{{ pet.id }}" class="chip" data-haptic="purr">{{ pet.name }}</button>
                         {% endfor %}
-                        {% if member.household.pets|length > 1 %}<button type="submit" name="animal" value="" class="chip">Tout le monde</button>{% endif %}
+                        {% if member.household.pets|length > 1 %}<button type="submit" name="animal" value="" class="chip" data-haptic="purr">Tout le monde</button>{% endif %}
                     </form>
                 {% endif %}
             </article>
