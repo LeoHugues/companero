@@ -90,7 +90,10 @@
         </section>
     {% endif %}
 
-    <a href="{{ path('task_index') }}" class="btn-link self-center">Voir toutes les tâches</a>
+    <p class="flex items-center justify-center gap-5">
+        <a href="{{ path('task_index') }}" class="btn-link">Toutes les tâches</a>
+        <a href="{{ path('plan_show') }}" class="btn-link">Le plan de la maison</a>
+    </p>
 {% endblock %}
 
 {% block nav %}<twig:BottomNav active="home"/>{% endblock %}

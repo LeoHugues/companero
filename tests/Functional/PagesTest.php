@@ -16,6 +16,7 @@ final class PagesTest extends AppTestCase
         yield ['/bilan', 'Bilan de la semaine'];
         yield ['/profil', 'Léo'];
         yield ['/coloc', 'La coloc'];
+        yield ['/plan', 'Le plan'];
     }
 
     #[DataProvider('pages')]
@@ -86,6 +87,34 @@ final class PagesTest extends AppTestCase
 
         $this->client->request('POST', '/api/presence', server: ['HTTP_X_COMPANERO_APP' => '1']);
         self::assertTrue(json_decode((string) $this->client->getResponse()->getContent(), true)['atHome']);
+    }
+
+    public function testThePlanShowsEachRoomAndWhatItNeeds(): void
+    {
+        $leo = $this->foundHousehold();
+        $this->client->loginUser($leo);
+        $this->client->request('GET', '/taches/nouvelle');
+        $form = $this->client->getCrawler()->selectButton('Ajouter la tâche')->form();
+        $kitchen = array_search('Cuisine', array_map(static fn ($node) => $node->textContent, iterator_to_array($this->client->getCrawler()->filter('#task_zone label'))), true);
+        $this->client->submit($form, [
+            'task[title]' => 'Plans de travail',
+            'task[kind]' => 'rolling',
+            'task[rhythmDays]' => '7',
+            'task[zone]' => $form['task[zone]']->availableOptionValues()[$kitchen],
+        ]);
+
+        $this->client->request('GET', '/plan');
+        self::assertSelectorTextContains('[aria-label="Les pièces"]', 'Cuisine');
+        $this->client->clickLink('Cuisine');
+        self::assertSelectorTextContains('h1', 'Cuisine');
+        self::assertSelectorTextContains('[aria-labelledby=zone-tasks-title]', 'Plans de travail');
+
+        // Done from the room, back to the room.
+        $room = (string) parse_url($this->client->getRequest()->getUri(), \PHP_URL_PATH);
+        $this->submitAction((string) $this->client->getCrawler()->filter('[aria-labelledby=zone-tasks-title] form')->attr('action'));
+        self::assertResponseRedirects($room);
+        $this->client->followRedirect();
+        self::assertSelectorTextContains('[aria-labelledby=zone-done-title]', 'Plans de travail');
     }
 
     public function testAddingAZone(): void

@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\Completion;
 use App\Entity\Household;
 use App\Entity\Task;
+use App\Entity\Zone;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -60,6 +61,23 @@ class CompletionRepository extends ServiceEntityRepository
             ->setParameter('from', $from)
             ->setParameter('to', $to)
             ->orderBy('c.completedAt', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /** @return list<Completion> latest first */
+    public function findRecentForZone(Zone $zone, \DateTimeImmutable $since, int $limit = 12): array
+    {
+        return $this->createQueryBuilder('c')
+            ->addSelect('t', 'm')
+            ->join('c.task', 't')
+            ->join('c.member', 'm')
+            ->andWhere('t.zone = :zone')
+            ->andWhere('c.completedAt >= :since')
+            ->setParameter('zone', $zone)
+            ->setParameter('since', $since)
+            ->orderBy('c.completedAt', 'DESC')
+            ->setMaxResults($limit)
             ->getQuery()
             ->getResult();
     }

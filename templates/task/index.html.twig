@@ -5,9 +5,12 @@
 {% block body %}
     {% set completion = app.flashes('completion')|first %}
 
-    <header class="flex flex-col gap-0.5">
-        <h1 class="text-[26px]">Toutes les tâches</h1>
-        <p class="text-sm text-muted">Plus la barre est vide, plus la Casa en a besoin.</p>
+    <header class="flex items-center justify-between gap-3">
+        <div class="flex flex-col gap-0.5">
+            <h1 class="text-[26px]">Toutes les tâches</h1>
+            <p class="text-sm text-muted">Plus la barre est vide, plus la Casa en a besoin.</p>
+        </div>
+        <a href="{{ path('plan_show') }}" class="chip shrink-0 gap-1.5"><twig:Icon name="plan" size="18"/> Plan</a>
     </header>
 
     {% if completion %}

@@ -3,6 +3,7 @@
 namespace App\Task;
 
 use App\Entity\Member;
+use App\Entity\Zone;
 use App\Enum\TaskKind;
 
 /** Every active task of a household with its current status, most pressing first. */
@@ -38,6 +39,22 @@ final readonly class TaskBoard
     public function pressing(): array
     {
         return array_values(array_filter($this->items, static fn (TaskView $view): bool => $view->status->urgency->isPressing()));
+    }
+
+    /**
+     * @param iterable<Zone> $zones
+     *
+     * @return list<ZoneSummary> shared rooms first, then private ones
+     */
+    public function byZone(iterable $zones): array
+    {
+        $summaries = [];
+        foreach ($zones as $zone) {
+            $summaries[] = new ZoneSummary($zone, array_values(array_filter($this->items, static fn (TaskView $view): bool => $view->task->getZone() === $zone)));
+        }
+        usort($summaries, static fn (ZoneSummary $a, ZoneSummary $b): int => $a->zone->isPrivate() <=> $b->zone->isPrivate());
+
+        return $summaries;
     }
 
     /** @return list<TaskView> pressing tasks someone counts on this member for: theirs, or one they stand in for */

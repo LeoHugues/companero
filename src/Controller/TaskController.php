@@ -159,7 +159,11 @@ final class TaskController extends AbstractController
 
     private function redirectBack(Request $request): RedirectResponse
     {
-        $route = self::BACK_ROUTES[$request->request->getString('_back')] ?? 'app_home';
+        $back = $request->request->getString('_back');
+        if (1 === preg_match('/^zone-(\d+)$/', $back, $zone)) {
+            return $this->redirectToRoute('plan_zone', ['id' => (int) $zone[1]], Response::HTTP_SEE_OTHER);
+        }
+        $route = self::BACK_ROUTES[$back] ?? 'app_home';
 
         return $this->redirectToRoute($route, status: Response::HTTP_SEE_OTHER);
     }

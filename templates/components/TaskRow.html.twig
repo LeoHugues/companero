@@ -1,4 +1,4 @@
-{% props view, member %}
+{% props view, member, back = 'tasks' %}
 {% set task = view.task %}
 {% set status = view.status %}
 {% set barColor = status.freshness >= 60 ? 'var(--color-sand)' : (status.freshness >= 30 ? 'var(--color-sun)' : 'var(--color-clay)') %}
@@ -20,5 +20,5 @@
         </p>
         <twig:ReminderNote :view="view" :member="member"/>
     </div>
-    <twig:TaskActions :view="view" back="tasks" :member="member" compact/>
+    <twig:TaskActions :view="view" :back="back" :member="member" compact/>
 </article>

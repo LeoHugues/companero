@@ -29,7 +29,7 @@ final class NativeConfiguration
             ]),
             // The bottom navigation and the login switch screens instead of piling them up
             // (including the review's other weeks, and its ± buttons that redirect to a dated week).
-            new Rule(patterns: ['^/?$', '^/taches/?(\?.*)?$', '^/bilan', '^/profil$', '^/connexion', '^/deconnexion'], properties: [
+            new Rule(patterns: ['^/?$', '^/taches/?(\?.*)?$', '^/plan$', '^/bilan', '^/profil$', '^/connexion', '^/deconnexion'], properties: [
                 'presentation' => 'replace_root',
             ]),
             // Task forms slide up as modals; their close button recedes to the screen underneath.
