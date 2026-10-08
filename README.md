@@ -77,6 +77,11 @@ déclarées dans `src/Native/NativeConfiguration.php` :
   ferme la modale) ;
 - tirer vers le bas rafraîchit la page.
 
+L'appli ajoute aussi une tuile **« À la maison »** aux réglages rapides (à côté du
+Wi-Fi et du Bluetooth ; à ajouter en modifiant les tuiles) : un appui bascule entre
+« Là » et « Pas là », avec la session de l'appli. Si personne n'est connecté ou si
+le serveur ne répond pas, elle affiche « Ouvre Companero ».
+
 ```bat
 .\dev apk                              :: serveur proposé : http://<IP du PC>:8000
 .\dev apk https://companero.example    :: ou une autre adresse
