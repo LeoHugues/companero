@@ -47,6 +47,13 @@ class PointEntry
         $this->completion = $completion;
     }
 
+    /** Follows its completion when it is moved to another moment or another member. */
+    public function moveTo(Member $member, \DateTimeImmutable $occurredAt): void
+    {
+        $this->member = $member;
+        $this->occurredAt = $occurredAt;
+    }
+
     public function getId(): ?int
     {
         return $this->id;

@@ -44,8 +44,15 @@
     </div>
     {{ form_errors(form.points) }}
 
+    {% if form.done is defined %}
+        {{ form_row(form.done, {attr: {'data-action': 'change->task-form#toggle', 'data-task-form-target': 'done'}}) }}
+        <fieldset class="flex flex-col gap-5" data-task-form-target="doneSection">
+            {{ form_row(form.doneAt) }}
+        </fieldset>
+    {% endif %}
+
     {% if form.reserve is defined %}
-        {{ form_row(form.reserve) }}
+        <div data-task-form-target="notDoneSection">{{ form_row(form.reserve) }}</div>
     {% endif %}
 
     {# Always at hand at the bottom of the screen: above the bottom navigation, or at the very bottom in the app's modal. #}

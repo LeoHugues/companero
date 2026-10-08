@@ -29,6 +29,12 @@ final readonly class TeamProgress
         return $this->goal() > 0 && $this->points() >= $this->goal();
     }
 
+    /** How far the household is towards its goal, in percent (capped at 100). */
+    public function percent(): int
+    {
+        return $this->goal() > 0 ? min(100, (int) floor(100 * $this->points() / $this->goal())) : 0;
+    }
+
     /** Width of a member's segment in the shared progress bar, in percent of the goal. */
     public function shareOf(MemberProgress $progress): float
     {

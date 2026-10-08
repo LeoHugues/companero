@@ -124,15 +124,15 @@
     {% if review.completions is not empty %}
         <section class="flex flex-col gap-2" aria-labelledby="journal-title">
             <h2 id="journal-title" class="section-title">Fait cette semaine</h2>
-            <p class="meta -mt-1">C’était plus long ou plus court que prévu ? Ajuste les points.</p>
+            <p class="meta -mt-1">C’était plus long ou plus court que prévu ? Ajuste les points. Une date à corriger ? Touche la tâche.</p>
             <ul class="card divide-y divide-line px-3.5 py-1">
                 {% for completion in review.completions %}
                     <li class="flex items-center gap-2.5 py-2">
                         <twig:Avatar :member="completion.member" size="26"/>
-                        <div class="flex min-w-0 flex-1 flex-col">
+                        <a href="{{ path('completion_edit', {id: completion.id, retour: 'bilan'}) }}" class="flex min-w-0 flex-1 flex-col text-ink no-underline hover:text-ink" aria-label="Corriger : {{ completion.task.title }}">
                             <span class="truncate text-sm font-bold">{{ completion.task.title }}</span>
-                            <span class="text-xs text-muted">{{ weekday_name(completion.completedAt|date('N')) }} {{ completion.completedAt|date('G\\hi') }}</span>
-                        </div>
+                            <span class="text-xs text-muted">{{ weekday_name(completion.completedAt|date('N')) }} {{ completion.completedAt|date('G\\hi') }} · <span class="underline">corriger</span></span>
+                        </a>
                         {% for direction in ['moins', 'plus'] %}
                             <form method="post" action="{{ path('completion_adjust', {id: completion.id}) }}">
                                 <input type="hidden" name="sens" value="{{ direction }}">

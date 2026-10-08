@@ -108,6 +108,10 @@ vendor/bin/php-cs-fixer fix     # style @Symfony
 php bin/console lint:twig templates
 ```
 
+Les mêmes vérifications tournent sur GitHub Actions à chaque push ; un push sur `main` qui
+passe les tests est mis en production automatiquement (voir
+[Déploiement automatique](docs/deploiement.md#déploiement-automatique)).
+
 ## Organisation du code
 
 | Dossier | Rôle |

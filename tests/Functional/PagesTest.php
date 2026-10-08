@@ -48,6 +48,21 @@ final class PagesTest extends AppTestCase
         self::assertSame('4', $this->client->getCrawler()->filter('#profile_presenceDays')->attr('value'));
     }
 
+    public function testTheHomePageShowsTheHouseGoalWithoutRankingTheMembers(): void
+    {
+        $leo = $this->foundHousehold();
+        $this->register($leo, 'Robin');
+        $this->client->loginUser($leo);
+
+        $this->client->request('GET', '/');
+        self::assertSelectorExists('[aria-labelledby=team-title] [role=progressbar]');
+        self::assertSelectorNotExists('[aria-labelledby=team-title] li');
+
+        // The weekly review keeps everyone's share.
+        $this->client->request('GET', '/bilan');
+        self::assertSelectorTextContains('[aria-labelledby=team-title] ul', 'Robin');
+    }
+
     public function testNobodyAroundAllWeekIsNotAtHome(): void
     {
         $leo = $this->foundHousehold();

@@ -1,0 +1,47 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ completion.task.title }} · Companero{% endblock %}
+
+{# Room for the save bar, fixed at the bottom of the screen. #}
+{% block main_class %}{{ ux_is_native() ? 'pb-28' : 'pb-48' }}{% endblock %}
+
+{% block body %}
+    <header class="flex items-center justify-between">
+        <h1 class="text-[22px]">Corriger ce qui a été fait</h1>
+        <a href="{{ ux_is_native() ? '/recede_historical_location' : (retour == 'bilan' ? path('review_show') : path('history')) }}" aria-label="Fermer" class="flex size-11 items-center justify-center rounded-full text-ink"><twig:Icon name="close" size="22" stroke="2.2"/></a>
+    </header>
+
+    <div class="card flex flex-col gap-0.5 px-3.5 py-3">
+        <p class="text-[15px] font-extrabold">{{ completion.task.title }}</p>
+        <p class="meta">Fait par {{ completion.member.name }} le {{ completion.completedAt|format_date(pattern: 'EEEE d MMMM', locale: 'fr') }} à {{ completion.completedAt|date('G\\hi') }} · {{ total }} pts au total</p>
+    </div>
+
+    {{ form_start(form, {attr: {class: 'flex flex-col gap-5'}}) }}
+        {{ form_row(form.completedAt, {help: 'Les points comptent pour la semaine de cette date, et la tâche repart de là.'}) }}
+        {{ form_row(form.member) }}
+
+        <div class="card flex items-center justify-between gap-3 px-3.5 py-3" data-controller="stepper">
+            <div class="flex flex-col gap-0.5">
+                {{ form_label(form.points) }}
+                <span class="text-xs text-muted" data-stepper-target="hint">5 min d’effort ≈ 10 pts</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+                <button type="button" class="flex size-11 cursor-pointer items-center justify-center rounded-full border-[1.5px] border-line bg-cream transition hover:bg-track active:scale-90" data-action="stepper#decrement" aria-label="5 points de moins"><twig:Icon name="minus"/></button>
+                {{ form_widget(form.points, {attr: {class: 'w-[4.5rem] border-0 bg-transparent px-0 text-center text-2xl font-extrabold text-clay-dark [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none', 'data-stepper-target': 'input', 'data-action': 'input->stepper#describe'}}) }}
+                <button type="button" class="flex size-11 cursor-pointer items-center justify-center rounded-full border-[1.5px] border-line bg-cream transition hover:bg-track active:scale-90" data-action="stepper#increment" aria-label="5 points de plus"><twig:Icon name="plus"/></button>
+            </div>
+        </div>
+        {{ form_errors(form.points) }}
+        <p class="meta -mt-3">Les points de la tâche, sans les bonus : ceux-ci sont recalculés pour la date choisie (boost du jour de ménage, boost activé…).</p>
+
+        {# Always at hand at the bottom of the screen: above the bottom navigation, or at the very bottom in the app's modal. #}
+        <div class="fixed inset-x-0 z-10 border-t-[1.5px] border-line bg-cream {{ ux_is_native() ? 'bottom-0 pb-[env(safe-area-inset-bottom)]' : 'bottom-[calc(72px+env(safe-area-inset-bottom))]' }}">
+            <div class="mx-auto max-w-md px-5 py-3">
+                <button type="submit" class="btn-primary h-[52px] w-full text-[17px]">Enregistrer</button>
+            </div>
+        </div>
+    {{ form_end(form) }}
+{% endblock %}
+
+{# In the Android app this form is a modal (see App\Native\NativeConfiguration): no bottom navigation. #}
+{% block nav %}{% if not ux_is_native() %}<twig:BottomNav :active="retour == 'bilan' ? 'review' : 'profile'"/>{% endif %}{% endblock %}

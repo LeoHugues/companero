@@ -32,8 +32,8 @@ final class NativeConfiguration
             new Rule(patterns: ['^/?$', '^/taches/?(\?.*)?$', '^/plan$', '^/bilan', '^/profil$', '^/connexion', '^/deconnexion'], properties: [
                 'presentation' => 'replace_root',
             ]),
-            // Task forms slide up as modals; their close button recedes to the screen underneath.
-            new Rule(patterns: ['^/taches/nouvelle', '^/taches/\d+/modifier'], properties: [
+            // Task (and completion) forms slide up as modals; their close button recedes to the screen underneath.
+            new Rule(patterns: ['^/taches/nouvelle', '^/taches/\d+/modifier', '^/realisations/\d+/modifier'], properties: [
                 'context' => 'modal',
                 'pull_to_refresh_enabled' => false,
             ]),

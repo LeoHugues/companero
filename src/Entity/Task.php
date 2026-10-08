@@ -171,6 +171,25 @@ class Task
         }
     }
 
+    /** After a completion was moved: the latest one left, if any, is the reference again. */
+    public function restoreLastCompletion(?\DateTimeImmutable $at, ?Member $by): void
+    {
+        // A one-off task is archived when it is done: it follows the completion.
+        if (!$this->kind->isRecurring() && null !== $at && null !== $this->archivedAt && $this->archivedAt == $this->lastCompletedAt) {
+            $this->archivedAt = $at;
+        }
+        $this->lastCompletedAt = $at;
+        $this->lastCompletedBy = $by;
+    }
+
+    /** A task noted once it is already done existed at least since then. */
+    public function backdateCreation(\DateTimeImmutable $at): void
+    {
+        if ($at < $this->createdAt) {
+            $this->createdAt = $at;
+        }
+    }
+
     public function reserveFor(Member $member, \DateTimeImmutable $until): void
     {
         $this->reservedBy = $member;

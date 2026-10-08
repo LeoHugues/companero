@@ -11,6 +11,7 @@ use App\Enum\TaskCategory;
 use App\Enum\TaskKind;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\QueryBuilder;
+use Psr\Clock\ClockInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
@@ -21,10 +22,16 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\TimeType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\LessThanOrEqual;
 
 /** @extends AbstractType<Task> */
 class TaskType extends AbstractType
 {
+    public function __construct(
+        private readonly ClockInterface $clock,
+    ) {
+    }
+
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         /** @var Household $household */
@@ -112,6 +119,26 @@ class TaskType extends AbstractType
                 'query_builder' => $members,
             ]);
 
+        if ($options['allow_done']) {
+            $builder
+                ->add('done', CheckboxType::class, [
+                    'label' => 'C’est déjà fait',
+                    'help' => 'Pour noter ce qui a été fait ces derniers jours : les points comptent à la date indiquée.',
+                    'mapped' => false,
+                    'required' => false,
+                ])
+                ->add('doneAt', DateTimeType::class, [
+                    'label' => 'Fait quand ?',
+                    'mapped' => false,
+                    'required' => false,
+                    'widget' => 'single_text',
+                    'input' => 'datetime_immutable',
+                    'data' => $this->clock->now(),
+                    'attr' => ['max' => $this->clock->now()->format('Y-m-d\TH:i')],
+                    'constraints' => [new LessThanOrEqual('now', message: 'Pas dans le futur : ce qui est noté est déjà fait.')],
+                ]);
+        }
+
         if ($options['allow_reservation']) {
             $builder->add('reserve', CheckboxType::class, [
                 'label' => 'Je m’en occupe',
@@ -127,9 +154,11 @@ class TaskType extends AbstractType
         $resolver->setDefaults([
             'data_class' => Task::class,
             'allow_reservation' => false,
+            'allow_done' => false,
         ]);
         $resolver->setRequired('household');
         $resolver->setAllowedTypes('household', Household::class);
         $resolver->setAllowedTypes('allow_reservation', 'bool');
+        $resolver->setAllowedTypes('allow_done', 'bool');
     }
 }

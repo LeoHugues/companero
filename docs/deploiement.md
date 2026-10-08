@@ -83,6 +83,47 @@ le cache. Il s'arrête à la première erreur ; la sauvegarde faite juste avant 
 
 Pour déployer une autre branche : `DEPLOY_BRANCH=ma-branche ./scripts/deploy.sh`.
 
+## Déploiement automatique
+
+Le workflow GitHub Actions [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) lance
+les tests (PHPUnit, php-cs-fixer, lint des templates) à chaque push. Sur `main`, une fois les
+tests au vert, il se connecte au serveur en SSH et lance `scripts/deploy.sh` sur le commit
+testé. Les déploiements passent un par un, dans l'ordre des pushes. Si les tests échouent, rien
+n'est déployé.
+
+Une seule fois, sur le serveur : un utilisateur `deploy` qui a seulement le droit de lancer le
+script en tant que `www-data` (qui, lui, n'a pas de shell), et une clé SSH réservée au déploiement :
+
+```bash
+sudo adduser --disabled-password --gecos '' deploy
+echo 'deploy ALL=(www-data) NOPASSWD: /srv/companero/scripts/deploy.sh' | sudo tee /etc/sudoers.d/companero-deploy
+sudo chmod 440 /etc/sudoers.d/companero-deploy
+
+ssh-keygen -t ed25519 -N '' -C companero-deploy -f companero-deploy
+sudo install -d -o deploy -g deploy -m 700 ~deploy/.ssh
+sudo tee -a ~deploy/.ssh/authorized_keys < companero-deploy.pub > /dev/null
+sudo chown deploy: ~deploy/.ssh/authorized_keys
+ssh-keyscan votre-domaine   # pour le secret DEPLOY_KNOWN_HOSTS
+```
+
+Puis dans GitHub, *Settings › Secrets and variables › Actions* :
+
+| Secret | Valeur |
+|---|---|
+| `DEPLOY_HOST` | l'adresse du serveur |
+| `DEPLOY_USER` | `deploy` |
+| `DEPLOY_SSH_KEY` | le contenu de la clé **privée** `companero-deploy` (à effacer du serveur ensuite) |
+| `DEPLOY_PORT` | facultatif, 22 par défaut |
+| `DEPLOY_KNOWN_HOSTS` | facultatif mais conseillé : la sortie de `ssh-keyscan` ; sinon la clé du serveur est acceptée au premier contact |
+
+Et en *Variables* : `DEPLOY_RUN_AS` = `sudo -u www-data` (à laisser vide si l'utilisateur SSH est
+déjà celui qui fait tourner PHP), et `DEPLOY_PATH` si l'appli n'est pas dans `/srv/companero`
+(penser alors à la règle sudoers).
+
+Tant que ces secrets manquent, le workflow teste mais ne déploie pas (un avertissement le
+rappelle). Un déploiement se relance à la main depuis l'onglet *Actions* (« Run workflow »
+sur `main`).
+
 ## Sauvegardes
 
 `php bin/console app:backup` écrit une copie cohérente de la base dans `var/backups/` (même

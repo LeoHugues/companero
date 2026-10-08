@@ -8,7 +8,7 @@
 
     <header class="flex flex-col gap-0.5">
         <h1 class="text-[26px]">{{ mine ? 'Ce que j’ai fait' : 'Ce que la coloc a fait' }}</h1>
-        <p class="text-sm text-muted">Ces {{ history.days }} derniers jours.</p>
+        <p class="text-sm text-muted">Ces {{ history.days }} derniers jours. Une date ou des points à corriger ? Touche la tâche.</p>
     </header>
 
     <nav class="flex flex-wrap items-center justify-between gap-2" aria-label="Choisir la vue">
@@ -69,13 +69,16 @@
                 </h3>
                 <ul class="card divide-y divide-line px-3.5 py-1">
                     {% for completion in day.completions %}
-                        <li class="flex items-center gap-2.5 py-2">
-                            {% if not mine %}<twig:Avatar :member="completion.member" size="26"/>{% endif %}
-                            <span class="flex min-w-0 flex-1 flex-col">
-                                <span class="truncate text-sm font-bold">{{ completion.task.title }}</span>
-                                <span class="text-xs text-muted">{{ not mine ? completion.member.name ~ ' · ' }}{{ completion.completedAt|date('G\\hi') }} · {{ completion.task.zone.name ?? completion.task.pet.name ?? (completion.task.category.value == 'pets' ? 'Les animaux' : 'Toute la coloc') }}</span>
-                            </span>
-                            <span class="text-sm font-extrabold whitespace-nowrap text-clay-dark">+{{ history.pointsOf(completion) }}</span>
+                        <li>
+                            <a href="{{ path('completion_edit', {id: completion.id}) }}" class="flex items-center gap-2.5 py-2 text-ink no-underline hover:text-ink" aria-label="Corriger : {{ completion.task.title }}">
+                                {% if not mine %}<twig:Avatar :member="completion.member" size="26"/>{% endif %}
+                                <span class="flex min-w-0 flex-1 flex-col">
+                                    <span class="truncate text-sm font-bold">{{ completion.task.title }}</span>
+                                    <span class="text-xs text-muted">{{ not mine ? completion.member.name ~ ' · ' }}{{ completion.completedAt|date('G\\hi') }} · {{ completion.task.zone.name ?? completion.task.pet.name ?? (completion.task.category.value == 'pets' ? 'Les animaux' : 'Toute la coloc') }}</span>
+                                </span>
+                                <span class="text-sm font-extrabold whitespace-nowrap text-clay-dark">+{{ history.pointsOf(completion) }}</span>
+                                <twig:Icon name="edit" size="15" class="shrink-0 text-muted"/>
+                            </a>
                         </li>
                     {% endfor %}
                 </ul>

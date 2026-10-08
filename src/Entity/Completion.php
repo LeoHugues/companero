@@ -38,6 +38,14 @@ class Completion
         $this->urgency = $urgency;
     }
 
+    /** Noted at the wrong time, or by the wrong person: put it right. */
+    public function amend(Member $member, \DateTimeImmutable $completedAt, Urgency $urgency): void
+    {
+        $this->member = $member;
+        $this->completedAt = $completedAt;
+        $this->urgency = $urgency;
+    }
+
     public function getId(): ?int
     {
         return $this->id;

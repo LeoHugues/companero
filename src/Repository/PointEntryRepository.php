@@ -86,4 +86,19 @@ class PointEntryRepository extends ServiceEntityRepository
 
         return array_column(array_map(static fn (array $row): array => [(int) $row['completion'], (int) $row['total']], $rows), 1, 0);
     }
+
+    /** The base points a completion earned, before bonuses, boosts and adjustments. */
+    public function basePointsOf(Completion $completion): ?int
+    {
+        $total = $this->createQueryBuilder('p')
+            ->select('SUM(p.points)')
+            ->andWhere('p.completion = :completion')
+            ->andWhere('p.reason = :reason')
+            ->setParameter('completion', $completion)
+            ->setParameter('reason', PointReason::Task)
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        return null !== $total ? (int) $total : null;
+    }
 }

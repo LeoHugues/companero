@@ -36,17 +36,39 @@ class CompletionRepository extends ServiceEntityRepository
         return array_column(array_map(static fn (array $row): array => [(int) $row['task'], (int) $row['total']], $rows), 1, 0);
     }
 
-    public function countForTask(Task $task, \DateTimeImmutable $from, \DateTimeImmutable $to): int
+    public function countForTask(Task $task, \DateTimeImmutable $from, \DateTimeImmutable $to, ?Completion $except = null): int
     {
-        return (int) $this->createQueryBuilder('c')
+        $query = $this->createQueryBuilder('c')
             ->select('COUNT(c.id)')
             ->andWhere('c.task = :task')
             ->andWhere('c.completedAt >= :from AND c.completedAt < :to')
             ->setParameter('task', $task)
             ->setParameter('from', $from)
-            ->setParameter('to', $to)
-            ->getQuery()
-            ->getSingleScalarResult();
+            ->setParameter('to', $to);
+        if (null !== $except?->getId()) {
+            $query->andWhere('c.id != :except')->setParameter('except', $except->getId());
+        }
+
+        return (int) $query->getQuery()->getSingleScalarResult();
+    }
+
+    /** The task's latest completion, or the latest one before a moment, leaving one aside. */
+    public function findLatestForTask(Task $task, ?\DateTimeImmutable $before = null, ?Completion $except = null): ?Completion
+    {
+        $query = $this->createQueryBuilder('c')
+            ->andWhere('c.task = :task')
+            ->setParameter('task', $task)
+            ->orderBy('c.completedAt', 'DESC')
+            ->addOrderBy('c.id', 'DESC')
+            ->setMaxResults(1);
+        if (null !== $before) {
+            $query->andWhere('c.completedAt < :before')->setParameter('before', $before);
+        }
+        if (null !== $except?->getId()) {
+            $query->andWhere('c.id != :except')->setParameter('except', $except->getId());
+        }
+
+        return $query->getQuery()->getOneOrNullResult();
     }
 
     /** @return list<Completion> */

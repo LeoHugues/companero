@@ -1,22 +1,27 @@
-{% props team, household = null %}
+{% props team, household = null, detailed = true %}
+{# detailed: each member's share of the bar and their points (the weekly review); otherwise one gauge for the whole house (home page). #}
 <section {{ attributes.defaults({class: 'card card-hover flex flex-col gap-2.5 p-3.5'}) }} aria-labelledby="team-title">
     <div class="flex items-baseline justify-between">
         <h2 id="team-title" class="text-[15px]">Objectif de la maison</h2>
         <p class="text-[15px] font-extrabold">{{ team.points }} <span class="font-semibold text-muted">/ {{ team.goal }} pts</span></p>
     </div>
-    <div class="track flex h-3.5">
-        {% for progress in team.members %}
-            <div class="h-full transition-[width] duration-700" style="width: {{ team.shareOf(progress) }}%; background: {{ progress.member.color }}"></div>
-        {% endfor %}
-    </div>
-    <ul class="grid grid-cols-2 gap-x-2 gap-y-1 sm:grid-cols-4">
-        {% for progress in team.members %}
-            <li class="flex items-center gap-1.5 text-xs font-semibold">
-                <span class="size-2.5 shrink-0 rounded-full" style="background: {{ progress.member.color }}"></span>
-                {{ progress.member.name }} {{ progress.points }}
-            </li>
-        {% endfor %}
-    </ul>
+    {% if detailed %}
+        <div class="track flex h-3.5">
+            {% for progress in team.members %}
+                <div class="h-full transition-[width] duration-700" style="width: {{ team.shareOf(progress) }}%; background: {{ progress.member.color }}"></div>
+            {% endfor %}
+        </div>
+        <ul class="grid grid-cols-2 gap-x-2 gap-y-1 sm:grid-cols-4">
+            {% for progress in team.members %}
+                <li class="flex items-center gap-1.5 text-xs font-semibold">
+                    <span class="size-2.5 shrink-0 rounded-full" style="background: {{ progress.member.color }}"></span>
+                    {{ progress.member.name }} {{ progress.points }}
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <twig:ProgressBar :value="team.percent" :height="14" label="Objectif de la maison"/>
+    {% endif %}
     <a href="{{ path('history', {qui: 'coloc'}) }}" class="self-start text-[13px] font-bold">Tout ce que la coloc a fait</a>
     {% if team.reached %}
         <p class="text-[13px] font-bold text-clay-dark">Objectif de la maison atteint : +{{ constant('App\\Review\\WeekCloser::TEAM_BONUS') }} pts pour chacun dimanche soir</p>

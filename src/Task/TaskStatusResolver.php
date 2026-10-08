@@ -25,20 +25,26 @@ final class TaskStatusResolver
 
     public function resolve(Task $task, \DateTimeImmutable $now, int $cleaningDay, int $doneThisWeek = 0): TaskStatus
     {
+        return $this->resolveAt($task, $now, $cleaningDay, $doneThisWeek, $task->getLastCompletedAt());
+    }
+
+    /** Where the task stood at a given moment, knowing when it had last been done before then (a task noted afterwards). */
+    public function resolveAt(Task $task, \DateTimeImmutable $now, int $cleaningDay, int $doneThisWeek, ?\DateTimeImmutable $lastCompletedAt): TaskStatus
+    {
         return match ($task->getKind()) {
-            TaskKind::Rolling => $this->rolling($task, $now, $cleaningDay, $doneThisWeek),
-            TaskKind::Scheduled => $this->scheduled($task, $now),
+            TaskKind::Rolling => $this->rolling($task, $now, $cleaningDay, $doneThisWeek, $lastCompletedAt),
+            TaskKind::Scheduled => $this->scheduled($task, $now, $lastCompletedAt),
             TaskKind::OneOff => $this->oneOff($task, $now),
             TaskKind::Quick => new TaskStatus(Urgency::Fresh, 100),
         };
     }
 
-    private function rolling(Task $task, \DateTimeImmutable $now, int $cleaningDay, int $doneThisWeek): TaskStatus
+    private function rolling(Task $task, \DateTimeImmutable $now, int $cleaningDay, int $doneThisWeek, ?\DateTimeImmutable $lastCompletedAt): TaskStatus
     {
         $rhythm = max(1, (int) $task->getRhythmDays()) * self::DAY;
         $margin = $task->getMarginHours() * self::HOUR;
         // Never done yet: it is due from the moment it is created.
-        $reference = $task->getLastCompletedAt() ?? $task->getCreatedAt()->modify(\sprintf('-%d seconds', $rhythm));
+        $reference = $lastCompletedAt ?? $task->getCreatedAt()->modify(\sprintf('-%d seconds', $rhythm));
         $elapsed = $now->getTimestamp() - $reference->getTimestamp();
         $dueAt = $reference->modify(\sprintf('+%d seconds', $rhythm));
 
@@ -65,12 +71,12 @@ final class TaskStatusResolver
         );
     }
 
-    private function scheduled(Task $task, \DateTimeImmutable $now): TaskStatus
+    private function scheduled(Task $task, \DateTimeImmutable $now, ?\DateTimeImmutable $lastCompletedAt): TaskStatus
     {
         $daily = $task->isDaily();
         // A completion covers an occurrence when it happens shortly before it.
-        $after = null !== $task->getLastCompletedAt()
-            ? $task->getLastCompletedAt()->modify(\sprintf('+%d seconds', $daily ? self::DAILY_COVER : self::LEAD_TIME))
+        $after = null !== $lastCompletedAt
+            ? $lastCompletedAt->modify(\sprintf('+%d seconds', $daily ? self::DAILY_COVER : self::LEAD_TIME))
             : $task->getCreatedAt();
         $occurrence = $this->nextOccurrence($task, $after);
 
