@@ -31,15 +31,18 @@ final class HomeController extends AbstractController
         $household = $member->getHousehold();
         $now = $clock->now();
         $board = $boards->build($household);
-        $upcoming = array_filter($board->items, static fn (TaskView $view): bool => Urgency::Soon === $view->status->urgency);
+        $upcoming = \array_slice(array_values(array_filter($board->items, static fn (TaskView $view): bool => Urgency::Soon === $view->status->urgency)), 0, self::UPCOMING_LIMIT);
         $mine = $board->pressingFor($member);
+        // Everything there is to do lives here: one-off tasks too, even when they are in no hurry.
+        $later = array_values(array_filter($board->oneOff(), static fn (TaskView $view): bool => Urgency::Fresh === $view->status->urgency));
 
         return $this->render('home/index.html.twig', [
             'board' => $board,
             'mine' => $mine,
             'pressing' => array_values(array_filter($board->pressing(), static fn (TaskView $view): bool => !\in_array($view, $mine, true))),
             'quick' => $board->quick(),
-            'upcoming' => \array_slice(array_values($upcoming), 0, self::UPCOMING_LIMIT),
+            'upcoming' => $upcoming,
+            'later' => $later,
             'cleanliness' => $board->cleanliness(),
             'mood' => CasaMood::fromCleanliness($board->cleanliness()),
             'team' => $teamProgress->build($household, Week::containing($now)),

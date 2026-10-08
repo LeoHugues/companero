@@ -95,8 +95,17 @@
         </section>
     {% endif %}
 
+    {% if later is not empty %}
+        <section class="flex flex-col gap-2.5" aria-labelledby="later-title">
+            <h2 id="later-title" class="section-title">Pas pressé</h2>
+            {% for view in later %}
+                <twig:TaskCard :view="view" :member="app.user"/>
+            {% endfor %}
+        </section>
+    {% endif %}
+
     <p class="flex items-center justify-center gap-5">
-        <a href="{{ path('task_index') }}" class="btn-link">Toutes les tâches</a>
+        <a href="{{ path('task_index') }}" class="btn-link">Les modèles</a>
         <a href="{{ path('plan_show') }}" class="btn-link">Le plan de la maison</a>
     </p>
 {% endblock %}

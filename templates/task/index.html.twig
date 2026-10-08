@@ -1,21 +1,19 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Toutes les tâches · Companero{% endblock %}
+{% block title %}Les modèles · Companero{% endblock %}
 
+{#
+    The templates: what comes back in the house (regular, on a fixed day, express) and the catalogue
+    of one-off tasks launched by hand. What there is to do right now is on the home page.
+#}
 {% block body %}
-    {% set completion = app.flashes('completion')|first %}
-
     <header class="flex items-center justify-between gap-3">
         <div class="flex flex-col gap-0.5">
-            <h1 class="text-[26px]">Toutes les tâches</h1>
-            <p class="text-sm text-muted">Plus la barre est vide, plus la Casa en a besoin.</p>
+            <h1 class="text-[26px]">Les modèles</h1>
+            <p class="text-sm text-muted">Les règles de la maison. Ce qu’il y a à faire est sur <a href="{{ path('app_home') }}">l’accueil</a>.</p>
         </div>
         <a href="{{ path('plan_show') }}" class="chip shrink-0 gap-1.5"><twig:Icon name="plan" size="18"/> Plan</a>
     </header>
-
-    {% if completion %}
-        <p class="animate-pop rounded-2xl bg-ink px-4 py-3 text-[15px] font-semibold text-cream" role="status">« {{ completion.title }} » : +{{ completion.points }} pts, merci !</p>
-    {% endif %}
 
     <nav class="-mx-5 flex gap-2 overflow-x-auto px-5 pb-1" aria-label="Filtrer par zone">
         <a href="{{ path('task_index') }}" class="chip shrink-0 {{ current_zone is null ? 'chip-active' : '' }}"{% if current_zone is null %} aria-current="page"{% endif %}>Tout</a>
@@ -24,45 +22,51 @@
         {% endfor %}
     </nav>
 
+    <section class="flex flex-col gap-2" aria-labelledby="recurring-title">
+        <div class="flex flex-col">
+            <h2 id="recurring-title" class="section-title">Reviennent toutes seules</h2>
+            <p class="meta">Une tâche à faire arrive sur l’accueil quand c’est le moment.</p>
+        </div>
+        {% if recurring is not empty %}
+            <ul class="card divide-y divide-line px-3.5">
+                {% for task in recurring %}<twig:TemplateRow :task="task"/>{% endfor %}
+            </ul>
+        {% else %}
+            <p class="meta py-2">Aucun modèle ici. <a href="{{ path('task_new') }}">En créer un</a></p>
+        {% endif %}
+    </section>
+
     {% if quick is not empty and current_zone is null %}
-        <section class="flex flex-col gap-2.5" aria-labelledby="quick-title">
-            <div class="flex items-baseline justify-between">
+        <section class="flex flex-col gap-2" aria-labelledby="quick-title">
+            <div class="flex flex-col">
                 <h2 id="quick-title" class="section-title">Express</h2>
-                <p class="meta font-semibold">un appui quand c’est fait</p>
+                <p class="meta">Jamais en retard : un appui sur l’accueil quand c’est fait.</p>
             </div>
-            {% for view in quick %}
-                <twig:TaskCard :view="view" :member="app.user" back="tasks" compact/>
-            {% endfor %}
+            <ul class="card divide-y divide-line px-3.5">
+                {% for task in quick %}<twig:TemplateRow :task="task"/>{% endfor %}
+            </ul>
         </section>
     {% endif %}
 
-    <section class="flex flex-col gap-2.5" aria-labelledby="recurring-title">
-        <h2 id="recurring-title" class="section-title">Récurrentes</h2>
-        {% for view in recurring %}
-            <twig:TaskCard :view="view" :member="app.user" back="tasks" compact/>
-        {% else %}
-            <p class="meta py-2">Aucune tâche récurrente ici. <a href="{{ path('task_new') }}">En créer une</a></p>
-        {% endfor %}
-    </section>
-
-    <section class="flex flex-col gap-2.5" aria-labelledby="oneoff-title">
-        <h2 id="oneoff-title" class="section-title mt-1.5">Ponctuelles</h2>
-        {% for view in one_off %}
-            <twig:TaskCard :view="view" :member="app.user" back="tasks" compact/>
-        {% else %}
-            <p class="meta py-2">Rien de prévu en dehors du quotidien.</p>
-        {% endfor %}
-    </section>
-
-    {% if catalog is not empty %}
-        <section class="flex flex-col gap-2.5" aria-labelledby="catalog-title">
-            <div class="mt-1.5 flex items-baseline justify-between">
+    {% if catalog is not empty and current_zone is null %}
+        <section class="flex flex-col gap-2" aria-labelledby="catalog-title">
+            <div class="flex flex-col">
                 <h2 id="catalog-title" class="section-title">Catalogue</h2>
-                <p class="meta font-semibold">à lancer quand il faut</p>
+                <p class="meta">Des tâches ponctuelles toutes prêtes : on en lance une quand il le faut.</p>
             </div>
-            <ul class="flex flex-wrap gap-2">
+            <ul class="card divide-y divide-line px-3.5">
                 {% for item in catalog %}
-                    <li><a href="{{ path('task_new', {modele: item.id}) }}" class="flex h-[38px] items-center rounded-xl bg-track px-3.5 text-sm font-bold text-ink no-underline transition hover:bg-sun hover:text-ink">{{ item.title }}</a></li>
+                    <li>
+                        <a href="{{ path('task_new', {modele: item.id}) }}" class="flex items-center gap-3 py-3 text-ink no-underline hover:text-ink">
+                            <span class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-track text-ink-soft" aria-hidden="true"><twig:Icon name="layers" size="20"/></span>
+                            <span class="flex min-w-0 flex-1 flex-col gap-0.5">
+                                <span class="text-[15px] leading-snug font-bold">{{ item.title }}</span>
+                                <span class="text-xs text-muted">{{ item.category.label }} · ponctuelle</span>
+                            </span>
+                            <span class="text-sm font-extrabold whitespace-nowrap">{{ item.points }} pts</span>
+                            <span class="flex h-8 shrink-0 items-center gap-1 rounded-full bg-sun px-3 text-xs font-extrabold">Lancer</span>
+                        </a>
+                    </li>
                 {% endfor %}
             </ul>
         </section>

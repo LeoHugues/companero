@@ -14,6 +14,7 @@ use App\Task\CompletionResult;
 use App\Task\TaskBoardBuilder;
 use App\Task\TaskCompleter;
 use App\Task\TaskNotAvailable;
+use App\Task\TaskView;
 use App\Twig\TaskLabels;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Clock\ClockInterface;
@@ -49,10 +50,10 @@ final class TaskController extends AbstractController
         $household = $member->getHousehold();
         $board = $boards->build($household);
 
+        // The templates only: the tasks to do, one-off ones included, are on the home page.
         return $this->render('task/index.html.twig', [
-            'recurring' => $board->recurring($zone),
-            'one_off' => $board->oneOff(),
-            'quick' => $board->quick(),
+            'recurring' => array_map(static fn (TaskView $view): Task => $view->task, $board->recurring($zone)),
+            'quick' => array_map(static fn (TaskView $view): Task => $view->task, $board->quick()),
             'zones' => $household->getZones(),
             'current_zone' => $zone,
             'catalog' => $catalog->findForHousehold($household),
@@ -124,6 +125,25 @@ final class TaskController extends AbstractController
         ]);
     }
 
+    #[Route('/{id}/modele', name: 'task_template', requirements: ['id' => '\d+'], methods: ['GET'])]
+    #[IsGranted(HouseholdVoter::ACCESS, subject: 'task')]
+    public function template(Task $task, TaskBoardBuilder $boards, CompletionRepository $completions, PointEntryRepository $points): Response
+    {
+        // A one-off task is not a template: it is something to do.
+        if ($task->isArchived() || !$task->getKind()->isRecurring()) {
+            throw $this->createNotFoundException();
+        }
+        $now = $this->clock->now();
+        $recent = $completions->findRecentForTask($task, 5);
+
+        return $this->render('task/template.html.twig', [
+            'view' => $boards->view($task),
+            'completions' => $recent,
+            'points' => $points->sumByCompletion($recent),
+            'done_last_30_days' => $completions->countForTask($task, $now->modify('-30 days'), $now->modify('+1 second')),
+        ]);
+    }
+
     #[Route('/{id}/modifier', name: 'task_edit', requirements: ['id' => '\d+'], methods: ['GET', 'POST'])]
     #[IsGranted(HouseholdVoter::ACCESS, subject: 'task')]
     public function edit(Task $task, Request $request): Response
@@ -135,7 +155,7 @@ final class TaskController extends AbstractController
             $this->entityManager->flush();
             $this->addFlash('success', 'C’est enregistré.');
 
-            return $this->redirectToRoute('task_show', ['id' => $task->getId()], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute($task->getKind()->isRecurring() ? 'task_template' : 'task_show', ['id' => $task->getId()], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('task/edit.html.twig', ['form' => $form, 'task' => $task]);

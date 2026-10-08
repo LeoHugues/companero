@@ -9,8 +9,13 @@
     {% set boost = task_boost(view) %}
 
     <header class="flex items-center justify-between">
-        <a href="{{ ux_is_native() ? '/recede_historical_location' : path('task_index') }}" aria-label="Retour" class="-ml-2 flex size-11 items-center justify-center rounded-full text-ink"><twig:Icon name="arrow-left" size="22" stroke="2.2"/></a>
-        <a href="{{ path('task_edit', {id: task.id}) }}" class="flex h-11 items-center gap-1.5 rounded-full px-3 text-sm font-bold text-ink no-underline hover:bg-track hover:text-ink"><twig:Icon name="settings" size="19"/> Modifier</a>
+        <a href="{{ ux_is_native() ? '/recede_historical_location' : path('app_home') }}" aria-label="Retour" class="-ml-2 flex size-11 items-center justify-center rounded-full text-ink"><twig:Icon name="arrow-left" size="22" stroke="2.2"/></a>
+        {% if task.kind.isRecurring %}
+            {# Its settings are the template's: shared by every time it comes back. #}
+            <a href="{{ path('task_template', {id: task.id}) }}" class="flex h-11 items-center gap-1.5 rounded-full px-3 text-sm font-bold text-ink no-underline hover:bg-track hover:text-ink"><twig:Icon name="repeat" size="18"/> Le modèle</a>
+        {% else %}
+            <a href="{{ path('task_edit', {id: task.id}) }}" class="flex h-11 items-center gap-1.5 rounded-full px-3 text-sm font-bold text-ink no-underline hover:bg-track hover:text-ink"><twig:Icon name="settings" size="19"/> Modifier</a>
+        {% endif %}
     </header>
 
     {% set done = app.flashes('completion')|first %}
@@ -25,6 +30,7 @@
             <twig:RarityBadge :rarity="rarity"/>
             <twig:UrgencyPill :view="view"/>
         </div>
+        <p class="-mb-2 text-xs font-extrabold tracking-wide text-muted uppercase">{{ task.kind.value == 'quick' ? 'Express · un appui quand c’est fait' : (task.kind.isRecurring ? 'À faire · revient ' ~ task_rule_label(task) : 'À faire · une fois') }}</p>
         <h1 class="text-[26px] leading-tight [overflow-wrap:anywhere]">{{ task.title }}</h1>
         <p class="text-sm font-semibold text-muted">
             {{ task.pet.name ?? task.zone.name ?? (task.category.value == 'pets' ? 'Les animaux' : 'Toute la coloc') }} · {{ task.category.label }} · {{ task_rule_label(task) }}
@@ -70,7 +76,7 @@
                     </li>
                 {% endif %}
             </ol>
-            <p class="meta">Ces délais se règlent dans <a href="{{ path('task_edit', {id: task.id}) }}">les réglages de la tâche</a>.</p>
+            <p class="meta">Ces délais se règlent dans <a href="{{ path(task.kind.isRecurring ? 'task_template' : 'task_edit', {id: task.id}) }}">{{ task.kind.isRecurring ? 'son modèle' : 'les réglages de la tâche' }}</a>.</p>
         </section>
     {% endif %}
 

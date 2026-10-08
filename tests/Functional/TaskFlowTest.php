@@ -56,10 +56,10 @@ final class TaskFlowTest extends AppTestCase
 
         // Common unless said otherwise, whatever the points.
         $this->client->request('GET', '/taches');
-        self::assertSelectorExists(\sprintf('#task-%d[data-rarity=common]', $common?->getId()));
-        self::assertSelectorTextContains('#task-'.$common?->getId(), 'Commune');
-        self::assertSelectorExists(\sprintf('#task-%d[data-rarity=legendary]', $legendary?->getId()));
-        self::assertSelectorTextContains('#task-'.$legendary?->getId(), 'Légendaire');
+        self::assertSelectorExists(\sprintf('#template-%d[data-rarity=common]', $common?->getId()));
+        self::assertSelectorTextContains('#template-'.$common?->getId(), 'Commune');
+        self::assertSelectorExists(\sprintf('#template-%d[data-rarity=legendary]', $legendary?->getId()));
+        self::assertSelectorTextContains('#template-'.$legendary?->getId(), 'Légendaire');
 
         // Never done, both are due: the home page shows them with their rarity too.
         $this->client->request('GET', '/');
@@ -67,9 +67,9 @@ final class TaskFlowTest extends AppTestCase
 
         $this->client->request('GET', '/taches/'.$common?->getId().'/modifier');
         $this->client->submitForm('Enregistrer', ['task[rarity]' => 'epic']);
-        self::assertResponseRedirects('/taches/'.$common?->getId());
+        self::assertResponseRedirects('/taches/'.$common?->getId().'/modele');
         $this->client->followRedirect();
-        self::assertSelectorExists('#task-'.$common?->getId().'.rarity-epic');
+        self::assertSelectorExists('#template-'.$common?->getId().'[data-rarity=epic]');
     }
 
     public function testACardShowsHowPressingItsTaskIs(): void
@@ -83,7 +83,8 @@ final class TaskFlowTest extends AppTestCase
         $this->client->submitForm('Ajouter la tâche', ['task[title]' => 'Tailler la haie', 'task[kind]' => 'one_off']);
         $tasks = static::getContainer()->get(TaskRepository::class);
 
-        $this->client->request('GET', '/taches');
+        // Everything there is to do is on the home page, one-off tasks included.
+        $this->client->request('GET', '/');
         self::assertSelectorExists(\sprintf('#task-%d[data-alert=warning]', $tasks->findOneBy(['title' => 'Arroser les plantes'])?->getId()));
         self::assertSelectorExists(\sprintf('#task-%d[data-alert=danger]', $tasks->findOneBy(['title' => 'Appeler le proprio'])?->getId()));
         self::assertSelectorExists(\sprintf('#task-%d[data-alert=ok]', $tasks->findOneBy(['title' => 'Tailler la haie'])?->getId()));
@@ -122,7 +123,7 @@ final class TaskFlowTest extends AppTestCase
         $this->client->submitForm('Ajouter la tâche', ['task[title]' => 'Serpillière', 'task[kind]' => 'rolling', 'task[rhythmDays]' => '7', 'task[points]' => '30', 'task[rarity]' => 'rare']);
         $task = static::getContainer()->get(TaskRepository::class)->findOneBy(['title' => 'Serpillière']);
 
-        $this->client->request('GET', '/taches');
+        $this->client->request('GET', '/');
         self::assertSelectorExists(\sprintf('#task-%d h3 a[href="/taches/%d"]', $task?->getId(), $task?->getId()));
         self::assertSelectorExists(\sprintf('#task-%d a[href="/taches/%d/modifier"]', $task?->getId(), $task?->getId()));
 
@@ -138,6 +139,38 @@ final class TaskFlowTest extends AppTestCase
         $this->client->followRedirect();
         self::assertSelectorTextContains('[role=status]', '+30 pts');
         self::assertSelectorTextContains('[aria-labelledby=done-title]', 'Léo');
+    }
+
+    public function testTheTemplatesAreKeptApartFromWhatThereIsToDo(): void
+    {
+        $this->client->loginUser($this->foundHousehold());
+        $this->client->request('GET', '/taches/nouvelle');
+        $this->client->submitForm('Ajouter la tâche', ['task[title]' => 'Serpillière', 'task[kind]' => 'rolling', 'task[rhythmDays]' => '7']);
+        $this->client->request('GET', '/taches/nouvelle');
+        $this->client->submitForm('Ajouter la tâche', ['task[title]' => 'Appeler le proprio', 'task[kind]' => 'one_off']);
+        $tasks = static::getContainer()->get(TaskRepository::class);
+        $mop = $tasks->findOneBy(['title' => 'Serpillière']);
+        $call = $tasks->findOneBy(['title' => 'Appeler le proprio']);
+
+        // The templates: no button to do anything, and no one-off task (that is something to do).
+        $this->client->request('GET', '/taches');
+        self::assertSelectorTextContains('h1', 'Les modèles');
+        self::assertSelectorExists(\sprintf('#template-%d a[href="/taches/%d/modele"]', $mop?->getId(), $mop?->getId()));
+        self::assertSelectorNotExists('form[action$="/fait"]');
+        self::assertSelectorNotExists('#template-'.$call?->getId());
+
+        // A template's page leads to what there is to do.
+        $this->client->request('GET', '/taches/'.$mop?->getId().'/modele');
+        self::assertSelectorTextContains('h1', 'Serpillière');
+        self::assertSelectorTextContains('main', 'Modèle · Régulière');
+        self::assertSelectorExists(\sprintf('a[href="/taches/%d"]', $mop?->getId()));
+        self::assertSelectorNotExists('form[action$="/fait"]');
+
+        // A one-off task has no template page; it has its card's.
+        $this->client->request('GET', '/taches/'.$call?->getId().'/modele');
+        self::assertResponseStatusCodeSame(404);
+        $this->client->request('GET', '/taches/'.$call?->getId());
+        self::assertSelectorTextContains('main', 'À faire · une fois');
     }
 
     public function testADoneOneOffTaskLeavesItsPage(): void
@@ -184,7 +217,7 @@ final class TaskFlowTest extends AppTestCase
         $task = static::getContainer()->get(TaskRepository::class)->findOneBy(['title' => 'Appeler le proprio']);
         self::assertSame($leo->getId(), $task?->reservedByAt(new \DateTimeImmutable())?->getId());
 
-        $this->client->request('GET', '/taches');
+        $this->client->request('GET', '/');
         $this->submitAction('/taches/'.$task->getId().'/fait');
         $this->client->followRedirect();
 
@@ -265,13 +298,14 @@ final class TaskFlowTest extends AppTestCase
         $this->client->submitForm('Ajouter la tâche', ['task[title]' => 'Racheter du PQ', 'task[kind]' => 'one_off']);
 
         $task = static::getContainer()->get(TaskRepository::class)->findOneBy(['title' => 'Racheter du PQ']);
-        $this->client->request('GET', '/taches');
-        self::assertSelectorTextNotContains('#task-'.$task?->getId(), 'tu t’en occupes');
+        // In no hurry, it still waits on the home page.
+        $this->client->request('GET', '/');
+        self::assertSelectorTextContains('[aria-labelledby=later-title] #task-'.$task?->getId(), 'Je m’en occupe');
 
-        $this->client->request('POST', '/taches/'.$task?->getId().'/je-m-en-occupe', ['_csrf_token' => 'csrf-token', '_back' => 'tasks']);
-        self::assertResponseRedirects('/taches');
+        $this->client->request('POST', '/taches/'.$task?->getId().'/je-m-en-occupe', ['_csrf_token' => 'csrf-token', '_back' => 'home']);
+        self::assertResponseRedirects('/');
         $this->client->followRedirect();
-        self::assertSelectorTextContains('#task-'.$task?->getId(), 'tu t’en occupes');
+        self::assertSelectorTextContains('#task-'.$task?->getId(), 'Tu t’en occupes');
     }
 
     public function testMembersCannotTouchAnotherHouseholdsTasks(): void

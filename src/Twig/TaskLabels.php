@@ -72,6 +72,32 @@ final readonly class TaskLabels
         };
     }
 
+    /** "12 h", "2 j", "1 j 6 h": a number of hours as people say it. */
+    #[AsTwigFunction('duration_label')]
+    public function duration(int $hours): string
+    {
+        $days = intdiv($hours, 24);
+        $rest = $hours % 24;
+
+        return match (true) {
+            0 === $days => \sprintf('%d h', $hours),
+            0 === $rest => \sprintf('%d j', $days),
+            default => \sprintf('%d j %d h', $days, $rest),
+        };
+    }
+
+    /** The icon of a kind of task: regular, on a fixed day, express. */
+    #[AsTwigFunction('task_kind_icon')]
+    public function kindIcon(Task $task): string
+    {
+        return match ($task->getKind()) {
+            TaskKind::Rolling => 'repeat',
+            TaskKind::Scheduled => 'calendar',
+            TaskKind::Quick => 'bolt',
+            TaskKind::OneOff => 'check',
+        };
+    }
+
     #[AsTwigFunction('weekday_name')]
     public static function weekday(int $isoDay): string
     {

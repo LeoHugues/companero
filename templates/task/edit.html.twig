@@ -7,10 +7,13 @@
 
 {% block body %}
     <header class="flex items-center justify-between">
-        <h1 class="text-[22px]">Modifier la tâche</h1>
-        <a href="{{ ux_is_native() ? '/recede_historical_location' : path('task_show', {id: task.id}) }}" aria-label="Fermer" class="flex size-11 items-center justify-center rounded-full text-ink"><twig:Icon name="close" size="22" stroke="2.2"/></a>
+        <h1 class="text-[22px]">{{ task.kind.isRecurring ? 'Modifier le modèle' : 'Modifier la tâche' }}</h1>
+        <a href="{{ ux_is_native() ? '/recede_historical_location' : path(task.kind.isRecurring ? 'task_template' : 'task_show', {id: task.id}) }}" aria-label="Fermer" class="flex size-11 items-center justify-center rounded-full text-ink"><twig:Icon name="close" size="22" stroke="2.2"/></a>
     </header>
 
+    {% if task.kind.isRecurring %}
+        <p class="meta -mt-2">Ce qui change ici vaut pour toutes les fois où elle revient.</p>
+    {% endif %}
     <p class="meta -mt-2">Ajoutée par {{ task.createdBy.name }} le {{ task.createdAt|date('d/m/Y') }}{% if task.lastCompletedAt %} · faite pour la dernière fois le {{ task.lastCompletedAt|date('d/m à H\\hi') }}{% endif %}.</p>
 
     {{ include('task/_form.html.twig', {submit_label: 'Enregistrer'}) }}

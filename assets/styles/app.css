@@ -198,6 +198,13 @@
   background: linear-gradient(100deg, var(--color-legend), var(--color-sun) 50%, var(--color-legend));
 }
 
+/* In the list of templates, the rarity is only a word with its colour: the shine is for the cards. */
+.template-rarity { @apply flex items-center gap-1 text-[11px] leading-none font-bold whitespace-nowrap text-muted; }
+.template-rarity::before { content: ''; @apply size-2 rotate-45 rounded-[2px] bg-dust; }
+.template-rarity-rare::before { @apply bg-rare; }
+.template-rarity-epic::before { @apply bg-epic; }
+.template-rarity-legendary::before { @apply bg-legend; }
+
 /* The urgency of a task: a stripe down the left edge of its card, and a pill with its status. */
 .urgency-stripe {
   position: absolute;

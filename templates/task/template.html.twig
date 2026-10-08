@@ -1,0 +1,92 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ view.task.title }} · Modèle · Companero{% endblock %}
+
+{#
+    A template's page: the rule it follows, what it is worth, who takes care of it. What there is to
+    do right now is the task's own page (its card), linked from here.
+#}
+{% block body %}
+    {% set task = view.task %}
+    {% set status = view.status %}
+
+    <header class="flex items-center justify-between">
+        <a href="{{ ux_is_native() ? '/recede_historical_location' : path('task_index') }}" aria-label="Retour aux modèles" class="-ml-2 flex size-11 items-center justify-center rounded-full text-ink"><twig:Icon name="arrow-left" size="22" stroke="2.2"/></a>
+        <a href="{{ path('task_edit', {id: task.id}) }}" class="btn-primary h-10 px-4 text-sm"><twig:Icon name="edit" size="17"/> Modifier le modèle</a>
+    </header>
+
+    <section class="flex flex-col gap-3" id="template-{{ task.id }}" data-rarity="{{ task.rarity.value }}">
+        <p class="flex items-center gap-2 text-xs font-extrabold tracking-wide text-muted uppercase">
+            <span class="flex size-7 items-center justify-center rounded-lg bg-track text-ink-soft"><twig:Icon :name="task_kind_icon(task)" size="16"/></span>
+            Modèle · {{ task.kind.label }}
+        </p>
+        <h1 class="text-[26px] leading-tight [overflow-wrap:anywhere]">{{ task.title }}</h1>
+        <p class="text-[15px] font-semibold text-ink-soft">
+            {{ task.pet.name ?? task.zone.name ?? (task.category.value == 'pets' ? 'Les animaux' : 'Toute la coloc') }} · {{ task_rule_label(task) }}
+        </p>
+    </section>
+
+    <dl class="card grid grid-cols-[auto_1fr] gap-x-4 gap-y-3 px-3.5 py-3.5 text-sm" aria-label="La règle">
+        <dt class="font-bold">Vaut</dt>
+        <dd class="font-extrabold text-clay-dark">{{ task.points }} pts</dd>
+        <dt class="font-bold">Carte</dt>
+        <dd><twig:RarityBadge :rarity="task.rarity"/></dd>
+        <dt class="font-bold">Catégorie</dt>
+        <dd class="text-muted">{{ task.category.label }}</dd>
+        {% if task.kind.isPlanned %}
+            <dt class="font-bold">Alertes</dt>
+            <dd class="flex flex-col gap-1 text-muted">
+                <span class="flex items-center gap-1.5"><span class="size-2.5 rounded-full bg-warn" aria-hidden="true"></span>orange {{ task.warningHours ? duration_label(task.warningHours) ~ ' avant' : (task.kind.value == 'rolling' ? 'aux 60 % du rythme' : '2 jours avant') }}</span>
+                <span class="flex items-center gap-1.5"><span class="size-2.5 rounded-full bg-danger" aria-hidden="true"></span>rouge {{ duration_label(task.marginHours) }} après</span>
+            </dd>
+        {% endif %}
+        {% if task.cooldownHours %}
+            <dt class="font-bold">Délai</dt>
+            <dd class="text-muted">pas avant {{ duration_label(task.cooldownHours) }} après l’avoir faite</dd>
+        {% endif %}
+        <dt class="font-bold">S’en charge</dt>
+        <dd class="text-muted">{{ task.assignee ? task.assignee.name ~ (task.backup ? ' (sinon ' ~ task.backup.name ~ ')') : 'qui est là' }}</dd>
+        <dt class="font-bold">Créé</dt>
+        <dd class="text-muted">par {{ task.createdBy.name }} le {{ task.createdAt|date('d/m/Y') }}</dd>
+    </dl>
+
+    <section class="flex flex-col gap-2" aria-labelledby="now-title">
+        <h2 id="now-title" class="section-title">En ce moment</h2>
+        {% if task.kind.isPlanned %}
+            <a href="{{ path('task_show', {id: task.id}) }}" class="card card-hover flex items-center gap-3 px-3.5 py-3 text-ink no-underline hover:text-ink">
+                <twig:UrgencyPill :view="view"/>
+                <span class="flex-1 text-sm font-bold">Voir la tâche à faire</span>
+                <twig:Icon name="chevron-right" size="18" class="shrink-0 text-muted"/>
+            </a>
+        {% else %}
+            <p class="card px-3.5 py-3 text-sm text-muted">Une tâche express se fait d’un appui, depuis l’accueil (« En un geste »).</p>
+        {% endif %}
+    </section>
+
+    <section class="flex flex-col gap-2" aria-labelledby="history-title">
+        <div class="flex items-baseline justify-between">
+            <h2 id="history-title" class="section-title">Déjà fait</h2>
+            <p class="meta font-bold">{{ done_last_30_days }} fois en 30 jours</p>
+        </div>
+        {% if completions is not empty %}
+            <ul class="card divide-y divide-line px-3.5 py-1">
+                {% for completion in completions %}
+                    <li>
+                        <a href="{{ path('completion_edit', {id: completion.id}) }}" class="flex items-center gap-2.5 py-2 text-ink no-underline hover:text-ink">
+                            <twig:Avatar :member="completion.member" size="26"/>
+                            <span class="flex min-w-0 flex-1 flex-col">
+                                <span class="text-sm font-bold">{{ completion.member.name }}</span>
+                                <span class="text-xs text-muted">{{ completion.completedAt|format_date(pattern: 'EEEE d MMMM', locale: 'fr') }} à {{ completion.completedAt|date('G\\hi') }}</span>
+                            </span>
+                            <span class="text-sm font-extrabold whitespace-nowrap text-clay-dark">+{{ points[completion.id] ?? 0 }}</span>
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="card p-4 text-sm text-muted">Jamais encore.</p>
+        {% endif %}
+    </section>
+{% endblock %}
+
+{% block nav %}<twig:BottomNav active="tasks"/>{% endblock %}

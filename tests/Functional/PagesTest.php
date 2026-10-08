@@ -11,7 +11,7 @@ final class PagesTest extends AppTestCase
     public static function pages(): iterable
     {
         yield ['/', 'La Casa'];
-        yield ['/taches', 'Toutes les tâches'];
+        yield ['/taches', 'Les modèles'];
         yield ['/taches/nouvelle', 'Nouvelle tâche'];
         yield ['/bilan', 'Bilan de la semaine'];
         yield ['/profil', 'Léo'];
