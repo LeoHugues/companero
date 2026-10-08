@@ -1,5 +1,7 @@
-# Tests à chaque push et pull request ; sur main, une fois les tests au vert, mise en
-# production par SSH avec scripts/deploy.sh (voir docs/deploiement.md, « Déploiement automatique »).
+# Tests à chaque push et pull request ; l'appli Android est compilée quand elle a changé. Sur main,
+# une fois tout au vert, mise en production par SSH avec scripts/deploy.sh, avec la nouvelle appli
+# s'il y en a une : les téléphones se mettent à jour tout seuls (voir docs/deploiement.md,
+# « Déploiement automatique » et « L'appli Android »).
 name: CI
 
 on:
@@ -7,6 +9,11 @@ on:
     branches: ['**']
   pull_request:
   workflow_dispatch:
+    inputs:
+      android:
+        description: Recompiler et publier l'appli Android même si elle n'a pas changé
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -47,10 +54,106 @@ jobs:
       - name: PHPUnit
         run: php bin/phpunit
 
+  android:
+    name: Appli Android
+    runs-on: ubuntu-latest
+    env:
+      # L'adresse publique du serveur : celle que l'appli ouvre, et où elle cherche ses mises à jour.
+      APP_URL: ${{ vars.APP_URL }}
+      MAIN: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/main' }}
+    outputs:
+      publish: ${{ steps.plan.outputs.publish }}
+      version: ${{ steps.build.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Sur main : une appli quand le dossier android/ n'est plus celui de l'appli publiée.
+      # Ailleurs : une compilation de contrôle quand android/ diffère de main.
+      - name: Faut-il une nouvelle appli ?
+        id: plan
+        env:
+          FORCE: ${{ inputs.android || false }}
+          HAS_KEY: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
+        run: |
+          tree=$(git rev-parse HEAD:android)
+          echo "tree=$tree" >> "$GITHUB_OUTPUT"
+          build=false
+          publish=false
+          if [ "$MAIN" = true ]; then
+            published=""
+            if [ -n "$APP_URL" ]; then
+              published=$(curl -fsS --max-time 20 "$APP_URL/companero-apk.json" | jq -r '.tree // empty' || true)
+            fi
+            if [ "$FORCE" = true ] || [ "$tree" != "$published" ]; then
+              build=true
+              if [ -z "$APP_URL" ] || [ "$HAS_KEY" != true ]; then
+                echo "::warning::Appli Android non publiée : il manque la variable APP_URL ou le secret ANDROID_KEYSTORE_BASE64 (voir docs/deploiement.md)."
+              else
+                publish=true
+              fi
+            fi
+          elif ! git diff --quiet origin/main...HEAD -- android 2>/dev/null; then
+            build=true
+          fi
+          echo "build=$build" >> "$GITHUB_OUTPUT"
+          echo "publish=$publish" >> "$GITHUB_OUTPUT"
+          echo "Compiler : $build · publier : $publish (android/ $tree, publiée : ${published:-aucune})"
+
+      - uses: actions/setup-java@v4
+        if: steps.plan.outputs.build == 'true'
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+          cache-dependency-path: android/**/*.gradle*
+
+      - uses: android-actions/setup-android@v3
+        if: steps.plan.outputs.build == 'true'
+
+      # Toujours la même clé : sans elle, Android refuse d'installer la mise à jour par-dessus l'appli.
+      - name: Clé de signature
+        if: steps.plan.outputs.publish == 'true'
+        env:
+          KEYSTORE: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          printf '%s' "$KEYSTORE" | base64 -d > "$RUNNER_TEMP/companero.keystore"
+          echo "COMPANERO_KEYSTORE=$RUNNER_TEMP/companero.keystore" >> "$GITHUB_ENV"
+
+      - name: Compilation
+        id: build
+        if: steps.plan.outputs.build == 'true'
+        working-directory: android
+        env:
+          COMPANERO_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD || 'android' }}
+          COMPANERO_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS || 'androiddebugkey' }}
+          COMPANERO_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD || 'android' }}
+        run: |
+          code=$(git rev-list --count HEAD)
+          ./gradlew --no-daemon --console=plain assembleRelease "-PversionCode=$code" "-PserverUrl=${APP_URL:-http://192.168.1.2:8000}"
+          mkdir -p "$RUNNER_TEMP/release"
+          cp app/build/outputs/apk/release/app-release.apk "$RUNNER_TEMP/release/companero.apk"
+          sha=$(sha256sum "$RUNNER_TEMP/release/companero.apk" | cut -d' ' -f1)
+          jq -n --argjson code "$code" --arg name "1.0.$code" --arg tree "${{ steps.plan.outputs.tree }}" \
+            --arg sha "$sha" --arg commit "$GITHUB_SHA" --arg at "$(date -u +%FT%TZ)" \
+            --argjson size "$(stat -c %s "$RUNNER_TEMP/release/companero.apk")" \
+            '{versionCode: $code, versionName: $name, path: "/companero.apk", sha256: $sha, size: $size, tree: $tree, commit: $commit, builtAt: $at}' \
+            > "$RUNNER_TEMP/release/companero-apk.json"
+          cat "$RUNNER_TEMP/release/companero-apk.json"
+          echo "version=$code" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/upload-artifact@v4
+        if: steps.plan.outputs.publish == 'true'
+        with:
+          name: android-release
+          path: ${{ runner.temp }}/release/
+          retention-days: 30
+
   deploy:
     name: Mise en production
-    needs: tests
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [tests, android]
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     # Un déploiement à la fois, dans l'ordre des pushes.
     concurrency:
@@ -64,6 +167,9 @@ jobs:
       DEPLOY_PATH: ${{ vars.DEPLOY_PATH || '/srv/companero' }}
       # Facultatif : « sudo -u www-data » si l'utilisateur SSH n'est pas celui qui fait tourner PHP.
       DEPLOY_RUN_AS: ${{ vars.DEPLOY_RUN_AS }}
+      APP_URL: ${{ vars.APP_URL }}
+      PUBLISH_APP: ${{ needs.android.outputs.publish }}
+      APP_VERSION: ${{ needs.android.outputs.version }}
     steps:
       - name: Configuration
         id: config
@@ -90,8 +196,37 @@ jobs:
             ssh-keyscan -p "$DEPLOY_PORT" -H "$DEPLOY_HOST" > ~/.ssh/known_hosts
           fi
 
+      - uses: actions/download-artifact@v4
+        if: steps.config.outputs.ready == 'true' && env.PUBLISH_APP == 'true'
+        with:
+          name: android-release
+          path: release
+
+      # La nouvelle appli part dans un dossier temporaire du serveur ; deploy.sh la publie.
+      - name: Envoi de l'appli Android
+        id: upload
+        if: steps.config.outputs.ready == 'true' && env.PUBLISH_APP == 'true'
+        run: |
+          remote() { ssh -i ~/.ssh/id_deploy -p "$DEPLOY_PORT" -o BatchMode=yes "$DEPLOY_USER@$DEPLOY_HOST" "$@"; }
+          dir=$(remote 'd=$(mktemp -d /tmp/companero-release.XXXXXX) && chmod 755 "$d" && echo "$d"')
+          scp -i ~/.ssh/id_deploy -P "$DEPLOY_PORT" -o BatchMode=yes release/companero.apk release/companero-apk.json "$DEPLOY_USER@$DEPLOY_HOST:$dir/"
+          remote "chmod 644 '$dir'/*"
+          echo "dir=$dir" >> "$GITHUB_OUTPUT"
+
       - name: Déploiement
         if: steps.config.outputs.ready == 'true'
+        env:
+          RELEASE_DIR: ${{ steps.upload.outputs.dir }}
         run: |
-          ssh -i ~/.ssh/id_deploy -p "$DEPLOY_PORT" -o BatchMode=yes "$DEPLOY_USER@$DEPLOY_HOST" \
-            "$DEPLOY_RUN_AS '$DEPLOY_PATH/scripts/deploy.sh' '$GITHUB_SHA'"
+          remote() { ssh -i ~/.ssh/id_deploy -p "$DEPLOY_PORT" -o BatchMode=yes "$DEPLOY_USER@$DEPLOY_HOST" "$@"; }
+          remote "$DEPLOY_RUN_AS '$DEPLOY_PATH/scripts/deploy.sh' '$GITHUB_SHA' '$RELEASE_DIR'"
+          if [ -n "$RELEASE_DIR" ]; then
+            # Le tout premier déploiement de cette étape tourne avec l'ancien deploy.sh, qui ne
+            # publiait pas l'appli : une seconde passe, avec le nouveau, s'en charge.
+            published=$(curl -fsS --max-time 20 "$APP_URL/companero-apk.json" | jq -r '.versionCode // empty' || true)
+            if [ "$published" != "$APP_VERSION" ]; then
+              remote "$DEPLOY_RUN_AS '$DEPLOY_PATH/scripts/deploy.sh' '$GITHUB_SHA' '$RELEASE_DIR'"
+            fi
+            remote "rm -rf '$RELEASE_DIR'"
+            echo "Appli Android 1.0.$APP_VERSION publiée : $APP_URL/companero.apk"
+          fi
