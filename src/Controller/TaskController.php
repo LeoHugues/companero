@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Gift;
 use App\Entity\Member;
 use App\Entity\Task;
 use App\Form\TaskType;
@@ -118,7 +119,13 @@ final class TaskController extends AbstractController
         }
 
         $result = $completer->complete($task, $member);
-        $this->addFlash('completion', ['points' => $result->totalPoints(), 'title' => $task->getTitle()]);
+        $this->addFlash('completion', ['points' => $result->totalPoints(), 'title' => $task->getTitle(), 'xp' => $result->boostXp]);
+        if ([] !== $result->gifts) {
+            $this->addFlash('gifts', [
+                'level' => $member->getGiftedLevel(),
+                'labels' => array_map(static fn (Gift $gift): string => $gift->getKind()->label(), $result->gifts),
+            ]);
+        }
 
         return $this->redirectBack($request);
     }

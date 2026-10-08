@@ -11,6 +11,7 @@
     {{ form_start(household_form, {attr: {class: 'flex flex-col gap-5'}}) }}
         {{ form_row(household_form.name) }}
         {{ form_row(household_form.cleaningDay, {help: 'Le rendez-vous de la semaine : les engagements sont attendus ce jour-là.'}) }}
+        <div class="card px-3.5 py-1">{{ form_row(household_form.cleaningDayBoost) }}</div>
         <button type="submit" class="btn-primary self-start">Enregistrer</button>
     {{ form_end(household_form) }}
 
@@ -83,6 +84,13 @@
             {{ form_row(pet_form.description) }}
             <button type="submit" class="btn-primary self-start"><twig:Icon name="plus" size="18" stroke="2.6"/> Ajouter l’animal</button>
         {{ form_end(pet_form) }}
+        {% if treats is not empty %}
+            <ul class="flex flex-col gap-1 px-1" aria-label="Dernières friandises">
+                {% for treat in treats %}
+                    <li class="meta"><twig:Icon name="paw" size="12" stroke="2.4"/> {{ treat.owner.name }} a donné une friandise {{ treat.pet ? 'à ' ~ treat.pet.name : 'à tout le monde' }} · {{ treat.usedAt|format_date(pattern: 'EEEE d MMM', locale: 'fr') }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
         <p class="meta">Leurs tâches (repas, litière…) se créent dans la catégorie « Animaux », avec qui s’en charge et qui prévenir en son absence.</p>
     </section>
 {% endblock %}

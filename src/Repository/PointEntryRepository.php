@@ -27,7 +27,7 @@ class PointEntryRepository extends ServiceEntityRepository
             ->getSingleScalarResult();
     }
 
-    /** @return array<int, int> points indexed by member id */
+    /** @return array<int, int> points towards the weekly goal, indexed by member id */
     public function sumByMember(Household $household, \DateTimeImmutable $from, \DateTimeImmutable $to): array
     {
         $rows = $this->createQueryBuilder('p')
@@ -35,6 +35,8 @@ class PointEntryRepository extends ServiceEntityRepository
             ->join('p.member', 'm')
             ->andWhere('m.household = :household')
             ->andWhere('p.occurredAt >= :from AND p.occurredAt < :to')
+            ->andWhere('p.reason != :xpOnly')
+            ->setParameter('xpOnly', PointReason::XpBoost)
             ->setParameter('household', $household)
             ->setParameter('from', $from)
             ->setParameter('to', $to)

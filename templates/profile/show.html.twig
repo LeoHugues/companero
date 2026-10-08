@@ -18,7 +18,65 @@
             <span>{{ level.xp }} / {{ level.ceiling }} XP</span>
         </div>
         <twig:ProgressBar :value="level.progress" label="Progression vers le niveau suivant"/>
-        <p class="meta">Encore {{ level.xpToNext }} XP pour devenir <strong class="text-ink">{{ level.nextRank }}</strong>.</p>
+        <p class="meta">Encore {{ level.xpToNext }} XP pour devenir <strong class="text-ink">{{ level.nextRank }}</strong> et ouvrir un cadeau.</p>
+        <p class="flex items-center gap-1.5 border-t-[1.5px] border-line pt-2 text-sm font-bold">
+            <twig:Icon name="flame" size="18" class="text-clay-dark"/>
+            {% if member.streak > 0 %}Série de {{ member.streak }} semaine{{ member.streak > 1 ? 's' }} avec l’objectif atteint{% else %}Atteins ton objectif pour lancer une série{% endif %}
+            {% if member.bestStreak > member.streak %}<span class="ml-auto text-xs font-semibold text-muted">record : {{ member.bestStreak }}</span>{% endif %}
+        </p>
+    </section>
+
+    <section class="flex flex-col gap-2" aria-labelledby="gifts-title">
+        <h2 id="gifts-title" class="section-title">Mes cadeaux</h2>
+        {% for group in gifts %}
+            {% set gift = group.gifts|first %}
+            <article class="card flex flex-col gap-2.5 p-3.5">
+                <div class="flex items-start gap-3">
+                    <span class="flex size-10 shrink-0 items-center justify-center rounded-full bg-sun"><twig:Icon :name="group.kind.icon" size="22"/></span>
+                    <div class="flex flex-1 flex-col gap-0.5">
+                        <h3 class="text-[15px]">{{ group.kind.label }}{% if group.gifts|length > 1 %} <span class="text-muted">×{{ group.gifts|length }}</span>{% endif %}</h3>
+                        <p class="text-xs text-muted">{{ group.kind.description }} · {{ gift.offeredBy ? 'offert par ' ~ gift.offeredBy.name : gift.reason|lower }}</p>
+                    </div>
+                </div>
+                {% set kind = group.kind.value %}
+                {% if kind in ['team_boost', 'xp_boost'] %}
+                    <form method="post" action="{{ path('gift_activate', {id: gift.id}) }}">
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
+                        <button type="submit" class="btn-primary"><twig:Icon name="bolt" size="18"/> Activer</button>
+                    </form>
+                {% elseif kind == 'friend_boost' and friends is not empty %}
+                    <form method="post" action="{{ path('gift_activate', {id: gift.id}) }}" class="flex flex-wrap items-center gap-2">
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
+                        <span class="text-sm font-bold">Pour</span>
+                        {% for friend in friends %}
+                            <button type="submit" name="pour" value="{{ friend.id }}" class="chip gap-1.5"><twig:Avatar :member="friend" size="20"/>{{ friend.name }}</button>
+                        {% endfor %}
+                    </form>
+                {% elseif kind == 'streak_freeze' %}
+                    <p class="text-xs font-semibold">Il se déclenche tout seul une semaine où ton objectif n’est pas atteint.</p>
+                    {% if friends is not empty %}
+                        <form method="post" action="{{ path('gift_offer', {id: gift.id}) }}" class="flex flex-wrap items-center gap-2">
+                            <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
+                            <span class="text-sm font-bold">Ou l’offrir à</span>
+                            {% for friend in friends %}
+                                <button type="submit" name="pour" value="{{ friend.id }}" class="chip gap-1.5"><twig:Avatar :member="friend" size="20"/>{{ friend.name }}</button>
+                            {% endfor %}
+                        </form>
+                    {% endif %}
+                {% elseif kind == 'treat' and member.household.pets is not empty %}
+                    <form method="post" action="{{ path('gift_treat', {id: gift.id}) }}" class="flex flex-wrap items-center gap-2">
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
+                        <span class="text-sm font-bold">Pour</span>
+                        {% for pet in member.household.pets %}
+                            <button type="submit" name="animal" value="{{ pet.id }}" class="chip">{{ pet.name }}</button>
+                        {% endfor %}
+                        {% if member.household.pets|length > 1 %}<button type="submit" name="animal" value="" class="chip">Tout le monde</button>{% endif %}
+                    </form>
+                {% endif %}
+            </article>
+        {% else %}
+            <p class="card p-4 text-sm text-muted">Chaque niveau gagné t’apporte un cadeau : boosts, gels de série{{ member.household.pets is not empty ? ', friandises' }}…</p>
+        {% endfor %}
     </section>
 
     <section class="card flex items-center gap-3 p-3.5" aria-labelledby="home-title">

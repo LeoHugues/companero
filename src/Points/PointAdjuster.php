@@ -6,6 +6,7 @@ use App\Entity\Completion;
 use App\Entity\Member;
 use App\Entity\PointEntry;
 use App\Enum\PointReason;
+use App\Reward\GiftGranter;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Clock\ClockInterface;
 
@@ -14,6 +15,7 @@ final readonly class PointAdjuster
 {
     public function __construct(
         private EntityManagerInterface $entityManager,
+        private GiftGranter $gifts,
         private ClockInterface $clock,
     ) {
     }
@@ -36,5 +38,6 @@ final readonly class PointAdjuster
             $completion,
         ));
         $this->entityManager->flush();
+        $this->gifts->catchUp($completion->getMember());
     }
 }

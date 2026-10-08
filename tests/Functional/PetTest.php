@@ -2,13 +2,9 @@
 
 namespace App\Tests\Functional;
 
-use App\Entity\Member;
 use App\Entity\Task;
 use App\Enum\PetSpecies;
-use App\Household\MemberRegistrar;
-use App\Household\Registration;
 use App\Presence\PresenceRecorder;
-use App\Repository\MemberRepository;
 use App\Repository\TaskRepository;
 
 final class PetTest extends AppTestCase
@@ -52,7 +48,7 @@ final class PetTest extends AppTestCase
         $this->client->request('GET', '/');
         self::assertSelectorTextContains('[aria-labelledby=mine-title]', 'C’est toi qui t’en charges');
 
-        $leo = static::getContainer()->get(MemberRepository::class)->find($leo->getId());
+        $leo = $this->reload($leo);
         static::getContainer()->get(PresenceRecorder::class)->setAtHome($leo, false);
         $this->client->loginUser($robin);
         $this->client->request('GET', '/');
@@ -62,15 +58,5 @@ final class PetTest extends AppTestCase
         $reminders = json_decode((string) $this->client->getResponse()->getContent(), true);
         self::assertSame('Nourrir les chats', $reminders[0]['title']);
         self::assertSame('Léo', $reminders[0]['standingInFor']);
-    }
-
-    private function register(Member $founder, string $name): Member
-    {
-        $registration = new Registration();
-        $registration->name = $name;
-        $registration->email = strtolower($name).'@example.com';
-        $registration->plainPassword = 'companero';
-
-        return static::getContainer()->get(MemberRegistrar::class)->register($founder->getHousehold(), $registration);
     }
 }

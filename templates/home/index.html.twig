@@ -2,6 +2,7 @@
 
 {% block body %}
     {% set completion = app.flashes('completion')|first %}
+    {% set gifts = app.flashes('gifts')|first %}
 
     <header class="flex items-center justify-between">
         {% if is_cleaning_day %}
@@ -18,15 +19,30 @@
                     <twig:Icon :name="app.user.atHome ? 'home' : 'door'" size="16" stroke="2.4"/>{{ app.user.atHome ? 'Là' : 'Pas là' }}
                 </button>
             </form>
-            <a href="{{ path('profile_show') }}" class="rounded-full border-[1.5px] border-ink px-3 py-1 text-[13px] font-bold text-ink no-underline">Niv. {{ level.number }}</a>
+            <a href="{{ path('profile_show') }}" class="flex items-center gap-1 rounded-full border-[1.5px] border-ink px-3 py-1 text-[13px] font-bold text-ink no-underline">
+                Niv. {{ level.number }}
+                {% if app.user.streak > 0 %}<span class="flex items-center text-clay-dark" aria-label="Série de {{ app.user.streak }} semaine{{ app.user.streak > 1 ? 's' }}"> · <twig:Icon name="flame" size="14" stroke="2.4"/>{{ app.user.streak }}</span>{% endif %}
+            </a>
         </div>
     </header>
+
+    <twig:BoostBanner/>
+
+    {% if gifts %}
+        <a href="{{ path('profile_show') }}#gifts-title" class="animate-pop flex items-center gap-3 rounded-[20px] bg-ink p-3.5 text-cream no-underline hover:text-cream">
+            <twig:Icon name="gift" size="28" class="shrink-0 text-sun"/>
+            <span class="flex flex-col">
+                <span class="text-[15px] font-extrabold">Niveau {{ gifts.level }} ! Un cadeau pour toi</span>
+                <span class="text-sm text-[#D9C8B0]">{{ gifts.labels|join(', ', ' et ') }} · à ouvrir dans ton profil</span>
+            </span>
+        </a>
+    {% endif %}
 
     <twig:Casa
         :mood="mood"
         :cleanliness="cleanliness"
         :reacting="completion is not same as(false)"
-        :speech="completion ? 'Merci ' ~ app.user.name ~ ' ! +' ~ completion.points ~ ' pts pour toi.' : null"
+        :speech="completion ? 'Merci ' ~ app.user.name ~ ' ! +' ~ completion.points ~ ' pts pour toi' ~ (completion.xp|default(0) ? ' (et +' ~ completion.xp ~ ' XP)') ~ '.' : null"
         class="min-h-[262px]"
     />
 

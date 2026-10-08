@@ -1,0 +1,14 @@
+{% set boosts = active_boosts() %}
+{% if boosts.points or boosts.xp %}
+    <section {{ attributes.defaults({class: 'flex flex-col gap-1 rounded-[20px] bg-sun px-3.5 py-3'}) }} aria-label="Boosts en cours">
+        {% for boost in [boosts.points, boosts.xp] %}
+            {% if boost %}
+                <p class="flex items-center gap-2 text-sm font-bold">
+                    <twig:Icon name="bolt" size="18" stroke="2.4" class="shrink-0"/>
+                    <span class="flex-1">{{ boost.source }} : +1 {{ boost.kind.value == 'xp' ? 'XP' : 'pt' }} tous les 3 pts</span>
+                    <span class="text-xs font-semibold">jusqu’à {{ boost.endsAt|date('Hi') == '0000' ? 'minuit' : (boost.endsAt|date('Ymd') != 'now'|date('Ymd') ? 'demain ') ~ boost.endsAt|date('G\\hi') }}</span>
+                </p>
+            {% endif %}
+        {% endfor %}
+    </section>
+{% endif %}

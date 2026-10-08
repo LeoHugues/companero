@@ -29,6 +29,10 @@ class Household
     #[Assert\Range(min: 1, max: 7)]
     private int $cleaningDay = self::DEFAULT_CLEANING_DAY;
 
+    /** On the cleaning day, everyone's tasks earn +1 point every 3 points. */
+    #[ORM\Column(options: ['default' => true])]
+    private bool $cleaningDayBoost = true;
+
     #[ORM\Column(length: 32, unique: true)]
     private string $inviteToken;
 
@@ -88,6 +92,16 @@ class Household
     public function isCleaningDay(\DateTimeImmutable $at): bool
     {
         return (int) $at->format('N') === $this->cleaningDay;
+    }
+
+    public function hasCleaningDayBoost(): bool
+    {
+        return $this->cleaningDayBoost;
+    }
+
+    public function setCleaningDayBoost(bool $cleaningDayBoost): void
+    {
+        $this->cleaningDayBoost = $cleaningDayBoost;
     }
 
     public function getInviteToken(): string

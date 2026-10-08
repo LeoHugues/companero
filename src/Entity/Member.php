@@ -64,6 +64,17 @@ class Member implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $atHomeChangedAt = null;
 
+    /** The highest level whose gifts were handed out. */
+    #[ORM\Column(type: Types::SMALLINT, options: ['default' => 1])]
+    private int $giftedLevel = 1;
+
+    /** Weeks in a row with the goal reached: paused when away, saved by a streak freeze. */
+    #[ORM\Column(type: Types::SMALLINT, options: ['default' => 0])]
+    private int $streak = 0;
+
+    #[ORM\Column(type: Types::SMALLINT, options: ['default' => 0])]
+    private int $bestStreak = 0;
+
     public function __construct(Household $household, string $name, string $email, string $color, \DateTimeImmutable $joinedAt)
     {
         $this->household = $household;
@@ -191,6 +202,37 @@ class Member implements UserInterface, PasswordAuthenticatedUserInterface
     public function getAtHomeChangedAt(): ?\DateTimeImmutable
     {
         return $this->atHomeChangedAt;
+    }
+
+    public function getGiftedLevel(): int
+    {
+        return $this->giftedLevel;
+    }
+
+    public function setGiftedLevel(int $level): void
+    {
+        $this->giftedLevel = $level;
+    }
+
+    public function getStreak(): int
+    {
+        return $this->streak;
+    }
+
+    public function extendStreak(): void
+    {
+        ++$this->streak;
+        $this->bestStreak = max($this->bestStreak, $this->streak);
+    }
+
+    public function breakStreak(): void
+    {
+        $this->streak = 0;
+    }
+
+    public function getBestStreak(): int
+    {
+        return $this->bestStreak;
     }
 
     public function belongsTo(Household $household): bool

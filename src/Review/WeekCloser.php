@@ -7,11 +7,15 @@ use App\Entity\Completion;
 use App\Entity\EarnedTitle;
 use App\Entity\Household;
 use App\Entity\PointEntry;
+use App\Enum\GiftKind;
 use App\Enum\PointReason;
+use App\Progress\MemberProgress;
 use App\Progress\TeamProgressBuilder;
 use App\Repository\CompletionRepository;
 use App\Repository\EarnedTitleRepository;
+use App\Repository\GiftRepository;
 use App\Repository\PointEntryRepository;
+use App\Reward\GiftGranter;
 use Doctrine\ORM\EntityManagerInterface;
 
 /**
@@ -29,6 +33,8 @@ final readonly class WeekCloser
         private EarnedTitleRepository $earnedTitles,
         private PointEntryRepository $points,
         private TitleAwarder $titleAwarder,
+        private GiftRepository $gifts,
+        private GiftGranter $giftGranter,
     ) {
     }
 
@@ -49,6 +55,8 @@ final readonly class WeekCloser
                     $household->getCleaningDay(),
                 );
                 $this->entityManager->persist(new EarnedTitle($member, $week->start, $title->name, $title->reason));
+                // Titles are handed out once per week: so is the streak.
+                $this->updateStreak($progress, $bonusAt);
             }
 
             if ($team->reached() && $progress->wasPresent() && !$this->points->hasEntry($member, PointReason::TeamBonus, $week->start, $week->end())) {
@@ -57,5 +65,30 @@ final readonly class WeekCloser
         }
 
         $this->entityManager->flush();
+
+        foreach ($team->members as $progress) {
+            $this->giftGranter->catchUp($progress->member, $bonusAt);
+        }
+    }
+
+    /** Paused while away; a missed goal uses up a streak freeze if there is one, or ends the streak. */
+    private function updateStreak(MemberProgress $progress, \DateTimeImmutable $at): void
+    {
+        $member = $progress->member;
+        if (!$progress->wasPresent()) {
+            return;
+        }
+        if ($progress->reached()) {
+            $member->extendStreak();
+
+            return;
+        }
+
+        $freeze = $this->gifts->findUnused($member, GiftKind::StreakFreeze)[0] ?? null;
+        if (null !== $freeze && $member->getStreak() > 0) {
+            $freeze->use($at);
+        } else {
+            $member->breakStreak();
+        }
     }
 }

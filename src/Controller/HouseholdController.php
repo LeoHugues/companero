@@ -8,6 +8,7 @@ use App\Entity\Zone;
 use App\Form\HouseholdType;
 use App\Form\PetType;
 use App\Form\ZoneType;
+use App\Repository\GiftRepository;
 use App\Security\HouseholdVoter;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -28,7 +29,7 @@ final class HouseholdController extends AbstractController
     }
 
     #[Route('', name: 'household_edit', methods: ['GET', 'POST'])]
-    public function edit(#[CurrentUser] Member $member, Request $request): Response
+    public function edit(#[CurrentUser] Member $member, Request $request, GiftRepository $gifts): Response
     {
         $household = $member->getHousehold();
 
@@ -67,6 +68,7 @@ final class HouseholdController extends AbstractController
             'household_form' => $householdForm,
             'zone_form' => $zoneForm,
             'pet_form' => $petForm,
+            'treats' => $gifts->findTreatsGiven($household),
         ], new Response(status: $status));
     }
 
