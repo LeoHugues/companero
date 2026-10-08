@@ -57,9 +57,17 @@ Ensuite :
 
 1. **Serveur web** : copiez et adaptez `deploy/Caddyfile` (ou `deploy/nginx.conf` puis
    `certbot --nginx`), puis rechargez le serveur.
-2. **Tâches planifiées** : ajoutez le contenu de [`deploy/crontab`](../deploy/crontab) au
-   crontab de `www-data` (`sudo crontab -u www-data -e`) : clôture de la semaine le lundi à
-   0 h 05, sauvegarde de la base chaque nuit.
+2. **Tâches planifiées** : clôture de la semaine le lundi à 0 h 05, sauvegarde de la base
+   chaque nuit. Avec cron, ajoutez le contenu de [`deploy/crontab`](../deploy/crontab) au
+   crontab de `www-data` (`sudo crontab -u www-data -e`). Sans cron (Debian minimal…), les
+   timers systemd de [`deploy/systemd/`](../deploy/systemd/) font la même chose, à l'heure
+   de Paris même si le serveur est en UTC :
+
+   ```bash
+   sudo cp deploy/systemd/companero-* /etc/systemd/system/
+   sudo systemctl daemon-reload
+   sudo systemctl enable --now companero-week-close.timer companero-backup.timer
+   ```
 3. **Appli Android** : compilez-la avec l'adresse publique, puis déposez-la sur le serveur
    pour que les colocs la téléchargent sur `https://votre-domaine/companero.apk` :
 
@@ -75,6 +83,9 @@ Sur le serveur : `sudo -u www-data /srv/companero/scripts/deploy.sh`. Depuis Win
 ```bat
 .\dev deploy moi@serveur /srv/companero
 ```
+
+Lancé en root, le script se relance avec le propriétaire du dossier (`www-data`) : les
+fichiers qu'il crée restent modifiables par PHP.
 
 Le script sauvegarde la base, récupère `main` (ou la version passée en argument : un tag,
 un commit), installe les dépendances, compile les assets, applique les migrations et vide
