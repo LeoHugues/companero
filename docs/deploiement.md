@@ -33,14 +33,25 @@ sudo -u www-data tee .env.local > /dev/null <<EOF
 APP_ENV=prod
 APP_DEBUG=0
 APP_SECRET=$(openssl rand -hex 32)
+DEFAULT_URI=https://votre-domaine
 EOF
 
 sudo -u www-data ./scripts/deploy.sh
 ```
 
-La base `var/data_prod.db` est créée par les migrations. Il n'y a pas de données de démo en
-production : ouvrez `https://votre-domaine/bienvenue` pour créer la coloc, puis partagez le
-lien d'invitation (*Réglages de la coloc › Inviter quelqu'un*).
+La base `var/data_prod.db` est créée par les migrations, vide : pas de données de démo en
+production. Créez la coloc et votre compte à partir de sa description
+([`config/coloc/notre-coloc.yaml`](../config/coloc/notre-coloc.yaml) : zones et plan, Tishka,
+le ménage du dimanche, les tâches express, le catalogue) :
+
+```bash
+sudo -u www-data php bin/console app:coloc:creer config/coloc/notre-coloc.yaml --nom=Léo --email=vous@exemple.fr
+```
+
+Le mot de passe est demandé, puis la commande affiche le lien d'invitation à envoyer aux
+autres colocs (il est aussi dans *Réglages de la coloc › Inviter quelqu'un*). Tout se modifie
+ensuite dans l'appli. Pour une coloc sans fichier de description, `https://votre-domaine/bienvenue`
+la crée avec quelques zones et un catalogue par défaut.
 
 Ensuite :
 

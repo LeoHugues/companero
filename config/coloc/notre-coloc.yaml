@@ -1,0 +1,65 @@
+# Notre coloc, pour démarrer en production :
+#   php bin/console app:coloc:creer config/coloc/notre-coloc.yaml --nom=Léo --email=…
+# Seulement ce qui fait partie de notre routine, telle que décrite par Léo. Les points suivent
+# « 5 min ≈ 10 pts » ; ceux qui n'ont pas été donnés sont marqués « estimé ».
+# Tout se modifie ensuite dans l'appli.
+
+coloc:
+    nom: La coloc
+    jour_de_menage: dimanche
+    objectif_de_la_maison: 250
+
+# La forme de chaque pièce sur le plan, d'après l'esquisse (docs/esquisse-plan-maison.svg) :
+# des points « x,y » sur une grille, puis « @x,y » pour placer le nom.
+zones:
+    - { nom: Grande terrasse, plan: '20,21 71,21 71,51 45,36 20,51 @45.5,28' }
+    - { nom: Salon, plan: '20,52 45,37 58,44.4 50,54.4 50,81 57,81 57,97 26,97 26,80 20,80 @35,66' }
+    - { nom: Cuisine, plan: '59,45 71,52 71,80 51,80 51,55 @61,66' }
+    - { nom: Petite terrasse, plan: '20,81 25,81 25,97 20,97' }
+    - { nom: Terrasse de l’entrée, plan: '58,81 71,81 71,91 58,91' }
+    - { nom: WC, plan: '58,92 71,92 71,97 58,97' }
+    - { nom: Salle de bain, plan: '58,98 71,98 71,115 58,115' }
+    - { nom: Salle de bain de Gab, privee: true, plan: '58,116 71,116 71,129 58,129' }
+    - { nom: Chambre de Robin, privee: true, plan: '20,98 50,98 50,116 20,116' }
+    - { nom: Couloir, plan: '51,98 57,98 57,134 46,134 46,130 51,130 @54,114' }
+    - { nom: Chambre de Léo et Léa, privee: true, plan: '20,117 50,117 50,129 45,129 45,134 20,134 @33,125.5' }
+    - { nom: Chambre de Gab, privee: true, plan: '58,130 71,130 71,150 46,150 46,135 58,135 @59,143' }
+    - { nom: Bureau, plan: '20,135 45,135 45,150 20,150' }
+    - { nom: Entrée }
+    - { nom: Jardin }
+
+animaux:
+    - { nom: Tishka, espece: chat, description: 'Chat roux, petit et mince, à poils longs' }
+
+# Le ménage du dimanche : chaque semaine, au moins une fois par semaine.
+taches:
+    - { titre: Aspirateur salon et cuisine, zone: Salon, points: 20, tous_les: 7, par_semaine: 1 }
+    - { titre: Aspirateur du bureau, zone: Bureau, points: 10, tous_les: 7, par_semaine: 1 }
+    - { titre: Aspirateur du couloir, zone: Couloir, points: 10, tous_les: 7, par_semaine: 1 }
+    - { titre: Aspirateur de la salle de bain, zone: Salle de bain, points: 10, tous_les: 7, par_semaine: 1 }
+    - { titre: Plans de travail (javel ou vinaigre), zone: Cuisine, points: 25, tous_les: 7, par_semaine: 1 }
+    - { titre: Nettoyer les toilettes, zone: WC, points: 20, tous_les: 7, par_semaine: 1 }
+    - { titre: Serpillière salon, cuisine et toilettes, zone: Salon, points: 30, tous_les: 7, par_semaine: 1 }
+    - { titre: Balayer la grande terrasse, zone: Grande terrasse, points: 20, tous_les: 7, par_semaine: 1 }
+    - { titre: Balayer la petite terrasse, zone: Petite terrasse, points: 10, tous_les: 7, par_semaine: 1 }
+    - { titre: Balayer la terrasse de l’entrée, zone: Terrasse de l’entrée, points: 10, tous_les: 7, par_semaine: 1 }
+    - { titre: Nettoyer la grande table de la terrasse, zone: Grande terrasse, points: 10, tous_les: 7 } # points estimés
+    - { titre: Sortir les poubelles, zone: Entrée, points: 10, tous_les: 7 } # points estimés ; jour de collecte à préciser
+    - { titre: Aspirateur de la chambre, zone: Chambre de Léo et Léa, points: 10, tous_les: 7 }
+
+# En un geste, quand c'est fait.
+express:
+    - { titre: Vider le lave-vaisselle, zone: Cuisine, points: 10 }
+    - { titre: Ranger la vaisselle de l’égouttoir, zone: Cuisine, points: 5 } # points estimés
+    - { titre: Faire le verre, zone: Entrée, points: 10 } # points estimés
+
+# Ce qu'on ne fait pas tout le temps : à lancer depuis le catalogue quand il le faut.
+catalogue:
+    - { titre: Tondre autour de la maison, categorie: jardin, points: 30 }
+    - { titre: Nettoyer les vitres du salon, points: 50 }
+    - { titre: Ranger et nettoyer les placards, points: 60 } # points estimés
+    - { titre: Nettoyer et ranger le tiroir à couverts, points: 20 } # points estimés
+    - { titre: Nettoyer sous le lave-vaisselle, points: 20 } # points estimés
+    - { titre: Nettoyer le lave-linge, points: 20 } # points estimés
+    - { titre: Ranger le placard du couloir, points: 30 } # points estimés
+    - { titre: Ranger le placard de l’entrée, points: 30 } # points estimés

@@ -10,7 +10,7 @@ use App\Enum\TaskCategory;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Clock\ClockInterface;
 
-/** Creates a household with sensible defaults (zones, catalogue) and its first member. */
+/** Creates a household, with sensible defaults (zones, catalogue) unless told otherwise, and its first member. */
 final readonly class HouseholdFounder
 {
     private const ZONES = ['Cuisine', 'Salon', 'Salle de bain', 'WC', 'Entrée'];
@@ -33,16 +33,19 @@ final readonly class HouseholdFounder
     ) {
     }
 
-    public function found(Founding $founding): Member
+    /** @param bool $withDefaults false: no zone and no catalogue, the caller brings its own */
+    public function found(Founding $founding, bool $withDefaults = true): Member
     {
         $household = new Household(trim($founding->householdName), $this->clock->now());
         $household->setCleaningDay($founding->cleaningDay);
 
-        foreach (self::ZONES as $name) {
-            new Zone($household, $name);
-        }
-        foreach (self::CATALOG as [$title, $category, $points]) {
-            $this->entityManager->persist(new CatalogItem($household, $title, $category, $points));
+        if ($withDefaults) {
+            foreach (self::ZONES as $name) {
+                new Zone($household, $name);
+            }
+            foreach (self::CATALOG as [$title, $category, $points]) {
+                $this->entityManager->persist(new CatalogItem($household, $title, $category, $points));
+            }
         }
         $this->entityManager->persist($household);
 

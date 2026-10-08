@@ -12,6 +12,7 @@ use App\Entity\Zone;
 use App\Enum\PetSpecies;
 use App\Enum\TaskCategory;
 use App\Enum\TaskKind;
+use App\Household\Blueprint;
 use App\Household\Founding;
 use App\Household\HouseholdFounder;
 use App\Household\MemberRegistrar;
@@ -26,6 +27,7 @@ use Psr\Clock\ClockInterface;
 use Symfony\Component\Clock\Clock;
 use Symfony\Component\Clock\MockClock;
 use Symfony\Component\Clock\NativeClock;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 /**
  * Our coloc, as it is these days: Léo, Léa, Robin and Gab, two cats, the cleaning on Sunday,
@@ -49,26 +51,6 @@ final class AppFixtures extends Fixture
         'Chambre de Robin' => true,
         'Chambre de Gab' => true,
         'Salle de bain de Gab' => true,
-    ];
-
-    /**
-     * The plan of the house, from Léo's sketch: one grid unit is 2.65 mm of the drawing.
-     * The small terrace is tucked in so that the house stays a rectangle; the garden goes around.
-     */
-    private const PLAN = [
-        'Grande terrasse' => '20,21 71,21 71,51 45,36 20,51 @45.5,28',
-        'Salon' => '20,52 45,37 58,44.4 50,54.4 50,81 57,81 57,97 26,97 26,80 20,80 @35,66',
-        'Cuisine' => '59,45 71,52 71,80 51,80 51,55 @61,66',
-        'Petite terrasse' => '20,81 25,81 25,97 20,97',
-        'Terrasse de l’entrée' => '58,81 71,81 71,91 58,91',
-        'WC' => '58,92 71,92 71,97 58,97',
-        'Salle de bain' => '58,98 71,98 71,115 58,115',
-        'Salle de bain de Gab' => '58,116 71,116 71,129 58,129',
-        'Chambre de Robin' => '20,98 50,98 50,116 20,116',
-        'Couloir' => '51,98 57,98 57,134 46,134 46,130 51,130 @54,114',
-        'Chambre de Léo et Léa' => '20,117 50,117 50,129 45,129 45,134 20,134 @33,125.5',
-        'Chambre de Gab' => '58,130 71,130 71,150 46,150 46,135 58,135 @59,143',
-        'Bureau' => '20,135 45,135 45,150 20,150',
     ];
 
     /**
@@ -123,6 +105,7 @@ final class AppFixtures extends Fixture
         private readonly CompletionRepository $completions,
         private readonly WeekCloser $weekCloser,
         private readonly ClockInterface $clock,
+        #[Autowire('%kernel.project_dir%')] private readonly string $projectDir,
     ) {
     }
 
@@ -197,7 +180,8 @@ final class AppFixtures extends Fixture
             $zones[$name] = new Zone($household, $name, $private);
             $manager->persist($zones[$name]);
         }
-        foreach (self::PLAN as $name => $shape) {
+        // The plan of the house, as described for production.
+        foreach (Blueprint::fromFile($this->projectDir.'/config/coloc/notre-coloc.yaml')->plan() as $name => $shape) {
             $zones[$name]->setPlanShape($shape);
         }
 
