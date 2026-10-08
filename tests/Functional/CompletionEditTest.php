@@ -37,14 +37,14 @@ final class CompletionEditTest extends AppTestCase
 
         $completion = $this->completionOf($task);
         self::assertSame($doneAt->format('Y-m-d H:i'), $completion->getCompletedAt()->format('Y-m-d H:i'));
-        // Done right when it was due: the points and the punctuality bonus count on that day.
-        self::assertSame(40, static::getContainer()->get(PointEntryRepository::class)->totalFor($leo));
+        // The points count on that day.
+        self::assertSame(30, static::getContainer()->get(PointEntryRepository::class)->totalFor($leo));
         foreach (static::getContainer()->get(PointEntryRepository::class)->findBy(['completion' => $completion]) as $entry) {
             self::assertSame($doneAt->format('Y-m-d H:i'), $entry->getOccurredAt()->format('Y-m-d H:i'));
         }
 
         $this->client->followRedirect();
-        self::assertSelectorTextContains('[data-casa-target=speech]', 'Merci Léo ! +40 pts');
+        self::assertSelectorTextContains('[data-casa-target=speech]', 'Merci Léo ! +30 pts');
     }
 
     public function testACompletionCanBeMovedToAnotherDayAndMember(): void
@@ -82,6 +82,25 @@ final class CompletionEditTest extends AppTestCase
         $task = static::getContainer()->get(TaskRepository::class)->find($task->getId());
         self::assertSame($doneAt->format('Y-m-d H:i'), $task?->getLastCompletedAt()?->format('Y-m-d H:i'));
         self::assertSame($robin->getId(), $task?->getLastCompletedBy()?->getId());
+    }
+
+    public function testMovedToTheCleaningDayItEarnsItsBoost(): void
+    {
+        $leo = $this->foundHousehold(cleaningDayBoost: true);
+        $cleaningDay = new \DateTimeImmutable('-2 days 11:00');
+        $leo->getHousehold()->setCleaningDay((int) $cleaningDay->format('N'));
+        static::getContainer()->get(EntityManagerInterface::class)->flush();
+        $task = $this->quickTask($leo, 'Aspirateur', 30);
+        $this->client->loginUser($leo);
+        $this->client->request('GET', '/');
+        $this->submitAction('/taches/'.$task->getId().'/fait');
+        self::assertSame(30, static::getContainer()->get(PointEntryRepository::class)->totalFor($this->reload($leo)));
+
+        $this->client->request('GET', '/realisations/'.$this->completionOf($task)->getId().'/modifier');
+        $this->client->submitForm('Enregistrer', ['completion[completedAt]' => $cleaningDay->format('Y-m-d\TH:i')]);
+
+        // +1 pt every 3 pts on the cleaning day.
+        self::assertSame(40, static::getContainer()->get(PointEntryRepository::class)->totalFor($this->reload($leo)));
     }
 
     public function testMovingAnOlderCompletionKeepsTheLatestOneAsReference(): void

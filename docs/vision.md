@@ -99,8 +99,8 @@ Ce jour-là :
   faites dans la semaine ;
 - **une notification le matin** présente la liste du jour : les tâches dues,
   les plus urgentes et celles qui ne sont pas réservées ;
-- **un bonus de ponctualité** s'applique aux tâches dues réalisées ce jour-là
-  (voir § 5) ;
+- **un boost** s'applique automatiquement à tout ce qui est fait ce jour-là
+  (désactivable, voir § 5) ;
 - *(idée)* un **défi collectif** : si la jauge de la maison dépasse un seuil à
   la fin du jour de ménage, tous les membres présents gagnent un petit bonus.
   C'est un moteur coopératif, qui complète l'objectif personnel.
@@ -139,19 +139,12 @@ Les pourcentages sont exprimés par rapport au rythme ou à l'échéance. La
 
 - **Valeur de base** définie sur la tâche. Pour amorcer : **5 min ≈ 10 points**, puis
   ajustement collectif selon la pénibilité (les toilettes valent plus que leurs 5 minutes).
-- **Bonus de retard** : une tâche en retard prend de la valeur (+10 points tous les deux jours de retard, plafonné à +30). Les corvées impopulaires s'équilibrent
-  d'elles-mêmes.
-- **Bonus de ponctualité** : une tâche faite au bon moment rapporte un petit
-  bonus, **+10 points pour une petite tâche, +20 pour une grosse** (40 points et
-  plus ; valeurs de départ, à ajuster à l'usage). « Au bon moment », c'est le jour de ménage pour une tâche avec
-  engagement, le jour de l'échéance pour une tâche calendaire, et la fenêtre
-  « due » pour une glissante.
-- **Équilibre entre les deux bonus** : il ne faut pas qu'attendre rapporte plus
-  que faire à l'heure. Proposition : le bonus de retard ne démarre qu'après la
-  marge et reste faible au début. Ainsi, faire la tâche à l'heure rapporte
-  toujours au moins autant que la faire avec un ou deux jours de retard. Le
-  bonus de retard sert à faire *reprendre* une tâche abandonnée, pas à
-  récompenser l'attente.
+- **Pas de bonus de retard ni de ponctualité** : une tâche rapporte ses points, que
+  ce soit à l'heure ou en retard. Seuls le **jour de ménage** et les **boosts**
+  rapportent plus.
+- **Noter après coup** : on peut noter une tâche déjà faite (à la création, « C'est
+  déjà fait »), et corriger une réalisation (date, heure, qui, points). Les points
+  comptent à la date de la réalisation, et les boosts sont ceux de ce moment-là.
 - **Ajustement ponctuel** : sur une réalisation, n'importe qui peut dire « cette
   fois c'était plus, ou moins » (±5).
 - **Boosts** : +1 point tous les 3 points de base, pendant 24 h. Le jour de ménage,
@@ -269,7 +262,7 @@ Il est généré le dimanche soir et consultable le lundi :
 | Tâches récurrentes (glissante, engagement, calendaire) | Cartons |
 | Tâches ponctuelles + catalogue | Services entre membres / mini-économie |
 | Réserver / faire / ajuster les points | Classes de personnage |
-| Urgence, bonus de retard et de ponctualité | Vue Kanban |
+| Urgence, jour de ménage et boosts | Vue Kanban |
 | Jour de ménage (rendez-vous + notification) | Défi collectif du jour de ménage |
 | Objectif hebdo + présence | Statistiques avancées |
 | Bilan hebdo, XP, niveaux, quelques titres | |
@@ -293,7 +286,7 @@ Il est généré le dimanche soir et consultable le lundi :
 
 ## 11. Questions ouvertes
 
-1. Formule exacte du bonus de retard (linéaire ? plafond ?).
+1. ~~Formule exacte du bonus de retard~~ : plus de bonus de retard ni de ponctualité.
 2. Une tâche faite à plusieurs : points partagés ou doublés ?
 3. Durée par défaut d'une réservation : 24 h ? Réglable par tâche ?
 4. Objectif hebdo : choisi par chacun, ou valeur commune ?
@@ -301,5 +294,4 @@ Il est généré le dimanche soir et consultable le lundi :
    agaçant ?
 6. Début et fin de semaine : du lundi 00:00 au dimanche 23:59 ? Heure du bilan ?
 7. Formule de la jauge de la maison.
-8. Seuil entre « petite » et « grosse » tâche pour le bonus de ponctualité, et
-   courbe exacte du bonus de retard, pour respecter l'équilibre décrit au § 5.
+8. ~~Seuil du bonus de ponctualité~~ : sans objet (voir § 5).

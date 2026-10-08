@@ -32,7 +32,7 @@
             </div>
         </div>
         {{ form_errors(form.points) }}
-        <p class="meta -mt-3">Les points de la tâche, sans les bonus : ceux-ci sont recalculés pour la date choisie (boost du jour de ménage, boost activé…).</p>
+        <p class="meta -mt-3">Les points de la tâche, sans les boosts : ceux-ci sont recalculés pour la date choisie (jour de ménage, boost activé…).</p>
 
         {# Always at hand at the bottom of the screen: above the bottom navigation, or at the very bottom in the app's modal. #}
         <div class="fixed inset-x-0 z-10 border-t-[1.5px] border-line bg-cream {{ ux_is_native() ? 'bottom-0 pb-[env(safe-area-inset-bottom)]' : 'bottom-[calc(72px+env(safe-area-inset-bottom))]' }}">

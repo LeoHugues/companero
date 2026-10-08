@@ -26,7 +26,6 @@ final readonly class TaskCompleter
         private CompletionRepository $completions,
         private PointEntryRepository $points,
         private TaskStatusResolver $resolver,
-        private BonusPolicy $bonusPolicy,
         private BoostResolver $boosts,
         private GiftGranter $gifts,
         private ClockInterface $clock,
@@ -50,7 +49,7 @@ final readonly class TaskCompleter
 
         $completion = new Completion($task, $member, $at, $status->urgency);
         $this->entityManager->persist($completion);
-        $result = $this->score($completion, $task->getPoints(), $status);
+        $result = $this->score($completion, $task->getPoints());
 
         // Noted afterwards, it may come before a later completion: that one stays the reference.
         if (null === $task->getLastCompletedAt() || $at >= $task->getLastCompletedAt()) {
@@ -58,12 +57,12 @@ final readonly class TaskCompleter
         }
         $this->entityManager->flush();
 
-        return new CompletionResult($completion, $result['base'], $result['bonus'], $result['boost'], $result['xp'], $this->gifts->catchUp($member, $now));
+        return new CompletionResult($completion, $result['base'], $result['boost'], $result['xp'], $this->gifts->catchUp($member, $now));
     }
 
     /**
-     * Moves a completion to another moment or member, or changes its base points: bonuses and boosts
-     * are worked out again for that moment, the weekly scores and the task's rhythm follow.
+     * Moves a completion to another moment or member, or changes its base points: boosts are
+     * worked out again for that moment, the weekly scores and the task's rhythm follow.
      */
     public function amend(Completion $completion, Member $member, \DateTimeImmutable $at, int $basePoints): void
     {
@@ -82,7 +81,7 @@ final readonly class TaskCompleter
             }
         }
         $completion->amend($member, $at, $status->urgency);
-        $this->score($completion, $basePoints, $status);
+        $this->score($completion, $basePoints);
         $this->entityManager->flush();
 
         $latest = $this->completions->findLatestForTask($task);
@@ -108,25 +107,25 @@ final readonly class TaskCompleter
         );
     }
 
-    /** @return array{base: int, bonus: ?Bonus, boost: int, xp: int} */
-    private function score(Completion $completion, int $basePoints, TaskStatus $status): array
+    /**
+     * The base points, plus the boosts in effect at that moment (the cleaning day's, one a coloc activated…).
+     * Doing a task on time or late earns nothing more: its urgency is only kept for the weekly titles.
+     *
+     * @return array{base: int, boost: int, xp: int}
+     */
+    private function score(Completion $completion, int $basePoints): array
     {
-        $task = $completion->getTask();
         $member = $completion->getMember();
         $at = $completion->getCompletedAt();
         $this->credit($completion, PointReason::Task, $basePoints);
 
-        $bonus = $this->bonusPolicy->bonusFor($task, $status);
-        if (null !== $bonus) {
-            $this->credit($completion, $bonus->reason, $bonus->points);
-        }
         // Boosts apply to the base points of the task.
         $boostPoints = $this->boosts->points($member, $at)?->bonusFor($basePoints) ?? 0;
         $this->credit($completion, PointReason::Boost, $boostPoints);
         $boostXp = $this->boosts->xp($member, $at)?->bonusFor($basePoints) ?? 0;
         $this->credit($completion, PointReason::XpBoost, $boostXp);
 
-        return ['base' => $basePoints, 'bonus' => $bonus, 'boost' => $boostPoints, 'xp' => $boostXp];
+        return ['base' => $basePoints, 'boost' => $boostPoints, 'xp' => $boostXp];
     }
 
     private function credit(Completion $completion, PointReason $reason, int $points): void

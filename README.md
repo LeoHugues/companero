@@ -117,7 +117,7 @@ passe les tests est mis en production automatiquement (voir
 | Dossier | Rôle |
 |---|---|
 | `src/Entity`, `src/Repository` | Modèle : foyer, membres, zones, animaux, tâches, réalisations, journal de points, présence, titres, cadeaux, boosts |
-| `src/Task` | Statut d'une tâche (urgence, fraîcheur), bonus, tableau des tâches et des pièces, réalisation |
+| `src/Task` | Statut d'une tâche (urgence, fraîcheur), tableau des tâches et des pièces, réalisation et correction |
 | `src/Presence`, `src/Reminder` | Qui est là (jours par semaine, « à la maison ») et qui prévenir d'une tâche |
 | `src/Reward` | Cadeaux de niveau, boosts (dont celui du jour de ménage) |
 | `src/Calendar` | La semaine (lundi → dimanche) |

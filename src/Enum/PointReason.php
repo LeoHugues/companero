@@ -5,7 +5,9 @@ namespace App\Enum;
 enum PointReason: string
 {
     case Task = 'task';
+    /** No longer earned (only boosts add to a task now), kept for the lines already in the journal. */
     case Punctuality = 'punctuality';
+    /** No longer earned, kept for the lines already in the journal. */
     case Rescue = 'rescue';
     case Adjustment = 'adjustment';
     case TeamBonus = 'team_bonus';

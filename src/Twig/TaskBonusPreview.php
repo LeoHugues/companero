@@ -5,8 +5,6 @@ namespace App\Twig;
 use App\Entity\Member;
 use App\Reward\ActiveBoost;
 use App\Reward\BoostResolver;
-use App\Task\Bonus;
-use App\Task\BonusPolicy;
 use App\Task\TaskView;
 use Psr\Clock\ClockInterface;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -16,17 +14,10 @@ use Twig\Attribute\AsTwigFunction;
 final readonly class TaskBonusPreview
 {
     public function __construct(
-        private BonusPolicy $bonusPolicy,
         private BoostResolver $boosts,
         private Security $security,
         private ClockInterface $clock,
     ) {
-    }
-
-    #[AsTwigFunction('task_bonus')]
-    public function bonus(TaskView $view): ?Bonus
-    {
-        return $this->bonusPolicy->bonusFor($view->task, $view->status);
     }
 
     /** Extra points from the boost in effect for the current member. */

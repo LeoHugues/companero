@@ -11,7 +11,6 @@ final readonly class CompletionResult
     public function __construct(
         public Completion $completion,
         public int $basePoints,
-        public ?Bonus $bonus,
         public int $boostPoints = 0,
         public int $boostXp = 0,
         public array $gifts = [],
@@ -21,6 +20,6 @@ final readonly class CompletionResult
     /** What counts towards the weekly goal. */
     public function totalPoints(): int
     {
-        return $this->basePoints + ($this->bonus->points ?? 0) + $this->boostPoints;
+        return $this->basePoints + $this->boostPoints;
     }
 }

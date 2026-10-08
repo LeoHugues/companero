@@ -35,11 +35,12 @@ final class TaskFlowTest extends AppTestCase
         $this->submitAction('/taches/'.$task->getId().'/fait');
         self::assertResponseRedirects('/');
         $this->client->followRedirect();
-        self::assertSelectorTextContains('[data-casa-target=speech]', 'Merci Léo ! +40 pts');
+        // Its points and nothing more: only the cleaning day and the boosts add to a task.
+        self::assertSelectorTextContains('[data-casa-target=speech]', 'Merci Léo ! +30 pts');
 
         $points = static::getContainer()->get(PointEntryRepository::class);
-        self::assertSame(40, $points->totalFor($leo));
-        self::assertTrue($points->hasEntry($leo, PointReason::Punctuality, new \DateTimeImmutable('-1 hour'), new \DateTimeImmutable('+1 hour')));
+        self::assertSame(30, $points->totalFor($leo));
+        self::assertFalse($points->hasEntry($leo, PointReason::Punctuality, new \DateTimeImmutable('-1 hour'), new \DateTimeImmutable('+1 hour')));
     }
 
     public function testInvalidRecurringTaskIsRejected(): void
