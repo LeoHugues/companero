@@ -1,0 +1,98 @@
+# À placer dans .github/workflows/ci.yml.
+# Tests à chaque push et pull request ; sur main, une fois les tests au vert, mise en
+# production par SSH avec scripts/deploy.sh (voir docs/deploiement.md, « Déploiement automatique »).
+name: CI
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    name: Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: pdo_sqlite, intl, mbstring
+          coverage: none
+          tools: composer:v2
+
+      - name: Cache Composer
+        uses: actions/cache@v4
+        with:
+          path: ~/.composer/cache/files
+          key: composer-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-
+
+      - name: Dépendances
+        run: |
+          composer install --no-interaction --no-progress
+          php bin/console importmap:install
+          php bin/console tailwind:build
+
+      - name: Style et templates
+        run: |
+          vendor/bin/php-cs-fixer fix --dry-run --diff
+          php bin/console lint:twig templates
+          php bin/console lint:container
+
+      - name: PHPUnit
+        run: php bin/phpunit
+
+  deploy:
+    name: Mise en production
+    needs: tests
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    # Un déploiement à la fois, dans l'ordre des pushes.
+    concurrency:
+      group: production
+      cancel-in-progress: false
+    environment: production
+    env:
+      DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+      DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+      DEPLOY_PORT: ${{ secrets.DEPLOY_PORT || '22' }}
+      DEPLOY_PATH: ${{ vars.DEPLOY_PATH || '/srv/companero' }}
+      # Facultatif : « sudo -u www-data » si l'utilisateur SSH n'est pas celui qui fait tourner PHP.
+      DEPLOY_RUN_AS: ${{ vars.DEPLOY_RUN_AS }}
+    steps:
+      - name: Configuration
+        id: config
+        run: |
+          if [ -z "$DEPLOY_HOST" ] || [ -z "$DEPLOY_USER" ]; then
+            echo "::warning::Déploiement automatique pas encore configuré (secrets DEPLOY_HOST, DEPLOY_USER, DEPLOY_SSH_KEY) : voir docs/deploiement.md."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Clé SSH
+        if: steps.config.outputs.ready == 'true'
+        env:
+          SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/id_deploy
+          chmod 600 ~/.ssh/id_deploy
+          if [ -n "$KNOWN_HOSTS" ]; then
+            printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+          else
+            ssh-keyscan -p "$DEPLOY_PORT" -H "$DEPLOY_HOST" > ~/.ssh/known_hosts
+          fi
+
+      - name: Déploiement
+        if: steps.config.outputs.ready == 'true'
+        run: |
+          ssh -i ~/.ssh/id_deploy -p "$DEPLOY_PORT" -o BatchMode=yes "$DEPLOY_USER@$DEPLOY_HOST" \
+            "$DEPLOY_RUN_AS '$DEPLOY_PATH/scripts/deploy.sh' '$GITHUB_SHA'"
