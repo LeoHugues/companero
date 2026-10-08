@@ -9,9 +9,12 @@ companero.example.org {
 	@assets path /assets/*
 	header @assets Cache-Control "public, max-age=31536000, immutable"
 
-	# L'APK de l'appli Android, à déposer dans public/ (voir docs/deploiement.md).
+	# L'APK de l'appli Android et sa description, publiées par la CI (voir docs/deploiement.md) :
+	# jamais en cache, les téléphones y cherchent leurs mises à jour.
 	@apk path /companero.apk
 	header @apk Content-Type application/vnd.android.package-archive
+	@app path /companero.apk /companero-apk.json
+	header @app Cache-Control "no-cache"
 
 	php_fastcgi unix//run/php/php8.4-fpm.sock
 	file_server

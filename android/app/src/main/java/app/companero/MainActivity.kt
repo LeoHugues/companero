@@ -29,6 +29,18 @@ class MainActivity : HotwireActivity() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        // A newer build on the server? It is downloaded, then installed (see Updater).
+        Updater.check(this)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        // Leaving the app: the right moment for a silent update.
+        Updater.installIfReady(this)
+    }
+
     override fun navigatorConfigurations() = listOf(
         NavigatorConfiguration(
             name = "main",

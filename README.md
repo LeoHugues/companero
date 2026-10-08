@@ -81,10 +81,14 @@ déclarées dans `src/Native/NativeConfiguration.php` :
   ferme la modale) ;
 - tirer vers le bas rafraîchit la page.
 
+Elle **se met à jour toute seule** : la CI compile et publie chaque nouvelle version sur le serveur
+(`/companero.apk`), et l'appli l'installe par-dessus elle-même, sans désinstaller (voir
+[L'appli Android](docs/deploiement.md#lappli-android)).
+
 Elle fait aussi vibrer le téléphone pour chaque retour (un clic sous le doigt, les points gagnés,
 une boîte qui s'ouvre, un chat qui ronronne) : un *bridge component* Hotwire Native, `haptics`
 (`assets/controllers/haptics_controller.js` côté pages, `HapticsComponent.kt` côté appli).
-Une version de l'APK sans ce composant ne vibre pas : la recompiler (`.\dev apk`).
+Une version de l'APK sans ce composant ne vibre pas ; la CI publie celle qui vibre.
 
 L'appli ajoute aussi une tuile **« À la maison »** aux réglages rapides (à côté du
 Wi-Fi et du Bluetooth ; à ajouter en modifiant les tuiles) : un appui bascule entre

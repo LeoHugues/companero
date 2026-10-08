@@ -68,8 +68,8 @@ Ensuite :
    sudo systemctl daemon-reload
    sudo systemctl enable --now companero-week-close.timer companero-backup.timer
    ```
-3. **Appli Android** : compilez-la avec l'adresse publique, puis déposez-la sur le serveur
-   pour que les colocs la téléchargent sur `https://votre-domaine/companero.apk` :
+3. **Appli Android** : la CI la compile et la publie sur `https://votre-domaine/companero.apk`
+   (voir [L'appli Android](#lappli-android)). À la main, sans la CI :
 
    ```bat
    .\dev apk https://votre-domaine
@@ -97,10 +97,11 @@ Pour déployer une autre branche : `DEPLOY_BRANCH=ma-branche ./scripts/deploy.sh
 ## Déploiement automatique
 
 Le workflow GitHub Actions [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) lance
-les tests (PHPUnit, php-cs-fixer, lint des templates) à chaque push. Sur `main`, une fois les
-tests au vert, il se connecte au serveur en SSH et lance `scripts/deploy.sh` sur le commit
-testé. Les déploiements passent un par un, dans l'ordre des pushes. Si les tests échouent, rien
-n'est déployé.
+les tests (PHPUnit, php-cs-fixer, lint des templates) à chaque push, et compile l'appli Android
+quand elle a changé. Sur `main`, une fois tout au vert, il se connecte au serveur en SSH et lance
+`scripts/deploy.sh` sur le commit testé, avec la nouvelle appli s'il y en a une (voir
+[L'appli Android](#lappli-android)). Les déploiements passent un par un, dans l'ordre des pushes.
+Si les tests ou la compilation échouent, rien n'est déployé.
 
 Une seule fois, sur le serveur : un utilisateur `deploy` qui a le droit de lancer le
 script en tant que `www-data` (qui, lui, n'a pas de shell), et une clé SSH réservée au déploiement
@@ -134,7 +135,65 @@ déjà celui qui fait tourner PHP), et `DEPLOY_PATH` si l'appli n'est pas dans `
 
 Tant que ces secrets manquent, le workflow teste mais ne déploie pas (un avertissement le
 rappelle). Un déploiement se relance à la main depuis l'onglet *Actions* (« Run workflow »
-sur `main`).
+sur `main`), en cochant au besoin « Recompiler et publier l'appli Android ».
+
+## L'appli Android
+
+À chaque push sur `main`, la CI regarde si le dossier `android/` a changé depuis l'appli publiée
+(elle lit `https://votre-domaine/companero-apk.json`). Si oui, elle compile une nouvelle version
+(son numéro : le nombre de commits, toujours croissant), la signe avec **toujours la même clé**,
+et `deploy.sh` la dépose dans `public/` avec sa description (`companero-apk.json` : version,
+empreinte SHA-256). Le lien de téléchargement, `https://votre-domaine/companero.apk`, donne
+donc toujours la dernière version.
+
+**Les téléphones se mettent à jour tout seuls.** À chaque retour dans l'appli (au plus toutes les
+30 minutes), elle regarde la description sur le serveur ; si une version plus récente existe, elle
+la télécharge, vérifie son empreinte et l'installe **par-dessus elle-même** : rien à désinstaller,
+rien de perdu (la session reste ouverte).
+
+- La toute première fois, Android demande d'autoriser Companero à installer des applis (un
+  interrupteur dans les réglages), puis de confirmer la mise à jour.
+- Ensuite, sur Android 12 et plus, les mises à jour s'installent **sans rien demander**, au moment
+  où l'on quitte l'appli. Sur Android 9 à 11, une fenêtre propose « Mettre à jour » à chaque fois.
+
+### À configurer une fois
+
+Le workflow qui fait tout ça est dans [`deploy/github-ci.yml`](../deploy/github-ci.yml) : copiez-le
+à la place de `.github/workflows/ci.yml` (un accès GitHub sans le droit « workflow », comme celui
+de Claude, ne peut pas modifier ce dossier lui-même).
+
+Dans GitHub, *Settings › Secrets and variables › Actions* :
+
+| Où | Nom | Valeur |
+|---|---|---|
+| *Variables* | `APP_URL` | l'adresse publique, sans `/` final : `https://votre-domaine`. C'est celle que l'appli ouvre, et où elle cherche ses mises à jour. |
+| *Secrets* | `ANDROID_KEYSTORE_BASE64` | la clé de signature, en base64 (voir ci-dessous) |
+| *Secrets* | `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD` | seulement pour une clé à vous ; pour la clé de debug, les valeurs par défaut (`android`, `androiddebugkey`, `android`) conviennent |
+
+**La clé.** Android n'installe une mise à jour par-dessus une appli que si elle est signée avec la
+même clé. Les APK compilées jusqu'ici avec `.\dev apk` sont signées avec la clé de debug du PC :
+en la donnant à la CI, les téléphones déjà équipés n'ont **rien à désinstaller**. Sous Windows,
+elle est dans `%USERPROFILE%\.android\debug.keystore` ; pour la copier en base64 :
+
+```powershell
+[Convert]::ToBase64String([IO.File]::ReadAllBytes("$env:USERPROFILE\.android\debug.keystore")) | Set-Clipboard
+```
+
+Gardez ce fichier précieusement : sans lui, plus de mise à jour possible sans désinstaller.
+(Une clé neuve, faite avec `keytool -genkeypair -v -keystore companero.keystore -alias companero
+-keyalg RSA -keysize 2048 -validity 10000`, marche aussi, avec ses trois secrets — mais il faudra
+alors désinstaller une dernière fois l'appli compilée sur le PC.)
+
+Sans `APP_URL` ou sans la clé, la CI compile l'appli pour vérifier qu'elle se construit, mais ne
+la publie pas (un avertissement le rappelle).
+
+**Le premier passage.** Les téléphones qui ont une version d'avant ce mécanisme ne savent pas
+encore se mettre à jour : installez-y une fois la nouvelle version depuis
+`https://votre-domaine/companero.apk` — par-dessus l'ancienne, sans désinstaller. Ensuite, c'est
+automatique.
+
+Une APK compilée sur le PC (`.\dev apk`) a le même numéro que celle de la CI pour un même commit :
+elles s'installent l'une sur l'autre tant qu'elles sont signées par la même clé.
 
 ## Sauvegardes
 

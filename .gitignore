@@ -37,4 +37,5 @@
 ###> production ###
 # The Android app, offered for download by the server (see docs/deploiement.md)
 /public/companero.apk
+/public/companero-apk.json
 ###< production ###

@@ -5,8 +5,19 @@ plugins {
     id("org.jetbrains.kotlin.android")
 }
 
-// Server opened on first launch; `.\dev apk` passes the PC's Wi-Fi address.
+// Server opened on first launch; `.\dev apk` passes the PC's Wi-Fi address, the CI the public one.
 val serverUrl = providers.gradleProperty("serverUrl").getOrElse("http://192.168.1.2:8000")
+
+// Every build is newer than the previous one: the number of commits, so that an update installs
+// over the app (a build from the CI or from a PC, whichever is the latest).
+val commitCount = runCatching {
+    providers.exec { commandLine("git", "rev-list", "--count", "HEAD") }.standardOutput.asText.get().trim().toInt()
+}.getOrDefault(1)
+val appVersionCode = providers.gradleProperty("versionCode").map { it.toInt() }.getOrElse(commitCount)
+
+// The key the app is signed with: always the same one, or Android refuses to update it in place.
+// The CI passes it (see docs/deploiement.md); otherwise, the PC's debug key.
+val keystore = providers.environmentVariable("COMPANERO_KEYSTORE").orNull?.let { file(it) }
 
 android {
     namespace = "app.companero"
@@ -16,9 +27,27 @@ android {
         applicationId = "app.companero"
         minSdk = 28 // Hotwire Native's minimum
         targetSdk = 36
-        versionCode = 2
-        versionName = "0.2.0"
+        versionCode = appVersionCode
+        versionName = "1.0.$appVersionCode"
         buildConfigField("String", "DEFAULT_SERVER_URL", "\"$serverUrl\"")
+    }
+
+    signingConfigs {
+        if (keystore != null && keystore.exists()) {
+            create("companero") {
+                storeFile = keystore
+                storePassword = providers.environmentVariable("COMPANERO_KEYSTORE_PASSWORD").getOrElse("android")
+                keyAlias = providers.environmentVariable("COMPANERO_KEY_ALIAS").getOrElse("androiddebugkey")
+                keyPassword = providers.environmentVariable("COMPANERO_KEY_PASSWORD").getOrElse("android")
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            isMinifyEnabled = false
+            signingConfig = signingConfigs.findByName("companero") ?: signingConfigs.getByName("debug")
+        }
     }
 
     buildFeatures {
