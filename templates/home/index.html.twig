@@ -9,7 +9,17 @@
         {% else %}
             <p class="rounded-full bg-track px-3 py-1.5 text-[13px] font-bold">{{ weekday_name(now|date('N'))|capitalize }} · ménage {{ weekday_name(app.user.household.cleaningDay) }}</p>
         {% endif %}
-        <a href="{{ path('profile_show') }}" class="rounded-full border-[1.5px] border-ink px-3 py-1 text-[13px] font-bold text-ink no-underline">Niv. {{ level.number }}</a>
+        <div class="flex items-center gap-2">
+            <form method="post" action="{{ path('presence_toggle') }}">
+                <input type="hidden" name="_back" value="home">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
+                <button type="submit" aria-pressed="{{ app.user.atHome ? 'true' : 'false' }}" aria-label="{{ app.user.atHome ? 'Je suis à la maison : signaler que je pars' : 'Je ne suis pas là : signaler mon retour' }}"
+                        class="flex h-[30px] cursor-pointer items-center gap-1 rounded-full px-2.5 text-[13px] font-bold transition active:scale-95 {{ app.user.atHome ? 'bg-ink text-cream' : 'border-[1.5px] border-dashed border-muted text-muted' }}">
+                    <twig:Icon :name="app.user.atHome ? 'home' : 'door'" size="16" stroke="2.4"/>{{ app.user.atHome ? 'Là' : 'Pas là' }}
+                </button>
+            </form>
+            <a href="{{ path('profile_show') }}" class="rounded-full border-[1.5px] border-ink px-3 py-1 text-[13px] font-bold text-ink no-underline">Niv. {{ level.number }}</a>
+        </div>
     </header>
 
     <twig:Casa

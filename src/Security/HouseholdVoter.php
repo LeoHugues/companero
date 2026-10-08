@@ -2,7 +2,6 @@
 
 namespace App\Security;
 
-use App\Entity\Absence;
 use App\Entity\Completion;
 use App\Entity\Member;
 use App\Entity\Task;
@@ -12,10 +11,9 @@ use Symfony\Component\Security\Core\Authorization\Voter\Vote;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 
 /**
- * A member can only see and touch what belongs to their own household
- * (and only their own absences).
+ * A member can only see and touch what belongs to their own household.
  *
- * @extends Voter<string, Task|Zone|Completion|Absence>
+ * @extends Voter<string, Task|Zone|Completion>
  */
 final class HouseholdVoter extends Voter
 {
@@ -24,7 +22,7 @@ final class HouseholdVoter extends Voter
     protected function supports(string $attribute, mixed $subject): bool
     {
         return self::ACCESS === $attribute
-            && ($subject instanceof Task || $subject instanceof Zone || $subject instanceof Completion || $subject instanceof Absence);
+            && ($subject instanceof Task || $subject instanceof Zone || $subject instanceof Completion);
     }
 
     protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token, ?Vote $vote = null): bool
@@ -35,7 +33,6 @@ final class HouseholdVoter extends Voter
         }
 
         return match (true) {
-            $subject instanceof Absence => $subject->getMember() === $member,
             $subject instanceof Completion => $member->belongsTo($subject->getTask()->getHousehold()),
             default => $member->belongsTo($subject->getHousehold()),
         };

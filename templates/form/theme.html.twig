@@ -37,7 +37,9 @@
 {%- endblock form_errors -%}
 
 {%- block form_widget_simple -%}
-    {%- set attr = attr|merge({class: (attr.class|default('') ~ ' input')|trim}) -%}
+    {%- if type|default('text') != 'range' -%}
+        {%- set attr = attr|merge({class: (attr.class|default('') ~ ' input')|trim}) -%}
+    {%- endif -%}
     {{- parent() -}}
 {%- endblock form_widget_simple -%}
 

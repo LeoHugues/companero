@@ -2,26 +2,14 @@
 
 namespace App\Progress;
 
-use App\Calendar\Week;
-use App\Entity\Absence;
 use App\Entity\Member;
+use App\Entity\Presence;
 
-/** A member's weekly goal shrinks with the days they are away. */
+/** A member's weekly goal follows the days they are around: 4 days out of 7, 4/7 of the goal. */
 final class WeeklyGoalCalculator
 {
-    /** @param iterable<Absence> $absences absences of this member */
-    public function absentDays(Week $week, iterable $absences): int
+    public function goalFor(Member $member, int $presentDays): int
     {
-        $days = 0;
-        foreach ($absences as $absence) {
-            $days += $absence->daysWithin($week->start, $week->end());
-        }
-
-        return min(7, $days);
-    }
-
-    public function goalFor(Member $member, int $absentDays): int
-    {
-        return (int) round($member->getWeeklyGoal() * (7 - $absentDays) / 7);
+        return (int) round($member->getWeeklyGoal() * max(0, min(Presence::FULL_WEEK, $presentDays)) / Presence::FULL_WEEK);
     }
 }

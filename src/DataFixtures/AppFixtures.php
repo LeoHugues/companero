@@ -3,7 +3,6 @@
 namespace App\DataFixtures;
 
 use App\Calendar\Week;
-use App\Entity\Absence;
 use App\Entity\Completion;
 use App\Entity\Household;
 use App\Entity\Member;
@@ -69,7 +68,6 @@ final class AppFixtures extends Fixture
 
         $this->history($tasks, $members, $start, $now, $manager);
         $this->oneOffTasks($household, $members, $now, $manager);
-        $this->absence($members[2], $now, $manager);
         $manager->flush();
 
         for ($week = Week::containing($start); $week->end() <= $now; $week = $week->next()) {
@@ -225,14 +223,5 @@ final class AppFixtures extends Fixture
         $paper->setPoints(1);
         $paper->reserveFor($members[1], $now->modify('+20 hours'));
         $manager->persist($paper);
-    }
-
-    private function absence(Member $member, \DateTimeImmutable $now, ObjectManager $manager): void
-    {
-        $absence = new Absence($member);
-        $absence->setLabel('Week-end chez mes parents');
-        $absence->setStartsOn($now->modify('+9 days')->setTime(0, 0));
-        $absence->setEndsOn($now->modify('+11 days')->setTime(0, 0));
-        $manager->persist($absence);
     }
 }

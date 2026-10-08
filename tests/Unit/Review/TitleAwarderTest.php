@@ -17,7 +17,7 @@ final class TitleAwarderTest extends TestCase
 
     public function testAbsentAllWeek(): void
     {
-        $title = (new TitleAwarder())->award(new MemberProgress($this->member(), 0, 0, 7), [], self::SATURDAY);
+        $title = (new TitleAwarder())->award(new MemberProgress($this->member(), 0, 0, 0), [], self::SATURDAY);
 
         self::assertSame('En vadrouille', $title->name);
     }
@@ -30,7 +30,7 @@ final class TitleAwarderTest extends TestCase
             new Completion($this->task(), $member, new \DateTimeImmutable('2026-10-07'), Urgency::Late),
         ];
 
-        $title = (new TitleAwarder())->award(new MemberProgress($member, 80, 200, 0), $completions, self::SATURDAY);
+        $title = (new TitleAwarder())->award(new MemberProgress($member, 80, 200), $completions, self::SATURDAY);
 
         self::assertSame('As du rattrapage', $title->name);
     }
@@ -44,14 +44,14 @@ final class TitleAwarderTest extends TestCase
             ['2026-10-05', '2026-10-07', '2026-10-09'],
         );
 
-        $title = (new TitleAwarder())->award(new MemberProgress($member, 90, 200, 0), $completions, self::SATURDAY);
+        $title = (new TitleAwarder())->award(new MemberProgress($member, 90, 200), $completions, self::SATURDAY);
 
         self::assertSame('Spécialiste Serpillière', $title->name);
     }
 
     public function testThereIsAlwaysAKindTitle(): void
     {
-        $title = (new TitleAwarder())->award(new MemberProgress($this->member(), 0, 200, 0), [], self::SATURDAY);
+        $title = (new TitleAwarder())->award(new MemberProgress($this->member(), 0, 200), [], self::SATURDAY);
 
         self::assertSame('En mode économie d’énergie', $title->name);
     }

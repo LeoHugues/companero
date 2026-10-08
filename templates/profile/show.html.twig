@@ -21,9 +21,29 @@
         <p class="meta">Encore {{ level.xpToNext }} XP pour devenir <strong class="text-ink">{{ level.nextRank }}</strong>.</p>
     </section>
 
-    {{ form_start(profile_form, {attr: {class: 'flex flex-col gap-5'}}) }}
+    <section class="card flex items-center gap-3 p-3.5" aria-labelledby="home-title">
+        <twig:Icon :name="member.atHome ? 'home' : 'door'" class="shrink-0 text-clay-dark"/>
+        <div class="flex flex-1 flex-col">
+            <h2 id="home-title" class="text-[15px]">{{ member.atHome ? 'Je suis à la maison' : 'Je ne suis pas là' }}</h2>
+            <p class="text-xs text-muted">{{ member.atHome ? 'Tu reçois les rappels de la coloc.' : 'Les rappels vont aux colocs présents.' }}</p>
+        </div>
+        <twig:PresenceToggle :member="member" back="profile"/>
+    </section>
+
+    {{ form_start(profile_form, {attr: {class: 'flex flex-col gap-5', 'data-controller': 'presence'}}) }}
         <section class="flex flex-col gap-2">
-            {{ form_row(profile_form.weeklyGoal, {label_attr: {class: 'section-title'}, help: 'Réduit automatiquement pendant tes absences.'}) }}
+            {{ form_row(profile_form.weeklyGoal, {label_attr: {class: 'section-title'}, attr: {'data-action': 'change->presence#describe'}}) }}
+        </section>
+        <section class="card flex flex-col gap-2 p-3.5" aria-labelledby="presence-title">
+            <div class="flex items-baseline justify-between gap-2">
+                <h2 id="presence-title" class="text-[15px]"><label for="{{ profile_form.presenceDays.vars.id }}">Ma présence cette semaine</label></h2>
+                <output for="{{ profile_form.presenceDays.vars.id }}" class="text-[15px] font-extrabold text-clay-dark" data-presence-target="days"></output>
+            </div>
+            {{ form_widget(profile_form.presenceDays, {attr: {class: 'h-8 w-full cursor-pointer accent-clay', 'data-presence-target': 'slider', 'data-action': 'input->presence#describe', 'aria-describedby': 'presence-help'}}) }}
+            <ol class="-mt-1 flex justify-between px-1 text-[11px] font-bold text-muted" aria-hidden="true">
+                {% for day in 0..7 %}<li class="w-3 text-center">{{ day }}</li>{% endfor %}
+            </ol>
+            <p id="presence-help" class="meta" data-presence-target="help">Ton objectif suit tes jours de présence, et reste ainsi les semaines suivantes.</p>
         </section>
         <section class="flex flex-col gap-2" aria-labelledby="reminders-title">
             <h2 id="reminders-title" class="section-title">Rappels</h2>
@@ -35,38 +55,6 @@
         </section>
         <button type="submit" class="btn-primary self-start">Enregistrer</button>
     {{ form_end(profile_form) }}
-
-    <section class="flex flex-col gap-2" aria-labelledby="absences-title">
-        <h2 id="absences-title" class="section-title">Mes absences</h2>
-        {% if absences is not empty %}
-            <ul class="card divide-y divide-line px-3.5 py-1">
-                {% for absence in absences %}
-                    <li class="flex items-center gap-2.5 py-2.5">
-                        <twig:Icon name="calendar" size="20" class="shrink-0 text-clay-dark"/>
-                        <div class="flex flex-1 flex-col">
-                            <span class="text-[15px] font-bold">{{ absence.label }}</span>
-                            <span class="text-xs text-muted">du {{ absence.startsOn|format_date(pattern: 'd MMM', locale: 'fr') }} au {{ absence.endsOn|format_date(pattern: 'd MMM', locale: 'fr') }}</span>
-                        </div>
-                        <form method="post" action="{{ path('absence_delete', {id: absence.id}) }}">
-                            <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
-                            <button type="submit" aria-label="Supprimer l’absence « {{ absence.label }} »" class="flex size-10 cursor-pointer items-center justify-center rounded-full text-muted hover:bg-track hover:text-ink"><twig:Icon name="trash" size="18"/></button>
-                        </form>
-                    </li>
-                {% endfor %}
-            </ul>
-        {% endif %}
-        <details class="card px-3.5 py-1"{% if absence_form.vars.submitted %} open{% endif %}>
-            <summary class="flex h-12 cursor-pointer items-center gap-1.5 text-[15px] font-extrabold"><twig:Icon name="plus" size="18" stroke="2.6"/> Déclarer une absence</summary>
-            {{ form_start(absence_form, {attr: {class: 'flex flex-col gap-4 pb-4'}}) }}
-                {{ form_row(absence_form.label) }}
-                <div class="grid grid-cols-2 gap-3">
-                    {{ form_row(absence_form.startsOn) }}
-                    {{ form_row(absence_form.endsOn) }}
-                </div>
-                <button type="submit" class="btn-primary self-start">Ajouter</button>
-            {{ form_end(absence_form) }}
-        </details>
-    </section>
 
     <section class="flex flex-col gap-2" aria-labelledby="titles-title">
         <div class="flex items-baseline justify-between">

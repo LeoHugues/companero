@@ -82,9 +82,9 @@
                     <p class="flex items-center gap-2 text-[15px] font-extrabold"><twig:Avatar :member="progress.member"/> {{ progress.member.name }}</p>
                     <p class="text-[22px] leading-none font-extrabold">{{ progress.points }} <span class="text-[13px] font-semibold text-muted">/ {{ progress.goal }} pts</span></p>
                     <p class="text-xs font-bold {{ progress.reached ? 'text-clay-dark' : 'text-muted' }}">
-                        {%- if not progress.wasPresent -%}Absent toute la semaine
-                        {%- elseif progress.reached -%}Objectif atteint{{ progress.absentDays ? ' · absent ' ~ progress.absentDays ~ ' j' }}
-                        {%- else -%}{{ review.current ? 'En route !' : 'Presque !' }}{{ progress.absentDays ? ' · absent ' ~ progress.absentDays ~ ' j' }}
+                        {%- if not progress.wasPresent -%}Pas là cette semaine
+                        {%- elseif progress.reached -%}Objectif atteint{{ progress.partTime ? ' · là ' ~ progress.presentDays ~ ' j/7' }}
+                        {%- else -%}{{ review.current ? 'En route !' : 'Presque !' }}{{ progress.partTime ? ' · là ' ~ progress.presentDays ~ ' j/7' }}
                         {%- endif -%}
                     </p>
                 </li>

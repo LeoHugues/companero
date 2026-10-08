@@ -1,0 +1,9 @@
+{% props member, back = 'home' %}
+<form method="post" action="{{ path('presence_toggle') }}" {{ attributes }}>
+    <input type="hidden" name="_back" value="{{ back }}">
+    <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
+    <button type="submit" role="switch" aria-checked="{{ member.atHome ? 'true' : 'false' }}" aria-label="À la maison"
+            class="relative inline-flex h-[30px] w-[50px] shrink-0 cursor-pointer rounded-full transition {{ member.atHome ? 'bg-clay' : 'bg-switch-off' }}">
+        <span class="absolute top-[3px] left-[3px] size-6 rounded-full bg-surface shadow transition {{ member.atHome ? 'translate-x-5' : '' }}" aria-hidden="true"></span>
+    </button>
+</form>

@@ -57,6 +57,13 @@ class Member implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private \DateTimeImmutable $joinedAt;
 
+    /** "Am I home right now?", switched by hand: reminders go to the people who are around. */
+    #[ORM\Column(options: ['default' => true])]
+    private bool $atHome = true;
+
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $atHomeChangedAt = null;
+
     public function __construct(Household $household, string $name, string $email, string $color, \DateTimeImmutable $joinedAt)
     {
         $this->household = $household;
@@ -166,6 +173,24 @@ class Member implements UserInterface, PasswordAuthenticatedUserInterface
     public function getJoinedAt(): \DateTimeImmutable
     {
         return $this->joinedAt;
+    }
+
+    public function isAtHome(): bool
+    {
+        return $this->atHome;
+    }
+
+    public function setAtHome(bool $atHome, \DateTimeImmutable $at): void
+    {
+        if ($atHome !== $this->atHome) {
+            $this->atHome = $atHome;
+            $this->atHomeChangedAt = $at;
+        }
+    }
+
+    public function getAtHomeChangedAt(): ?\DateTimeImmutable
+    {
+        return $this->atHomeChangedAt;
     }
 
     public function belongsTo(Household $household): bool
