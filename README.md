@@ -30,7 +30,8 @@ php bin/console tailwind:build --watch      # dans un terminal à part
 symfony serve                               # ou tout serveur PHP pointant sur public/
 ```
 
-Coloc de démo : `leo@example.com` / `companero` (aussi `ines@`, `max@`, `sam@`).
+Coloc de démo (la nôtre : zones, tâches du dimanche, chats…) : `leo@example.com` / `companero`
+(aussi `lea@`, `robin@`, `gab@`).
 
 Sinon, ouvrez `/bienvenue` pour créer votre coloc, puis partagez le lien
 d'invitation affiché dans *Profil › La coloc*.
@@ -103,8 +104,10 @@ php bin/console lint:twig templates
 
 | Dossier | Rôle |
 |---|---|
-| `src/Entity`, `src/Repository` | Modèle : foyer, membres, zones, tâches, réalisations, journal de points, absences, titres |
-| `src/Task` | Statut d'une tâche (urgence, fraîcheur), bonus, tableau des tâches, réalisation |
+| `src/Entity`, `src/Repository` | Modèle : foyer, membres, zones, animaux, tâches, réalisations, journal de points, présence, titres, cadeaux, boosts |
+| `src/Task` | Statut d'une tâche (urgence, fraîcheur), bonus, tableau des tâches et des pièces, réalisation |
+| `src/Presence`, `src/Reminder` | Qui est là (jours par semaine, « à la maison ») et qui prévenir d'une tâche |
+| `src/Reward` | Cadeaux de niveau, boosts (dont celui du jour de ménage) |
 | `src/Calendar` | La semaine (lundi → dimanche) |
 | `src/Progress` | Niveaux, objectifs hebdo proratisés, progression collective |
 | `src/Review` | Bilan de la semaine, titres, clôture |
@@ -116,3 +119,12 @@ php bin/console lint:twig templates
 Le statut d'une tâche n'est jamais stocké : il est **calculé** à partir de ses
 règles et de sa dernière réalisation. Les points forment un **journal** : chaque
 total est une somme de lignes.
+
+## API de l'appli
+
+Deux points d'entrée JSON, authentifiés par la session (cookies de la WebView) :
+
+- `GET /api/presence`, `POST /api/presence` (`{"atHome": true|false}` ou rien pour basculer) :
+  « je suis à la maison ». Le `POST` exige l'en-tête `X-Companero-App` (protection CSRF).
+- `GET /api/rappels` : les tâches pressantes pour lesquelles on compte sur le membre
+  (les siennes, celles d'un coloc absent qu'il remplace, celles des animaux).

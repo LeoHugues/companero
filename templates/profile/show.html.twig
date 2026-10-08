@@ -95,7 +95,7 @@
         <section class="card flex flex-col gap-2 p-3.5" aria-labelledby="presence-title">
             <div class="flex items-baseline justify-between gap-2">
                 <h2 id="presence-title" class="text-[15px]"><label for="{{ profile_form.presenceDays.vars.id }}">Ma présence cette semaine</label></h2>
-                <output for="{{ profile_form.presenceDays.vars.id }}" class="text-[15px] font-extrabold text-clay-dark" data-presence-target="days"></output>
+                <output for="{{ profile_form.presenceDays.vars.id }}" class="shrink-0 text-[15px] font-extrabold whitespace-nowrap text-clay-dark" data-presence-target="days"></output>
             </div>
             {{ form_widget(profile_form.presenceDays, {attr: {class: 'h-8 w-full cursor-pointer accent-clay', 'data-presence-target': 'slider', 'data-action': 'input->presence#describe', 'aria-describedby': 'presence-help'}}) }}
             <ol class="-mt-1 flex justify-between px-1 text-[11px] font-bold text-muted" aria-hidden="true">

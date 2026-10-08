@@ -50,7 +50,12 @@ Elle est d'abord construite pour une coloc de 4 personnes. Elle pourra ensuite
 | **Réalisation** | L'événement « membre M a fait la tâche T à telle date », avec sa valeur en points, figée au moment de la réalisation. |
 | **Points** | Valeur d'une réalisation. Ce n'est pas du temps passé, mais un mélange de temps, de pénibilité et de corvée. |
 | **Objectif hebdo** | Le nombre de points qu'un membre vise sur la semaine, au prorata de sa présence. |
-| **Absence** | Une période où un membre n'est pas là. Elle réduit son objectif et met sa série en pause. |
+| **Présence** | Le nombre de jours par semaine où un membre est là (0 à 7). Elle proratise son objectif ; à 0, sa série est en pause. |
+| **À la maison** | Interrupteur « là / pas là » du moment : les rappels vont aux membres présents. |
+| **Tâche express** | Une petite tâche jamais planifiée, signalée en un appui quand elle est faite (« j'ai vidé le lave-vaisselle »). |
+| **Animal** | Un animal de la coloc. Ses tâches (repas, litière…) ont une personne qui s'en charge et un remplaçant. |
+| **Boost** | Pendant 24 h, +1 point tous les 3 points. Automatique le jour de ménage, ou gagné en montant de niveau. |
+| **Cadeau** | Ce qu'apporte un nouveau niveau : boost coloc, boost ciblé, boost d'XP, gel de série, friandise. |
 | **Bilan hebdo** | Le récapitulatif de fin de semaine : engagements tenus, objectifs atteints, titres gagnés. |
 | **Jauge de la maison** | Un indicateur collectif de l'état du foyer (« la maison est propre à 72 % »). |
 
@@ -62,7 +67,8 @@ Elle est d'abord construite pour une coloc de 4 personnes. Elle pourra ensuite
 |---|---|---|
 | **Glissante** | Aspirateur salon, rythme 3 j | L'urgence monte depuis la dernière réalisation. Chaque réalisation remet le compteur à zéro. |
 | **Glissante + engagement** | Serpillière salon, rythme 7 j, engagement 1/sem | Comme la glissante, mais si l'engagement de la semaine n'est pas tenu, l'urgence monte aussi à l'approche du jour de ménage, puis de la fin de semaine. |
-| **Calendaire** | Sortir les poubelles, mardi 20 h | Elle réapparaît à date fixe et a une échéance précise. |
+| **Calendaire** | Sortir les poubelles, mardi 20 h ; nourrir les chats, tous les jours à 19 h | Elle réapparaît à date fixe (un jour de la semaine, ou tous les jours) et a une échéance précise. |
+| **Express** | Vider le lave-vaisselle | Jamais planifiée, jamais urgente : on la signale en un appui depuis l'accueil quand on l'a faite. Elle ne compte pas dans la jauge de la maison. |
 
 **Concilier le glissant et l'hebdomadaire.** Une tâche avec engagement a deux
 sources d'urgence, et c'est **la plus forte des deux** qui s'affiche :
@@ -131,14 +137,13 @@ Les pourcentages sont exprimés par rapport au rythme ou à l'échéance. La
 
 ## 5. Les points
 
-- **Valeur de base** définie sur la tâche. Pour amorcer : 5 min ≈ 1 point, puis
-  ajustement collectif selon la pénibilité.
-- **Bonus de retard** : une tâche en retard prend de la valeur (par exemple
-  +1 point par jour de retard, plafonné). Les corvées impopulaires s'équilibrent
+- **Valeur de base** définie sur la tâche. Pour amorcer : **5 min ≈ 10 points**, puis
+  ajustement collectif selon la pénibilité (les toilettes valent plus que leurs 5 minutes).
+- **Bonus de retard** : une tâche en retard prend de la valeur (+10 points tous les deux jours de retard, plafonné à +30). Les corvées impopulaires s'équilibrent
   d'elles-mêmes.
 - **Bonus de ponctualité** : une tâche faite au bon moment rapporte un petit
-  bonus, **+1 point pour une petite tâche, +2 pour une grosse** (valeurs de
-  départ, à ajuster à l'usage). « Au bon moment », c'est le jour de ménage pour une tâche avec
+  bonus, **+10 points pour une petite tâche, +20 pour une grosse** (40 points et
+  plus ; valeurs de départ, à ajuster à l'usage). « Au bon moment », c'est le jour de ménage pour une tâche avec
   engagement, le jour de l'échéance pour une tâche calendaire, et la fenêtre
   « due » pour une glissante.
 - **Équilibre entre les deux bonus** : il ne faut pas qu'attendre rapporte plus
@@ -148,7 +153,10 @@ Les pourcentages sont exprimés par rapport au rythme ou à l'échéance. La
   bonus de retard sert à faire *reprendre* une tâche abandonnée, pas à
   récompenser l'attente.
 - **Ajustement ponctuel** : sur une réalisation, n'importe qui peut dire « cette
-  fois c'était plus, ou moins » (±).
+  fois c'était plus, ou moins » (±5).
+- **Boosts** : +1 point tous les 3 points de base, pendant 24 h. Le jour de ménage,
+  un boost s'applique automatiquement à tout le monde (désactivable). Les boosts
+  d'un même type ne s'additionnent pas.
 - Les points sont stockés comme un **journal d'événements** (réalisations,
   ajustements, et plus tard services ou cartons). Les totaux sont calculés à
   partir de ce journal.
@@ -164,14 +172,28 @@ zone : la salle de bain privée compte autant que la salle de bain partagée.
 - **chambres** : comptent, mais la tâche peut être désactivée par chaque membre
   pour sa propre chambre.
 
-## 6. Membres, absences, objectifs
+## 6. Membres, présence, objectifs
 
-- Chaque membre a un **objectif hebdo** en points (il le choisit lui-même, ou
-  on part d'une valeur commune).
-- L'objectif est **proratisé** selon la présence : 3 jours d'absence sur 7, cela
-  donne 4/7 de l'objectif.
+- Chaque membre a un **objectif hebdo** en points (150, 200, 250 ou 300).
+- Plutôt que des dates d'absence, chacun règle dans son profil un **curseur cranté
+  de 0 à 7 jours de présence par semaine**. Il vaut pour la semaine en cours et les
+  suivantes (les semaines passées gardent le leur). L'objectif est **proratisé** :
+  4 jours sur 7, cela donne 4/7 de l'objectif.
+- Un interrupteur **« Là / Pas là »** (accueil, profil, et bientôt une tuile des
+  réglages rapides Android) dit qui est à la maison en ce moment.
 - Une **série** compte les semaines consécutives où l'objectif est atteint.
-  Elle est gelée pendant les absences, jamais cassée.
+  Elle est en pause les semaines à 0 jour ; un **gel de série** la sauve une fois.
+
+## 6 bis. Animaux et rappels ciblés
+
+- Les animaux de la coloc se déclarent dans *La coloc*. Leurs tâches sont dans la
+  catégorie « Animaux » et peuvent viser un animal en particulier.
+- Une tâche peut avoir **une personne qui s'en charge** et **un remplaçant**.
+  Le rappel va à la personne si elle est à la maison, sinon au remplaçant s'il est
+  là, sinon à **toute la coloc présente**. Sans personne désignée, toute la coloc
+  présente est concernée.
+- L'accueil montre « On compte sur toi » ; `GET /api/rappels` donne la même liste
+  pour les notifications de l'appli (à brancher).
 
 ## 7. Gamification
 
@@ -186,6 +208,17 @@ zone : la salle de bain privée compte autant que la salle de bain partagée.
   jauge (voir [direction artistique](direction-artistique.md)).
 - **Objectif collectif** : la somme des points de la coloc sur la semaine, avec
   la contribution de chacun, mise en avant avant l'objectif personnel.
+- **Plan de la maison** : une vue d'en haut, une tuile par pièce dont le sol fonce
+  quand elle a besoin d'attention, avec une petite Casa à son humeur. Une pièce
+  montre ses tâches et ce qui y a été fait.
+
+### Cadeaux de niveau
+
+Chaque niveau apporte un cadeau, à tour de rôle : **boost coloc** (tout le monde,
+24 h), **gel de série**, **boost ciblé** (pour un autre coloc, jamais pour soi),
+**boost d'XP** (de l'XP en plus, qui ne compte pas pour l'objectif). Quand la coloc
+a des animaux, chaque niveau apporte aussi une **friandise**, à donner à l'un
+d'eux ou à tous. Un gel de série peut être offert à un coloc.
 
 ### Titres de la semaine
 
@@ -197,7 +230,7 @@ des titres secrets viendront plus tard.
 ### Bonus collectif
 
 Quand la coloc atteint son objectif commun (la somme des objectifs de chacun),
-chaque membre présent gagne **+5 points** à la clôture de la semaine.
+chaque membre présent gagne **+50 points** à la clôture de la semaine.
 
 ### Rappels
 
@@ -232,9 +265,11 @@ Il est généré le dimanche soir et consultable le lundi :
 | Réserver / faire / ajuster les points | Classes de personnage |
 | Urgence, bonus de retard et de ponctualité | Vue Kanban |
 | Jour de ménage (rendez-vous + notification) | Défi collectif du jour de ménage |
-| Objectif hebdo + absences | Statistiques avancées |
+| Objectif hebdo + présence | Statistiques avancées |
 | Bilan hebdo, XP, niveaux, quelques titres | |
-| Jauge de la maison | |
+| Jauge de la maison, plan par pièce | Animations de la Casa, des chats et du plumeau |
+| Tâches express, animaux, présence « à la maison » | Probabilité d'être à la maison (Wi-Fi, localisation) |
+| Cadeaux de niveau, boosts, séries et gels | Widget et tuile Android de présence |
 | Notifications (rappels) | |
 
 ## 10. Choix techniques (provisoires)

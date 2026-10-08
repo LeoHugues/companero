@@ -11,7 +11,7 @@
             <p class="meta flex items-center gap-1.5">
                 <twig:StatusDot :urgency="view.status.urgency"/>
                 <span>
-                    {{ task_status_label(task, view.status) }} · {{ task.pet.name ?? task.zone.name ?? 'Toute la coloc' }}
+                    {{ task_status_label(task, view.status) }} · {{ task.pet.name ?? task.zone.name ?? (task.category.value == 'pets' ? 'Les animaux' : 'Toute la coloc') }}
                     {% if view.status.weeklyCommitment %}· {{ view.status.doneThisWeek }}/{{ view.status.weeklyCommitment }} cette sem.{% endif %}
                 </span>
             </p>

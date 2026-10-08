@@ -3,21 +3,22 @@
 namespace App\DataFixtures;
 
 use App\Calendar\Week;
-use App\Entity\Completion;
 use App\Entity\Household;
 use App\Entity\Member;
-use App\Entity\PointEntry;
+use App\Entity\Pet;
+use App\Entity\Presence;
 use App\Entity\Task;
 use App\Entity\Zone;
-use App\Enum\PointReason;
+use App\Enum\PetSpecies;
 use App\Enum\TaskCategory;
 use App\Enum\TaskKind;
 use App\Household\Founding;
 use App\Household\HouseholdFounder;
 use App\Household\MemberRegistrar;
 use App\Household\Registration;
+use App\Repository\CompletionRepository;
 use App\Review\WeekCloser;
-use App\Task\BonusPolicy;
+use App\Task\TaskCompleter;
 use App\Task\TaskStatusResolver;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
@@ -27,18 +28,78 @@ use Symfony\Component\Clock\MockClock;
 use Symfony\Component\Clock\NativeClock;
 
 /**
- * A demo household with a few weeks of history: log in as leo@example.com / companero.
+ * Our coloc, as it is these days: Léo, Léa, Robin and Gab, two cats, the cleaning on Sunday,
+ * a few weeks of history and last Sunday's big clean. Log in as leo@example.com / companero.
  */
 final class AppFixtures extends Fixture
 {
     public const PASSWORD = 'companero';
     private const HISTORY_WEEKS = 3;
+    private const SUNDAY = 7;
+
+    /** Zones added to the founder's defaults (Cuisine, Salon, Salle de bain, WC, Entrée); true: private. */
+    private const ZONES = [
+        'Bureau' => false,
+        'Couloir' => false,
+        'Grande terrasse' => false,
+        'Petite terrasse' => false,
+        'Terrasse de l’entrée' => false,
+        'Jardin' => false,
+        'Chambre de Léo et Léa' => true,
+        'Chambre de Robin' => true,
+        'Chambre de Gab' => true,
+    ];
+
+    /**
+     * The Sunday package: every week, ideally on the cleaning day.
+     * [title, zone, points, rhythm in days, weekly commitment].
+     */
+    private const CLEANING_DAY = [
+        ['Aspirateur salon et cuisine', 'Salon', 20, 7, 1],
+        ['Aspirateur du bureau', 'Bureau', 10, 7, 1],
+        ['Aspirateur du couloir', 'Couloir', 10, 7, 1],
+        ['Aspirateur de la salle de bain', 'Salle de bain', 10, 7, 1],
+        ['Plans de travail (javel ou vinaigre)', 'Cuisine', 25, 7, 1],
+        ['Nettoyer les toilettes', 'WC', 20, 7, 1],
+        ['Serpillière salon, cuisine et toilettes', 'Salon', 30, 7, 1],
+        ['Balayer la grande terrasse', 'Grande terrasse', 20, 7, 1],
+        ['Balayer la petite terrasse', 'Petite terrasse', 10, 7, 1],
+        ['Balayer la terrasse de l’entrée', 'Terrasse de l’entrée', 10, 7, 1],
+        ['Nettoyer la grande table de la terrasse', 'Grande terrasse', 10, 7, null],
+        ['Aspirateur de la chambre', 'Chambre de Léo et Léa', 10, 7, null],
+        ['Aspirateur de la chambre de Robin', 'Chambre de Robin', 10, 7, null],
+        ['Aspirateur de la chambre de Gab', 'Chambre de Gab', 10, 7, null],
+    ];
+
+    /**
+     * Less frequent jobs: [title, zone, points, rhythm in days, category, days since last done (null: never)].
+     */
+    private const OCCASIONAL = [
+        ['Tondre autour de la maison', 'Jardin', 30, 14, TaskCategory::Garden, 20],
+        ['Nettoyer les vitres du salon', 'Salon', 50, 60, TaskCategory::Cleaning, 40],
+        ['Nettoyer et ranger le tiroir à couverts', 'Cuisine', 20, 30, TaskCategory::Cleaning, null],
+        ['Nettoyer sous le lave-vaisselle', 'Cuisine', 20, 30, TaskCategory::Cleaning, 25],
+        ['Nettoyer le lave-linge', 'Salle de bain', 20, 30, TaskCategory::Cleaning, 12],
+        ['Ranger le placard du couloir', 'Couloir', 30, 60, TaskCategory::Cleaning, 50],
+        ['Ranger le placard de l’entrée', 'Entrée', 30, 60, TaskCategory::Cleaning, null],
+    ];
+
+    /** Done when needed, in one tap: [title, zone, points, chance of being done on a given day]. */
+    private const QUICK = [
+        ['Vider le lave-vaisselle', 'Cuisine', 10, 70],
+        ['Ranger la vaisselle de l’égouttoir', 'Cuisine', 5, 50],
+        ['Faire le verre', 'Entrée', 10, 12],
+    ];
+
+    /** @var array<string, Task> */
+    private array $tasks = [];
 
     public function __construct(
         private readonly HouseholdFounder $founder,
         private readonly MemberRegistrar $registrar,
+        private readonly TaskCompleter $completer,
         private readonly TaskStatusResolver $resolver,
-        private readonly BonusPolicy $bonusPolicy,
+        private readonly CompletionRepository $completions,
         private readonly WeekCloser $weekCloser,
         private readonly ClockInterface $clock,
     ) {
@@ -49,25 +110,32 @@ final class AppFixtures extends Fixture
         mt_srand(41);
         $now = $this->clock->now();
         $start = Week::containing($now)->start->modify(\sprintf('-%d weeks', self::HISTORY_WEEKS));
+        $lastSunday = $this->lastSunday($now);
 
-        // The household was founded when its history starts.
-        Clock::set(new MockClock($start));
         try {
+            // The household was founded when its history starts.
+            Clock::set(new MockClock($start));
             $leo = $this->founder->found($this->founding());
+            $household = $leo->getHousehold();
+            [$lea, $robin, $gab] = array_map(fn (string $name): Member => $this->registrar->register($household, $this->registration($name)), ['Léa', 'Robin', 'Gab']);
+            $members = ['Léo' => $leo, 'Léa' => $lea, 'Robin' => $robin, 'Gab' => $gab];
+
+            $zones = $this->zones($household, $manager);
+            [$tishka] = $this->pets($household, $manager);
+            $this->createTasks($household, $leo, $zones, $tishka, $start, $now, $manager);
+
+            // Léa has been away since the week of last Sunday: 0 days a week.
+            $manager->persist(new Presence($lea, Week::containing($lastSunday)->start, 0));
+            $manager->flush();
+
+            $this->replay($start, $lastSunday, $members, $lastSunday);
+            $this->bigCleanOn($lastSunday, $household, $members, $zones, $manager);
+            $this->replay($lastSunday->modify('+1 day'), $now, $members, $lastSunday);
         } finally {
             Clock::set(new NativeClock());
         }
-        $household = $leo->getHousehold();
-        $members = [$leo, ...array_map(fn (string $name): Member => $this->registrar->register($household, $this->registration($name)), ['Inès', 'Max', 'Sam'])];
-        foreach ($members as $member) {
-            $member->setWeeklyGoal(150);
-        }
 
-        $zones = $this->zones($household, $manager);
-        $tasks = $this->tasks($household, $leo, $zones, $start, $manager);
-
-        $this->history($tasks, $members, $start, $now, $manager);
-        $this->oneOffTasks($household, $members, $now, $manager);
+        $lea->setAtHome(false, $lastSunday);
         $manager->flush();
 
         for ($week = Week::containing($start); $week->end() <= $now; $week = $week->next()) {
@@ -78,8 +146,8 @@ final class AppFixtures extends Fixture
     private function founding(): Founding
     {
         $founding = new Founding();
-        $founding->householdName = 'La coloc des Lilas';
-        $founding->cleaningDay = 6;
+        $founding->householdName = 'La coloc';
+        $founding->cleaningDay = self::SUNDAY;
         $founding->name = 'Léo';
         $founding->email = 'leo@example.com';
         $founding->plainPassword = self::PASSWORD;
@@ -91,7 +159,7 @@ final class AppFixtures extends Fixture
     {
         $registration = new Registration();
         $registration->name = $name;
-        $registration->email = strtolower(str_replace('è', 'e', $name)).'@example.com';
+        $registration->email = strtolower(str_replace('é', 'e', $name)).'@example.com';
         $registration->plainPassword = self::PASSWORD;
 
         return $registration;
@@ -104,9 +172,7 @@ final class AppFixtures extends Fixture
         foreach ($household->getZones() as $zone) {
             $zones[$zone->getName()] = $zone;
         }
-        $zones['Salle de bain du haut'] = $zones['Salle de bain'];
-        $zones['Salle de bain du haut']->setName('Salle de bain du haut');
-        foreach (['Jardin' => false, 'Salle de bain de Sam' => true, 'Chambre de Léo' => true] as $name => $private) {
+        foreach (self::ZONES as $name => $private) {
             $zones[$name] = new Zone($household, $name, $private);
             $manager->persist($zones[$name]);
         }
@@ -114,114 +180,195 @@ final class AppFixtures extends Fixture
         return $zones;
     }
 
-    /**
-     * @param array<string, Zone> $zones
-     *
-     * @return list<Task>
-     */
-    private function tasks(Household $household, Member $author, array $zones, \DateTimeImmutable $createdAt, ObjectManager $manager): array
+    /** @return list<Pet> */
+    private function pets(Household $household, ObjectManager $manager): array
     {
-        $definitions = [
-            ['Passer l’aspirateur', 'Salon', 30, 3, 2],
-            ['Serpillière', 'Salon', 30, 7, 1],
-            ['Nettoyer les WC', 'WC', 3, 7, 1],
-            ['Nettoyer le plan de travail', 'Cuisine', 1, 2, null],
-            ['Nettoyer la salle de bain', 'Salle de bain du haut', 4, 7, 1],
-            ['Nettoyer sa salle de bain', 'Salle de bain de Sam', 4, 7, null],
-            ['Ranger ma chambre', 'Chambre de Léo', 2, 7, null],
-            ['Arroser les plantes', 'Jardin', 1, 4, null],
-            ['Faire la vaisselle', 'Cuisine', 2, 1, null],
-            ['Nettoyer le frigo', 'Cuisine', 4, 14, null],
-            ['Passer l’aspirateur dans l’entrée', 'Entrée', 2, 7, null],
-            ['Changer les serviettes', 'Salle de bain du haut', 1, 7, null],
+        $pets = [
+            new Pet($household, 'Tishka', PetSpecies::Cat, 'Chat roux, petit et mince, à poils longs'),
+            // His name is still to be filled in.
+            new Pet($household, 'Gros chat', PetSpecies::Cat, 'Presque un maine coon : brun foncé tigré, plus clair vers le ventre'),
         ];
-
-        $tasks = [];
-        foreach ($definitions as [$title, $zone, $points, $rhythm, $commitment]) {
-            $task = new Task($household, $author, $createdAt);
-            $task->setTitle($title);
-            $task->setKind(TaskKind::Rolling);
-            $task->setZone($zones[$zone]);
-            $task->setPoints($points);
-            $task->setRhythmDays($rhythm);
-            $task->setWeeklyCommitment($commitment);
-            $manager->persist($task);
-            $tasks[] = $task;
+        foreach ($pets as $pet) {
+            $manager->persist($pet);
         }
 
-        $bins = new Task($household, $author, $createdAt);
-        $bins->setTitle('Sortir les poubelles');
-        $bins->setKind(TaskKind::Scheduled);
-        $bins->setZone($zones['Cuisine']);
-        $bins->setPoints(1);
-        $bins->setScheduledWeekday(2);
-        $bins->setScheduledTime(new \DateTimeImmutable('20:00'));
-        $bins->setMarginHours(2);
-        $manager->persist($bins);
-        $tasks[] = $bins;
+        return $pets;
+    }
 
-        return $tasks;
+    /** @param array<string, Zone> $zones */
+    private function createTasks(Household $household, Member $author, array $zones, Pet $tishka, \DateTimeImmutable $createdAt, \DateTimeImmutable $now, ObjectManager $manager): void
+    {
+        foreach (self::CLEANING_DAY as [$title, $zone, $points, $rhythm, $commitment]) {
+            $task = $this->task($household, $author, $createdAt, $title, TaskKind::Rolling, $points, $zones[$zone]);
+            $task->setRhythmDays($rhythm);
+            $task->setWeeklyCommitment($commitment);
+            // Done the Sunday before the history starts.
+            $task->complete($createdAt->modify('-1 day')->setTime(11, 0));
+        }
+
+        foreach (self::OCCASIONAL as [$title, $zone, $points, $rhythm, $category, $doneDaysAgo]) {
+            $task = $this->task($household, $author, $createdAt, $title, TaskKind::Rolling, $points, $zones[$zone], $category);
+            $task->setRhythmDays($rhythm);
+            if (null !== $doneDaysAgo) {
+                $task->complete($now->modify(\sprintf('-%d days', $doneDaysAgo))->setTime(15, 0));
+            }
+        }
+
+        foreach (self::QUICK as [$title, $zone, $points]) {
+            $this->task($household, $author, $createdAt, $title, TaskKind::Quick, $points, $zones[$zone]);
+        }
+
+        $bins = $this->task($household, $author, $createdAt, 'Sortir les poubelles', TaskKind::Scheduled, 10, $zones['Entrée']);
+        $bins->setScheduledWeekday(self::SUNDAY);
+        $bins->setScheduledTime(new \DateTimeImmutable('20:00'));
+        $bins->setMarginHours(12);
+
+        $food = $this->task($household, $author, $createdAt, 'Nourrir les chats', TaskKind::Scheduled, 5, null, TaskCategory::Pets);
+        $food->setScheduledWeekday(Task::EVERY_DAY);
+        $food->setScheduledTime(new \DateTimeImmutable('19:00'));
+        $food->setMarginHours(3);
+
+        $litter = $this->task($household, $author, $createdAt, 'Changer la litière', TaskKind::Rolling, 10, null, TaskCategory::Pets);
+        $litter->setRhythmDays(2);
+        $litter->setMarginHours(12);
+        $litter->setAssignee($author);
+
+        $brush = $this->task($household, $author, $createdAt, 'Brosser Tishka', TaskKind::Rolling, 10, null, TaskCategory::Pets);
+        $brush->setPet($tishka);
+        $brush->setRhythmDays(7);
+
+        foreach ($this->tasks as $task) {
+            $manager->persist($task);
+        }
+        $manager->flush();
+    }
+
+    private function task(Household $household, Member $author, \DateTimeImmutable $createdAt, string $title, TaskKind $kind, int $points, ?Zone $zone, TaskCategory $category = TaskCategory::Cleaning): Task
+    {
+        $task = new Task($household, $author, $createdAt);
+        $task->setTitle($title);
+        $task->setKind($kind);
+        $task->setPoints($points);
+        $task->setZone($zone);
+        $task->setCategory($category);
+
+        return $this->tasks[$title] = $task;
     }
 
     /**
-     * Replays a few weeks of life in the household, day after day.
+     * Last Sunday's big clean, as it happened: Léo did the whole Sunday package, the bins and
+     * fixed the toilets; Gab mowed around the house; Robin emptied the dishwasher.
      *
-     * @param list<Task>   $tasks
-     * @param list<Member> $members
+     * @param array<string, Member> $members
+     * @param array<string, Zone>   $zones
      */
-    private function history(array $tasks, array $members, \DateTimeImmutable $from, \DateTimeImmutable $now, ObjectManager $manager): void
+    private function bigCleanOn(\DateTimeImmutable $sunday, Household $household, array $members, array $zones, ObjectManager $manager): void
     {
-        $doneThisWeek = [];
-        for ($day = $from; $day < $now->setTime(0, 0); $day = $day->modify('+1 day')) {
-            if ('1' === $day->format('N')) {
-                $doneThisWeek = [];
+        $at = $sunday->setTime(10, 0);
+        foreach (self::CLEANING_DAY as [$title]) {
+            if (!\in_array($title, ['Aspirateur de la chambre de Robin', 'Aspirateur de la chambre de Gab'], true)) {
+                $this->doAt($title, $members['Léo'], $at = $at->modify('+12 minutes'));
             }
-            foreach ($tasks as $index => $task) {
+        }
+
+        $repair = $this->task($household, $members['Léo'], $sunday->setTime(9, 30), 'Réparer les toilettes', TaskKind::OneOff, 20, $zones['WC'], TaskCategory::Repair);
+        $manager->persist($repair);
+        $manager->flush();
+        $this->doAt('Réparer les toilettes', $members['Léo'], $sunday->setTime(13, 40));
+
+        $this->doAt('Vider le lave-vaisselle', $members['Robin'], $sunday->setTime(12, 15));
+        $this->doAt('Tondre autour de la maison', $members['Gab'], $sunday->setTime(15, 30));
+        $this->doAt('Nourrir les chats', $members['Robin'], $sunday->setTime(19, 5));
+        $this->doAt('Sortir les poubelles', $members['Léo'], $sunday->setTime(19, 45));
+    }
+
+    /**
+     * Replays the life of the household day after day, in [$from, $to): pressing tasks usually
+     * get done, the others now and then; nobody touches the Sunday package in the week of the
+     * big clean, done all at once on Sunday.
+     *
+     * @param array<string, Member> $members
+     */
+    private function replay(\DateTimeImmutable $from, \DateTimeImmutable $to, array $members, \DateTimeImmutable $bigClean): void
+    {
+        $sundayPackage = array_column(self::CLEANING_DAY, 4, 0);
+        $chances = array_column(self::QUICK, 3, 0);
+
+        for ($day = $from->setTime(0, 0); $day < $to; $day = $day->modify('+1 day')) {
+            $week = Week::containing($day);
+            $present = array_values(array_filter($members, static fn (Member $m): bool => 'Léa' !== $m->getName() || $week->end() <= Week::containing($bigClean)->start));
+
+            foreach ($this->tasks as $title => $task) {
+                if ($task->isArchived() || $task->getCreatedAt() > $day->setTime(23, 59)) {
+                    continue;
+                }
                 $at = $day->setTime(mt_rand(8, 21), mt_rand(0, 59));
-                $status = $this->resolver->resolve($task, $at, $task->getHousehold()->getCleaningDay(), $doneThisWeek[$index] ?? 0);
-                // Pressing tasks usually get done; the others only now and then.
-                if (mt_rand(1, 100) > ($status->urgency->isPressing() ? 75 : 10)) {
+                if ('Nourrir les chats' === $title) {
+                    $at = $day->setTime(18, mt_rand(40, 59));
+                }
+                if ($at >= $to) {
+                    continue;
+                }
+                if (isset($sundayPackage[$title]) && $week->contains($bigClean)) {
                     continue;
                 }
 
-                $member = $this->whoDoes($task, $members);
-                $completion = new Completion($task, $member, $at, $status->urgency);
-                $manager->persist($completion);
-                $manager->persist(new PointEntry($member, PointReason::Task, $task->getPoints(), $task->getTitle(), $at, $completion));
-                if (null !== $bonus = $this->bonusPolicy->bonusFor($task, $status)) {
-                    $manager->persist(new PointEntry($member, $bonus->reason, $bonus->points, $task->getTitle(), $at, $completion));
+                if (mt_rand(1, 100) > $this->chance($task, $at, $chances[$title] ?? null, $week)) {
+                    continue;
                 }
-                $task->complete($at);
-                $doneThisWeek[$index] = ($doneThisWeek[$index] ?? 0) + 1;
+                $this->doAt($title, $this->whoDoes($task, $present), $at);
             }
         }
     }
 
-    /** @param list<Member> $members */
-    private function whoDoes(Task $task, array $members): Member
+    /** In percent. */
+    private function chance(Task $task, \DateTimeImmutable $at, ?int $quickChance, Week $week): int
     {
-        return match ($task->getZone()?->getName()) {
-            'Chambre de Léo' => $members[0],
-            'Salle de bain de Sam' => $members[3],
-            default => $members[mt_rand(0, \count($members) - 1)],
+        if (TaskKind::Quick === $task->getKind()) {
+            return (int) $quickChance;
+        }
+        if ('Nourrir les chats' === $task->getTitle()) {
+            return 95;
+        }
+
+        $status = $this->resolver->resolve($task, $at, self::SUNDAY, $this->completions->countForTask($task, $week->start, $week->end()));
+        $occasional = ($task->getRhythmDays() ?? 0) >= 30;
+
+        return match (true) {
+            $status->urgency->isPressing() && self::SUNDAY === (int) $at->format('N') => 85,
+            $status->urgency->isPressing() => $occasional ? 4 : 35,
+            default => $occasional ? 0 : 4,
         };
     }
 
-    /** @param list<Member> $members */
-    private function oneOffTasks(Household $household, array $members, \DateTimeImmutable $now, ObjectManager $manager): void
+    private function doAt(string $title, Member $member, \DateTimeImmutable $at): void
     {
-        $call = new Task($household, $members[2], $now->modify('-2 days'));
-        $call->setTitle('Appeler le proprio pour la fuite du jardin');
-        $call->setCategory(TaskCategory::Other);
-        $call->setPoints(2);
-        $call->setDueAt($now->modify('+3 days')->setTime(18, 0));
-        $manager->persist($call);
+        Clock::set(new MockClock($at));
+        $this->completer->complete($this->tasks[$title], $member);
+    }
 
-        $paper = new Task($household, $members[1], $now->modify('-1 day'));
-        $paper->setTitle('Racheter du papier toilette');
-        $paper->setCategory(TaskCategory::Shopping);
-        $paper->setPoints(1);
-        $paper->reserveFor($members[1], $now->modify('+20 hours'));
-        $manager->persist($paper);
+    /** @param list<Member> $present */
+    private function whoDoes(Task $task, array $present): Member
+    {
+        $byName = array_column(array_map(static fn (Member $m): array => [$m->getName(), $m], $present), 1, 0);
+
+        return match (true) {
+            null !== $task->getAssignee() => $task->getAssignee(),
+            'Chambre de Robin' === $task->getZone()?->getName() => $byName['Robin'],
+            'Chambre de Gab' === $task->getZone()?->getName() => $byName['Gab'],
+            'Chambre de Léo et Léa' === $task->getZone()?->getName() => isset($byName['Léa']) && mt_rand(0, 1) ? $byName['Léa'] : $byName['Léo'],
+            default => $present[mt_rand(0, \count($present) - 1)],
+        };
+    }
+
+    /** The latest Sunday before today. */
+    private function lastSunday(\DateTimeImmutable $now): \DateTimeImmutable
+    {
+        $day = $now->setTime(0, 0)->modify('-1 day');
+        while (self::SUNDAY !== (int) $day->format('N')) {
+            $day = $day->modify('-1 day');
+        }
+
+        return $day;
     }
 }
