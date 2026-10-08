@@ -42,8 +42,8 @@ final class PagesTest extends AppTestCase
         self::assertResponseRedirects('/profil');
 
         $this->client->request('GET', '/bilan');
-        // 20 pts × 4 days present / 7.
-        self::assertSelectorTextContains('#team-title + p', '/ 11 pts');
+        // 200 pts × 4 days present / 7.
+        self::assertSelectorTextContains('#team-title + p', '/ 114 pts');
     }
 
     public function testAddingAZone(): void

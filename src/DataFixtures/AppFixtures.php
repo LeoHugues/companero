@@ -61,7 +61,7 @@ final class AppFixtures extends Fixture
         $household = $leo->getHousehold();
         $members = [$leo, ...array_map(fn (string $name): Member => $this->registrar->register($household, $this->registration($name)), ['Inès', 'Max', 'Sam'])];
         foreach ($members as $member) {
-            $member->setWeeklyGoal(15);
+            $member->setWeeklyGoal(150);
         }
 
         $zones = $this->zones($household, $manager);
@@ -124,8 +124,8 @@ final class AppFixtures extends Fixture
     private function tasks(Household $household, Member $author, array $zones, \DateTimeImmutable $createdAt, ObjectManager $manager): array
     {
         $definitions = [
-            ['Passer l’aspirateur', 'Salon', 3, 3, 2],
-            ['Serpillière', 'Salon', 3, 7, 1],
+            ['Passer l’aspirateur', 'Salon', 30, 3, 2],
+            ['Serpillière', 'Salon', 30, 7, 1],
             ['Nettoyer les WC', 'WC', 3, 7, 1],
             ['Nettoyer le plan de travail', 'Cuisine', 1, 2, null],
             ['Nettoyer la salle de bain', 'Salle de bain du haut', 4, 7, 1],

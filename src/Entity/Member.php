@@ -14,7 +14,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[UniqueEntity('email', message: 'Cette adresse est déjà utilisée.')]
 class Member implements UserInterface, PasswordAuthenticatedUserInterface
 {
-    public const GOAL_CHOICES = [15, 20, 25, 30];
+    public const GOAL_CHOICES = [150, 200, 250, 300];
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -43,7 +43,7 @@ class Member implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(type: Types::SMALLINT)]
     #[Assert\Choice(choices: self::GOAL_CHOICES)]
-    private int $weeklyGoal = 20;
+    private int $weeklyGoal = 200;
 
     #[ORM\Column]
     private bool $notifyCleaningDay = true;

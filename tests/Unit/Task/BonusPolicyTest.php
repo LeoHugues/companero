@@ -22,13 +22,13 @@ final class BonusPolicyTest extends TestCase
         self::assertNull($policy->bonusFor($this->task(), new TaskStatus(Urgency::Soon, 40)));
     }
 
-    public function testPunctualityPaysOneForSmallTasksAndTwoForBigOnes(): void
+    public function testPunctualityPaysTenForSmallTasksAndTwentyForBigOnes(): void
     {
         $policy = new BonusPolicy();
         $due = new TaskStatus(Urgency::Due, 0);
 
-        self::assertEquals(1, $policy->bonusFor($this->task(points: 3), $due)?->points);
-        self::assertEquals(2, $policy->bonusFor($this->task(points: 4), $due)?->points);
+        self::assertEquals(10, $policy->bonusFor($this->task(points: 30), $due)?->points);
+        self::assertEquals(20, $policy->bonusFor($this->task(points: 40), $due)?->points);
         self::assertSame(PointReason::Punctuality, $policy->bonusFor($this->task(), $due)?->reason);
     }
 
@@ -37,10 +37,10 @@ final class BonusPolicyTest extends TestCase
     {
         yield [0, 0];
         yield [1, 0];
-        yield [2, 1];
-        yield [3, 1];
-        yield [5, 2];
-        yield [30, 3];
+        yield [2, 10];
+        yield [3, 10];
+        yield [5, 20];
+        yield [30, 30];
     }
 
     #[DataProvider('rescueCases')]
@@ -54,7 +54,7 @@ final class BonusPolicyTest extends TestCase
     public function testBeingOnTimeNeverPaysLessThanTwoDaysOfDelay(): void
     {
         $policy = new BonusPolicy();
-        $task = $this->task(points: 2);
+        $task = $this->task(points: 20);
 
         $onTime = $policy->bonusFor($task, new TaskStatus(Urgency::Due, 0))->points ?? 0;
         $twoDaysLate = $policy->bonusFor($task, new TaskStatus(Urgency::Late, 0, overdueDays: 2))->points ?? 0;

@@ -18,6 +18,6 @@
         {% endfor %}
     </ul>
     {% if team.reached %}
-        <p class="text-[13px] font-bold text-clay-dark">Objectif collectif atteint : +5 pts pour chacun dimanche soir</p>
+        <p class="text-[13px] font-bold text-clay-dark">Objectif collectif atteint : +{{ constant('App\\Review\\WeekCloser::TEAM_BONUS') }} pts pour chacun dimanche soir</p>
     {% endif %}
 </section>

@@ -15,7 +15,7 @@ final class WeeklyGoalCalculatorTest extends TestCase
     public function testGoalIsProratedByTheDaysAway(): void
     {
         $member = $this->member();
-        $member->setWeeklyGoal(20);
+        $member->setWeeklyGoal(200);
         $week = Week::containing(new \DateTimeImmutable('2026-10-07'));
 
         // Away from Friday to the next Tuesday: Friday, Saturday and Sunday fall in this week.
@@ -27,7 +27,7 @@ final class WeeklyGoalCalculatorTest extends TestCase
         $days = $calculator->absentDays($week, [$absence]);
 
         self::assertSame(3, $days);
-        self::assertSame(11, $calculator->goalFor($member, $days));
+        self::assertSame(114, $calculator->goalFor($member, $days));
     }
 
     public function testNoAbsenceKeepsTheFullGoal(): void
@@ -35,6 +35,6 @@ final class WeeklyGoalCalculatorTest extends TestCase
         $member = $this->member();
         $calculator = new WeeklyGoalCalculator();
 
-        self::assertSame(20, $calculator->goalFor($member, $calculator->absentDays(Week::containing(new \DateTimeImmutable()), [])));
+        self::assertSame(200, $calculator->goalFor($member, $calculator->absentDays(Week::containing(new \DateTimeImmutable()), [])));
     }
 }

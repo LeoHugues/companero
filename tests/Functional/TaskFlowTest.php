@@ -21,7 +21,7 @@ final class TaskFlowTest extends AppTestCase
             'task[rhythmDays]' => '7',
             'task[weeklyCommitment]' => '1',
             'task[category]' => 'cleaning',
-            'task[points]' => '3',
+            'task[points]' => '30',
         ]);
         self::assertResponseRedirects('/');
 
@@ -35,10 +35,10 @@ final class TaskFlowTest extends AppTestCase
         $this->submitAction('/taches/'.$task->getId().'/fait');
         self::assertResponseRedirects('/');
         $this->client->followRedirect();
-        self::assertSelectorTextContains('[data-casa-target=speech]', 'Merci Léo ! +4 pts');
+        self::assertSelectorTextContains('[data-casa-target=speech]', 'Merci Léo ! +40 pts');
 
         $points = static::getContainer()->get(PointEntryRepository::class);
-        self::assertSame(4, $points->totalFor($leo));
+        self::assertSame(40, $points->totalFor($leo));
         self::assertTrue($points->hasEntry($leo, PointReason::Punctuality, new \DateTimeImmutable('-1 hour'), new \DateTimeImmutable('+1 hour')));
     }
 

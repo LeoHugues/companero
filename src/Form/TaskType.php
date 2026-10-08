@@ -58,7 +58,7 @@ class TaskType extends AbstractType
                     ->setParameter('household', $household)
                     ->orderBy('z.name', 'ASC'),
             ])
-            ->add('points', IntegerType::class, ['label' => 'Ça vaut combien ?', 'attr' => ['min' => 1, 'max' => 50]])
+            ->add('points', IntegerType::class, ['label' => 'Ça vaut combien ?', 'attr' => ['min' => 5, 'max' => 500, 'step' => 5]])
             ->add('rhythmDays', IntegerType::class, ['label' => 'Tous les combien de jours ?', 'required' => false, 'attr' => ['min' => 1]])
             ->add('weeklyCommitment', IntegerType::class, [
                 'label' => 'Au moins combien de fois par semaine ?',

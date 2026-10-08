@@ -137,7 +137,7 @@
                             <form method="post" action="{{ path('completion_adjust', {id: completion.id}) }}">
                                 <input type="hidden" name="sens" value="{{ direction }}">
                                 <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
-                                <button type="submit" aria-label="{{ direction == 'plus' ? 'Un point de plus' : 'Un point de moins' }} pour {{ completion.member.name }}"
+                                <button type="submit" aria-label="{{ direction == 'plus' ? '5 points de plus' : '5 points de moins' }} pour {{ completion.member.name }}"
                                         class="flex size-9 cursor-pointer items-center justify-center rounded-full border-[1.5px] border-line text-ink transition hover:bg-track active:scale-90">
                                     <twig:Icon :name="direction == 'plus' ? 'plus' : 'minus'" size="16" stroke="2.4"/>
                                 </button>

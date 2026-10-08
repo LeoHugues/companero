@@ -42,8 +42,9 @@ class Task
     private TaskCategory $category = TaskCategory::Cleaning;
 
     #[ORM\Column(type: Types::SMALLINT)]
-    #[Assert\Range(min: 1, max: 50)]
-    private int $points = 2;
+    /** 10 points ≈ 5 minutes of effort, then adjusted for how much of a chore it is. */
+    #[Assert\Range(min: 1, max: 500)]
+    private int $points = 20;
 
     #[ORM\Column(type: Types::SMALLINT, nullable: true)]
     #[Assert\Range(min: 1, max: 365)]

@@ -21,7 +21,7 @@ trait TaskFactory
         return new Member($household ?? $this->household(), $name, strtolower($name).'@example.com', '#E8692C', new \DateTimeImmutable('2026-01-01'));
     }
 
-    private function rollingTask(int $rhythmDays, ?string $lastCompletedAt, ?int $weeklyCommitment = null, int $points = 3, ?Zone $zone = null): Task
+    private function rollingTask(int $rhythmDays, ?string $lastCompletedAt, ?int $weeklyCommitment = null, int $points = 30, ?Zone $zone = null): Task
     {
         $task = $this->task(TaskKind::Rolling, $points, $zone);
         $task->setRhythmDays($rhythmDays);
@@ -33,7 +33,7 @@ trait TaskFactory
         return $task;
     }
 
-    private function task(TaskKind $kind = TaskKind::OneOff, int $points = 3, ?Zone $zone = null, string $createdAt = '2026-01-01'): Task
+    private function task(TaskKind $kind = TaskKind::OneOff, int $points = 30, ?Zone $zone = null, string $createdAt = '2026-01-01'): Task
     {
         $member = $this->member();
         $task = new Task($member->getHousehold(), $member, new \DateTimeImmutable($createdAt));

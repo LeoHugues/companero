@@ -18,10 +18,13 @@ final readonly class PointAdjuster
     ) {
     }
 
+    /** One tap is worth about two or three minutes. */
+    public const STEP = 5;
+
     public function adjust(Completion $completion, Member $author, int $delta): void
     {
-        if (!\in_array($delta, [-1, 1], true)) {
-            throw new \InvalidArgumentException('Points are adjusted one at a time.');
+        if (!\in_array($delta, [-self::STEP, self::STEP], true)) {
+            throw new \InvalidArgumentException(\sprintf('Points are adjusted %d at a time.', self::STEP));
         }
 
         $this->entityManager->persist(new PointEntry(

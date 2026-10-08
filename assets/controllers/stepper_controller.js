@@ -1,9 +1,9 @@
 import { Controller } from '@hotwired/stimulus';
 
-/* − / + buttons around the points field, with the matching effort in minutes. */
+/* − / + buttons around the points field, with the matching effort in minutes (10 pts ≈ 5 min). */
 export default class extends Controller {
     static targets = ['input', 'hint'];
-    static values = { minutesPerPoint: { type: Number, default: 5 } };
+    static values = { minutesPerPoint: { type: Number, default: 0.5 } };
 
     connect() {
         this.describe();
@@ -20,7 +20,7 @@ export default class extends Controller {
     }
 
     describe() {
-        const minutes = (parseInt(this.inputTarget.value, 10) || 0) * this.minutesPerPointValue;
+        const minutes = Math.round((parseInt(this.inputTarget.value, 10) || 0) * this.minutesPerPointValue);
         const duration = minutes >= 60 ? `${Math.floor(minutes / 60)} h${minutes % 60 ? ` ${minutes % 60}` : ''}` : `${minutes} min`;
         this.hintTarget.textContent = `≈ ${duration} d’effort`;
     }

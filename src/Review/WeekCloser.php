@@ -20,7 +20,7 @@ use Doctrine\ORM\EntityManagerInterface;
  */
 final readonly class WeekCloser
 {
-    public const TEAM_BONUS = 5;
+    public const TEAM_BONUS = 50;
 
     public function __construct(
         private EntityManagerInterface $entityManager,

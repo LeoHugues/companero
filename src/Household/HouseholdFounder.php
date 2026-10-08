@@ -16,12 +16,14 @@ final readonly class HouseholdFounder
     private const ZONES = ['Cuisine', 'Salon', 'Salle de bain', 'WC', 'Entrée'];
 
     private const CATALOG = [
-        ['Tailler la haie', TaskCategory::Garden, 10],
-        ['Tondre la pelouse', TaskCategory::Garden, 8],
-        ['Nettoyer les gouttières', TaskCategory::Repair, 12],
-        ['Dégivrer le congélateur', TaskCategory::Cleaning, 6],
-        ['Nettoyer les vitres', TaskCategory::Cleaning, 8],
-        ['Racheter du papier toilette', TaskCategory::Shopping, 1],
+        ['Tailler la haie', TaskCategory::Garden, 100],
+        ['Tondre la pelouse', TaskCategory::Garden, 60],
+        ['Nettoyer les gouttières', TaskCategory::Repair, 120],
+        ['Dégivrer le congélateur', TaskCategory::Cleaning, 60],
+        ['Nettoyer les vitres', TaskCategory::Cleaning, 50],
+        ['Ranger et nettoyer un placard', TaskCategory::Cleaning, 60],
+        ['Petite réparation', TaskCategory::Repair, 20],
+        ['Racheter du papier toilette', TaskCategory::Shopping, 10],
     ];
 
     public function __construct(

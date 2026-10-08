@@ -40,7 +40,7 @@ final class ReviewController extends AbstractController
     #[IsCsrfTokenValid('submit', tokenKey: '_csrf_token')]
     public function adjust(Completion $completion, #[CurrentUser] Member $member, Request $request, PointAdjuster $adjuster): RedirectResponse
     {
-        $adjuster->adjust($completion, $member, 'plus' === $request->request->getString('sens') ? 1 : -1);
+        $adjuster->adjust($completion, $member, 'plus' === $request->request->getString('sens') ? PointAdjuster::STEP : -PointAdjuster::STEP);
         $this->addFlash('success', 'Merci, c’est noté pour '.$completion->getMember()->getName().'.');
 
         return $this->redirectToRoute('review_show', [

@@ -29,10 +29,10 @@ final class LevelCalculator
         return new Level($number, self::rank($number), $xp, self::threshold($number), self::threshold($number + 1), self::rank($number + 1));
     }
 
-    /** XP needed to reach a level: 0, 20, 60, 120, 200… each level asks a bit more than the previous one. */
+    /** XP needed to reach a level: 0, 200, 600, 1 200, 2 000… each level asks a bit more than the previous one. */
     public static function threshold(int $level): int
     {
-        return 10 * $level * ($level - 1);
+        return 100 * $level * ($level - 1);
     }
 
     private static function rank(int $level): string
