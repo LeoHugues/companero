@@ -1,0 +1,26 @@
+{% props view, size = 56 %}
+{#
+    The face of a task card: its category in a round medallion, ringed by how much time is left
+    (sage, honey, coral). When its moment has come it bounces now and then; once late, it wobbles
+    and wears a little "!" — a nudge, never an alarm.
+#}
+{% set task = view.task %}
+{% set status = view.status %}
+{% set alert = status.alert %}
+{% set r = 25 %}
+{% set full = 157.1 %}
+{% set left = task.kind.value == 'occasional' and not task.raised ? 100 : (status.urgency.value == 'fresh' ? max(status.freshness, 70) : status.freshness) %}
+<span {{ attributes.defaults({class: 'medallion medallion-' ~ alert ~ ' medallion-' ~ status.urgency.value}) }} style="--size: {{ size }}px" aria-hidden="true">
+    <svg viewBox="0 0 60 60" width="{{ size }}" height="{{ size }}">
+        <circle cx="30" cy="30" r="{{ r }}" style="fill: var(--color-cat-{{ task.category.value }})"/>
+        <circle cx="30" cy="30" r="{{ r }}" fill="none" style="stroke: var(--color-track)" stroke-width="5"/>
+        <circle class="medallion-ring" cx="30" cy="30" r="{{ r }}" fill="none" stroke-width="5" stroke-linecap="round"
+                stroke-dasharray="{{ full }}" style="--full: {{ full }}; stroke-dashoffset: {{ (full * (1 - left / 100))|round(1) }}" transform="rotate(-90 30 30)"/>
+    </svg>
+    <span class="medallion-icon"><twig:Icon :name="task.category.icon" :size="(size * 0.42)|round" stroke="2.2"/></span>
+    {% if alert == 'danger' %}
+        <span class="medallion-badge">!</span>
+    {% elseif status.urgency.value == 'fresh' and left >= 90 %}
+        <span class="medallion-spark"><twig:Spark size="12" color="#F6C453"/></span>
+    {% endif %}
+</span>

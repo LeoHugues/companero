@@ -36,6 +36,10 @@ final class TaskStatusResolver
             TaskKind::Scheduled => $this->scheduled($task, $now, $lastCompletedAt),
             TaskKind::OneOff => $this->oneOff($task, $now),
             TaskKind::Quick => new TaskStatus(Urgency::Fresh, 100),
+            // Asleep until someone says it is needed; then the moment has come.
+            TaskKind::Occasional => null === $task->getRaisedAt()
+                ? new TaskStatus(Urgency::Fresh, 100)
+                : $this->deadlineStatus($task->getRaisedAt(), $task->getMarginHours(), 0, $now, self::DAY),
         };
     }
 

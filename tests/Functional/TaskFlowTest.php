@@ -299,7 +299,7 @@ final class TaskFlowTest extends AppTestCase
         $task = static::getContainer()->get(TaskRepository::class)->findOneBy(['title' => 'Racheter du PQ']);
         // In no hurry, it still waits on the home page.
         $this->client->request('GET', '/');
-        self::assertSelectorTextContains('[aria-labelledby=later-title] #task-'.$task?->getId(), 'Je m’en occupe');
+        self::assertSelectorTextContains('[aria-labelledby=later-title] #task-'.$task?->getId(), 'Je prends');
 
         $this->client->request('POST', '/taches/'.$task?->getId().'/je-m-en-occupe', ['_csrf_token' => 'csrf-token', '_back' => 'home']);
         self::assertResponseRedirects('/');

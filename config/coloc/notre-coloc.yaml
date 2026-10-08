@@ -30,6 +30,7 @@ zones:
 
 animaux:
     - { nom: Tishka, espece: chat, description: 'Chat roux, petit et mince, à poils longs' }
+    - { nom: Gizmo, espece: chat, description: 'Gros chat, presque un maine coon : brun foncé tigré, plus clair vers le ventre' }
 
 # Le ménage du dimanche : chaque semaine, au moins une fois par semaine.
 taches:
@@ -52,6 +53,11 @@ express:
     - { titre: Vider le lave-vaisselle, zone: Cuisine, points: 10 }
     - { titre: Ranger la vaisselle de l’égouttoir, zone: Cuisine, points: 5 } # points estimés
     - { titre: Faire le verre, zone: Entrée, points: 10 } # points estimés
+
+# Quand ça arrive : elles dorment jusqu'à ce que quelqu'un les signale.
+occasionnelles:
+    - { titre: Nettoyer le vomi de Gizmo, zone: Salon, categorie: animaux, points: 15 } # points estimés
+    - { titre: Réparer la chasse d’eau, zone: WC, categorie: bricolage, points: 40 } # points estimés
 
 # Ce qu'on ne fait pas tout le temps : à lancer depuis le catalogue quand il le faut.
 catalogue:

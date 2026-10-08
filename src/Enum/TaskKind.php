@@ -12,6 +12,8 @@ enum TaskKind: string
     case OneOff = 'one_off';
     /** Never planned, never late: done when needed and reported in one tap (emptied the dishwasher…). */
     case Quick = 'quick';
+    /** Sleeps until it is needed (the cat was sick, the flush leaks): someone says "ça arrive", its card shows up until done. */
+    case Occasional = 'occasional';
 
     public function label(): string
     {
@@ -20,6 +22,7 @@ enum TaskKind: string
             self::Scheduled => 'À jour fixe',
             self::OneOff => 'Ponctuelle',
             self::Quick => 'Express',
+            self::Occasional => 'Occasionnelle',
         };
     }
 

@@ -1,71 +1,47 @@
 {% props view, member, back = 'home', compact = false %}
 {#
-    A task as a card: its rarity (the skin), its urgency (the stripe and the pill), what it is worth.
-    The whole card opens its page; the settings wheel and the action buttons sit above that link.
-    compact: lists (tasks, rooms), with a single "done" button.
+    A task as a card to play: its medallion (the category, ringed by the time left), its title,
+    where and how often, then "Je prends" and "C'est fait", which shows what it is worth.
+    Its rarity is the card's skin; a surprise hidden in it this week makes it one class rarer.
+    The whole card opens its page; the settings wheel and the buttons sit above that link.
+    compact: lists (rooms), with a single round "done" button.
 #}
 {% set task = view.task %}
 {% set status = view.status %}
 {% set boost = task_boost(view) %}
-{# A surprise hidden in the card this week makes it one class rarer. #}
 {% set rarity = view.rarity %}
-{% set barColors = {ok: 'var(--color-ok)', warning: 'var(--color-warn)', danger: 'var(--color-danger)'} %}
-{% set barColor = barColors[status.alert] %}
 <article {{ attributes.defaults({
-    class: 'card card-hover rarity-' ~ rarity.value ~ ' relative flex flex-col overflow-hidden ' ~ (compact ? 'gap-1.5 py-3 pr-3 pl-5' : 'gap-2 py-3.5 pr-3.5 pl-5'),
+    class: 'task-card card card-hover rarity-' ~ rarity.value ~ ' task-card-' ~ status.alert ~ ' relative flex flex-col ' ~ (compact ? 'gap-2 p-3' : 'gap-3 p-3.5'),
     id: 'task-' ~ task.id,
     'data-rarity': rarity.value,
     'data-alert': status.alert
 }) }}>
-    <span class="urgency-stripe urgency-stripe-{{ status.alert }}" aria-hidden="true"></span>
-
-    <div class="flex items-center gap-2">
-        <twig:RarityBadge :rarity="rarity"/>
-        <twig:UrgencyPill :view="view"/>
-        {% if view.bounty %}
-            <span class="bounty-tag bounty-tag-icon" title="Une surprise attend la première personne qui la fait cette semaine" aria-label="Surprise cachée"><twig:Icon name="gift" size="13" stroke="2.6"/></span>
-        {% endif %}
+    <div class="flex items-start gap-3">
+        <twig:TaskMedallion :view="view" :size="compact ? 46 : 56" class="shrink-0"/>
+        <div class="flex min-w-0 flex-1 flex-col gap-1">
+            <div class="flex items-center gap-1.5">
+                {% if rarity.value != 'common' %}<twig:RarityBadge :rarity="rarity"/>{% endif %}
+                <twig:UrgencyPill :view="view"/>
+                {% if view.bounty %}
+                    <span class="bounty-tag bounty-tag-icon" title="Une surprise attend la première personne qui la fait cette semaine" aria-label="Surprise cachée"><twig:Icon name="gift" size="13" stroke="2.6"/></span>
+                {% endif %}
+            </div>
+            <h3 class="{{ compact ? 'text-base' : 'text-[17px]' }} leading-snug font-extrabold [overflow-wrap:anywhere]">
+                {# Stretched over the whole card: a tap anywhere opens the card's page. #}
+                <a href="{{ path('task_show', {id: task.id}) }}" class="text-ink no-underline after:absolute after:inset-0 after:rounded-[inherit] after:content-[''] hover:text-ink">{{ task.title }}</a>
+            </h3>
+            <p class="text-xs font-semibold text-muted">
+                {{ task.pet.name ?? task.zone.name ?? (task.category.value == 'pets' ? 'Les animaux' : 'Toute la coloc') }} · {{ task_rule_label(task) }}
+                {% if status.weeklyCommitment %}· {{ status.doneThisWeek }}/{{ status.weeklyCommitment }} cette sem.{% endif %}
+            </p>
+            <twig:ReminderNote :view="view" :member="member"/>
+        </div>
         <a href="{{ path('task_edit', {id: task.id}) }}" aria-label="Réglages de « {{ task.title }} »" title="Réglages de la tâche"
-           class="relative z-10 -my-1.5 -mr-1.5 ml-auto flex size-9 shrink-0 items-center justify-center rounded-full text-muted no-underline transition hover:bg-track hover:text-ink">
-            <twig:Icon name="settings" size="19"/>
+           class="relative z-10 -mt-1 -mr-1.5 flex size-8 shrink-0 items-center justify-center rounded-full text-dust no-underline transition hover:bg-track hover:text-ink">
+            <twig:Icon name="settings" size="17"/>
         </a>
     </div>
 
-    <h3 class="{{ compact ? 'text-base' : 'text-[17px]' }} leading-snug font-bold [overflow-wrap:anywhere]">
-        {# Stretched over the whole card: a tap anywhere opens the card's page. #}
-        <a href="{{ path('task_show', {id: task.id}) }}" class="text-ink no-underline after:absolute after:inset-0 after:content-[''] hover:text-clay-dark">{{ task.title }}</a>
-    </h3>
-
-    {% if task.kind.value == 'rolling' %}
-        <twig:ProgressBar :value="status.freshness" height="6" :color="barColor" label="Fraîcheur de « {{ task.title }} »"/>
-    {% endif %}
-
-    {% set meta %}
-        <p class="text-xs text-muted">
-            {{ task.pet.name ?? task.zone.name ?? (task.category.value == 'pets' ? 'Les animaux' : 'Toute la coloc') }} · {{ task_rule_label(task) }}
-            {% if status.weeklyCommitment %}· {{ status.doneThisWeek }}/{{ status.weeklyCommitment }} cette sem.{% endif %}
-            {% if compact and view.reservedBy %}· {{ view.isReservedBy(member) ? 'tu t’en occupes' : view.reservedBy.name ~ ' s’en occupe' }}{% endif %}
-        </p>
-        <twig:ReminderNote :view="view" :member="member"/>
-    {% endset %}
-    {% set points %}
-        <p class="flex items-baseline gap-1.5">
-            <span class="{{ compact ? 'text-sm' : 'text-[15px]' }} font-extrabold whitespace-nowrap text-clay-dark">+{{ task.points + boost }} pts</span>
-            {% if boost %}<span class="flex items-center text-[11px] font-bold whitespace-nowrap text-muted"><twig:Icon name="bolt" size="11" stroke="2.6"/>+{{ boost }} boost</span>{% endif %}
-        </p>
-    {% endset %}
-
     {# Only the buttons sit above the card's link. #}
-    {% if compact %}
-        <div class="flex items-end justify-between gap-3">
-            <div class="flex min-w-0 flex-col gap-1">{{ meta }}{{ points }}</div>
-            <twig:TaskActions :view="view" :back="back" :member="member" compact class="relative z-10 shrink-0"/>
-        </div>
-    {% else %}
-        {{ meta }}
-        <div class="flex items-center justify-between gap-3 pt-1">
-            {{ points }}
-            <twig:TaskActions :view="view" :back="back" :member="member" class="relative z-10 flex-row-reverse"/>
-        </div>
-    {% endif %}
+    <twig:TaskActions :view="view" :back="back" :member="member" :boost="boost" :compact="compact" class="relative z-10"/>
 </article>

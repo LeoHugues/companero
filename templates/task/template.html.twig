@@ -33,11 +33,11 @@
         <dd><twig:RarityBadge :rarity="task.rarity"/></dd>
         <dt class="font-bold">Catégorie</dt>
         <dd class="text-muted">{{ task.category.label }}</dd>
-        {% if task.kind.isPlanned %}
+        {% if task.kind.isPlanned or task.kind.value == 'occasional' %}
             <dt class="font-bold">Alertes</dt>
             <dd class="flex flex-col gap-1 text-muted">
-                <span class="flex items-center gap-1.5"><span class="size-2.5 rounded-full bg-warn" aria-hidden="true"></span>orange {{ task.warningHours ? duration_label(task.warningHours) ~ ' avant' : (task.kind.value == 'rolling' ? 'aux 60 % du rythme' : '2 jours avant') }}</span>
-                <span class="flex items-center gap-1.5"><span class="size-2.5 rounded-full bg-danger" aria-hidden="true"></span>rouge {{ duration_label(task.marginHours) }} après</span>
+                {% if task.kind.isPlanned %}<span class="flex items-center gap-1.5"><span class="size-2.5 rounded-full bg-warn" aria-hidden="true"></span>orange {{ task.warningHours ? duration_label(task.warningHours) ~ ' avant' : (task.kind.value == 'rolling' ? 'aux 60 % du rythme' : '2 jours avant') }}</span>{% endif %}
+                <span class="flex items-center gap-1.5"><span class="size-2.5 rounded-full bg-danger" aria-hidden="true"></span>rouge {{ duration_label(task.marginHours) }} après{{ task.kind.value == 'occasional' ? ' avoir été signalée' }}</span>
             </dd>
         {% endif %}
         {% if task.cooldownHours %}
@@ -58,6 +58,19 @@
                 <span class="flex-1 text-sm font-bold">Voir la tâche à faire</span>
                 <twig:Icon name="chevron-right" size="18" class="shrink-0 text-muted"/>
             </a>
+        {% elseif task.kind.value == 'occasional' %}
+            {% if task.raised %}
+                <a href="{{ path('task_show', {id: task.id}) }}" class="card card-hover flex items-center gap-3 px-3.5 py-3 text-ink no-underline hover:text-ink">
+                    <twig:UrgencyPill :view="view"/>
+                    <span class="flex-1 text-sm font-bold">Sa carte attend sur l’accueil</span>
+                    <twig:Icon name="chevron-right" size="18" class="shrink-0 text-muted"/>
+                </a>
+            {% else %}
+                <div class="card flex items-center gap-3 px-3.5 py-3">
+                    <p class="flex-1 text-sm text-muted">Elle dort. Quand ça arrive, dis-le : sa carte apparaît sur l’accueil jusqu’à ce que quelqu’un s’en occupe.</p>
+                    <twig:RaiseButton :task="task" :back="'template-' ~ task.id"/>
+                </div>
+            {% endif %}
         {% else %}
             <p class="card px-3.5 py-3 text-sm text-muted">Une tâche express se fait d’un appui, depuis l’accueil (« En un geste »).</p>
         {% endif %}

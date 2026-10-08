@@ -41,6 +41,17 @@
         <div class="flex items-center justify-between gap-2">
             <h1 class="text-lg">La Casa</h1>
             <p class="ml-auto text-sm font-bold">Propreté <twig:Count :value="cleanliness" key="casa"/> %</p>
+            {# A shortcut to the plan of the house: a little floor plan of its own. #}
+            <a href="{{ path('plan_show') }}" class="plan-shortcut" aria-label="Le plan de la maison" title="Le plan de la maison">
+                <svg viewBox="0 0 28 28" width="26" height="26" aria-hidden="true">
+                    <rect x="2" y="2" width="24" height="24" rx="4" fill="#FFFCF6" stroke="#2E1E14" stroke-width="2"/>
+                    <rect x="4.5" y="4.5" width="10" height="9" rx="1.5" fill="#F6C453"/>
+                    <rect x="16" y="4.5" width="7.5" height="13" rx="1.5" fill="#F2A27A"/>
+                    <rect x="4.5" y="15" width="10" height="8.5" rx="1.5" fill="#D9B48C"/>
+                    <rect x="16" y="19" width="7.5" height="4.5" rx="1.5" fill="#E8692C"/>
+                </svg>
+                <span>Plan</span>
+            </a>
             <a href="{{ path('household_edit') }}" aria-label="Réglages de la coloc" title="Réglages de la coloc" class="-mr-2 flex size-9 items-center justify-center rounded-full text-muted hover:bg-track hover:text-ink"><twig:Icon name="settings" size="19"/></a>
         </div>
         <twig:ProgressBar :value="cleanliness" label="Propreté de la Casa" key="casa"/>
@@ -50,6 +61,17 @@
         <section class="flex flex-col gap-2" aria-labelledby="quick-title">
             <h2 id="quick-title" class="flex items-center gap-1.5 text-[15px]"><twig:Icon name="bolt" size="18"/> En un geste</h2>
             <twig:QuickTasks :views="quick"/>
+        </section>
+    {% endif %}
+
+    {% if dormant is not empty %}
+        <section class="flex flex-col gap-2" aria-labelledby="raise-title">
+            <h2 id="raise-title" class="flex items-center gap-1.5 text-[15px]"><twig:Icon name="siren" size="18"/> Ça arrive ?</h2>
+            <ul class="flex flex-wrap gap-2">
+                {% for view in dormant %}
+                    <li><twig:RaiseButton :task="view.task" compact/></li>
+                {% endfor %}
+            </ul>
         </section>
     {% endif %}
 
@@ -93,7 +115,6 @@
 
     <p class="flex items-center justify-center gap-5">
         <a href="{{ path('task_index') }}" class="btn-link">Les modèles</a>
-        <a href="{{ path('plan_show') }}" class="btn-link">Le plan de la maison</a>
     </p>
 {% endblock %}
 

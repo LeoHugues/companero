@@ -124,6 +124,10 @@ class Task
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $archivedAt = null;
 
+    /** An occasional task that is needed right now: since when (null: it sleeps). */
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $raisedAt = null;
+
     public function __construct(Household $household, Member $createdBy, \DateTimeImmutable $createdAt)
     {
         $this->household = $household;
@@ -165,6 +169,9 @@ class Task
         if (TaskKind::Quick !== $this->kind) {
             $this->cooldownHours = null;
         }
+        if (TaskKind::Occasional !== $this->kind) {
+            $this->raisedAt = null;
+        }
         if (null === $this->assignee || $this->backup === $this->assignee) {
             $this->backup = null;
         }
@@ -175,6 +182,10 @@ class Task
         $this->lastCompletedAt = $at;
         $this->lastCompletedBy = $by;
         $this->release();
+        // Done: an occasional task goes back to sleep until it is needed again.
+        if (null !== $this->raisedAt && $at >= $this->raisedAt) {
+            $this->raisedAt = null;
+        }
 
         if (!$this->kind->isRecurring()) {
             $this->archive($at);
@@ -198,6 +209,30 @@ class Task
         if ($at < $this->createdAt) {
             $this->createdAt = $at;
         }
+    }
+
+    /** "Ça arrive": an occasional task is needed now, its card shows up until someone does it. */
+    public function raise(\DateTimeImmutable $at): void
+    {
+        if (TaskKind::Occasional === $this->kind && null === $this->raisedAt) {
+            $this->raisedAt = $at;
+        }
+    }
+
+    public function isRaised(): bool
+    {
+        return null !== $this->raisedAt;
+    }
+
+    public function getRaisedAt(): ?\DateTimeImmutable
+    {
+        return $this->raisedAt;
+    }
+
+    /** Counts for the Casa's cleanliness: it comes back on its own, or it is needed right now. */
+    public function isExpected(): bool
+    {
+        return $this->kind->isPlanned() || $this->isRaised();
     }
 
     public function reserveFor(Member $member, \DateTimeImmutable $until): void

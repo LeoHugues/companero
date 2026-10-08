@@ -22,14 +22,15 @@ final readonly class TaskBoard
     }
 
     /**
-     * How clean the shared home feels: the average freshness of shared recurring tasks.
+     * How clean the shared home feels: how well its shared tasks are looked after (TaskStatus::care()),
+     * on average — the ones that come back on their own, and the occasional ones signalled.
      * Private zones (bedrooms, en-suite bathrooms) count for points, not for the Casa.
      */
     public function cleanliness(): int
     {
         $freshness = array_map(
-            static fn (TaskView $view): int => $view->status->freshness,
-            array_filter($this->items, static fn (TaskView $view): bool => $view->task->getKind()->isPlanned() && $view->task->isShared()),
+            static fn (TaskView $view): int => $view->status->care(),
+            array_filter($this->items, static fn (TaskView $view): bool => $view->task->isExpected() && $view->task->isShared()),
         );
 
         return [] === $freshness ? 100 : (int) round(array_sum($freshness) / \count($freshness));
@@ -82,6 +83,27 @@ final readonly class TaskBoard
         usort($quick, static fn (TaskView $a, TaskView $b): int => $a->task->getTitle() <=> $b->task->getTitle());
 
         return $quick;
+    }
+
+    /** @return list<TaskView> occasional tasks asleep, ready to be raised when the need arises, by title */
+    public function dormant(): array
+    {
+        $dormant = array_values(array_filter($this->items, static fn (TaskView $view): bool => TaskKind::Occasional === $view->task->getKind() && !$view->task->isRaised()));
+        usort($dormant, static fn (TaskView $a, TaskView $b): int => $a->task->getTitle() <=> $b->task->getTitle());
+
+        return $dormant;
+    }
+
+    /** @return list<TaskView> every occasional task, raised or not, by title */
+    public function occasional(?int $zoneId = null): array
+    {
+        $occasional = array_values(array_filter(
+            $this->items,
+            static fn (TaskView $view): bool => TaskKind::Occasional === $view->task->getKind() && (null === $zoneId || $view->task->getZone()?->getId() === $zoneId),
+        ));
+        usort($occasional, static fn (TaskView $a, TaskView $b): int => $a->task->getTitle() <=> $b->task->getTitle());
+
+        return $occasional;
     }
 
     /** @return list<TaskView> */

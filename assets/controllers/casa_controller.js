@@ -66,6 +66,8 @@ export default class extends Controller {
     calmDown() {
         this.say(this.restSpeechValue, 0);
         this.swapBodyAnimation('animate-breathe');
+        // Ready for the next one: a page refreshed in place (morphing) sets it back to true.
+        this.reactingValue = false;
     }
 
     // ——— On her own ———

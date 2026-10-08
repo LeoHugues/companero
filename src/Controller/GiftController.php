@@ -6,6 +6,8 @@ use App\Entity\Gift;
 use App\Entity\Member;
 use App\Entity\Pet;
 use App\Enum\GiftKind;
+use App\Enum\PetSpecies;
+use App\Pet\CatLook;
 use App\Repository\MemberRepository;
 use App\Reward\GiftUser;
 use Doctrine\ORM\EntityManagerInterface;
@@ -107,9 +109,26 @@ final class GiftController extends AbstractController
         } catch (\InvalidArgumentException|\LogicException $exception) {
             throw new BadRequestHttpException($exception->getMessage(), $exception);
         }
-        $this->addFlash('success', null !== $pet ? \sprintf('%s se régale. Ronron !', $pet->getName()) : 'Friandise partagée : tout le monde se régale !');
 
-        return $this->back();
+        // A moment of its own: the treat falls into the bowl, the cat munches, purrs.
+        return $this->redirectToRoute('gift_treat_given', ['id' => $gift->getId()], Response::HTTP_SEE_OTHER);
+    }
+
+    #[Route('/friandise', name: 'gift_treat_given', methods: ['GET'])]
+    public function treatGiven(Gift $gift, #[CurrentUser] Member $member): Response
+    {
+        $this->assertOwnedBy($gift, $member);
+        if (GiftKind::Treat !== $gift->getKind() || !$gift->isUsed()) {
+            throw $this->createNotFoundException();
+        }
+        $pets = null !== $gift->getPet() ? [$gift->getPet()] : $member->getHousehold()->getPets()->toArray();
+        $cats = array_values(array_filter($pets, static fn (Pet $pet): bool => PetSpecies::Cat === $pet->getSpecies()));
+
+        return $this->render('gift/treat.html.twig', [
+            'gift' => $gift,
+            'pets' => array_values($pets),
+            'cats' => array_map(CatLook::of(...), \array_slice($cats, 0, 2)),
+        ]);
     }
 
     private function assertOwnedBy(Gift $gift, Member $member): void

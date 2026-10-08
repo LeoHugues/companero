@@ -15,12 +15,12 @@ final readonly class ZoneSummary
     ) {
     }
 
-    /** Average freshness of the zone's planned tasks; a room without any is considered fine. */
+    /** How well the zone's tasks are looked after, on average (TaskStatus::care()); a room without any is considered fine. */
     public function cleanliness(): int
     {
         $freshness = array_map(
-            static fn (TaskView $view): int => $view->status->freshness,
-            array_filter($this->tasks, static fn (TaskView $view): bool => $view->task->getKind()->isPlanned()),
+            static fn (TaskView $view): int => $view->status->care(),
+            array_filter($this->tasks, static fn (TaskView $view): bool => $view->task->isExpected()),
         );
 
         return [] === $freshness ? 100 : (int) round(array_sum($freshness) / \count($freshness));

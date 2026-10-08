@@ -19,28 +19,25 @@
     </header>
 
     {# The card itself, larger. #}
-    <article class="card rarity-{{ rarity.value }} relative flex flex-col gap-3 overflow-hidden py-5 pr-5 pl-7" id="task-{{ task.id }}" data-rarity="{{ rarity.value }}" data-alert="{{ status.alert }}">
-        <span class="urgency-stripe urgency-stripe-{{ status.alert }}" aria-hidden="true"></span>
-        <div class="flex flex-wrap items-center gap-2">
-            <twig:RarityBadge :rarity="rarity"/>
-            <twig:UrgencyPill :view="view"/>
+    <article class="task-card card rarity-{{ rarity.value }} task-card-{{ status.alert }} relative flex flex-col gap-3 p-5" id="task-{{ task.id }}" data-rarity="{{ rarity.value }}" data-alert="{{ status.alert }}">
+        <div class="flex items-center gap-4">
+            <twig:TaskMedallion :view="view" :size="84" class="shrink-0"/>
+            <div class="flex min-w-0 flex-col gap-1.5">
+                <div class="flex flex-wrap items-center gap-1.5">
+                    <twig:RarityBadge :rarity="rarity"/>
+                    <twig:UrgencyPill :view="view"/>
+                </div>
+                <p class="text-xs font-extrabold tracking-wide text-muted uppercase">{{ task.kind.value == 'quick' ? 'Express · un appui quand c’est fait' : (task.kind.value == 'occasional' ? 'Occasionnelle · quand ça arrive' : (task.kind.isRecurring ? 'À faire · revient ' ~ task_rule_label(task) : 'À faire · une fois')) }}</p>
+            </div>
         </div>
-        <p class="-mb-2 text-xs font-extrabold tracking-wide text-muted uppercase">{{ task.kind.value == 'quick' ? 'Express · un appui quand c’est fait' : (task.kind.isRecurring ? 'À faire · revient ' ~ task_rule_label(task) : 'À faire · une fois') }}</p>
         <h1 class="text-[26px] leading-tight [overflow-wrap:anywhere]">{{ task.title }}</h1>
         <p class="text-sm font-semibold text-muted">
             {{ task.pet.name ?? task.zone.name ?? (task.category.value == 'pets' ? 'Les animaux' : 'Toute la coloc') }} · {{ task.category.label }} · {{ task_rule_label(task) }}
         </p>
         {% if task.kind.value == 'rolling' %}
-            {% set barColors = {ok: 'var(--color-ok)', warning: 'var(--color-warn)', danger: 'var(--color-danger)'} %}
-            <div class="flex flex-col gap-1">
-                <twig:ProgressBar :value="status.freshness" height="10" :color="barColors[status.alert]" label="Fraîcheur" :key="'task-' ~ task.id"/>
-                <p class="text-xs font-bold text-muted">Fraîcheur {{ status.freshness }} %</p>
-            </div>
+            <p class="text-xs font-bold text-muted">Fraîcheur <twig:Count :value="status.freshness" :key="'task-' ~ task.id"/> %</p>
         {% endif %}
-        <p class="flex items-baseline gap-2">
-            <span class="text-[32px] leading-none font-extrabold text-clay-dark">+{{ task.points + boost }}</span>
-            <span class="text-sm font-bold text-muted">pts{% if boost %} · dont +{{ boost }} de boost{% endif %}</span>
-        </p>
+        {% if boost %}<p class="flex items-center gap-1 text-sm font-bold text-muted"><twig:Icon name="bolt" size="15" stroke="2.6"/> dont +{{ boost }} de boost</p>{% endif %}
         {% if view.bounty %}
             <p class="flex items-center gap-2.5 rounded-2xl bg-ink px-3 py-2.5 text-sm font-semibold text-cream">
                 <span class="bounty-tag shrink-0"><twig:Icon name="gift" size="12" stroke="2.6"/>Surprise</span>
@@ -48,7 +45,14 @@
             </p>
         {% endif %}
         <twig:ReminderNote :view="view" :member="app.user"/>
-        <twig:TaskActions :view="view" :back="'task-' ~ task.id" :member="app.user" class="flex-wrap pt-1"/>
+        {% if task.kind.value == 'occasional' and not task.raised %}
+            <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
+                <twig:RaiseButton :task="task" :back="'task-' ~ task.id"/>
+                <twig:TaskActions :view="view" :back="'task-' ~ task.id" :member="app.user" :boost="boost"/>
+            </div>
+        {% else %}
+            <twig:TaskActions :view="view" :back="'task-' ~ task.id" :member="app.user" :boost="boost" class="pt-1"/>
+        {% endif %}
     </article>
 
     {% if status.dueAt or status.warningAt or status.lateAt %}

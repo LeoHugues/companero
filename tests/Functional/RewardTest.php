@@ -107,8 +107,10 @@ final class RewardTest extends AppTestCase
 
         $this->client->request('GET', '/profil');
         $this->client->submitForm('Tishka');
+        // A moment of its own: the treat falls into the bowl, then "Continuer" goes back to the gifts.
         $this->client->followRedirect();
-        self::assertSelectorTextContains('[role=status]', 'Tishka se régale');
+        self::assertSelectorTextContains('h1', 'Tishka se régale');
+        $this->client->clickLink('Continuer');
 
         $this->client->submitForm('Robin');
         self::assertSame($robin->getId(), static::getContainer()->get(GiftRepository::class)->find($freeze->getId())?->getOwner()->getId());

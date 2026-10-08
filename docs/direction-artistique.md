@@ -32,6 +32,7 @@ discret.
 | Sable | `#D9B48C` | Couleur d'un membre |
 | Poussière | `#B9A58C` | Poussière autour de la Casa, états « frais » |
 | Joues | `#F2A27A` | Rougissement de la Casa |
+| Sauge, miel, corail | `#6E9A4C`, `#E9A53A`, `#E06C55` | Urgence des tâches (avec leurs fonds pâles) |
 
 Chaque membre a une couleur (terre cuite, jaune, brun, sable) utilisée dans
 les barres collectives.
@@ -59,20 +60,31 @@ les barres collectives.
 
 ## Cartes de tâche
 
-Une carte montre de haut en bas : la rareté et l'urgence, la roue crantée des réglages en haut
-à droite, le titre, la barre de fraîcheur (tâches régulières), la pièce et le rythme, puis les
-points et le bouton « C'est fait ». Toucher la carte ouvre sa page : la carte en grand, quand
-elle passe en orange et en rouge, qui s'en charge, les dernières fois qu'elle a été faite.
+Une carte à jouer, douce et chaleureuse :
+
+- à gauche, le **médaillon** : l'icône de la catégorie (balai, clé, feuille, caddie, patte…) sur
+  un fond pastel propre à la catégorie, entouré d'un **anneau** qui se vide avec le temps qui reste
+  (il se remplit à l'arrivée sur la page) ;
+- à droite : la rareté (sauf commune), la pastille d'urgence, le petit cadeau d'une surprise, le
+  titre en gras, la pièce et le rythme, qui s'en charge ; la roue crantée, discrète, en haut à droite ;
+- en bas : **« Je prends »** — une place vide, cerclée de pointillés, avec une main ; prise, elle
+  montre le visage de qui s'en occupe — et **« C'est fait »**, un jeton jaune Casa à bord encre et
+  ombre décalée (comme la bulle), avec une coche et ce que la tâche rapporte (« +20 ») dans une
+  pastille encre. Au toucher, il s'écrase, passe au vert sauge et lance des étoiles.
+
+Plus de bande colorée sur le bord : c'est le médaillon qui dit l'urgence. Toucher la carte ouvre
+sa page : la carte en grand, quand elle passe au miel et au corail, qui s'en charge, les dernières
+fois qu'elle a été faite. En liste (une pièce), la carte est compacte : un bouton rond jaune.
 
 ### Urgence
 
-Une bande sur le bord gauche de la carte et une pastille avec le statut :
+Des tons de jardin, jamais de rouge d'alarme : la Casa ne gronde pas.
 
-| État | Couleur | Quand |
-|---|---|---|
-| Tout va bien | vert `#3E9B62` | avant l'alerte |
-| Attention | orange `#F0A51C` | le moment approche, ou il est venu (dans le délai maximum) |
-| En retard | rouge `#D7402E`, la bande pulse | au-delà du délai maximum |
+| État | Couleur | Quand | Médaillon |
+|---|---|---|---|
+| Tout va bien | sauge `#6E9A4C` | avant l'alerte | anneau plein, petite étoile quand c'est tout frais |
+| Attention | miel `#E9A53A` | le moment approche, ou il est venu (dans le délai maximum) | le moment venu, il sautille de temps en temps |
+| En retard | corail `#E06C55` | au-delà du délai maximum | il gigote, avec un petit « ! » ; le bord de la carte rosit |
 
 Les deux délais se règlent pour chaque tâche (« Orange combien de temps avant ? », « Rouge
 combien de temps après ? »). Sans réglage : orange aux 60 % du rythme ou 2 jours avant
@@ -155,6 +167,15 @@ miaulent (« Miaou ! », « Prrrr… »). Quand une tâche est faite, ils sauten
 | Points gagnés | Une pastille encre descend du haut avec les points qui défilent | 3,4 s |
 | Boîte cadeau | Surprise et nouveau niveau : la boîte tremble, s'ouvre au toucher, confettis | 380 ms + 2,2 s |
 | Carton jaune reçu | Le carton arrive en tournoyant | 900 ms |
+
+| Friandise | Les croquettes tombent dans la gamelle, le chat mâche, des cœurs, le téléphone ronronne | 2,6 s |
+
+Après « C'est fait » (ou tout formulaire qui revient sur la même page), la page se met à jour
+sur place, sans recharger : la célébration, les jauges et la Casa jouent tout de suite, y
+compris dans l'appli Android.
+
+L'accueil a un raccourci vers **le plan de la maison** : un petit plan de quatre pièces colorées
+dans une pastille à bord encre, à côté de la propreté.
 
 Sur téléphone, les moments forts vibrent légèrement (une tâche faite, une boîte ouverte,
 un chat caressé).

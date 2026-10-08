@@ -4,8 +4,8 @@
     do right now (that is a card, on the home page): no urgency, no button, it opens its page.
 #}
 {% set rarity = task.rarity %}
-<li id="template-{{ task.id }}" data-rarity="{{ rarity.value }}">
-    <a href="{{ path('task_template', {id: task.id}) }}" class="flex items-center gap-3 py-3 text-ink no-underline hover:text-ink">
+<li id="template-{{ task.id }}" data-rarity="{{ rarity.value }}" class="flex items-center gap-2">
+    <a href="{{ path('task_template', {id: task.id}) }}" class="flex min-w-0 flex-1 items-center gap-3 py-3 text-ink no-underline hover:text-ink">
         <span class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-track text-ink-soft" aria-hidden="true">
             <twig:Icon :name="task_kind_icon(task)" size="20"/>
         </span>
@@ -17,6 +17,7 @@
             <span class="text-sm font-extrabold whitespace-nowrap">{{ task.points }} pts</span>
             <span class="template-rarity template-rarity-{{ rarity.value }}">{{ rarity.label }}</span>
         </span>
-        <twig:Icon name="chevron-right" size="18" class="shrink-0 text-muted"/>
+        {% if block('content') is empty %}<twig:Icon name="chevron-right" size="18" class="shrink-0 text-muted"/>{% endif %}
     </a>
+    {% block content %}{% endblock %}
 </li>

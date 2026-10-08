@@ -1,7 +1,7 @@
 {% props view %}
-{# How pressing the task is, in its colour: green all good, orange the moment approaches, red late. #}
+{# How pressing the task is, in its colour: sage all good, honey the moment approaches, coral late. #}
 {% set alert = view.status.alert %}
-{% set icons = {ok: 'check', warning: 'alert', danger: 'alarm'} %}
+{% set icons = {ok: 'check', warning: 'clock', danger: 'alarm'} %}
 <span {{ attributes.defaults({class: 'urgency-pill urgency-pill-' ~ alert}) }}>
     <twig:Icon :name="icons[alert]" size="13" stroke="2.8" class="shrink-0"/>
     <span class="truncate">{{ task_status_label(view.task, view.status) }}</span>

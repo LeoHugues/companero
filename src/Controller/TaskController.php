@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Member;
 use App\Entity\Task;
+use App\Enum\TaskKind;
 use App\Form\TaskType;
 use App\Repository\CatalogItemRepository;
 use App\Repository\CompletionRepository;
@@ -54,6 +55,7 @@ final class TaskController extends AbstractController
         return $this->render('task/index.html.twig', [
             'recurring' => array_map(static fn (TaskView $view): Task => $view->task, $board->recurring($zone)),
             'quick' => array_map(static fn (TaskView $view): Task => $view->task, $board->quick()),
+            'occasional' => array_map(static fn (TaskView $view): Task => $view->task, $board->occasional($zone)),
             'zones' => $household->getZones(),
             'current_zone' => $zone,
             'catalog' => $catalog->findForHousehold($household),
@@ -151,6 +153,24 @@ final class TaskController extends AbstractController
         return $this->redirectBack($request);
     }
 
+    /** "Ça arrive": an occasional task is needed now — its card shows up on the home page until someone does it. */
+    #[Route('/{id}/ca-arrive', name: 'task_raise', requirements: ['id' => '\d+'], methods: ['POST'])]
+    #[IsGranted(HouseholdVoter::ACCESS, subject: 'task')]
+    #[IsCsrfTokenValid('submit', tokenKey: '_csrf_token')]
+    public function raise(Task $task, Request $request): RedirectResponse
+    {
+        if ($task->isArchived() || TaskKind::Occasional !== $task->getKind()) {
+            throw $this->createNotFoundException();
+        }
+        if (!$task->isRaised()) {
+            $task->raise($this->clock->now());
+            $this->entityManager->flush();
+            $this->addFlash('success', \sprintf('« %s » : c’est signalé, sa carte attend sur l’accueil.', $task->getTitle()));
+        }
+
+        return $this->redirectBack($request);
+    }
+
     #[Route('/{id}/supprimer', name: 'task_delete', requirements: ['id' => '\d+'], methods: ['POST'])]
     #[IsGranted(HouseholdVoter::ACCESS, subject: 'task')]
     #[IsCsrfTokenValid('submit', tokenKey: '_csrf_token')]
@@ -169,6 +189,9 @@ final class TaskController extends AbstractController
         $back = $request->request->getString('_back');
         if (1 === preg_match('/^zone-(\d+)$/', $back, $zone)) {
             return $this->redirectToRoute('plan_zone', ['id' => (int) $zone[1]], Response::HTTP_SEE_OTHER);
+        }
+        if (1 === preg_match('/^template-(\d+)$/', $back, $id)) {
+            return $this->redirectToRoute('task_template', ['id' => (int) $id[1]], Response::HTTP_SEE_OTHER);
         }
         if (1 === preg_match('/^task-(\d+)$/', $back, $id)) {
             // A one-off task is gone once done: back home then.

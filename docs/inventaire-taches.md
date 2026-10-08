@@ -13,7 +13,7 @@ Léa n'est pas là en ce moment (0 jour par semaine). Objectif de la maison : 25
 | Nom | Description |
 |---|---|
 | Tishka | Chat roux, petit et mince, à poils longs |
-| *(nom à trouver)* | Gros chat, presque un maine coon : brun foncé tigré, plus clair vers le ventre |
+| Gizmo | Gros chat, presque un maine coon : brun foncé tigré, plus clair vers le ventre |
 
 ## Zones
 

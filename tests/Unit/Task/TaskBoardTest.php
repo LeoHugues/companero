@@ -38,7 +38,26 @@ final class TaskBoardTest extends TestCase
             new TaskView($this->task(), new TaskStatus(Urgency::Late, 0)),
         ]);
 
-        self::assertSame(60, $board->cleanliness());
+        // Fresh 100, soon 92: the private bedroom and the one-off task do not count.
+        self::assertSame(96, $board->cleanliness());
+    }
+
+    public function testAHouseKeptInTimeIsRadiantWhateverTheGauges(): void
+    {
+        $inTime = new TaskBoard([
+            new TaskView($this->rollingTask(7, null), new TaskStatus(Urgency::Fresh, 65)),
+            new TaskView($this->rollingTask(7, null), new TaskStatus(Urgency::Fresh, 70)),
+            new TaskView($this->rollingTask(7, null), new TaskStatus(Urgency::Soon, 30)),
+        ]);
+        self::assertGreaterThanOrEqual(92, $inTime->cleanliness());
+
+        // Things only weigh on the house once their moment has come, more and more as they are late.
+        $behind = new TaskBoard([
+            new TaskView($this->rollingTask(7, null), new TaskStatus(Urgency::Fresh, 90)),
+            new TaskView($this->rollingTask(7, null), new TaskStatus(Urgency::Due, 10)),
+            new TaskView($this->rollingTask(7, null), new TaskStatus(Urgency::Late, 0, overdueDays: 3)),
+        ]);
+        self::assertSame(57, $behind->cleanliness());
     }
 
     public function testEmptyHouseIsSpotless(): void

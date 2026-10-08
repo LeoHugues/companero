@@ -53,9 +53,9 @@ class TaskType extends AbstractType
             $builder->add('kind', EnumType::class, [
                 'class' => TaskKind::class,
                 'label' => 'Elle revient comment ?',
-                'help' => 'Régulière : tous les tant de jours. À jour fixe : un jour et une heure (les poubelles le mardi soir). Express : jamais en retard, un appui quand c’est fait.',
+                'help' => 'Régulière : tous les tant de jours. À jour fixe : un jour et une heure (les poubelles le mardi soir). Express : souvent et vite fait, un appui quand c’est fait. Occasionnelle : elle dort jusqu’à ce que quelqu’un dise « ça arrive » (le vomi du chat, la chasse d’eau qui fuit).',
                 'expanded' => true,
-                'choices' => [TaskKind::Rolling, TaskKind::Scheduled, TaskKind::Quick],
+                'choices' => [TaskKind::Rolling, TaskKind::Scheduled, TaskKind::Quick, TaskKind::Occasional],
                 'choice_label' => static fn (TaskKind $kind): string => $kind->label(),
             ]);
         }

@@ -16,14 +16,15 @@
         {{ form_row(form.dueAt) }}
     </fieldset>
     {# The card's colour: green while all is well, orange when the moment approaches, red once late. #}
-    <fieldset class="card flex flex-col gap-4 px-3.5 py-3" data-task-form-target="section" data-kind="rolling scheduled one_off">
+    <fieldset class="card flex flex-col gap-4 px-3.5 py-3" data-task-form-target="section" data-kind="rolling scheduled one_off occasional">
         <legend class="sr-only">Alertes</legend>
         <p class="flex items-center gap-2 text-[15px] font-extrabold">
             <span class="flex gap-1" aria-hidden="true"><span class="size-2.5 rounded-full bg-ok"></span><span class="size-2.5 rounded-full bg-warn"></span><span class="size-2.5 rounded-full bg-danger"></span></span>
             Alertes de la carte
         </p>
         {% for field in [form.warningHours, form.marginHours] %}
-            <div class="flex flex-col gap-2">
+            {# An occasional task has no "before": the moment comes when it is raised. #}
+            <div class="flex flex-col gap-2"{% if field == form.warningHours %} data-task-form-target="section" data-kind="rolling scheduled one_off"{% endif %}>
                 {{ form_label(field) }}
                 <div class="flex items-center gap-3">
                     {{ form_widget(field.amount, {attr: {class: 'w-24', placeholder: '—'}}) }}

@@ -25,9 +25,11 @@ final readonly class TaskLabels
 
         return match ($status->urgency) {
             Urgency::Late => $status->overdueDays > 0 ? \sprintf('En retard de %d j', $status->overdueDays) : 'En retard',
-            Urgency::Due => null !== $dueAt && $dueAt > $now && TaskKind::Rolling !== $task->getKind()
+            Urgency::Due => TaskKind::Occasional === $task->getKind()
+                ? (null === $dueAt || $now->getTimestamp() - $dueAt->getTimestamp() < 7_200 ? 'Ça vient d’arriver' : 'Signalée '.$this->moment($dueAt))
+                : (null !== $dueAt && $dueAt > $now && TaskKind::Rolling !== $task->getKind()
                 ? 'Avant '.$this->moment($dueAt)
-                : 'À faire aujourd’hui',
+                : 'À faire aujourd’hui'),
             Urgency::Soon => match (true) {
                 $status->hasPendingCommitment() => 'Cette semaine',
                 TaskKind::Rolling === $task->getKind() && null !== $dueAt => $this->inDays($dueAt),
@@ -39,6 +41,7 @@ final readonly class TaskLabels
                 TaskKind::Scheduled => null !== $dueAt ? ucfirst($this->moment($dueAt)) : 'Plus tard',
                 TaskKind::OneOff => null !== $dueAt ? 'Pour '.$this->moment($dueAt) : 'Pas pressé',
                 TaskKind::Quick => 'Quand il faut',
+                TaskKind::Occasional => 'Quand ça arrive',
             },
         };
     }
@@ -54,6 +57,7 @@ final readonly class TaskLabels
                 : \sprintf('chaque %s à %s', self::weekday((int) $task->getScheduledWeekday()), $this->time($task->getScheduledTime())),
             TaskKind::OneOff => 'ponctuelle',
             TaskKind::Quick => 'express',
+            TaskKind::Occasional => 'quand ça arrive',
         };
     }
 
@@ -95,6 +99,7 @@ final readonly class TaskLabels
             TaskKind::Scheduled => 'calendar',
             TaskKind::Quick => 'bolt',
             TaskKind::OneOff => 'check',
+            TaskKind::Occasional => 'siren',
         };
     }
 

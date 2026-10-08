@@ -1,0 +1,59 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Miam ! · Companero{% endblock %}
+{% block main_class %}pb-10{% endblock %}
+
+{#
+    A treat given: the treats fall into the bowls, the cats munch, purr and send hearts.
+    Its own page, then "Continuer" goes back to the gifts.
+#}
+{% block body %}
+    {% set names = gift.pet ? gift.pet.name : (pets|length == 1 ? (pets|first).name : 'Tout le monde') %}
+    <section class="treat-scene flex min-h-[78dvh] flex-col items-center justify-center gap-5 text-center" aria-labelledby="treat-title" data-controller="treat">
+        <p class="reward-kicker"><twig:Icon name="paw" size="14" stroke="2.6"/> Friandise</p>
+
+        <div class="relative w-full max-w-[340px]" data-treat-target="stage">
+            {% set count = max(1, cats|length) %}
+            <svg viewBox="0 0 340 230" class="block h-auto w-full overflow-visible" role="img" aria-label="{{ names }} se régale">
+                {% for i in 0..(count - 1) %}
+                    {% set x = count == 1 ? 170 : (i == 0 ? 92 : 248) %}
+                    {% set look = cats[i] ?? null %}
+                    {# The treats fall from the sky into the bowl… #}
+                    {% for t in 0..2 %}
+                        <g transform="translate({{ x - 14 + t * 14 }} 196)">
+                            <path class="treat-bit" style="animation-delay: {{ 300 + t * 260 + i * 140 }}ms" d="M-7 0 Q0 -6 7 0 L11 -4 L11 4 L7 0 Q0 6 -7 0 Z" fill="{{ t == 1 ? '#E8692C' : '#D9B48C' }}"/>
+                        </g>
+                    {% endfor %}
+                    {# …and the cat munches. #}
+                    <g class="treat-cat" style="animation-delay: {{ 1300 + i * 200 }}ms; transform-origin: {{ x }}px 200px">
+                        {% if look %}
+                            <g transform="translate({{ x }} 200) scale({{ count == 1 ? 1.65 : 1.25 }})">
+                                <twig:CasaCat :look="look" :x="0" :y="0" :index="i"/>
+                            </g>
+                        {% else %}
+                            <g transform="translate({{ x - 30 }} 130)" class="text-ink"><twig:Icon name="paw" size="60" stroke="2"/></g>
+                        {% endif %}
+                    </g>
+                    <g transform="translate({{ x }} 212)">
+                        <ellipse cx="0" cy="10" rx="40" ry="6" fill="#F0DFC6"/>
+                        <path d="M-34 -6 H34 L28 8 Q26 12 20 12 H-20 Q-26 12 -28 8 Z" fill="#3D7FA8"/>
+                        <rect x="-36" y="-9" width="72" height="6" rx="3" fill="#285F80"/>
+                        <path d="M-12 -2 h24" stroke="#FFFFFF" stroke-opacity=".5" stroke-width="2" stroke-linecap="round"/>
+                    </g>
+                    {% for h in 0..2 %}
+                        <g transform="translate({{ x - 26 + h * 26 }} {{ count == 1 ? 70 : 100 }})">
+                            <path class="treat-heart" style="animation-delay: {{ 1900 + h * 280 + i * 200 }}ms" d="M12 21 C5 15 1 11 1 6.5 A5.5 5.5 0 0 1 12 4 A5.5 5.5 0 0 1 23 6.5 C23 11 19 15 12 21 Z" fill="{{ h == 1 ? '#F6C453' : '#F2A27A' }}" transform="scale(.8)"/>
+                        </g>
+                    {% endfor %}
+                {% endfor %}
+                <text class="treat-says" x="170" y="34" text-anchor="middle">Miam miam… Ronron !</text>
+            </svg>
+        </div>
+
+        <h1 id="treat-title" class="treat-title text-[26px] leading-tight">{{ names }} se régale{{ names == 'Tout le monde' ? ' !' : '. Ronron !' }}</h1>
+        <p class="treat-title max-w-[300px] text-[15px] font-semibold text-muted" style="animation-delay: 2.4s">
+            {{- gift.pet ? 'Une friandise rien que pour ' ~ gift.pet.name : 'Une friandise partagée entre tous les animaux de la coloc' }}. C’est noté dans la coloc, avec ton nom.
+        </p>
+        <a href="{{ path('profile_show') }}#gifts-title" class="btn-primary treat-title px-8" style="animation-delay: 2.8s">Continuer</a>
+    </section>
+{% endblock %}

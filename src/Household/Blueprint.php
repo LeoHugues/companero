@@ -127,6 +127,10 @@ final readonly class Blueprint
             $created[] = $task;
         }
 
+        foreach ($this->list('occasionnelles') as $definition) {
+            $created[] = $this->task($household, $author, $now, $definition, TaskKind::Occasional, $zones);
+        }
+
         foreach ($this->list('catalogue') as $definition) {
             $created[] = new CatalogItem($household, (string) $definition['titre'], $this->category($definition), (int) $definition['points']);
         }

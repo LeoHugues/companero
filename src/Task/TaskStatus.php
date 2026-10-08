@@ -29,6 +29,21 @@ final readonly class TaskStatus
         return $this->urgency->alert();
     }
 
+    /**
+     * How well the task is looked after, for the Casa's cleanliness: a task done in time counts
+     * fully, whatever its gauge says — the house is not dirty because the vacuum will be due in
+     * three days. It only weighs on the house once its moment has come, and more so as it is late.
+     */
+    public function care(): int
+    {
+        return match ($this->urgency) {
+            Urgency::Fresh => 100,
+            Urgency::Soon => 92,
+            Urgency::Due => 70,
+            Urgency::Late => max(0, 45 - 15 * $this->overdueDays),
+        };
+    }
+
     public function hasPendingCommitment(): bool
     {
         return null !== $this->weeklyCommitment && $this->doneThisWeek < $this->weeklyCommitment;

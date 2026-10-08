@@ -148,6 +148,22 @@ final class AppFixtures extends Fixture
         }
 
         $lea->setAtHome(false, $lastSunday);
+        // When it happens (after the history, which they are no part of): Gizmo was sick this morning; the flush is fine for now.
+        $sick = new Task($household, $leo, $start);
+        $sick->setTitle('Nettoyer le vomi de Gizmo');
+        $sick->setKind(TaskKind::Occasional);
+        $sick->setCategory(TaskCategory::Pets);
+        $sick->setPoints(15);
+        $sick->setZone($zones['Salon']);
+        $sick->raise(min($now, $now->setTime(8, 30)));
+        $flush = new Task($household, $leo, $start);
+        $flush->setTitle('Réparer la chasse d’eau');
+        $flush->setKind(TaskKind::Occasional);
+        $flush->setCategory(TaskCategory::Repair);
+        $flush->setPoints(40);
+        $flush->setZone($zones['WC']);
+        $manager->persist($sick);
+        $manager->persist($flush);
         $manager->flush();
 
         for ($week = Week::containing($start); $week->end() <= $now; $week = $week->next()) {
@@ -208,7 +224,7 @@ final class AppFixtures extends Fixture
         $pets = [
             new Pet($household, 'Tishka', PetSpecies::Cat, 'Chat roux, petit et mince, à poils longs'),
             // His name is still to be filled in.
-            new Pet($household, 'Gros chat', PetSpecies::Cat, 'Presque un maine coon : brun foncé tigré, plus clair vers le ventre'),
+            new Pet($household, 'Gizmo', PetSpecies::Cat, 'Gros chat, presque un maine coon : brun foncé tigré, plus clair vers le ventre'),
         ];
         foreach ($pets as $pet) {
             $manager->persist($pet);

@@ -22,4 +22,17 @@ enum TaskCategory: string
             self::Other => 'Autre',
         };
     }
+
+    /** The icon of its medallion, on the task cards. */
+    public function icon(): string
+    {
+        return match ($this) {
+            self::Cleaning => 'broom',
+            self::Repair => 'wrench',
+            self::Garden => 'leaf',
+            self::Shopping => 'cart',
+            self::Pets => 'paw',
+            self::Other => 'spark',
+        };
+    }
 }

@@ -41,6 +41,7 @@ final class HomeController extends AbstractController
             'mine' => $mine,
             'pressing' => array_values(array_filter($board->pressing(), static fn (TaskView $view): bool => !\in_array($view, $mine, true))),
             'quick' => $board->quick(),
+            'dormant' => $board->dormant(),
             'upcoming' => $upcoming,
             'later' => $later,
             'cleanliness' => $board->cleanliness(),

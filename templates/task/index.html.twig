@@ -36,6 +36,26 @@
         {% endif %}
     </section>
 
+    {% if occasional is not empty %}
+        <section class="flex flex-col gap-2" aria-labelledby="occasional-title">
+            <div class="flex flex-col">
+                <h2 id="occasional-title" class="section-title">Occasionnelles</h2>
+                <p class="meta">Elles dorment jusqu’à ce que ça arrive : un appui, et leur carte attend sur l’accueil.</p>
+            </div>
+            <ul class="card divide-y divide-line px-3.5">
+                {% for task in occasional %}
+                    <twig:TemplateRow :task="task">
+                        {% if task.raised %}
+                            <span class="raise-awake" title="Signalée : sa carte attend sur l’accueil"><twig:Icon name="siren" size="13" stroke="2.4"/></span>
+                        {% else %}
+                            <twig:RaiseButton :task="task" back="tasks" round/>
+                        {% endif %}
+                    </twig:TemplateRow>
+                {% endfor %}
+            </ul>
+        </section>
+    {% endif %}
+
     {% if quick is not empty and current_zone is null %}
         <section class="flex flex-col gap-2" aria-labelledby="quick-title">
             <div class="flex flex-col">

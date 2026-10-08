@@ -71,7 +71,8 @@ Elle est d'abord construite pour une coloc de 4 personnes. Elle pourra ensuite
 | **Glissante** | Aspirateur salon, rythme 3 j | L'urgence monte depuis la dernière réalisation. Chaque réalisation remet le compteur à zéro. |
 | **Glissante + engagement** | Serpillière salon, rythme 7 j, engagement 1/sem | Comme la glissante, mais si l'engagement de la semaine n'est pas tenu, l'urgence monte aussi à l'approche du jour de ménage, puis de la fin de semaine. |
 | **Calendaire** | Sortir les poubelles, mardi 20 h ; nourrir les chats, tous les jours à 19 h | Elle réapparaît à date fixe (un jour de la semaine, ou tous les jours) et a une échéance précise. |
-| **Express** | Vider le lave-vaisselle | Jamais planifiée, jamais urgente : on la signale en un appui depuis l'accueil quand on l'a faite. Un délai minimal (en heures ou en jours) empêche de la refaire juste après. Elle ne compte pas dans la jauge de la maison. |
+| **Express** | Vider le lave-vaisselle | Souvent et vite fait. Jamais planifiée, jamais urgente : on la signale en un appui depuis l'accueil quand on l'a faite. Un délai minimal (en heures ou en jours) empêche de la refaire juste après. Elle ne compte pas dans la jauge de la maison. |
+| **Occasionnelle** | Nettoyer le vomi de Gizmo, réparer la chasse d'eau | Situationnelle : elle dort jusqu'à ce que quelqu'un dise **« Ça arrive ! »** (un appui sur l'accueil, ou dans les modèles). Sa carte apparaît alors, à faire tout de suite ; elle passe en retard après le délai maximum (1 jour par défaut). Une fois faite, elle se rendort. Signalée, elle compte dans la jauge de la maison. |
 
 **Concilier le glissant et l'hebdomadaire.** Une tâche avec engagement a deux
 sources d'urgence, et c'est **la plus forte des deux** qui s'affiche :
@@ -199,8 +200,11 @@ zone : la salle de bain privée compte autant que la salle de bain partagée.
   « Le retour du Jedi » pour une tâche très en retard rattrapée…).
 - **Pas de classement.** Le bilan met en avant ce que chacun a fait, sans
   ordonner les membres.
-- **Jauge de la maison** : une moyenne de « fraîcheur » des tâches récurrentes
-  des zones communes, affichée en permanence.
+- **Jauge de la maison** : à quel point les tâches des zones communes sont **tenues à temps**,
+  en moyenne, affichée en permanence. Une tâche qui n'est pas encore due compte pleinement (100,
+  ou 92 quand son moment approche), quelle que soit sa jauge de fraîcheur : la maison n'est pas sale
+  parce que l'aspirateur reviendra dans trois jours. Le moment venu, elle compte 70 ; en retard, 45,
+  puis 15 de moins par jour de retard. Une coloc dans les temps est donc rayonnante (≥ 92 %).
   Elle est incarnée par **la Casa**, la maison-personnage dont l'humeur suit la
   jauge (voir [direction artistique](direction-artistique.md)).
 - **Objectif de la maison** : un objectif hebdomadaire propre à la coloc (250 pts
@@ -220,7 +224,8 @@ Chaque niveau apporte un cadeau, à tour de rôle : **boost coloc** (tout le mon
 24 h), **gel de série**, **boost ciblé** (pour un autre coloc, jamais pour soi),
 **boost d'XP** (de l'XP en plus, qui ne compte pas pour l'objectif). Quand la coloc
 a des animaux, chaque niveau apporte aussi une **friandise**, à donner à l'un
-d'eux ou à tous. Un niveau sur deux (3, 5, 7…) apporte en plus un **carton jaune**.
+d'eux ou à tous : une page à elle montre les croquettes tomber dans la gamelle, le chat qui mâche
+et ronronne, puis « Continuer ». Un niveau sur deux (3, 5, 7…) apporte en plus un **carton jaune**.
 Un gel de série peut être offert à un coloc. La page *Mes récompenses* (depuis le
 profil) montre le chemin des niveaux et ce que chacun apporte.
 
@@ -317,5 +322,5 @@ Il est généré le dimanche soir et consultable le lundi :
 5. Notifications : lesquelles, à quelle fréquence, et comment ne pas devenir
    agaçant ?
 6. Début et fin de semaine : du lundi 00:00 au dimanche 23:59 ? Heure du bilan ?
-7. Formule de la jauge de la maison.
+7. ~~Formule de la jauge de la maison~~ : la tenue à temps des tâches (voir § 7).
 8. ~~Seuil du bonus de ponctualité~~ : sans objet (voir § 5).

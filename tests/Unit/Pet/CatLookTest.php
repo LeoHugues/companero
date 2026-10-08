@@ -20,7 +20,7 @@ final class CatLookTest extends TestCase
         self::assertFalse($tishka->loaf);
         self::assertLessThan(1, $tishka->scale);
 
-        $big = CatLook::of(new Pet($household, 'Gros chat', description: 'Presque un maine coon : brun foncé tigré, plus clair vers le ventre'));
+        $big = CatLook::of(new Pet($household, 'Gizmo', description: 'Gros chat, presque un maine coon : brun foncé tigré, plus clair vers le ventre'));
         self::assertSame('brown', $big->coat);
         self::assertTrue($big->striped);
         self::assertTrue($big->loaf, 'A big cat lies like a loaf.');
