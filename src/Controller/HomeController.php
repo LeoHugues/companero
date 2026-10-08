@@ -36,6 +36,7 @@ final class HomeController extends AbstractController
         return $this->render('home/index.html.twig', [
             'board' => $board,
             'pressing' => $board->pressing(),
+            'quick' => $board->quick(),
             'upcoming' => \array_slice(array_values($upcoming), 0, self::UPCOMING_LIMIT),
             'cleanliness' => $board->cleanliness(),
             'mood' => CasaMood::fromCleanliness($board->cleanliness()),

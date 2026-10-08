@@ -21,6 +21,18 @@
         {% endfor %}
     </nav>
 
+    {% if quick is not empty and current_zone is null %}
+        <section class="flex flex-col gap-2.5" aria-labelledby="quick-title">
+            <div class="flex items-baseline justify-between">
+                <h2 id="quick-title" class="section-title">Express</h2>
+                <p class="meta font-semibold">un appui quand c’est fait</p>
+            </div>
+            {% for view in quick %}
+                <twig:TaskRow :view="view" :member="app.user"/>
+            {% endfor %}
+        </section>
+    {% endif %}
+
     <section class="flex flex-col gap-2.5" aria-labelledby="recurring-title">
         <h2 id="recurring-title" class="section-title">Récurrentes</h2>
         {% for view in recurring %}

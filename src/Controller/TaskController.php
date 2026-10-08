@@ -46,6 +46,7 @@ final class TaskController extends AbstractController
         return $this->render('task/index.html.twig', [
             'recurring' => $board->recurring($zone),
             'one_off' => $board->oneOff(),
+            'quick' => $board->quick(),
             'zones' => $household->getZones(),
             'current_zone' => $zone,
             'catalog' => $catalog->findForHousehold($household),

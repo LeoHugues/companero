@@ -78,6 +78,26 @@ final class TaskFlowTest extends AppTestCase
         self::assertSelectorNotExists('#task-'.$task->getId());
     }
 
+    public function testQuickTaskIsDoneInOneTapAndStays(): void
+    {
+        $leo = $this->foundHousehold();
+        $this->client->loginUser($leo);
+        $this->client->request('GET', '/taches/nouvelle');
+        $this->client->submitForm('Ajouter la tâche', ['task[title]' => 'Vider le lave-vaisselle', 'task[kind]' => 'quick', 'task[points]' => '10']);
+        $task = static::getContainer()->get(TaskRepository::class)->findOneBy(['title' => 'Vider le lave-vaisselle']);
+
+        // Never pressing, but always one tap away on the home page.
+        $this->client->followRedirect();
+        self::assertSelectorTextContains('#quick-title + ul #task-'.$task?->getId(), 'Vider le lave-vaisselle');
+        self::assertSelectorTextNotContains('[aria-labelledby=todo-title]', 'Vider le lave-vaisselle');
+
+        $this->submitAction('/taches/'.$task?->getId().'/fait');
+        $this->client->followRedirect();
+        self::assertSelectorTextContains('[data-casa-target=speech]', '+10 pts');
+        self::assertSelectorExists('#quick-title + ul #task-'.$task?->getId());
+        self::assertSame(10, static::getContainer()->get(PointEntryRepository::class)->totalFor($leo));
+    }
+
     public function testReservingATask(): void
     {
         $leo = $this->foundHousehold();

@@ -25,6 +25,7 @@ final class TaskStatusResolver
             TaskKind::Rolling => $this->rolling($task, $now, $cleaningDay, $doneThisWeek),
             TaskKind::Scheduled => $this->scheduled($task, $now),
             TaskKind::OneOff => $this->oneOff($task, $now),
+            TaskKind::Quick => new TaskStatus(Urgency::Fresh, 100),
         };
     }
 

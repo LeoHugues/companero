@@ -28,6 +28,13 @@
         <twig:ProgressBar :value="cleanliness" label="Propreté de la Casa"/>
     </section>
 
+    {% if quick is not empty %}
+        <section class="flex flex-col gap-2" aria-labelledby="quick-title">
+            <h2 id="quick-title" class="flex items-center gap-1.5 text-[15px]"><twig:Icon name="bolt" size="18"/> En un geste</h2>
+            <twig:QuickTasks :views="quick"/>
+        </section>
+    {% endif %}
+
     <twig:TeamBar :team="team"/>
 
     <section class="flex flex-col gap-2.5" aria-labelledby="todo-title">

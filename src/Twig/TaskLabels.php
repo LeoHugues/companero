@@ -38,6 +38,7 @@ final readonly class TaskLabels
                 TaskKind::Rolling => $status->freshness >= 75 || null === $dueAt ? 'Tout propre' : $this->inDays($dueAt),
                 TaskKind::Scheduled => null !== $dueAt ? ucfirst($this->moment($dueAt)) : 'Plus tard',
                 TaskKind::OneOff => null !== $dueAt ? 'Pour '.$this->moment($dueAt) : 'Pas pressé',
+                TaskKind::Quick => 'Quand il faut',
             },
         };
     }
@@ -50,6 +51,7 @@ final readonly class TaskLabels
                 .(null !== $task->getWeeklyCommitment() ? \sprintf(' · au moins %d×/sem', $task->getWeeklyCommitment()) : ''),
             TaskKind::Scheduled => \sprintf('chaque %s à %s', self::weekday((int) $task->getScheduledWeekday()), $this->time($task->getScheduledTime())),
             TaskKind::OneOff => 'ponctuelle',
+            TaskKind::Quick => 'express',
         };
     }
 

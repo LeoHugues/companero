@@ -2,6 +2,8 @@
 
 namespace App\Task;
 
+use App\Enum\TaskKind;
+
 /** Every active task of a household with its current status, most pressing first. */
 final readonly class TaskBoard
 {
@@ -25,7 +27,7 @@ final readonly class TaskBoard
     {
         $freshness = array_map(
             static fn (TaskView $view): int => $view->status->freshness,
-            array_filter($this->items, static fn (TaskView $view): bool => $view->task->getKind()->isRecurring() && $view->task->isShared()),
+            array_filter($this->items, static fn (TaskView $view): bool => $view->task->getKind()->isPlanned() && $view->task->isShared()),
         );
 
         return [] === $freshness ? 100 : (int) round(array_sum($freshness) / \count($freshness));
@@ -42,13 +44,22 @@ final readonly class TaskBoard
     {
         return array_values(array_filter(
             $this->items,
-            static fn (TaskView $view): bool => $view->task->getKind()->isRecurring() && (null === $zoneId || $view->task->getZone()?->getId() === $zoneId),
+            static fn (TaskView $view): bool => $view->task->getKind()->isPlanned() && (null === $zoneId || $view->task->getZone()?->getId() === $zoneId),
         ));
+    }
+
+    /** @return list<TaskView> the tasks reported in one tap, by title */
+    public function quick(): array
+    {
+        $quick = array_values(array_filter($this->items, static fn (TaskView $view): bool => TaskKind::Quick === $view->task->getKind()));
+        usort($quick, static fn (TaskView $a, TaskView $b): int => $a->task->getTitle() <=> $b->task->getTitle());
+
+        return $quick;
     }
 
     /** @return list<TaskView> */
     public function oneOff(): array
     {
-        return array_values(array_filter($this->items, static fn (TaskView $view): bool => !$view->task->getKind()->isRecurring()));
+        return array_values(array_filter($this->items, static fn (TaskView $view): bool => TaskKind::OneOff === $view->task->getKind()));
     }
 }
