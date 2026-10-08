@@ -60,7 +60,8 @@ joint pas le PC.
 ### Clôture de la semaine
 
 Les titres de la semaine et le bonus collectif sont distribués par une commande à
-lancer chaque lundi peu après minuit :
+lancer chaque lundi peu après minuit ; elle cache aussi les surprises de la nouvelle semaine
+dans quelques cartes (à défaut, la première page ouverte de la semaine s'en charge) :
 
 ```cron
 5 0 * * 1  php /chemin/vers/companero/bin/console app:week:close
@@ -116,10 +117,13 @@ passe les tests est mis en production automatiquement (voir
 
 | Dossier | Rôle |
 |---|---|
-| `src/Entity`, `src/Repository` | Modèle : foyer, membres, zones, animaux, tâches, réalisations, journal de points, présence, titres, cadeaux, boosts |
+| `src/Entity`, `src/Repository` | Modèle : foyer, membres, zones, animaux, tâches, réalisations, journal de points, présence, titres, cadeaux, boosts, surprises, cartons jaunes |
 | `src/Task` | Statut d'une tâche (urgence, fraîcheur), tableau des tâches et des pièces, réalisation et correction |
 | `src/Presence`, `src/Reminder` | Qui est là (jours par semaine, « à la maison ») et qui prévenir d'une tâche |
-| `src/Reward` | Cadeaux de niveau, boosts (dont celui du jour de ménage) |
+| `src/Reward` | Cadeaux de niveau, boosts (dont celui du jour de ménage), cartons jaunes |
+| `src/Bounty` | Surprises de la semaine : tirage au hasard dans les cartes, découverte par le premier qui fait la tâche |
+| `src/Pet` | Portrait des chats autour de la Casa, d'après leur description |
+| `assets/controllers`, `assets/lib/fx.js` | Animations : la Casa et ses chats, jauges qui montent, compteurs, célébrations, confettis |
 | `src/Calendar` | La semaine (lundi → dimanche) |
 | `src/Progress` | Niveaux, objectifs hebdo proratisés, progression collective |
 | `src/Review` | Bilan de la semaine, titres, clôture |

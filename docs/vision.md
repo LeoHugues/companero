@@ -56,7 +56,9 @@ Elle est d'abord construite pour une coloc de 4 personnes. Elle pourra ensuite
 | **Tâche express** | Une petite tâche jamais planifiée, signalée en un appui quand elle est faite (« j'ai vidé le lave-vaisselle »). |
 | **Animal** | Un animal de la coloc. Ses tâches (repas, litière…) ont une personne qui s'en charge et un remplaçant. |
 | **Boost** | Pendant 24 h, +1 point tous les 3 points. Automatique le jour de ménage, ou gagné en montant de niveau. |
-| **Cadeau** | Ce qu'apporte un nouveau niveau : boost coloc, boost ciblé, boost d'XP, gel de série, friandise. |
+| **Cadeau** | Ce qu'apporte un nouveau niveau (ou une surprise) : boost coloc, boost ciblé, boost d'XP, gel de série, friandise, carton jaune. |
+| **Surprise** | Une petite récompense cachée au hasard dans une carte pour la semaine. La carte passe d'une rareté au-dessus ; la première personne qui fait la tâche la trouve. |
+| **Carton jaune** | Se gagne (niveaux, surprises) et se donne à un coloc, pour un truc en particulier. Symbolique : aucun point perdu. |
 | **Bilan hebdo** | Le récapitulatif de fin de semaine : engagements tenus, objectifs atteints, titres gagnés. |
 | **Jauge de la maison** | Un indicateur collectif de l'état du foyer (« la maison est propre à 72 % »). |
 
@@ -218,7 +220,9 @@ Chaque niveau apporte un cadeau, à tour de rôle : **boost coloc** (tout le mon
 24 h), **gel de série**, **boost ciblé** (pour un autre coloc, jamais pour soi),
 **boost d'XP** (de l'XP en plus, qui ne compte pas pour l'objectif). Quand la coloc
 a des animaux, chaque niveau apporte aussi une **friandise**, à donner à l'un
-d'eux ou à tous. Un gel de série peut être offert à un coloc.
+d'eux ou à tous. Un niveau sur deux (3, 5, 7…) apporte en plus un **carton jaune**.
+Un gel de série peut être offert à un coloc. La page *Mes récompenses* (depuis le
+profil) montre le chemin des niveaux et ce que chacun apporte.
 
 ### Titres de la semaine
 
@@ -238,13 +242,31 @@ Trois rappels, réglables par chacun : le matin du jour de ménage, quand une t�
 traîne (au plus un par jour), et le bilan du dimanche soir. *Les réglages existent ;
 l'envoi des notifications (Web Push) reste à faire.*
 
-### Cartons (à garder en mémoire, pas en V1)
+### Surprises de la semaine
 
-Un système de pénalités légères et drôles : chaque membre dispose par exemple de
-**3 cartons par semaine** à distribuer pour des broutilles (vaisselle qui
-traîne…). Le carton doit être motivé par une phrase. L'effet est symbolique :
-un titre ou un gage, pas une vraie perte de points. Garde-fous à définir pour
-que ça reste un jeu.
+Quand la semaine est planifiée (`app:week:close`, le lundi après minuit, ou à défaut la première
+page ouverte de la semaine), quelques cartes tirées au hasard cachent une **surprise** : environ
+une carte sur cinq parmi les tâches qui reviennent (ni les express, ni celles de tous les jours),
+au moins une, au plus quatre. Tant que personne ne l'a trouvée, la carte passe **d'une rareté
+au-dessus** (commune → rare → épique → légendaire) et porte un petit ruban cadeau.
+
+La première personne qui fait la tâche dans la semaine ouvre la boîte : des points en plus
+(+10, +15 ou +25, qui comptent pour l'objectif), de l'XP en plus (+30 ou +60, pour l'XP
+seulement) ou un cadeau (carton jaune, boost d'XP, boost coloc, gel de série, friandise si la
+coloc a des animaux). Noter après coup une tâche déjà faite n'ouvre pas de surprise. La page
+*Mes récompenses* montre les surprises de la semaine, trouvées ou non.
+
+### Cartons jaunes
+
+Ceux qui font des choses ont le droit de siffler : un **carton jaune** se gagne un niveau sur deux
+(niveaux 3, 5, 7…) ou dans une surprise, et se donne depuis le profil à un coloc, **pour un truc
+en particulier** (« la vaisselle qui traîne »). Celui qui le reçoit le voit en grand à sa
+prochaine visite. L'effet est symbolique : aucun point perdu.
+
+*Idées de règles, pour plus tard :* deux cartons jaunes dans la même journée font un carton rouge,
+sinon un carton s'annule tout seul au bout de 24 h mais reste dans les bilans ; ou bien vu à la
+semaine (deux ou trois cartons jaunes dans la semaine font « un truc en plus »). Garde-fous à
+définir pour que ça reste un jeu.
 
 ## 8. Bilan hebdomadaire
 
@@ -260,14 +282,15 @@ Il est généré le dimanche soir et consultable le lundi :
 | V1 (MVP à tester dans la coloc) | Plus tard |
 |---|---|
 | Foyer, membres, zones | Plusieurs foyers par instance |
-| Tâches récurrentes (glissante, engagement, calendaire) | Cartons |
+| Tâches récurrentes (glissante, engagement, calendaire) | Règles des cartons (rouge, expiration) |
 | Tâches ponctuelles + catalogue | Services entre membres / mini-économie |
 | Réserver / faire / ajuster les points | Classes de personnage |
 | Urgence, jour de ménage et boosts | Vue Kanban |
 | Jour de ménage (rendez-vous + notification) | Défi collectif du jour de ménage |
 | Objectif hebdo + présence | Statistiques avancées |
 | Bilan hebdo, XP, niveaux, quelques titres | |
-| Jauge de la maison, plan par pièce | Animations de la Casa, des chats et du plumeau |
+| Jauge de la maison, plan par pièce | |
+| Animations de la Casa, des chats et du plumeau ; surprises ; cartons jaunes | |
 | Tâches express, animaux, présence « à la maison » | Probabilité d'être à la maison (Wi-Fi, localisation) |
 | Cadeaux de niveau, boosts, séries et gels | Widget et tuile Android de présence |
 | Notifications (rappels) | |

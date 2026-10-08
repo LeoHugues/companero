@@ -52,7 +52,10 @@ les barres collectives.
 - La bulle de la Casa est le seul clin d'œil BD : bordure encre et ombre décalée
   de 3 px.
 - **Couleurs plates uniquement** : ni dégradé, ni brillance, ni néon.
-  Seule exception : la **rareté des cartes de tâche**, comme dans un jeu de cartes.
+  Seules exceptions : la **rareté des cartes de tâche**, comme dans un jeu de cartes, et
+  l'éclat qui passe sur une jauge pendant qu'elle monte.
+- Le **carton jaune** est un vrai carton d'arbitre : jaune franc `#F7D21E`, coins arrondis,
+  légèrement penché, ombre encre décalée.
 
 ## Cartes de tâche
 
@@ -87,21 +90,47 @@ Choisie pour chaque tâche dans son formulaire, **commune** par défaut :
 | Légendaire | Bordure dorée `#E3A21A` où une lumière fait le tour (4,5 s), halo doré, reflet |
 
 Une pastille en capitales (« RARE », « ÉPIQUE »…) avec un petit diamant rappelle la rareté.
+Une carte qui cache une **surprise** cette semaine passe d'une rareté au-dessus et porte une
+pastille encre avec un petit cadeau qui gigote de temps en temps.
 Les animations s'arrêtent si le téléphone demande moins d'animations.
 
 ## La Casa
 
-| Humeur | Propreté | Visage | Bulle (exemple) |
-|---|---|---|---|
-| Poussiéreuse | < 80 % | bouche en moue, poussière autour | « Je me sens un peu poussiéreuse… » |
-| Ça va | 80–91 % | petit sourire | « Ah, ça respire déjà mieux ! » |
-| Rayonnante | ≥ 92 % | grand sourire, joues roses, scintillements | « Je brille ! » |
+Une scène (un seul SVG) : la maison au milieu — cheminée qui fume, lucarne, toit de tuiles —,
+quelques touffes d'herbe, et **les chats de la coloc** de part et d'autre.
 
+| Humeur | Propreté | Visage | Autour | Bulle (exemple) |
+|---|---|---|---|---|
+| Négligée | < 55 % | paupières lourdes tombant vers l'extérieur, bouche triste | toile d'araignée et son araignée, pansement sur le mur, murs ternes, pas de fumée, herbe sèche | « Pfiou… j'ai des toiles d'araignée partout. » |
+| Poussiéreuse | 55–79 % | bouche en moue | poussière autour, éternuements | « Je me sens un peu poussiéreuse… » |
+| Ça va | 80–91 % | petit sourire, joues légèrement roses | fleurs blanches et roses | « Ah, ça respire déjà mieux ! » |
+| Rayonnante | ≥ 92 % | grand sourire, langue, joues roses | scintillements, fleurs | « Je brille ! » |
+
+- **La nuit** (23 h – 7 h), elle dort : yeux fermés, « Zzz », lucarne allumée, les chats dorment aussi.
 - **La poussière** diminue au fur et à mesure que la propreté monte.
+- **Au repos**, elle respire, cligne des yeux, regarde à droite et à gauche (avec une souris,
+  elle suit le pointeur) ; poussiéreuse, elle éternue de temps en temps.
+- **Au toucher**, elle rit, envoie des cœurs et répond une phrase au hasard selon son humeur.
+- **Le plumeau** : un doigt qui glisse sur elle fait apparaître un plumeau qui suit le doigt et
+  soulève la poussière. Elle glousse (« Hihi, ça chatouille ! »), la poussière s'en va ; assez
+  frottée, elle scintille et remercie. C'est cosmétique : la vraie propreté vient des tâches,
+  la poussière revient au bout de 30 s.
 - **Quand une tâche est faite**, la Casa fait un saut, ferme les yeux de joie,
   envoie des cœurs et remercie le membre dans sa bulle (« Merci Léo ! +4 pts »).
 - **Au repos**, elle respire légèrement.
-- La Casa parle à la première personne, au féminin, en tutoyant. Elle est
+- La Casa parle à la première personne, au féminin, en tutoyant.
+
+### Les chats
+
+Les chats déclarés dans *La coloc* (deux au plus) sont dessinés d'après leur description :
+la robe (« roux », « brun », « tigré », « noir », « gris », « blanc », « crème »), la taille
+(« petit », « mince » ; « gros », « maine coon »), le poil (« poils longs »). Un petit chat
+s'assoit à gauche, queue enroulée ; un gros se couche à droite comme un pain, la queue devant.
+Chez nous : **Tishka**, petite rousse à poils longs (collerette, joues touffues), et le **gros
+chat** brun foncé tigré, plus clair sur le ventre.
+
+Ils clignent des yeux, battent de la queue, bougent une oreille ; touchés, ils sautillent et
+miaulent (« Miaou ! », « Prrrr… »). Quand une tâche est faite, ils sautent avec la Casa. Elle est
   bienveillante, avec un humour léger, et ne culpabilise jamais.
 - Idée : chaque foyer peut renommer sa maison.
 
@@ -116,6 +145,19 @@ Les animations s'arrêtent si le téléphone demande moins d'animations.
 | Apparition élastique | Bulle, bandeau de niveau | 360 ms |
 | Remplissage | Barres de progression | 600 ms |
 | Pression | Boutons (réduction à 0,95) | 120 ms |
+| Clignement, regard | La Casa et les chats | toutes les 5 s environ |
+| Fumée | Cheminée (sauf négligée) | 3,3 s en boucle |
+| Queue, oreille | Les chats | 3,6 s, 7 s |
+| Plumeau, bouffées de poussière | Doigt qui glisse sur la Casa | tant que le doigt bouge |
+| Montée des jauges | À l'arrivée sur la page : depuis la dernière valeur vue (avec le gain, « +4 % ») ou depuis zéro | 0,9 à 1,3 s |
+| Compteurs | Points, XP, propreté : les chiffres défilent jusqu'à leur valeur | 0,9 s |
+| « C'est fait » | Le bouton s'écrase, passe au vert, lance des étoiles | 500 ms |
+| Points gagnés | Une pastille encre descend du haut avec les points qui défilent | 3,4 s |
+| Boîte cadeau | Surprise et nouveau niveau : la boîte tremble, s'ouvre au toucher, confettis | 380 ms + 2,2 s |
+| Carton jaune reçu | Le carton arrive en tournoyant | 900 ms |
+
+Sur téléphone, les moments forts vibrent légèrement (une tâche faite, une boîte ouverte,
+un chat caressé).
 
 Toutes les animations sont coupées avec `prefers-reduced-motion`.
 
