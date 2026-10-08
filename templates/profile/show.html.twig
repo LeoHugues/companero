@@ -3,27 +3,62 @@
 {% block title %}Profil · Companero{% endblock %}
 
 {% block body %}
-    <header class="flex items-center gap-3.5">
-        <twig:Avatar :member="member" size="64"/>
-        <div class="flex flex-1 flex-col gap-0.5">
-            <h1 class="text-[26px] leading-tight">{{ member.name }}</h1>
+    <header class="flex items-center gap-4">
+        <twig:LevelRing :member="member" :level="level"/>
+        <div class="flex min-w-0 flex-1 flex-col gap-0.5">
+            <h1 class="truncate text-[26px] leading-tight">{{ member.name }}</h1>
             <p class="text-sm font-bold text-clay-dark">Niveau {{ level.number }} · {{ level.rank }}</p>
+            {% if member.streak > 0 %}
+                <p class="flex items-center gap-1 text-[13px] font-bold"><twig:Icon name="flame" size="15" stroke="2.4" class="text-clay-dark"/>{{ member.streak }} semaine{{ member.streak > 1 ? 's' }} de série</p>
+            {% endif %}
         </div>
     </header>
 
     <section class="card flex flex-col gap-2 p-3.5" aria-label="Expérience">
         <div class="flex justify-between text-sm font-bold">
             <span>Expérience</span>
-            <span>{{ level.xp }} / {{ level.ceiling }} XP</span>
+            <span><twig:Count :value="level.xp" key="xp"/> / {{ level.ceiling }} XP</span>
         </div>
-        <twig:ProgressBar :value="level.progress" label="Progression vers le niveau suivant"/>
+        <twig:ProgressBar :value="level.progress" label="Progression vers le niveau suivant" key="xp-level"/>
         <p class="meta">Encore {{ level.xpToNext }} XP pour devenir <strong class="text-ink">{{ level.nextRank }}</strong> et ouvrir un cadeau.</p>
+        {% if week %}
+            <div class="flex flex-col gap-1.5 border-t-[1.5px] border-line pt-2">
+                <div class="flex justify-between text-sm font-bold">
+                    <span>Mon objectif de la semaine</span>
+                    <span><twig:Count :value="week.points" key="week-points"/> / {{ week.goal }} pts</span>
+                </div>
+                <twig:ProgressBar :value="week.percent" height="8" color="var(--color-sun)" label="Mon objectif de la semaine" key="week"/>
+            </div>
+        {% endif %}
         <p class="flex items-center gap-1.5 border-t-[1.5px] border-line pt-2 text-sm font-bold">
             <twig:Icon name="flame" size="18" class="text-clay-dark"/>
             {% if member.streak > 0 %}Série de {{ member.streak }} semaine{{ member.streak > 1 ? 's' }} avec l’objectif atteint{% else %}Atteins ton objectif pour lancer une série{% endif %}
             {% if member.bestStreak > member.streak %}<span class="ml-auto text-xs font-semibold text-muted">record : {{ member.bestStreak }}</span>{% endif %}
         </p>
     </section>
+
+    <ul class="grid grid-cols-3 gap-2" aria-label="Mes chiffres">
+        {% for stat in [
+            {value: stats.done, label: 'tâches faites', icon: 'check'},
+            {value: stats.surprises, label: 'surprise' ~ (stats.surprises > 1 ? 's') ~ ' trouvée' ~ (stats.surprises > 1 ? 's'), icon: 'gem'},
+            {value: titles|length, label: 'titre' ~ (titles|length > 1 ? 's'), icon: 'trophy'},
+        ] %}
+            <li class="stat-tile" style="animation-delay: {{ loop.index0 * 90 }}ms">
+                <twig:Icon :name="stat.icon" size="18" class="text-clay-dark"/>
+                <span class="text-[22px] leading-tight font-extrabold"><twig:Count :value="stat.value" :delay="loop.index0 * 120"/></span>
+                <span class="text-[11px] leading-tight font-bold text-muted">{{ stat.label }}</span>
+            </li>
+        {% endfor %}
+    </ul>
+
+    <a href="{{ path('rewards_show') }}" class="card card-hover flex items-center gap-3 p-3.5 text-ink no-underline hover:text-ink">
+        <span class="flex size-10 shrink-0 items-center justify-center rounded-full bg-sun"><twig:Icon name="trophy" size="22"/></span>
+        <span class="flex flex-1 flex-col">
+            <span class="text-[15px] font-extrabold">Mes récompenses</span>
+            <span class="text-xs text-muted">Le chemin des niveaux, mes trouvailles, mes titres{{ stats.cards ? ', mes cartons' }}</span>
+        </span>
+        <twig:Icon name="chevron-right" size="20" class="text-muted"/>
+    </a>
 
     <a href="{{ path('history') }}" class="card card-hover flex items-center gap-3 p-3.5 text-ink no-underline hover:text-ink">
         <span class="flex size-10 shrink-0 items-center justify-center rounded-full bg-track"><twig:Icon name="check" size="22" stroke="2.4"/></span>
@@ -38,9 +73,11 @@
         <h2 id="gifts-title" class="section-title">Mes cadeaux</h2>
         {% for group in gifts %}
             {% set gift = group.gifts|first %}
-            <article class="card flex flex-col gap-2.5 p-3.5">
+            <article class="card flex flex-col gap-2.5 p-3.5 {{ group.kind.value == 'yellow_card' ? 'gift-card-yellow' }}" style="animation-delay: {{ loop.index0 * 80 }}ms">
                 <div class="flex items-start gap-3">
-                    <span class="flex size-10 shrink-0 items-center justify-center rounded-full bg-sun"><twig:Icon :name="group.kind.icon" size="22"/></span>
+                    <span class="flex size-10 shrink-0 items-center justify-center rounded-full {{ group.kind.value == 'yellow_card' ? 'bg-legend-soft' : 'bg-sun' }}">
+                        {%- if group.kind.value == 'yellow_card' %}<span class="yellow-card yellow-card-mini" aria-hidden="true"></span>{% else %}<twig:Icon :name="group.kind.icon" size="22"/>{% endif -%}
+                    </span>
                     <div class="flex flex-1 flex-col gap-0.5">
                         <h3 class="text-[15px]">{{ group.kind.label }}{% if group.gifts|length > 1 %} <span class="text-muted">×{{ group.gifts|length }}</span>{% endif %}</h3>
                         <p class="text-xs text-muted">{{ group.kind.description }} · {{ gift.offeredBy ? 'offert par ' ~ gift.offeredBy.name : gift.reason|lower }}</p>
@@ -71,6 +108,31 @@
                             {% endfor %}
                         </form>
                     {% endif %}
+                {% elseif kind == 'yellow_card' and friends is not empty %}
+                    {# Those who do things may hand out cards: to someone, about something in particular. #}
+                    <form method="post" action="{{ path('gift_card', {id: gift.id}) }}" class="flex flex-col gap-2.5">
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
+                        <fieldset class="flex flex-wrap items-center gap-2">
+                            <legend class="sr-only">Pour qui ?</legend>
+                            <span class="text-sm font-bold">Pour</span>
+                            <span class="choice-chips">
+                                {% for friend in friends %}
+                                    <input type="radio" name="pour" value="{{ friend.id }}" id="card-{{ gift.id }}-{{ friend.id }}" required{{ loop.first ? ' checked' }}>
+                                    <label for="card-{{ gift.id }}-{{ friend.id }}" class="gap-1.5"><twig:Avatar :member="friend" size="20"/>{{ friend.name }}</label>
+                                {% endfor %}
+                            </span>
+                        </fieldset>
+                        <label class="flex flex-col gap-1">
+                            <span class="text-sm font-bold">Pour quoi ?</span>
+                            <input type="text" name="motif" class="input" maxlength="{{ constant('App\\Entity\\YellowCard::REASON_MAX_LENGTH') }}" required list="card-reasons-{{ gift.id }}" placeholder="La vaisselle qui traîne">
+                            <datalist id="card-reasons-{{ gift.id }}">
+                                {% for reason in ['La vaisselle qui traîne', 'Le linge oublié dans la machine', 'Les chaussures dans l’entrée', 'La lumière restée allumée', 'Le dernier rouleau de PQ non remplacé', 'Les miettes sur le plan de travail'] %}
+                                    <option value="{{ reason }}">
+                                {% endfor %}
+                            </datalist>
+                        </label>
+                        <button type="submit" class="btn-primary self-start"><span class="yellow-card yellow-card-mini" aria-hidden="true"></span> Siffler le carton</button>
+                    </form>
                 {% elseif kind == 'treat' and member.household.pets is not empty %}
                     <form method="post" action="{{ path('gift_treat', {id: gift.id}) }}" class="flex flex-wrap items-center gap-2">
                         <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
@@ -83,7 +145,7 @@
                 {% endif %}
             </article>
         {% else %}
-            <p class="card p-4 text-sm text-muted">Chaque niveau gagné t’apporte un cadeau : boosts, gels de série{{ member.household.pets is not empty ? ', friandises' }}…</p>
+            <p class="card p-4 text-sm text-muted">Chaque niveau gagné t’apporte un cadeau : boosts, gels de série, cartons jaunes{{ member.household.pets is not empty ? ', friandises' }}… Et des surprises se cachent dans certaines cartes chaque semaine.</p>
         {% endfor %}
     </section>
 

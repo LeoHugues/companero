@@ -1,0 +1,13 @@
+{% props member, level, size = 92 %}
+{# The member's avatar in a ring that fills with the XP of the level, and the level in a badge. #}
+{% set r = 44 %}
+{% set full = (2 * 3.14159 * r)|round(1) %}
+<div {{ attributes.defaults({class: 'level-ring relative shrink-0'}) }} style="width: {{ size }}px; height: {{ size }}px">
+    <svg viewBox="0 0 100 100" width="{{ size }}" height="{{ size }}" class="-rotate-90" aria-hidden="true">
+        <circle cx="50" cy="50" r="{{ r }}" fill="none" stroke="var(--color-track)" stroke-width="7"/>
+        <circle class="level-ring-fill" cx="50" cy="50" r="{{ r }}" fill="none" stroke="var(--color-clay)" stroke-width="7" stroke-linecap="round"
+                stroke-dasharray="{{ full }}" style="--full: {{ full }}; stroke-dashoffset: {{ (full * (1 - level.progress / 100))|round(1) }}"/>
+    </svg>
+    <twig:Avatar :member="member" :size="(size * 0.7)|round" class="absolute inset-0 m-auto"/>
+    <span class="level-ring-badge" aria-label="Niveau {{ level.number }}">{{ level.number }}</span>
+</div>

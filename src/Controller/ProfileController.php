@@ -9,9 +9,13 @@ use App\Enum\GiftKind;
 use App\Form\ProfileType;
 use App\Presence\PresenceRecorder;
 use App\Progress\LevelProvider;
+use App\Progress\TeamProgressBuilder;
+use App\Repository\BountyRepository;
+use App\Repository\CompletionRepository;
 use App\Repository\EarnedTitleRepository;
 use App\Repository\GiftRepository;
 use App\Repository\PresenceRepository;
+use App\Repository\YellowCardRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Clock\ClockInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -37,6 +41,10 @@ final class ProfileController extends AbstractController
         PresenceRecorder $presenceRecorder,
         EarnedTitleRepository $titles,
         GiftRepository $gifts,
+        CompletionRepository $completions,
+        BountyRepository $bounties,
+        YellowCardRepository $cards,
+        TeamProgressBuilder $teamProgress,
         ClockInterface $clock,
     ): Response {
         $profileForm = $this->createForm(ProfileType::class, $member);
@@ -54,6 +62,12 @@ final class ProfileController extends AbstractController
         return $this->render('profile/show.html.twig', [
             'member' => $member,
             'level' => $levels->levelOf($member),
+            'week' => $teamProgress->build($member->getHousehold(), Week::containing($clock->now()))->of($member),
+            'stats' => [
+                'done' => $completions->count(['member' => $member]),
+                'surprises' => $bounties->countClaimedBy($member),
+                'cards' => $cards->count(['givenTo' => $member]),
+            ],
             'profile_form' => $profileForm,
             'titles' => $titles->findForMember($member),
             'gifts' => $this->groupByKind($gifts->findUnused($member)),

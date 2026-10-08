@@ -6,7 +6,8 @@
 #}
 {% set dialogs = (completion and completion.bounty ? 1 : 0) + (gifts ? 1 : 0) + cards|length %}
 {% if completion or dialogs or card_given %}
-    <div class="contents" data-controller="celebration" data-turbo-temporary>
+    {# A new id each time: a page refreshed in place (morphing) starts a new celebration instead of keeping the last one. #}
+    <div class="contents" id="celebration-{{ random() }}" data-controller="celebration" data-turbo-temporary>
         {% if completion %}
             <p class="reward-toast" role="status" data-celebration-target="toast">
                 <span class="reward-toast-star" aria-hidden="true"><twig:Spark size="20" color="#F6C453"/></span>

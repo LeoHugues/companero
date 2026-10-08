@@ -1,0 +1,156 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mes récompenses · Companero{% endblock %}
+
+{% block body %}
+    <header class="flex items-center gap-2">
+        <a href="{{ path('profile_show') }}" aria-label="Retour au profil" class="-ml-2 flex size-11 shrink-0 items-center justify-center rounded-full text-ink hover:bg-track"><twig:Icon name="chevron-left" size="22" stroke="2.4"/></a>
+        <h1 class="flex-1 text-[24px] leading-tight">Mes récompenses</h1>
+    </header>
+
+    {# This week's surprises: how many are hidden in the cards, who found what. #}
+    <section class="flex flex-col gap-2.5 rounded-[20px] bg-ink p-4 text-cream" aria-labelledby="surprises-title">
+        <div class="flex items-center gap-3">
+            <span class="flex size-11 shrink-0 items-center justify-center rounded-full bg-sun text-ink"><twig:Icon name="gift" size="24"/></span>
+            <div class="flex flex-col">
+                <h2 id="surprises-title" class="text-[17px]">Les surprises de la semaine</h2>
+                <p class="text-sm text-[#D9C8B0]">
+                    {%- if week_bounties is empty %}Pas de surprise cette semaine : elles arrivent lundi.
+                    {%- else %}{{ week_bounties|length }} cachée{{ week_bounties|length > 1 ? 's' }} dans les cartes · {{ found_this_week }} trouvée{{ found_this_week > 1 ? 's' }}{% endif -%}
+                </p>
+            </div>
+        </div>
+        {% if week_bounties is not empty %}
+            <ul class="flex flex-col gap-1.5">
+                {% for bounty in week_bounties %}
+                    <li class="road-step flex items-center gap-2.5 rounded-2xl bg-white/10 px-3 py-2" style="animation-delay: {{ loop.index0 * 70 }}ms">
+                        {% if bounty.claimed %}
+                            <span class="flex size-8 shrink-0 items-center justify-center rounded-full bg-sun text-ink">
+                                {%- if bounty.kind.value == 'yellow_card' %}<span class="yellow-card yellow-card-mini" aria-hidden="true"></span>{% else %}<twig:Icon :name="bounty.kind.icon" size="17"/>{% endif -%}
+                            </span>
+                            <span class="flex min-w-0 flex-1 flex-col leading-tight">
+                                <span class="truncate text-sm font-bold">{{ bounty.task.title }}</span>
+                                <span class="text-xs text-[#D9C8B0]">{{ bounty.label }} · trouvée par {{ bounty.claimedBy ? (bounty.claimedBy == member ? 'toi' : bounty.claimedBy.name) : 'quelqu’un' }}</span>
+                            </span>
+                        {% else %}
+                            <span class="flex size-8 shrink-0 items-center justify-center rounded-full border-2 border-dashed border-sun text-sm font-extrabold text-sun">?</span>
+                            <span class="flex min-w-0 flex-1 flex-col leading-tight">
+                                <a href="{{ path('task_show', {id: bounty.task.id}) }}" class="truncate text-sm font-bold text-cream underline-offset-2 hover:text-sun">{{ bounty.task.title }}</a>
+                                <span class="text-xs text-[#D9C8B0]">Une surprise attend la première personne qui la fait</span>
+                            </span>
+                        {% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </section>
+
+    {# The road of levels: what was reached, where I am, what comes next and what it brings. #}
+    <section class="flex flex-col gap-2" aria-labelledby="road-title">
+        <div class="flex items-baseline justify-between">
+            <h2 id="road-title" class="section-title">Le chemin des niveaux</h2>
+            <p class="meta font-semibold"><twig:Count :value="level.xp" key="xp"/> XP</p>
+        </div>
+        <ol class="road">
+            {% for step in road %}
+                {% set reached = step.number <= level.number %}
+                {% set current = step.number == level.number %}
+                <li class="road-step road-node {{ current ? 'is-current' : (reached ? 'is-reached' : 'is-locked') }}" style="animation-delay: {{ loop.index0 * 60 }}ms">
+                    <span class="road-dot" aria-hidden="true">
+                        {%- if current %}{{ step.number }}{% elseif reached %}<twig:Icon name="check" size="16" stroke="3"/>{% else %}<twig:Icon name="lock" size="14" stroke="2.4"/>{% endif -%}
+                    </span>
+                    <div class="flex min-w-0 flex-1 flex-col gap-1 {{ current ? 'card p-3' : 'py-1' }}">
+                        <p class="flex items-baseline justify-between gap-2">
+                            <span class="text-[15px] font-extrabold {{ reached ? '' : 'text-muted' }}">Niveau {{ step.number }} · {{ step.rank }}</span>
+                            <span class="shrink-0 text-[11px] font-bold text-muted">{{ step.xp }} XP</span>
+                        </p>
+                        {% if current %}
+                            <twig:ProgressBar :value="level.progress" height="8" label="Vers le niveau {{ step.number + 1 }}" key="xp-level"/>
+                            <p class="text-xs font-semibold text-muted">Encore {{ level.xpToNext }} XP pour le niveau {{ step.number + 1 }}</p>
+                        {% endif %}
+                        {% if step.gifts is not empty %}
+                            <ul class="flex flex-wrap gap-1.5">
+                                {% for gift in step.gifts %}
+                                    <li class="road-gift {{ reached ? 'is-reached' }}">
+                                        {%- if gift.value == 'yellow_card' %}<span class="yellow-card yellow-card-mini" aria-hidden="true"></span>{% else %}<twig:Icon :name="gift.icon" size="13" stroke="2.4"/>{% endif %}{{ gift.label -}}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                </li>
+            {% endfor %}
+        </ol>
+    </section>
+
+    <section class="flex flex-col gap-2" aria-labelledby="found-title">
+        <h2 id="found-title" class="section-title">Mes trouvailles</h2>
+        {% if found is not empty %}
+            <ul class="card divide-y divide-line px-3.5 py-1">
+                {% for bounty in found %}
+                    <li class="flex items-center gap-2.5 py-2">
+                        <span class="flex size-8 shrink-0 items-center justify-center rounded-full bg-sun">
+                            {%- if bounty.kind.value == 'yellow_card' %}<span class="yellow-card yellow-card-mini" aria-hidden="true"></span>{% else %}<twig:Icon :name="bounty.kind.icon" size="17"/>{% endif -%}
+                        </span>
+                        <span class="flex min-w-0 flex-1 flex-col">
+                            <span class="truncate text-sm font-bold">{{ bounty.label }}</span>
+                            <span class="truncate text-xs text-muted">{{ bounty.task.title }} · {{ bounty.claimedAt|format_date(pattern: 'EEEE d MMM', locale: 'fr') }}</span>
+                        </span>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="card p-4 text-sm text-muted">Chaque semaine, quelques cartes cachent une surprise : elles passent d’une rareté au-dessus et portent un petit ruban. Fais-en une la première !</p>
+        {% endif %}
+    </section>
+
+    <section class="flex flex-col gap-2" aria-labelledby="cards-title">
+        <h2 id="cards-title" class="section-title">Cartons jaunes</h2>
+        {% if cards_received is not empty or cards_given is not empty %}
+            <ul class="card divide-y divide-line px-3.5 py-1">
+                {% for card in cards_received %}
+                    <li class="flex items-center gap-3 py-2.5">
+                        <span class="yellow-card" aria-hidden="true">{{ card.givenBy.initial }}</span>
+                        <span class="flex min-w-0 flex-1 flex-col">
+                            <span class="text-sm font-bold">« {{ card.reason }} »</span>
+                            <span class="text-xs text-muted">Reçu de {{ card.givenBy.name }} · {{ card.givenAt|format_date(pattern: 'EEEE d MMM', locale: 'fr') }}</span>
+                        </span>
+                    </li>
+                {% endfor %}
+                {% for card in cards_given %}
+                    <li class="flex items-center gap-3 py-2.5">
+                        <span class="yellow-card opacity-60" aria-hidden="true">{{ card.givenTo.initial }}</span>
+                        <span class="flex min-w-0 flex-1 flex-col">
+                            <span class="text-sm font-bold">« {{ card.reason }} »</span>
+                            <span class="text-xs text-muted">Donné à {{ card.givenTo.name }} · {{ card.givenAt|format_date(pattern: 'EEEE d MMM', locale: 'fr') }}</span>
+                        </span>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="card p-4 text-sm text-muted">Ceux qui font des choses ont le droit de siffler : un carton jaune se gagne en montant de niveau ou dans une surprise, et se donne à un coloc pour un truc en particulier. Pour rire, sans perdre de points.</p>
+        {% endif %}
+    </section>
+
+    <section class="flex flex-col gap-2" aria-labelledby="trophies-title">
+        <div class="flex items-baseline justify-between">
+            <h2 id="trophies-title" class="section-title">Mes titres</h2>
+            <p class="meta font-semibold">{{ titles|length }} gagné{{ titles|length > 1 ? 's' }}</p>
+        </div>
+        {% if titles is not empty %}
+            <ul class="grid grid-cols-3 gap-2">
+                {% for title in titles %}
+                    <li class="road-step flex min-h-[92px] flex-col justify-between gap-1.5 rounded-2xl bg-ink p-2.5 text-cream" style="animation-delay: {{ loop.index0 * 60 }}ms">
+                        <twig:Spark size="18" color="#F6C453"/>
+                        <span class="text-[13px] leading-tight font-extrabold">{{ title.name }}</span>
+                        <span class="text-[11px] leading-tight text-[#D9C8B0]">sem. {{ title.weekStart|date('W') }}</span>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="card p-4 text-sm text-muted">Ton premier titre t’attend au bilan de lundi.</p>
+        {% endif %}
+    </section>
+{% endblock %}
+
+{% block nav %}<twig:BottomNav active="profile"/>{% endblock %}
