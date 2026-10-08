@@ -1,4 +1,3 @@
-# À placer dans .github/workflows/ci.yml.
 # Tests à chaque push et pull request ; sur main, une fois les tests au vert, mise en
 # production par SSH avec scripts/deploy.sh (voir docs/deploiement.md, « Déploiement automatique »).
 name: CI

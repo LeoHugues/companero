@@ -96,17 +96,15 @@ Pour déployer une autre branche : `DEPLOY_BRANCH=ma-branche ./scripts/deploy.sh
 
 ## Déploiement automatique
 
-Le workflow GitHub Actions [`deploy/github-ci.yml`](../deploy/github-ci.yml), à copier une fois
-dans `.github/workflows/ci.yml` (`mkdir -p .github/workflows && git mv deploy/github-ci.yml
-.github/workflows/ci.yml`, puis commit et push : il faut un accès GitHub avec le droit
-`workflow`), lance
+Le workflow GitHub Actions [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) lance
 les tests (PHPUnit, php-cs-fixer, lint des templates) à chaque push. Sur `main`, une fois les
 tests au vert, il se connecte au serveur en SSH et lance `scripts/deploy.sh` sur le commit
 testé. Les déploiements passent un par un, dans l'ordre des pushes. Si les tests échouent, rien
 n'est déployé.
 
-Une seule fois, sur le serveur : un utilisateur `deploy` qui a seulement le droit de lancer le
-script en tant que `www-data` (qui, lui, n'a pas de shell), et une clé SSH réservée au déploiement :
+Une seule fois, sur le serveur : un utilisateur `deploy` qui a le droit de lancer le
+script en tant que `www-data` (qui, lui, n'a pas de shell), et une clé SSH réservée au déploiement
+(si `deploy` existe déjà, sautez `adduser`) :
 
 ```bash
 sudo adduser --disabled-password --gecos '' deploy
