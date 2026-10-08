@@ -4,6 +4,7 @@ namespace App\Security;
 
 use App\Entity\Completion;
 use App\Entity\Member;
+use App\Entity\Pet;
 use App\Entity\Task;
 use App\Entity\Zone;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
@@ -13,7 +14,7 @@ use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 /**
  * A member can only see and touch what belongs to their own household.
  *
- * @extends Voter<string, Task|Zone|Completion>
+ * @extends Voter<string, Task|Zone|Pet|Completion>
  */
 final class HouseholdVoter extends Voter
 {
@@ -22,7 +23,7 @@ final class HouseholdVoter extends Voter
     protected function supports(string $attribute, mixed $subject): bool
     {
         return self::ACCESS === $attribute
-            && ($subject instanceof Task || $subject instanceof Zone || $subject instanceof Completion);
+            && ($subject instanceof Task || $subject instanceof Zone || $subject instanceof Pet || $subject instanceof Completion);
     }
 
     protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token, ?Vote $vote = null): bool

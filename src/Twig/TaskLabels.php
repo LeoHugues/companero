@@ -49,7 +49,9 @@ final readonly class TaskLabels
         return match ($task->getKind()) {
             TaskKind::Rolling => \sprintf('tous les %d j', $task->getRhythmDays())
                 .(null !== $task->getWeeklyCommitment() ? \sprintf(' · au moins %d×/sem', $task->getWeeklyCommitment()) : ''),
-            TaskKind::Scheduled => \sprintf('chaque %s à %s', self::weekday((int) $task->getScheduledWeekday()), $this->time($task->getScheduledTime())),
+            TaskKind::Scheduled => $task->isDaily()
+                ? \sprintf('tous les jours à %s', $this->time($task->getScheduledTime()))
+                : \sprintf('chaque %s à %s', self::weekday((int) $task->getScheduledWeekday()), $this->time($task->getScheduledTime())),
             TaskKind::OneOff => 'ponctuelle',
             TaskKind::Quick => 'express',
         };

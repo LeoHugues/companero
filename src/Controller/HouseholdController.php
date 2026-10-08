@@ -3,8 +3,10 @@
 namespace App\Controller;
 
 use App\Entity\Member;
+use App\Entity\Pet;
 use App\Entity\Zone;
 use App\Form\HouseholdType;
+use App\Form\PetType;
 use App\Form\ZoneType;
 use App\Security\HouseholdVoter;
 use Doctrine\ORM\EntityManagerInterface;
@@ -46,12 +48,25 @@ final class HouseholdController extends AbstractController
             return $this->redirectToRoute('household_edit', status: Response::HTTP_SEE_OTHER);
         }
 
-        $status = $householdForm->isSubmitted() || $zoneForm->isSubmitted() ? Response::HTTP_UNPROCESSABLE_ENTITY : Response::HTTP_OK;
+        $petForm = $this->createForm(PetType::class, options: ['household' => $household])->handleRequest($request);
+        if ($petForm->isSubmitted() && $petForm->isValid()) {
+            $this->entityManager->persist($petForm->getData());
+            $this->entityManager->flush();
+
+            return $this->redirectToRoute('household_edit', status: Response::HTTP_SEE_OTHER);
+        }
+        if ($petForm->isSubmitted()) {
+            // The form's empty data already joined the household: it must not be shown as one of its pets.
+            $household->removePet($petForm->getData());
+        }
+
+        $status = $householdForm->isSubmitted() || $zoneForm->isSubmitted() || $petForm->isSubmitted() ? Response::HTTP_UNPROCESSABLE_ENTITY : Response::HTTP_OK;
 
         return $this->render('household/edit.html.twig', [
             'household' => $household,
             'household_form' => $householdForm,
             'zone_form' => $zoneForm,
+            'pet_form' => $petForm,
         ], new Response(status: $status));
     }
 
@@ -62,6 +77,18 @@ final class HouseholdController extends AbstractController
     {
         // Its tasks are kept and become "toute la coloc".
         $zone->getHousehold()->removeZone($zone);
+        $this->entityManager->flush();
+
+        return $this->redirectToRoute('household_edit', status: Response::HTTP_SEE_OTHER);
+    }
+
+    #[Route('/animaux/{id}/supprimer', name: 'pet_delete', requirements: ['id' => '\d+'], methods: ['POST'])]
+    #[IsGranted(HouseholdVoter::ACCESS, subject: 'pet')]
+    #[IsCsrfTokenValid('submit', tokenKey: '_csrf_token')]
+    public function deletePet(Pet $pet): RedirectResponse
+    {
+        // Its tasks are kept, for everyone.
+        $pet->getHousehold()->removePet($pet);
         $this->entityManager->flush();
 
         return $this->redirectToRoute('household_edit', status: Response::HTTP_SEE_OTHER);

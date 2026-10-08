@@ -8,6 +8,7 @@ enum TaskCategory: string
     case Repair = 'repair';
     case Garden = 'garden';
     case Shopping = 'shopping';
+    case Pets = 'pets';
     case Other = 'other';
 
     public function label(): string
@@ -17,6 +18,7 @@ enum TaskCategory: string
             self::Repair => 'Bricolage',
             self::Garden => 'Jardin',
             self::Shopping => 'Course',
+            self::Pets => 'Animaux',
             self::Other => 'Autre',
         };
     }

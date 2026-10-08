@@ -16,6 +16,8 @@ class Task
 {
     public const DEFAULT_MARGIN_HOURS = 24;
     public const DEFAULT_RESERVATION_HOURS = 24;
+    /** scheduledWeekday value for a task that comes back every day (feeding the cats…). */
+    public const EVERY_DAY = 0;
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -54,9 +56,9 @@ class Task
     #[Assert\Range(min: 1, max: 14)]
     private ?int $weeklyCommitment = null;
 
-    /** ISO-8601 day of the week for scheduled tasks. */
+    /** ISO-8601 day of the week for scheduled tasks, or EVERY_DAY. */
     #[ORM\Column(type: Types::SMALLINT, nullable: true)]
-    #[Assert\Range(min: 1, max: 7)]
+    #[Assert\Range(min: 0, max: 7)]
     private ?int $scheduledWeekday = null;
 
     #[ORM\Column(type: Types::TIME_IMMUTABLE, nullable: true)]
@@ -68,6 +70,20 @@ class Task
     #[ORM\Column(type: Types::SMALLINT)]
     #[Assert\Range(min: 0, max: 168)]
     private int $marginHours = self::DEFAULT_MARGIN_HOURS;
+
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(onDelete: 'SET NULL')]
+    private ?Pet $pet = null;
+
+    /** Who takes care of it. Nobody in particular: everyone at home is reminded. */
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(onDelete: 'SET NULL')]
+    private ?Member $assignee = null;
+
+    /** Reminded when the assignee is away. Nobody in particular: everyone at home. */
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(onDelete: 'SET NULL')]
+    private ?Member $backup = null;
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
@@ -127,6 +143,9 @@ class Task
         if (TaskKind::OneOff !== $this->kind) {
             $this->dueAt = null;
         }
+        if (null === $this->assignee || $this->backup === $this->assignee) {
+            $this->backup = null;
+        }
     }
 
     public function complete(\DateTimeImmutable $at): void
@@ -164,6 +183,11 @@ class Task
     public function archive(\DateTimeImmutable $at): void
     {
         $this->archivedAt = $at;
+    }
+
+    public function isDaily(): bool
+    {
+        return TaskKind::Scheduled === $this->kind && self::EVERY_DAY === $this->scheduledWeekday;
     }
 
     public function isArchived(): bool
@@ -284,6 +308,36 @@ class Task
     public function setDueAt(?\DateTimeImmutable $dueAt): void
     {
         $this->dueAt = $dueAt;
+    }
+
+    public function getPet(): ?Pet
+    {
+        return $this->pet;
+    }
+
+    public function setPet(?Pet $pet): void
+    {
+        $this->pet = $pet;
+    }
+
+    public function getAssignee(): ?Member
+    {
+        return $this->assignee;
+    }
+
+    public function setAssignee(?Member $assignee): void
+    {
+        $this->assignee = $assignee;
+    }
+
+    public function getBackup(): ?Member
+    {
+        return $this->backup;
+    }
+
+    public function setBackup(?Member $backup): void
+    {
+        $this->backup = $backup;
     }
 
     public function getMarginHours(): int

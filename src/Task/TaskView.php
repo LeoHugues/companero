@@ -4,6 +4,7 @@ namespace App\Task;
 
 use App\Entity\Member;
 use App\Entity\Task;
+use App\Reminder\Reminder;
 
 final readonly class TaskView
 {
@@ -11,6 +12,7 @@ final readonly class TaskView
         public Task $task,
         public TaskStatus $status,
         public ?Member $reservedBy = null,
+        public ?Reminder $reminder = null,
     ) {
     }
 

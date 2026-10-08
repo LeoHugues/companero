@@ -2,6 +2,7 @@
 
 namespace App\Task;
 
+use App\Entity\Member;
 use App\Enum\TaskKind;
 
 /** Every active task of a household with its current status, most pressing first. */
@@ -37,6 +38,15 @@ final readonly class TaskBoard
     public function pressing(): array
     {
         return array_values(array_filter($this->items, static fn (TaskView $view): bool => $view->status->urgency->isPressing()));
+    }
+
+    /** @return list<TaskView> pressing tasks someone counts on this member for: theirs, or one they stand in for */
+    public function pressingFor(Member $member): array
+    {
+        return array_values(array_filter(
+            $this->pressing(),
+            static fn (TaskView $view): bool => null !== $view->task->getAssignee() && true === $view->reminder?->isPersonalFor($member),
+        ));
     }
 
     /** @return list<TaskView> */

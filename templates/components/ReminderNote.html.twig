@@ -1,0 +1,21 @@
+{% props view, member %}
+{# Who takes care of the task, and who is reminded when they are away. #}
+{% set task = view.task %}
+{% set reminder = view.reminder %}
+{% if task.assignee and reminder %}
+    <p {{ attributes.defaults({class: 'flex items-center gap-1.5 text-xs font-bold'}) }}>
+        {% if reminder.standingInFor %}
+            <twig:Icon name="door" size="14" stroke="2.4" class="shrink-0"/>
+            {% if reminder.isPersonalFor(member) %}
+                <span class="text-clay-dark">{{ task.assignee.name }} n’est pas là : on compte sur toi</span>
+            {% elseif reminder.recipients is empty %}
+                <span class="text-muted">{{ task.assignee.name }} n’est pas là, et personne n’est à la maison</span>
+            {% else %}
+                <span class="text-muted">{{ task.assignee.name }} n’est pas là : rappel à {{ reminder.recipients|map(m => m == member ? 'toi' : m.name)|join(', ', ' et ') }}</span>
+            {% endif %}
+        {% else %}
+            <twig:Avatar :member="task.assignee" size="18"/>
+            <span class="text-muted">{{ task.assignee == member ? 'C’est toi qui t’en charges' : task.assignee.name ~ ' s’en charge' }}</span>
+        {% endif %}
+    </p>
+{% endif %}

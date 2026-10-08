@@ -32,10 +32,12 @@ final class HomeController extends AbstractController
         $now = $clock->now();
         $board = $boards->build($household);
         $upcoming = array_filter($board->items, static fn (TaskView $view): bool => Urgency::Soon === $view->status->urgency);
+        $mine = $board->pressingFor($member);
 
         return $this->render('home/index.html.twig', [
             'board' => $board,
-            'pressing' => $board->pressing(),
+            'mine' => $mine,
+            'pressing' => array_values(array_filter($board->pressing(), static fn (TaskView $view): bool => !\in_array($view, $mine, true))),
             'quick' => $board->quick(),
             'upcoming' => \array_slice(array_values($upcoming), 0, self::UPCOMING_LIMIT),
             'cleanliness' => $board->cleanliness(),

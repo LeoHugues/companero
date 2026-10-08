@@ -14,10 +14,11 @@
             <twig:ProgressBar :value="status.freshness" height="8" :color="barColor" label="Fraîcheur de « {{ task.title }} »"/>
         {% endif %}
         <p class="text-xs text-muted">
-            {{ task.zone.name ?? 'Toute la coloc' }} · {{ task_rule_label(task) }}
+            {{ task.pet.name ?? task.zone.name ?? 'Toute la coloc' }} · {{ task_rule_label(task) }}
             {% if status.weeklyCommitment %}· {{ status.doneThisWeek }}/{{ status.weeklyCommitment }} cette sem.{% endif %}
             {% if view.reservedBy %}· {{ view.isReservedBy(member) ? 'tu t’en occupes' : view.reservedBy.name ~ ' s’en occupe' }}{% endif %}
         </p>
+        <twig:ReminderNote :view="view" :member="member"/>
     </div>
     <twig:TaskActions :view="view" back="tasks" :member="member" compact/>
 </article>

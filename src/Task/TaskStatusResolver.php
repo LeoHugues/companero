@@ -16,8 +16,12 @@ final class TaskStatusResolver
     private const HOUR = 3_600;
     /** Share of the rhythm after which a rolling task starts to show up as "soon". */
     private const SOON_RATIO = 0.6;
-    /** A dated task becomes due this long before its deadline. */
+    /** A dated task becomes due this long before its deadline… */
     private const LEAD_TIME = self::DAY;
+    /** …or, for a task that comes back every day, a few hours before. */
+    private const DAILY_LEAD_TIME = 3 * self::HOUR;
+    /** Being done this long before a daily occurrence covers it (fed at 8 a.m., done for the evening). */
+    private const DAILY_COVER = 12 * self::HOUR;
 
     public function resolve(Task $task, \DateTimeImmutable $now, int $cleaningDay, int $doneThisWeek = 0): TaskStatus
     {
@@ -63,13 +67,16 @@ final class TaskStatusResolver
 
     private function scheduled(Task $task, \DateTimeImmutable $now): TaskStatus
     {
-        // A completion covers an occurrence when it happens at most LEAD_TIME before it.
+        $daily = $task->isDaily();
+        // A completion covers an occurrence when it happens shortly before it.
         $after = null !== $task->getLastCompletedAt()
-            ? $task->getLastCompletedAt()->modify(\sprintf('+%d seconds', self::LEAD_TIME))
+            ? $task->getLastCompletedAt()->modify(\sprintf('+%d seconds', $daily ? self::DAILY_COVER : self::LEAD_TIME))
             : $task->getCreatedAt();
         $occurrence = $this->nextOccurrence($task, $after);
 
-        return $this->deadlineStatus($occurrence, $task->getMarginHours(), $now, 7 * self::DAY);
+        return $daily
+            ? $this->deadlineStatus($occurrence, min($task->getMarginHours(), 12), $now, self::DAY, self::DAILY_LEAD_TIME)
+            : $this->deadlineStatus($occurrence, $task->getMarginHours(), $now, 7 * self::DAY);
     }
 
     private function oneOff(Task $task, \DateTimeImmutable $now): TaskStatus
@@ -82,13 +89,13 @@ final class TaskStatusResolver
         return $this->deadlineStatus($dueAt, $task->getMarginHours(), $now, 7 * self::DAY);
     }
 
-    private function deadlineStatus(\DateTimeImmutable $deadline, int $marginHours, \DateTimeImmutable $now, int $horizon): TaskStatus
+    private function deadlineStatus(\DateTimeImmutable $deadline, int $marginHours, \DateTimeImmutable $now, int $horizon, int $leadTime = self::LEAD_TIME): TaskStatus
     {
         $left = $deadline->getTimestamp() - $now->getTimestamp();
 
         $urgency = match (true) {
-            $left > 2 * self::LEAD_TIME => Urgency::Fresh,
-            $left > self::LEAD_TIME => Urgency::Soon,
+            $left > 2 * $leadTime => Urgency::Fresh,
+            $left > $leadTime => Urgency::Soon,
             $left >= -$marginHours * self::HOUR => Urgency::Due,
             default => Urgency::Late,
         };
@@ -107,6 +114,9 @@ final class TaskStatusResolver
         $weekday = (int) $task->getScheduledWeekday();
 
         $candidate = $after->setTime((int) $time->format('H'), (int) $time->format('i'));
+        if (Task::EVERY_DAY === $weekday) {
+            return $candidate > $after ? $candidate : $candidate->modify('+1 day');
+        }
         $candidate = $candidate->modify(\sprintf('+%d days', ($weekday - (int) $candidate->format('N') + 7) % 7));
 
         return $candidate > $after ? $candidate : $candidate->modify('+7 days');

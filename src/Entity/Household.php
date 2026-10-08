@@ -45,12 +45,18 @@ class Household
     #[ORM\OrderBy(['name' => 'ASC'])]
     private Collection $zones;
 
+    /** @var Collection<int, Pet> */
+    #[ORM\OneToMany(targetEntity: Pet::class, mappedBy: 'household', cascade: ['persist'], orphanRemoval: true)]
+    #[ORM\OrderBy(['name' => 'ASC'])]
+    private Collection $pets;
+
     public function __construct(string $name, \DateTimeImmutable $createdAt)
     {
         $this->name = $name;
         $this->createdAt = $createdAt;
         $this->members = new ArrayCollection();
         $this->zones = new ArrayCollection();
+        $this->pets = new ArrayCollection();
         $this->regenerateInviteToken();
     }
 
@@ -128,5 +134,23 @@ class Household
     public function removeZone(Zone $zone): void
     {
         $this->zones->removeElement($zone);
+    }
+
+    /** @return Collection<int, Pet> */
+    public function getPets(): Collection
+    {
+        return $this->pets;
+    }
+
+    public function addPet(Pet $pet): void
+    {
+        if (!$this->pets->contains($pet)) {
+            $this->pets->add($pet);
+        }
+    }
+
+    public function removePet(Pet $pet): void
+    {
+        $this->pets->removeElement($pet);
     }
 }

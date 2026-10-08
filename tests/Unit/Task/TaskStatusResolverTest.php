@@ -2,6 +2,7 @@
 
 namespace App\Tests\Unit\Task;
 
+use App\Entity\Task;
 use App\Enum\TaskKind;
 use App\Enum\Urgency;
 use App\Task\TaskStatusResolver;
@@ -133,6 +134,44 @@ final class TaskStatusResolverTest extends TestCase
 
         self::assertSame(Urgency::Fresh, $status->urgency);
         self::assertEquals(new \DateTimeImmutable('2026-10-13 20:00'), $status->dueAt);
+    }
+
+    /** @return iterable<string, array{string, string, Urgency}> */
+    public static function dailyCases(): iterable
+    {
+        // The cats eat every day at 19:00; they were fed yesterday evening.
+        yield 'the morning after' => ['2026-10-07 09:00', '2026-10-07 19:00', Urgency::Fresh];
+        yield 'in the afternoon' => ['2026-10-07 14:00', '2026-10-07 19:00', Urgency::Soon];
+        yield 'dinner time' => ['2026-10-07 18:30', '2026-10-07 19:00', Urgency::Due];
+        yield 'forgotten' => ['2026-10-07 22:30', '2026-10-07 19:00', Urgency::Late];
+    }
+
+    #[DataProvider('dailyCases')]
+    public function testDailyTaskComesBackEveryDay(string $now, string $dueAt, Urgency $expected): void
+    {
+        $task = $this->task(TaskKind::Scheduled);
+        $task->setScheduledWeekday(Task::EVERY_DAY);
+        $task->setScheduledTime(new \DateTimeImmutable('19:00'));
+        $task->setMarginHours(2);
+        $task->complete(new \DateTimeImmutable('2026-10-06 19:10'));
+
+        $status = $this->resolver->resolve($task, new \DateTimeImmutable($now), self::SATURDAY);
+
+        self::assertSame($expected, $status->urgency);
+        self::assertEquals(new \DateTimeImmutable($dueAt), $status->dueAt);
+    }
+
+    public function testDailyTaskDoneInTheAfternoonCoversTheEvening(): void
+    {
+        $task = $this->task(TaskKind::Scheduled);
+        $task->setScheduledWeekday(Task::EVERY_DAY);
+        $task->setScheduledTime(new \DateTimeImmutable('19:00'));
+        $task->complete(new \DateTimeImmutable('2026-10-07 16:00'));
+
+        $status = $this->resolver->resolve($task, new \DateTimeImmutable('2026-10-07 19:30'), self::SATURDAY);
+
+        self::assertSame(Urgency::Fresh, $status->urgency);
+        self::assertEquals(new \DateTimeImmutable('2026-10-08 19:00'), $status->dueAt);
     }
 
     public function testOneOffWithoutDeadlineIsNeverPressing(): void

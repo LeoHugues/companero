@@ -47,6 +47,15 @@
 
     <twig:TeamBar :team="team"/>
 
+    {% if mine is not empty %}
+        <section class="flex flex-col gap-2.5" aria-labelledby="mine-title">
+            <h2 id="mine-title" class="pt-0.5 text-xl">On compte sur toi</h2>
+            {% for view in mine %}
+                <twig:TaskCard :view="view" :member="app.user"/>
+            {% endfor %}
+        </section>
+    {% endif %}
+
     <section class="flex flex-col gap-2.5" aria-labelledby="todo-title">
         <h2 id="todo-title" class="pt-0.5 text-xl">Prendre soin de la Casa</h2>
         {% for view in pressing %}

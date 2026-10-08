@@ -3,6 +3,8 @@
 namespace App\Form;
 
 use App\Entity\Household;
+use App\Entity\Member;
+use App\Entity\Pet;
 use App\Entity\Task;
 use App\Entity\Zone;
 use App\Enum\TaskCategory;
@@ -66,9 +68,45 @@ class TaskType extends AbstractType
                 'required' => false,
                 'attr' => ['min' => 1],
             ])
-            ->add('scheduledWeekday', WeekdayType::class, ['label' => 'Quel jour ?', 'required' => false, 'placeholder' => 'Choisir…'])
+            ->add('scheduledWeekday', WeekdayType::class, ['label' => 'Quel jour ?', 'required' => false, 'placeholder' => 'Choisir…', 'every_day' => true])
             ->add('scheduledTime', TimeType::class, ['label' => 'À quelle heure ?', 'required' => false, 'widget' => 'single_text', 'input' => 'datetime_immutable'])
             ->add('dueAt', DateTimeType::class, ['label' => 'Pour quand ?', 'help' => 'Laisse vide si ce n’est pas pressé.', 'required' => false, 'widget' => 'single_text', 'input' => 'datetime_immutable']);
+
+        $members = static fn (EntityRepository $members): QueryBuilder => $members->createQueryBuilder('m')
+            ->andWhere('m.household = :household')
+            ->setParameter('household', $household)
+            ->orderBy('m.name', 'ASC');
+        if (!$household->getPets()->isEmpty()) {
+            $builder->add('pet', EntityType::class, [
+                'class' => Pet::class,
+                'label' => 'Pour qui ?',
+                'required' => false,
+                'expanded' => true,
+                'placeholder' => 'Tout le monde',
+                'choice_label' => 'name',
+                'choices' => $household->getPets()->toArray(),
+            ]);
+        }
+        $builder
+            ->add('assignee', EntityType::class, [
+                'class' => Member::class,
+                'label' => 'Qui s’en charge ?',
+                'help' => 'C’est cette personne qui reçoit le rappel quand elle est à la maison.',
+                'required' => false,
+                'expanded' => true,
+                'placeholder' => 'Personne en particulier',
+                'choice_label' => 'name',
+                'query_builder' => $members,
+            ])
+            ->add('backup', EntityType::class, [
+                'class' => Member::class,
+                'label' => 'Et quand elle n’est pas là, qui prévenir ?',
+                'required' => false,
+                'expanded' => true,
+                'placeholder' => 'Toute la coloc présente',
+                'choice_label' => 'name',
+                'query_builder' => $members,
+            ]);
 
         if ($options['allow_reservation']) {
             $builder->add('reserve', CheckboxType::class, [

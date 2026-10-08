@@ -14,7 +14,12 @@
         {{ form_row(form.dueAt) }}
     </fieldset>
 
-    {{ form_row(form.category) }}
+    {{ form_row(form.category, {attr: {'data-action': 'change->task-form#toggle'}}) }}
+    <fieldset class="flex flex-col gap-5" data-task-form-target="category" data-category="pets">
+        {% if form.pet is defined %}{{ form_row(form.pet) }}{% endif %}
+        {{ form_row(form.assignee) }}
+        {{ form_row(form.backup) }}
+    </fieldset>
     {{ form_row(form.zone) }}
 
     <div class="card flex items-center justify-between gap-3 px-3.5 py-3" data-controller="stepper">
