@@ -11,7 +11,7 @@
             <span class="flex items-center gap-1.5 text-sm font-bold text-muted"><twig:Icon name="clock" size="18"/> Possible {{ available_again(view.availableAt) }}</span>
         {% endif %}
     {% else %}
-    <form method="post" action="{{ path('task_complete', {id: task.id}) }}">
+    <form method="post" action="{{ path('task_complete', {id: task.id}) }}" data-controller="done" data-action="submit->done#celebrate">
         <input type="hidden" name="_back" value="{{ back }}">
         <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
         {% if compact %}

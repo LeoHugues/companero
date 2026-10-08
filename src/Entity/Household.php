@@ -46,6 +46,10 @@ class Household
     #[ORM\Column(type: Types::DATE_IMMUTABLE, nullable: true)]
     private ?\DateTimeImmutable $streakCountedUntil = null;
 
+    /** The last week whose surprises were drawn, so that a week is planned only once. */
+    #[ORM\Column(type: Types::DATE_IMMUTABLE, nullable: true)]
+    private ?\DateTimeImmutable $bountiesPlannedFor = null;
+
     /** On the cleaning day, everyone's tasks earn +1 point every 3 points. */
     #[ORM\Column(options: ['default' => true])]
     private bool $cleaningDayBoost = true;
@@ -140,6 +144,18 @@ class Household
         $this->streakCountedUntil = $weekStart;
         $this->streak = $goalReached ? $this->streak + 1 : 0;
         $this->bestStreak = max($this->bestStreak, $this->streak);
+    }
+
+    /** True the first time a week is planned: its surprises are to be drawn. */
+    public function planBounties(\DateTimeImmutable $weekStart): bool
+    {
+        $weekStart = $weekStart->setTime(0, 0);
+        if (null !== $this->bountiesPlannedFor && $weekStart <= $this->bountiesPlannedFor) {
+            return false;
+        }
+        $this->bountiesPlannedFor = $weekStart;
+
+        return true;
     }
 
     public function hasCleaningDayBoost(): bool

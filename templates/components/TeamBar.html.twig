@@ -3,7 +3,7 @@
 <section {{ attributes.defaults({class: 'card card-hover flex flex-col gap-2.5 p-3.5'}) }} aria-labelledby="team-title">
     <div class="flex items-baseline justify-between">
         <h2 id="team-title" class="text-[15px]">Objectif de la maison</h2>
-        <p class="text-[15px] font-extrabold">{{ team.points }} <span class="font-semibold text-muted">/ {{ team.goal }} pts</span></p>
+        <p class="text-[15px] font-extrabold"><twig:Count :value="team.points" key="team-points"/> <span class="font-semibold text-muted">/ {{ team.goal }} pts</span></p>
     </div>
     {% if detailed %}
         <div class="track flex h-3.5">
@@ -20,7 +20,7 @@
             {% endfor %}
         </ul>
     {% else %}
-        <twig:ProgressBar :value="team.percent" :height="14" label="Objectif de la maison"/>
+        <twig:ProgressBar :value="team.percent" :height="14" label="Objectif de la maison" key="team"/>
     {% endif %}
     <a href="{{ path('history', {qui: 'coloc'}) }}" class="self-start text-[13px] font-bold">Tout ce que la coloc a fait</a>
     {% if team.reached %}

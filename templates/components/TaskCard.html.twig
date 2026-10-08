@@ -7,7 +7,8 @@
 {% set task = view.task %}
 {% set status = view.status %}
 {% set boost = task_boost(view) %}
-{% set rarity = task.rarity %}
+{# A surprise hidden in the card this week makes it one class rarer. #}
+{% set rarity = view.rarity %}
 {% set barColors = {ok: 'var(--color-ok)', warning: 'var(--color-warn)', danger: 'var(--color-danger)'} %}
 {% set barColor = barColors[status.alert] %}
 <article {{ attributes.defaults({
@@ -48,6 +49,7 @@
         <p class="flex items-baseline gap-1.5">
             <span class="{{ compact ? 'text-sm' : 'text-[15px]' }} font-extrabold whitespace-nowrap text-clay-dark">+{{ task.points + boost }} pts</span>
             {% if boost %}<span class="flex items-center text-[11px] font-bold whitespace-nowrap text-muted"><twig:Icon name="bolt" size="11" stroke="2.6"/>+{{ boost }} boost</span>{% endif %}
+            {% if view.bounty %}<span class="bounty-tag self-center" title="Une surprise attend la première personne qui la fait cette semaine"><twig:Icon name="gift" size="12" stroke="2.6"/>Surprise</span>{% endif %}
         </p>
     {% endset %}
 

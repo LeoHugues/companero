@@ -1,0 +1,18 @@
+{% props label = 'Ouvrir' %}
+{# A gift box that shakes until it is tapped, then flies open (celebration_controller.js). #}
+<button type="button" class="reward-box" data-action="celebration#open" aria-label="{{ label }}">
+    <svg viewBox="0 0 120 120" width="132" height="132" aria-hidden="true">
+        <ellipse cx="60" cy="110" rx="40" ry="6" fill="#F0DFC6"/>
+        <g class="reward-box-body">
+            <rect x="22" y="52" width="76" height="56" rx="6" fill="#E8692C"/>
+            <rect x="22" y="52" width="76" height="10" fill="#000" fill-opacity=".1"/>
+            <rect x="53" y="52" width="14" height="56" fill="#F6C453"/>
+        </g>
+        <g class="reward-box-lid">
+            <path d="M60 36 C46 18 30 22 36 32 C40 38 52 38 60 36 Z M60 36 C74 18 90 22 84 32 C80 38 68 38 60 36 Z" fill="#F6C453" stroke="#E3A21A" stroke-width="2"/>
+            <rect x="16" y="36" width="88" height="20" rx="6" fill="#F27A3C"/>
+            <rect x="53" y="36" width="14" height="20" fill="#F6C453"/>
+        </g>
+    </svg>
+    <span class="reward-box-hint">Touche pour ouvrir</span>
+</button>

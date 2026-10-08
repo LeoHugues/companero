@@ -15,6 +15,8 @@ enum GiftKind: string
     case StreakFreeze = 'streak_freeze';
     /** For the pets. */
     case Treat = 'treat';
+    /** A yellow card to give a coloc, about something in particular. Symbolic: no points lost. */
+    case YellowCard = 'yellow_card';
 
     public function label(): string
     {
@@ -24,6 +26,7 @@ enum GiftKind: string
             self::XpBoost => 'Boost d’XP',
             self::StreakFreeze => 'Gel de série',
             self::Treat => 'Friandise',
+            self::YellowCard => 'Carton jaune',
         };
     }
 
@@ -35,6 +38,7 @@ enum GiftKind: string
             self::XpBoost => '+1 XP tous les 3 pts pour toi, pendant 24 h',
             self::StreakFreeze => 'Sauve ta série une semaine où l’objectif n’est pas atteint',
             self::Treat => 'Une petite douceur pour les animaux de la coloc',
+            self::YellowCard => 'À donner à un coloc, pour un truc en particulier. Pour rire : aucun point perdu',
         };
     }
 
@@ -44,6 +48,7 @@ enum GiftKind: string
             self::TeamBoost, self::FriendBoost, self::XpBoost => 'bolt',
             self::StreakFreeze => 'snow',
             self::Treat => 'paw',
+            self::YellowCard => 'card',
         };
     }
 }

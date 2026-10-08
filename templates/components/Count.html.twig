@@ -1,0 +1,3 @@
+{% props value, key = null, prefix = '', suffix = '', delay = 0 %}
+{# A number that counts up when the page shows (count_up_controller.js); `key`: from what it showed last time. #}
+<span {{ attributes.defaults({class: 'count tabular-nums'}) }} data-controller="count-up" data-count-up-to-value="{{ value }}"{% if key %} data-count-up-key-value="{{ key }}"{% endif %}{% if delay %} data-count-up-delay-value="{{ delay }}"{% endif %} data-prefix="{{ prefix }}" data-suffix="{{ suffix }}">{{ prefix }}{{ value }}{{ suffix }}</span>

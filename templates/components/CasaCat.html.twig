@@ -1,0 +1,108 @@
+{% props look, x, y, asleep = false, reacting = false, index = 0 %}
+{#
+    A cat of the coloc around the Casa (App\Pet\CatLook), drawn from the bottom centre of its paws.
+    Small cats sit, big ones lie like a loaf. It blinks, swishes its tail, twitches an ear; tap it and it meows.
+#}
+{% set fur = look.fur %}
+{% set belly = look.belly %}
+{% set stripes = look.stripes %}
+{% set tail = look.fluffy ? 12 : 8 %}
+{% set delay = index * 1700 %}
+<g transform="translate({{ x }} {{ y }}) scale({{ look.scale }})">
+    <g class="casa-cat {{ reacting ? 'animate-cat-hop' }}" data-casa-target="cat" data-name="{{ look.name }}" data-action="pointerup->casa#pet" role="button" tabindex="0" aria-label="{{ look.name }}"
+       style="animation-delay: {{ 120 + index * 160 }}ms">
+        {% if look.loaf %}
+            {# Lying down, paws tucked in: a big loaf. #}
+            <ellipse cx="0" cy="1" rx="44" ry="5" fill="#F0DFC6"/>
+            <path d="M-42 -2 C-47 -30 -26 -46 0 -46 C26 -46 47 -30 42 -2 Z" fill="{{ fur }}"/>
+            {% if look.fluffy %}
+                <path d="M-42 -4 l-5 -4 4 -3 -6 -5 5 -2 -4 -6 6 0" fill="{{ fur }}"/>
+                <path d="M42 -4 l5 -4 -4 -3 6 -5 -5 -2 4 -6 -6 0" fill="{{ fur }}"/>
+            {% endif %}
+            {% if look.striped %}
+                <g fill="none" stroke="{{ stripes }}" stroke-width="3.2" stroke-linecap="round">
+                    <path d="M-30 -36 Q-24 -30 -29 -22"/>
+                    <path d="M-36 -26 Q-30 -20 -34 -12"/>
+                    <path d="M30 -36 Q24 -30 29 -22"/>
+                    <path d="M36 -26 Q30 -20 34 -12"/>
+                </g>
+            {% endif %}
+            <ellipse cx="0" cy="-9" rx="22" ry="11" fill="{{ belly }}"/>
+            <ellipse cx="-11" cy="-2.5" rx="8" ry="4.5" fill="{{ belly }}"/>
+            <ellipse cx="11" cy="-2.5" rx="8" ry="4.5" fill="{{ belly }}"/>
+            <g class="casa-cat-tail" style="transform-origin: 38px -6px; animation-delay: {{ delay }}ms">
+                <path d="M38 -6 C48 2 26 6 6 3" fill="none" stroke="{{ fur }}" stroke-width="{{ tail }}" stroke-linecap="round"/>
+                {% if look.striped %}<path d="M30 2.5 l-2 4 M20 4 l-1 4.5" stroke="{{ stripes }}" stroke-width="2.6" stroke-linecap="round"/>{% endif %}
+            </g>
+            {% set headY = -40 %}
+        {% else %}
+            {# Sitting up, tail curled around. #}
+            <ellipse cx="0" cy="1" rx="26" ry="4.5" fill="#F0DFC6"/>
+            <g class="casa-cat-tail" style="transform-origin: 16px -4px; animation-delay: {{ delay }}ms">
+                <path d="M16 -4 C38 -2 44 -28 32 -46" fill="none" stroke="{{ fur }}" stroke-width="{{ tail }}" stroke-linecap="round"/>
+                {% if look.striped %}<path d="M36 -20 l-5 1 M38 -32 l-5 -1" stroke="{{ stripes }}" stroke-width="2.6" stroke-linecap="round"/>{% endif %}
+            </g>
+            <path d="M-22 0 C-27 -20 -20 -46 0 -48 C20 -46 27 -20 22 0 Z" fill="{{ fur }}"/>
+            {% if look.striped %}
+                <g fill="none" stroke="{{ stripes }}" stroke-width="3" stroke-linecap="round">
+                    <path d="M-21 -26 Q-15 -24 -13 -30"/>
+                    <path d="M-22 -14 Q-16 -12 -14 -18"/>
+                    <path d="M21 -26 Q15 -24 13 -30"/>
+                    <path d="M22 -14 Q16 -12 14 -18"/>
+                </g>
+            {% endif %}
+            <path d="M-11 -2 C-13 -16 -9 -36 0 -38 C9 -36 13 -16 11 -2 Z" fill="{{ belly }}"/>
+            {% if look.fluffy %}
+                {# The ruff of a long-haired cat. #}
+                <path d="M-13 -36 l3 5 2 -4 3 5 2 -4 3 5 2 -4 3 5 2 -4 3 4 L13 -36 Z" fill="{{ belly }}"/>
+            {% endif %}
+            <ellipse cx="-9" cy="-2.5" rx="7.5" ry="4.5" fill="{{ belly }}"/>
+            <ellipse cx="9" cy="-2.5" rx="7.5" ry="4.5" fill="{{ belly }}"/>
+            {% set headY = -54 %}
+        {% endif %}
+
+        <g transform="translate(0 {{ headY }}){{ look.loaf ? ' scale(1.12)' }}">
+            <g class="casa-cat-ear" style="transform-origin: -12px -12px; animation-delay: {{ 2600 + delay }}ms">
+                <path d="M-20 -6 L-17 -31 L-3 -15 Z" fill="{{ fur }}"/>
+                <path d="M-16 -10 L-15 -24 L-7 -15 Z" fill="#F2A27A"/>
+            </g>
+            <path d="M20 -6 L17 -31 L3 -15 Z" fill="{{ fur }}"/>
+            <path d="M16 -10 L15 -24 L7 -15 Z" fill="#F2A27A"/>
+            {% if look.fluffy %}
+                <path d="M-19 0 l-7 2 5 3 -6 4 6 1 -3 5 7 -2" fill="{{ fur }}"/>
+                <path d="M19 0 l7 2 -5 3 6 4 -6 1 3 5 -7 -2" fill="{{ fur }}"/>
+                <path d="M-15 -26 l-1 -4 M15 -26 l1 -4" stroke="{{ fur }}" stroke-width="2" stroke-linecap="round"/>
+            {% endif %}
+            <ellipse cx="0" cy="0" rx="21" ry="18" fill="{{ fur }}"/>
+            {% if look.striped %}
+                <path d="M-5 -16 L-4 -10 M0 -17.5 L0 -11 M5 -16 L4 -10" stroke="{{ stripes }}" stroke-width="2.4" stroke-linecap="round"/>
+            {% endif %}
+            <ellipse cx="0" cy="7" rx="10" ry="7" fill="{{ belly }}"/>
+            {% if asleep %}
+                <path d="M-11 -1 Q-7.5 2.5 -4 -1 M4 -1 Q7.5 2.5 11 -1" fill="none" stroke="#2E1E14" stroke-width="1.8" stroke-linecap="round"/>
+            {% else %}
+                <g class="casa-cat-eyes" style="animation-delay: {{ 900 + delay }}ms">
+                    <ellipse cx="-7.5" cy="-1" rx="3.8" ry="4.4" fill="{{ look.eyes }}"/>
+                    <ellipse cx="7.5" cy="-1" rx="3.8" ry="4.4" fill="{{ look.eyes }}"/>
+                    <ellipse cx="-7.5" cy="-1" rx="1.4" ry="3.6" fill="#2E1E14"/>
+                    <ellipse cx="7.5" cy="-1" rx="1.4" ry="3.6" fill="#2E1E14"/>
+                    <circle cx="-6.3" cy="-2.6" r="1" fill="#FFFFFF"/>
+                    <circle cx="8.7" cy="-2.6" r="1" fill="#FFFFFF"/>
+                </g>
+            {% endif %}
+            <path d="M-2.6 4 L2.6 4 L0 6.6 Z" fill="#E07A6A"/>
+            <path d="M-4.5 9 Q-2.2 11.5 0 9 Q2.2 11.5 4.5 9" fill="none" stroke="#2E1E14" stroke-width="1.3" stroke-linecap="round"/>
+            <g stroke="#2E1E14" stroke-opacity=".45" stroke-width="1" stroke-linecap="round">
+                <path d="M-10 6 L-25 3.5 M-10 8.5 L-24 10"/>
+                <path d="M10 6 L25 3.5 M10 8.5 L24 10"/>
+            </g>
+        </g>
+    </g>
+    <text class="casa-cat-says" data-casa-target="meow" x="{{ look.loaf ? 0 : 0 }}" y="{{ look.loaf ? -86 : -92 }}" text-anchor="middle" aria-hidden="true"></text>
+    {% if asleep %}
+        <g class="casa-zzz" aria-hidden="true">
+            <text x="16" y="{{ look.loaf ? -70 : -80 }}" style="animation-delay: {{ 400 + delay }}ms">z</text>
+            <text x="24" y="{{ look.loaf ? -80 : -90 }}" style="animation-delay: {{ 1400 + delay }}ms">z</text>
+        </g>
+    {% endif %}
+</g>

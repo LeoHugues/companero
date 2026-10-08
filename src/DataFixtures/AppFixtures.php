@@ -2,13 +2,17 @@
 
 namespace App\DataFixtures;
 
+use App\Bounty\WeekPlanner;
 use App\Calendar\Week;
+use App\Entity\Gift;
 use App\Entity\Household;
 use App\Entity\Member;
 use App\Entity\Pet;
 use App\Entity\Presence;
 use App\Entity\Task;
+use App\Entity\YellowCard;
 use App\Entity\Zone;
+use App\Enum\GiftKind;
 use App\Enum\PetSpecies;
 use App\Enum\TaskCategory;
 use App\Enum\TaskKind;
@@ -18,12 +22,15 @@ use App\Household\HouseholdFounder;
 use App\Household\MemberRegistrar;
 use App\Household\Registration;
 use App\Repository\CompletionRepository;
+use App\Repository\TaskRepository;
 use App\Review\WeekCloser;
 use App\Task\TaskCompleter;
 use App\Task\TaskStatusResolver;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 use Psr\Clock\ClockInterface;
+use Random\Engine\Mt19937;
+use Random\Randomizer;
 use Symfony\Component\Clock\Clock;
 use Symfony\Component\Clock\MockClock;
 use Symfony\Component\Clock\NativeClock;
@@ -104,6 +111,7 @@ final class AppFixtures extends Fixture
         private readonly TaskStatusResolver $resolver,
         private readonly CompletionRepository $completions,
         private readonly WeekCloser $weekCloser,
+        private readonly TaskRepository $taskRepository,
         private readonly ClockInterface $clock,
         #[Autowire('%kernel.project_dir%')] private readonly string $projectDir,
     ) {
@@ -145,6 +153,12 @@ final class AppFixtures extends Fixture
         for ($week = Week::containing($start); $week->end() <= $now; $week = $week->next()) {
             $this->weekCloser->close($household, $week);
         }
+
+        // This week's surprises, always the same ones; a yellow card for Léo to give, one Robin gave him.
+        (new WeekPlanner($manager, $this->taskRepository, new Randomizer(new Mt19937(41))))->plan($household, Week::containing($now));
+        $manager->persist(new Gift($leo, GiftKind::YellowCard, 'Niveau 3', $now->modify('-1 day')));
+        $manager->persist(new YellowCard($robin, $leo, 'Le vélo en plein milieu de l’entrée', $now->modify('-3 hours')));
+        $manager->flush();
     }
 
     private function founding(): Founding

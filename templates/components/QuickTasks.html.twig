@@ -13,7 +13,7 @@
                     </span>
                 </span>
             {% else %}
-                <form method="post" action="{{ path('task_complete', {id: view.task.id}) }}">
+                <form method="post" action="{{ path('task_complete', {id: view.task.id}) }}" data-controller="done" data-action="submit->done#celebrate">
                     <input type="hidden" name="_back" value="{{ back }}">
                     <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
                     <button type="submit" aria-label="J’ai fait « {{ view.task.title }} »"

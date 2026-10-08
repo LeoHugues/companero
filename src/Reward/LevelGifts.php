@@ -20,6 +20,10 @@ final class LevelGifts
         if ($hasPets) {
             $gifts[] = GiftKind::Treat;
         }
+        // Every other level, the right to give a yellow card: those who do things may hand them out.
+        if (1 === $level % 2) {
+            $gifts[] = GiftKind::YellowCard;
+        }
 
         return $gifts;
     }

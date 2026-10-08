@@ -2,6 +2,7 @@
 
 namespace App\Task;
 
+use App\Bounty\BountyClaimer;
 use App\Calendar\Week;
 use App\Entity\Completion;
 use App\Entity\Member;
@@ -28,6 +29,7 @@ final readonly class TaskCompleter
         private TaskStatusResolver $resolver,
         private BoostResolver $boosts,
         private GiftGranter $gifts,
+        private BountyClaimer $bounties,
         private ClockInterface $clock,
     ) {
     }
@@ -50,6 +52,8 @@ final readonly class TaskCompleter
         $completion = new Completion($task, $member, $at, $status->urgency);
         $this->entityManager->persist($completion);
         $result = $this->score($completion, $task->getPoints());
+        // Surprises are found doing the task, not noting it afterwards.
+        $bounty = $backdated ? null : $this->bounties->claim($completion);
 
         // Noted afterwards, it may come before a later completion: that one stays the reference.
         if (null === $task->getLastCompletedAt() || $at >= $task->getLastCompletedAt()) {
@@ -57,7 +61,7 @@ final readonly class TaskCompleter
         }
         $this->entityManager->flush();
 
-        return new CompletionResult($completion, $result['base'], $result['boost'], $result['xp'], $this->gifts->catchUp($member, $now));
+        return new CompletionResult($completion, $result['base'], $result['boost'], $result['xp'], $this->gifts->catchUp($member, $now), $bounty);
     }
 
     /**
@@ -73,8 +77,8 @@ final readonly class TaskCompleter
         $previousMember = $completion->getMember();
 
         foreach ($this->points->findBy(['completion' => $completion]) as $entry) {
-            if (PointReason::Adjustment === $entry->getReason()) {
-                // "This time it was more work": still true, wherever the completion goes.
+            if ($entry->getReason()->followsCompletion()) {
+                // "This time it was more work", a surprise found: still true, wherever the completion goes.
                 $entry->moveTo($member, $at);
             } else {
                 $this->entityManager->remove($entry);

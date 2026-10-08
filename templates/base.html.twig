@@ -20,11 +20,16 @@
             {% block importmap %}{{ importmap('app') }}{% endblock %}
         {% endblock %}
     </head>
+    {# What was just earned, celebrated on any page (templates/_celebration.html.twig). #}
+    {% set just_done = app.flashes('completion')|first %}
+    {% set level_gifts = app.flashes('gifts')|first %}
+    {% set card_given = app.flashes('card_given')|first %}
     <body class="min-h-dvh">
         <main class="mx-auto flex max-w-md flex-col gap-4 px-5 pt-5 {% block main_class %}pb-28{% endblock %}">
             {% for message in app.flashes('success') %}
                 <p class="animate-pop rounded-2xl bg-ink px-4 py-3 text-[15px] font-semibold text-cream" role="status" data-controller="dismiss">{{ message }}</p>
             {% endfor %}
+            {{ include('_celebration.html.twig', {completion: just_done, gifts: level_gifts, cards: yellow_cards_to_show()}) }}
             {% block body %}{% endblock %}
         </main>
         {% block nav %}{% endblock %}

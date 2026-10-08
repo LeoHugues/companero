@@ -13,8 +13,8 @@
         <twig:CasaMini :size="80" :mood="room.mood" class="shrink-0"/>
         <div class="mb-1 flex flex-1 flex-col gap-1.5">
             <p class="bubble text-sm">{{ room.pressingCount ? room.pressingCount ~ ' chose' ~ (room.pressingCount > 1 ? 's') ~ ' à faire ici.' : 'Rien d’urgent par ici.' }}</p>
-            <div class="flex justify-between text-xs font-bold"><span>Propreté</span><span>{{ room.cleanliness }} %</span></div>
-            <twig:ProgressBar :value="room.cleanliness" height="8" label="Propreté de {{ zone.name }}"/>
+            <div class="flex justify-between text-xs font-bold"><span>Propreté</span><span><twig:Count :value="room.cleanliness" :key="'zone-' ~ zone.id"/> %</span></div>
+            <twig:ProgressBar :value="room.cleanliness" height="8" label="Propreté de {{ zone.name }}" :key="'zone-' ~ zone.id"/>
         </div>
     </section>
 

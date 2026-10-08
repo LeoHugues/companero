@@ -1,9 +1,6 @@
 {% extends 'base.html.twig' %}
 
 {% block body %}
-    {% set completion = app.flashes('completion')|first %}
-    {% set gifts = app.flashes('gifts')|first %}
-
     <header class="flex items-center justify-between gap-3">
         <div class="flex min-w-0 flex-col">
             <p class="truncate text-[17px] leading-tight font-extrabold">{{ weekday_name(now|date('N'))|capitalize }} {{ now|format_date(pattern: 'd MMMM', locale: 'fr') }}</p>
@@ -32,31 +29,21 @@
 
     <twig:BoostBanner/>
 
-    {% if gifts %}
-        <a href="{{ path('profile_show') }}#gifts-title" class="animate-pop flex items-center gap-3 rounded-[20px] bg-ink p-3.5 text-cream no-underline hover:text-cream">
-            <twig:Icon name="gift" size="28" class="shrink-0 text-sun"/>
-            <span class="flex flex-col">
-                <span class="text-[15px] font-extrabold">Niveau {{ gifts.level }} ! Un cadeau pour toi</span>
-                <span class="text-sm text-[#D9C8B0]">{{ gifts.labels|join(', ', ' et ') }} · à ouvrir dans ton profil</span>
-            </span>
-        </a>
-    {% endif %}
-
     <twig:Casa
         :mood="mood"
         :cleanliness="cleanliness"
-        :reacting="completion is not same as(false)"
-        :speech="completion ? 'Merci ' ~ app.user.name ~ ' ! +' ~ completion.points ~ ' pts pour toi' ~ (completion.xp|default(0) ? ' (et +' ~ completion.xp ~ ' XP)') ~ '.' : null"
+        :reacting="just_done is not same as(false)"
+        :speech="just_done ? 'Merci ' ~ app.user.name ~ ' ! +' ~ just_done.points ~ ' pts pour toi' ~ (just_done.xp|default(0) ? ' (et +' ~ just_done.xp ~ ' XP)') ~ '.' : null"
         class="min-h-[262px]"
     />
 
     <section class="flex flex-col gap-1.5" aria-label="Propreté de la Casa">
         <div class="flex items-center justify-between gap-2">
             <h1 class="text-lg">La Casa</h1>
-            <p class="ml-auto text-sm font-bold">Propreté {{ cleanliness }} %</p>
+            <p class="ml-auto text-sm font-bold">Propreté <twig:Count :value="cleanliness" key="casa"/> %</p>
             <a href="{{ path('household_edit') }}" aria-label="Réglages de la coloc" title="Réglages de la coloc" class="-mr-2 flex size-9 items-center justify-center rounded-full text-muted hover:bg-track hover:text-ink"><twig:Icon name="settings" size="19"/></a>
         </div>
-        <twig:ProgressBar :value="cleanliness" label="Propreté de la Casa"/>
+        <twig:ProgressBar :value="cleanliness" label="Propreté de la Casa" key="casa"/>
     </section>
 
     {% if quick is not empty %}

@@ -6,6 +6,7 @@ use App\Entity\Boost;
 use App\Entity\Gift;
 use App\Entity\Member;
 use App\Entity\Pet;
+use App\Entity\YellowCard;
 use App\Enum\BoostKind;
 use App\Enum\GiftKind;
 use Doctrine\ORM\EntityManagerInterface;
@@ -55,6 +56,27 @@ final readonly class GiftUser
 
         $gift->use($this->clock->now(), $pet);
         $this->entityManager->flush();
+    }
+
+    /** A yellow card for a coloc, about something in particular. */
+    public function giveCard(Gift $gift, Member $friend, string $reason): YellowCard
+    {
+        $this->assertUsable($gift);
+        $reason = trim($reason);
+        if (GiftKind::YellowCard !== $gift->getKind() || $friend === $gift->getOwner() || !$friend->belongsTo($gift->getOwner()->getHousehold())) {
+            throw new \InvalidArgumentException('A yellow card is for another member of the household.');
+        }
+        if ('' === $reason || mb_strlen($reason) > YellowCard::REASON_MAX_LENGTH) {
+            throw new \InvalidArgumentException('A yellow card says what it is about.');
+        }
+
+        $now = $this->clock->now();
+        $gift->use($now);
+        $card = new YellowCard($gift->getOwner(), $friend, $reason, $now);
+        $this->entityManager->persist($card);
+        $this->entityManager->flush();
+
+        return $card;
     }
 
     public function offer(Gift $gift, Member $friend): void

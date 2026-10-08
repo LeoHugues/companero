@@ -3,20 +3,20 @@
 {% set face = mood ? mood.value : (happy ? 'radiant' : 'okay') %}
 <svg {{ attributes }} width="{{ size }}" height="{{ (size * 0.9)|round }}" viewBox="0 0 200 180" aria-hidden="true">
     <ellipse cx="100" cy="171" rx="62" ry="7" fill="#F0DFC6"/>
-    <path d="M42 84 L100 36 L158 84 V156 Q158 166 148 166 H52 Q42 166 42 156 Z" fill="{{ face == 'dusty' ? '#E3C27A' : '#F6C453' }}"/>
+    <path d="M42 84 L100 36 L158 84 V156 Q158 166 148 166 H52 Q42 166 42 156 Z" fill="{{ face == 'neglected' ? '#E0BE78' : (face == 'dusty' ? '#EEC25C' : '#F6C453') }}"/>
     <path d="M32 88 L100 30 L168 88" fill="none" stroke="#E8692C" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
     {% if face == 'radiant' %}
         <circle cx="68" cy="128" r="9" fill="#F2A27A"/>
         <circle cx="132" cy="128" r="9" fill="#F2A27A"/>
         <path d="M84 127 Q100 150 116 127 Z" fill="#2E1E14" stroke="#2E1E14" stroke-width="3.5" stroke-linejoin="round"/>
-    {% elseif face == 'dusty' %}
-        <path d="M86 136 Q100 128 114 136" fill="none" stroke="#2E1E14" stroke-width="5" stroke-linecap="round"/>
+    {% elseif face in ['dusty', 'neglected'] %}
+        <path d="{{ face == 'neglected' ? 'M86 139 Q100 126 114 139' : 'M86 136 Q100 128 114 136' }}" fill="none" stroke="#2E1E14" stroke-width="5" stroke-linecap="round"/>
         <circle cx="26" cy="146" r="8" fill="#B9A58C" opacity=".7"/>
         <circle cx="170" cy="138" r="7" fill="#B9A58C" opacity=".7"/>
         <circle cx="150" cy="158" r="6" fill="#B9A58C" opacity=".6"/>
     {% else %}
         <path d="M86 130 Q100 140 114 130" fill="none" stroke="#2E1E14" stroke-width="5" stroke-linecap="round"/>
     {% endif %}
-    <ellipse cx="78" cy="110" rx="8" ry="{{ face == 'dusty' ? 6 : 8 }}" fill="#2E1E14"/>
-    <ellipse cx="122" cy="110" rx="8" ry="{{ face == 'dusty' ? 6 : 8 }}" fill="#2E1E14"/>
+    <ellipse cx="78" cy="110" rx="8" ry="{{ face == 'neglected' ? 4.5 : (face == 'dusty' ? 6 : 8) }}" fill="#2E1E14"/>
+    <ellipse cx="122" cy="110" rx="8" ry="{{ face == 'neglected' ? 4.5 : (face == 'dusty' ? 6 : 8) }}" fill="#2E1E14"/>
 </svg>

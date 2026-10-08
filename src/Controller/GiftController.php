@@ -68,6 +68,29 @@ final class GiftController extends AbstractController
         return $this->back();
     }
 
+    #[Route('/carton', name: 'gift_card', methods: ['POST'])]
+    #[IsCsrfTokenValid('submit', tokenKey: '_csrf_token')]
+    public function card(Gift $gift, #[CurrentUser] Member $member, Request $request): RedirectResponse
+    {
+        $this->assertOwnedBy($gift, $member);
+        $friend = $this->friend($member, $request);
+        $reason = $request->request->getString('motif');
+        if ('' === trim($reason)) {
+            $this->addFlash('success', 'Un carton, c’est pour quelque chose : dis pour quoi.');
+
+            return $this->back();
+        }
+
+        try {
+            $this->giftUser->giveCard($gift, $friend, $reason);
+        } catch (\InvalidArgumentException|\LogicException $exception) {
+            throw new BadRequestHttpException($exception->getMessage(), $exception);
+        }
+        $this->addFlash('card_given', ['to' => $friend->getName(), 'reason' => trim($reason)]);
+
+        return $this->back();
+    }
+
     #[Route('/donner', name: 'gift_treat', methods: ['POST'])]
     #[IsCsrfTokenValid('submit', tokenKey: '_csrf_token')]
     public function treat(Gift $gift, #[CurrentUser] Member $member, Request $request): RedirectResponse

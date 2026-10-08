@@ -1,0 +1,102 @@
+{#
+    What was just earned, celebrated on the page that follows (celebration_controller.js):
+    the points slide in from the top, then a surprise found in the card, the gifts of a new level
+    and the yellow cards received open one after the other, each in its box.
+    Variables: completion, gifts, card_given (flashes read by base.html.twig), cards (unseen yellow cards).
+#}
+{% set dialogs = (completion and completion.bounty ? 1 : 0) + (gifts ? 1 : 0) + cards|length %}
+{% if completion or dialogs or card_given %}
+    <div class="contents" data-controller="celebration" data-turbo-temporary>
+        {% if completion %}
+            <p class="reward-toast" role="status" data-celebration-target="toast">
+                <span class="reward-toast-star" aria-hidden="true"><twig:Spark size="20" color="#F6C453"/></span>
+                <span class="flex flex-col leading-tight">
+                    <span class="text-[17px] font-extrabold">+<twig:Count :value="completion.points" delay="250"/> pts</span>
+                    <span class="max-w-[220px] truncate text-xs font-semibold text-[#D9C8B0]">{{ completion.title }}{% if completion.boost %} · dont +{{ completion.boost }} de boost{% endif %}{% if completion.xp %} · +{{ completion.xp }} XP{% endif %}</span>
+                </span>
+            </p>
+        {% elseif card_given %}
+            <p class="reward-toast" role="status" data-celebration-target="toast">
+                <span class="yellow-card yellow-card-mini" aria-hidden="true"></span>
+                <span class="flex flex-col leading-tight">
+                    <span class="text-[15px] font-extrabold">Carton jaune pour {{ card_given.to }} !</span>
+                    <span class="max-w-[230px] truncate text-xs font-semibold text-[#D9C8B0]">« {{ card_given.reason }} »</span>
+                </span>
+            </p>
+        {% endif %}
+
+        {% if completion and completion.bounty %}
+            {% set bounty = completion.bounty %}
+            <dialog class="reward-dialog" data-celebration-target="dialog" data-confetti="true" aria-labelledby="bounty-title">
+                <div class="reward-card">
+                    <p class="reward-kicker"><twig:Icon name="gem" size="14" stroke="2.6"/> Surprise</p>
+                    <h2 id="bounty-title" class="text-[22px] leading-tight">Une surprise était cachée dans « {{ completion.title }} » !</h2>
+                    <twig:RewardBox label="Ouvrir la surprise"/>
+                    <div class="reward-reveal">
+                        <span class="reward-icon reward-icon-{{ bounty.kind }}">
+                            {% if bounty.kind == 'yellow_card' %}<span class="yellow-card" aria-hidden="true"></span>{% else %}<twig:Icon :name="bounty.icon" size="34" stroke="2.2"/>{% endif %}
+                        </span>
+                        <p class="text-[26px] leading-none font-extrabold">{{ bounty.kind == 'yellow_card' ? 'Un carton jaune !' : bounty.label }}</p>
+                        <p class="text-sm font-semibold text-muted">
+                            {%- if bounty.kind == 'points' %}En plus de tes points : ça compte pour ton objectif.
+                            {%- elseif bounty.kind == 'xp' %}De l’expérience en plus, pour monter de niveau.
+                            {%- else %}{{ bounty.description }}. Il t’attend dans ton profil.{% endif -%}
+                        </p>
+                    </div>
+                    <form method="dialog" class="flex flex-wrap items-center justify-center gap-3">
+                        {% if bounty.gift %}<a href="{{ path('profile_show') }}#gifts-title" class="btn-link">Voir mes cadeaux</a>{% endif %}
+                        <button type="submit" class="btn-primary" autofocus>Trop bien !</button>
+                    </form>
+                </div>
+            </dialog>
+        {% endif %}
+
+        {% if gifts %}
+            <dialog class="reward-dialog reward-dialog-level" data-celebration-target="dialog" data-confetti="true" aria-labelledby="level-title">
+                <div class="reward-card">
+                    <p class="reward-kicker"><twig:Icon name="trophy" size="14" stroke="2.6"/> Nouveau niveau</p>
+                    <p class="reward-level" aria-hidden="true">{{ gifts.level }}</p>
+                    <h2 id="level-title" class="text-[22px] leading-tight">Niveau {{ gifts.level }} ! Un cadeau pour toi</h2>
+                    {% if gifts.rank is defined %}<p class="-mt-2 text-sm font-bold text-clay-dark">Te voilà « {{ gifts.rank }} »</p>{% endif %}
+                    <twig:RewardBox label="Ouvrir le cadeau"/>
+                    <ul class="reward-reveal w-full">
+                        {% for item in gifts.items ?? [] %}
+                            <li class="flex items-center gap-3 rounded-2xl bg-surface p-2.5 text-left">
+                                <span class="flex size-10 shrink-0 items-center justify-center rounded-full {{ item.icon == 'card' ? 'bg-legend-soft' : 'bg-sun' }}">
+                                    {% if item.icon == 'card' %}<span class="yellow-card yellow-card-mini" aria-hidden="true"></span>{% else %}<twig:Icon :name="item.icon" size="22"/>{% endif %}
+                                </span>
+                                <span class="flex flex-col">
+                                    <span class="text-[15px] font-extrabold">{{ item.label }}</span>
+                                    <span class="text-xs text-muted">{{ item.description }}</span>
+                                </span>
+                            </li>
+                        {% else %}
+                            <li class="text-sm font-bold">{{ gifts.labels|join(', ', ' et ') }}</li>
+                        {% endfor %}
+                    </ul>
+                    <form method="dialog" class="flex flex-wrap items-center justify-center gap-3">
+                        <a href="{{ path('profile_show') }}#gifts-title" class="btn-link">À ouvrir dans ton profil</a>
+                        <button type="submit" class="btn-primary">Génial !</button>
+                    </form>
+                </div>
+            </dialog>
+        {% endif %}
+
+        {% for card in cards %}
+            <dialog class="reward-dialog reward-dialog-card" data-celebration-target="dialog" aria-labelledby="card-title-{{ card.id }}">
+                <div class="reward-card">
+                    <p class="reward-kicker reward-kicker-card">Coup de sifflet</p>
+                    <div class="yellow-card yellow-card-big" aria-hidden="true">
+                        <span>{{ card.givenBy.initial }}</span>
+                    </div>
+                    <h2 id="card-title-{{ card.id }}" class="text-[22px] leading-tight">Carton jaune de {{ card.givenBy.name }} !</h2>
+                    <p class="bubble self-center text-center">« {{ card.reason }} »</p>
+                    <p class="text-xs font-semibold text-muted">Pour rire : aucun point perdu. Les règles viendront plus tard…</p>
+                    <form method="dialog">
+                        <button type="submit" class="btn-primary">Bien reçu</button>
+                    </form>
+                </div>
+            </dialog>
+        {% endfor %}
+    </div>
+{% endif %}

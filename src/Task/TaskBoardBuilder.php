@@ -3,9 +3,11 @@
 namespace App\Task;
 
 use App\Calendar\Week;
+use App\Entity\Bounty;
 use App\Entity\Household;
 use App\Entity\Task;
 use App\Reminder\ReminderRecipients;
+use App\Repository\BountyRepository;
 use App\Repository\CompletionRepository;
 use App\Repository\TaskRepository;
 use Psr\Clock\ClockInterface;
@@ -17,6 +19,7 @@ final readonly class TaskBoardBuilder
         private CompletionRepository $completions,
         private TaskStatusResolver $resolver,
         private ReminderRecipients $reminders,
+        private BountyRepository $bounties,
         private ClockInterface $clock,
     ) {
     }
@@ -26,9 +29,10 @@ final readonly class TaskBoardBuilder
         $now = $this->clock->now();
         $week = Week::containing($now);
         $doneThisWeek = $this->completions->countByTask($household, $week->start, $week->end());
+        $bounties = $this->bounties->findForWeek($household, $week->start);
 
         return new TaskBoard(array_map(
-            fn (Task $task): TaskView => $this->viewOf($task, $now, $doneThisWeek[$task->getId()] ?? 0),
+            fn (Task $task): TaskView => $this->viewOf($task, $now, $doneThisWeek[$task->getId()] ?? 0, $bounties[$task->getId()] ?? null),
             $this->tasks->findActive($household),
         ));
     }
@@ -39,10 +43,10 @@ final readonly class TaskBoardBuilder
         $now = $this->clock->now();
         $week = Week::containing($now);
 
-        return $this->viewOf($task, $now, $this->completions->countForTask($task, $week->start, $week->end()));
+        return $this->viewOf($task, $now, $this->completions->countForTask($task, $week->start, $week->end()), $this->bounties->findOneForWeek($task, $week->start));
     }
 
-    private function viewOf(Task $task, \DateTimeImmutable $now, int $doneThisWeek): TaskView
+    private function viewOf(Task $task, \DateTimeImmutable $now, int $doneThisWeek, ?Bounty $bounty): TaskView
     {
         $household = $task->getHousehold();
 
@@ -52,6 +56,7 @@ final readonly class TaskBoardBuilder
             $task->reservedByAt($now),
             $this->reminders->for($task, $household->getMembers()),
             $task->availableAt($now),
+            $bounty?->isClaimed() ? null : $bounty,
         );
     }
 }

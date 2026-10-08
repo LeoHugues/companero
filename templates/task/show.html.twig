@@ -5,7 +5,7 @@
 {% block body %}
     {% set task = view.task %}
     {% set status = view.status %}
-    {% set rarity = task.rarity %}
+    {% set rarity = view.rarity %}
     {% set boost = task_boost(view) %}
 
     <header class="flex items-center justify-between">
@@ -17,11 +17,6 @@
             <a href="{{ path('task_edit', {id: task.id}) }}" class="flex h-11 items-center gap-1.5 rounded-full px-3 text-sm font-bold text-ink no-underline hover:bg-track hover:text-ink"><twig:Icon name="settings" size="19"/> Modifier</a>
         {% endif %}
     </header>
-
-    {% set done = app.flashes('completion')|first %}
-    {% if done %}
-        <p class="animate-pop rounded-2xl bg-ink px-4 py-3 text-[15px] font-semibold text-cream" role="status">C’est fait : +{{ done.points }} pts, merci !</p>
-    {% endif %}
 
     {# The card itself, larger. #}
     <article class="card rarity-{{ rarity.value }} relative flex flex-col gap-3 overflow-hidden py-5 pr-5 pl-7" id="task-{{ task.id }}" data-rarity="{{ rarity.value }}" data-alert="{{ status.alert }}">
@@ -38,7 +33,7 @@
         {% if task.kind.value == 'rolling' %}
             {% set barColors = {ok: 'var(--color-ok)', warning: 'var(--color-warn)', danger: 'var(--color-danger)'} %}
             <div class="flex flex-col gap-1">
-                <twig:ProgressBar :value="status.freshness" height="10" :color="barColors[status.alert]" label="Fraîcheur"/>
+                <twig:ProgressBar :value="status.freshness" height="10" :color="barColors[status.alert]" label="Fraîcheur" :key="'task-' ~ task.id"/>
                 <p class="text-xs font-bold text-muted">Fraîcheur {{ status.freshness }} %</p>
             </div>
         {% endif %}
@@ -46,6 +41,12 @@
             <span class="text-[32px] leading-none font-extrabold text-clay-dark">+{{ task.points + boost }}</span>
             <span class="text-sm font-bold text-muted">pts{% if boost %} · dont +{{ boost }} de boost{% endif %}</span>
         </p>
+        {% if view.bounty %}
+            <p class="flex items-center gap-2.5 rounded-2xl bg-ink px-3 py-2.5 text-sm font-semibold text-cream">
+                <span class="bounty-tag shrink-0"><twig:Icon name="gift" size="12" stroke="2.6"/>Surprise</span>
+                <span>Une surprise attend la première personne qui la fait cette semaine. {% if rarity != task.rarity %}En attendant, la carte passe {{ rarity.label|lower }}.{% endif %}</span>
+            </p>
+        {% endif %}
         <twig:ReminderNote :view="view" :member="app.user"/>
         <twig:TaskActions :view="view" :back="'task-' ~ task.id" :member="app.user" class="flex-wrap pt-1"/>
     </article>

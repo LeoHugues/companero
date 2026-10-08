@@ -19,4 +19,14 @@ enum Rarity: string
             self::Legendary => 'Légendaire',
         };
     }
+
+    /** One class up: what a card becomes while it hides a surprise. */
+    public function next(): self
+    {
+        return match ($this) {
+            self::Common => self::Rare,
+            self::Rare => self::Epic,
+            self::Epic, self::Legendary => self::Legendary,
+        };
+    }
 }

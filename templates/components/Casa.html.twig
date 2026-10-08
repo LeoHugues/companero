@@ -1,40 +1,138 @@
-<div {{ attributes.defaults({class: 'relative flex flex-col items-center justify-end'}) }}
+{#
+    La Casa and the cats of the coloc. The scene is one SVG (340 × 196, from y = 22): the house in the middle,
+    a cat on each side. Everything that moves on its own is CSS (app.css, "La Casa");
+    what answers a touch is casa_controller.js.
+#}
+{% set face = this.face.value %}
+{% set asleep = this.asleep %}
+<div {{ attributes.defaults({class: 'casa relative flex flex-col items-center justify-end'}) }}
      data-controller="casa"
      data-casa-reacting-value="{{ reacting ? 'true' : 'false' }}"
-     data-casa-rest-speech-value="{{ this.restSpeech }}">
+     data-casa-rest-speech-value="{{ this.restSpeech }}"
+     data-casa-taps-value="{{ this.taps|json_encode }}"
+     data-casa-mood-value="{{ mood.value }}"
+     data-casa-asleep-value="{{ asleep ? 'true' : 'false' }}">
     {% if showSpeech %}
-        <p class="bubble animate-pop relative z-10 mb-2 ml-16 max-w-[230px] self-start" data-casa-target="speech" aria-live="polite">{{ speech ?? this.restSpeech }}</p>
+        <p class="bubble animate-pop relative z-10 mb-1 ml-14 max-w-[240px] self-start" data-casa-target="speech" aria-live="polite">{{ speech ?? this.restSpeech }}</p>
     {% endif %}
-    <div class="relative h-[180px] w-[200px] origin-bottom {{ reacting ? 'animate-bounce-joy' : 'animate-breathe' }}" data-casa-target="body">
-        <svg width="200" height="180" viewBox="0 0 200 180" role="img" aria-label="La Casa, propre à {{ cleanliness }} %">
-            <ellipse cx="100" cy="171" rx="62" ry="7" fill="#F0DFC6"/>
-            <rect x="128" y="34" width="16" height="30" rx="3" fill="#B4521F"/>
-            <path d="M42 84 L100 36 L158 84 V156 Q158 166 148 166 H52 Q42 166 42 156 Z" fill="#F6C453"/>
-            <path d="M32 88 L100 30 L168 88" fill="none" stroke="#E8692C" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
-            {% if this.blushing %}
-                <circle cx="68" cy="128" r="9" fill="#F2A27A"/>
-                <circle cx="132" cy="128" r="9" fill="#F2A27A"/>
+    <div class="casa-stage relative w-full max-w-[340px] select-none" data-casa-target="stage"
+         data-action="pointerdown->casa#press pointermove->casa#move pointerup->casa#release pointercancel->casa#cancel pointerleave->casa#cancel">
+        <svg viewBox="0 22 340 196" class="block h-auto w-full overflow-visible" role="img" aria-label="La Casa, propre à {{ cleanliness }} %{{ asleep ? ', elle dort' }}">
+            {# The ground: her shadow, a few tufts of grass, flowers when she is well. #}
+            <ellipse cx="170" cy="189" rx="66" ry="7" fill="#F0DFC6"/>
+            {% for tuft in [{x: 112, y: 190, flip: false}, {x: 229, y: 190, flip: true}] %}
+                <g transform="translate({{ tuft.x }} {{ tuft.y }}){{ tuft.flip ? ' scale(-1 1)' }}" class="casa-tuft">
+                    <path d="M-7 0 Q-8 -9 -11 -13 M-2 0 Q-2 -11 0 -16 M3 0 Q5 -8 9 -11" fill="none" stroke="{{ face == 'neglected' ? '#B39A6E' : '#7FA84E' }}" stroke-width="3" stroke-linecap="round"/>
+                    {% if face in ['okay', 'radiant'] %}
+                        <g class="casa-flower" style="animation-delay: {{ tuft.flip ? 900 : 0 }}ms">
+                            <circle cx="0" cy="-19" r="3.4" fill="{{ tuft.flip ? '#F2A27A' : '#FFFFFF' }}"/>
+                            <circle cx="-3.4" cy="-16" r="3.4" fill="{{ tuft.flip ? '#F2A27A' : '#FFFFFF' }}"/>
+                            <circle cx="3.4" cy="-16" r="3.4" fill="{{ tuft.flip ? '#F2A27A' : '#FFFFFF' }}"/>
+                            <circle cx="0" cy="-16.5" r="2.4" fill="#F6C453"/>
+                        </g>
+                    {% endif %}
+                </g>
+            {% endfor %}
+
+            <g class="casa-house {{ reacting ? 'animate-bounce-joy' : (asleep ? 'casa-snore' : 'animate-breathe') }}" data-casa-target="body">
+                <g transform="translate(70 16)">
+                    {% if face != 'neglected' %}
+                        <g class="casa-smoke" aria-hidden="true">
+                            <circle cx="136" cy="24" r="5" style="animation-delay: 0ms"/>
+                            <circle cx="136" cy="24" r="6" style="animation-delay: 1100ms"/>
+                            <circle cx="136" cy="24" r="5" style="animation-delay: 2200ms"/>
+                        </g>
+                    {% endif %}
+                    <rect x="128" y="36" width="16" height="30" rx="3" fill="#B4521F"/>
+                    <rect x="125" y="31" width="22" height="8" rx="3" fill="#8C5A3C"/>
+                    <path d="M42 84 L100 36 L158 84 V156 Q158 166 148 166 H52 Q42 166 42 156 Z" fill="{{ this.wallColor }}"/>
+                    <path d="M42 152 V156 Q42 166 52 166 H148 Q158 166 158 156 V152 Z" fill="#000" fill-opacity=".06"/>
+                    {# The attic window, lit at night. #}
+                    <circle cx="100" cy="66" r="9.5" fill="{{ asleep ? '#FFE08A' : '#FFF6E9' }}" stroke="#B4521F" stroke-width="3"/>
+                    <path d="M100 57 V75 M91 66 H109" stroke="#B4521F" stroke-width="2"/>
+                    <path d="M32 88 L100 30 L168 88" fill="none" stroke="#E8692C" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M58 66 l7 -6 M78 49 l7 -6 M115 43 l7 6 M135 60 l7 6" stroke="#B4521F" stroke-opacity=".45" stroke-width="2.4" stroke-linecap="round"/>
+
+                    {% if face == 'neglected' %}
+                        {# A cobweb under the eave, its spider going up and down; a plaster on the wall. #}
+                        <g fill="none" stroke="#7A6555" stroke-opacity=".6" stroke-width="1" aria-hidden="true">
+                            <path d="M46 92 L72 92 M46 92 L46 118 M46 92 L66 112"/>
+                            <path d="M54 92 Q52 98 46 100 M62 92 Q59 103 46 107 M70 92 Q65 109 46 115"/>
+                        </g>
+                        <g class="casa-spider" aria-hidden="true">
+                            <path d="M58 92 V104" stroke="#7A6555" stroke-width=".8"/>
+                            <circle cx="58" cy="106" r="2.6" fill="#2E1E14"/>
+                        </g>
+                        <g transform="rotate(-24 140 148)">
+                            <rect x="128" y="143" width="24" height="10" rx="4" fill="#F7E3C2" stroke="#D9B48C" stroke-width="1.2"/>
+                            <path d="M137 146 v4 M140 146 v4 M143 146 v4" stroke="#D9B48C" stroke-width="1"/>
+                        </g>
+                    {% endif %}
+
+                    {% if this.blushing %}
+                        <circle cx="66" cy="128" r="9" fill="#F2A27A" opacity="{{ face == 'radiant' ? 1 : 0.55 }}"/>
+                        <circle cx="134" cy="128" r="9" fill="#F2A27A" opacity="{{ face == 'radiant' ? 1 : 0.55 }}"/>
+                    {% endif %}
+
+                    {% if asleep %}
+                        <path d="M70 110 Q78 117 86 110 M114 110 Q122 117 130 110" fill="none" stroke="#2E1E14" stroke-width="3.5" stroke-linecap="round"/>
+                    {% elseif reacting %}
+                        {# Eyes closed with joy. #}
+                        <path d="M70 112 Q78 103 86 112 M114 112 Q122 103 130 112" fill="none" stroke="#2E1E14" stroke-width="4" stroke-linecap="round"/>
+                    {% else %}
+                        <g class="casa-eyes" data-casa-target="eyes">
+                            <g class="casa-gaze" data-casa-target="gaze">
+                                {% set eyeRy = face == 'dusty' ? 6.5 : 7.5 %}
+                                <ellipse cx="78" cy="110" rx="7.5" ry="{{ eyeRy }}" fill="#2E1E14"/>
+                                <ellipse cx="122" cy="110" rx="7.5" ry="{{ eyeRy }}" fill="#2E1E14"/>
+                                <circle cx="80.5" cy="{{ face == 'neglected' ? 111 : 107 }}" r="2.2" fill="#FFFFFF"/>
+                                <circle cx="124.5" cy="{{ face == 'neglected' ? 111 : 107 }}" r="2.2" fill="#FFFFFF"/>
+                            </g>
+                        </g>
+                        {% if face == 'neglected' %}
+                            {# Heavy eyelids, drooping outwards: tired, a bit sad — never cross. #}
+                            <path d="M68 100 H88 V106 L68 111 Z M112 100 H132 V111 L112 106 Z" fill="{{ this.wallColor }}"/>
+                            <path d="M68 111 L88 106 M112 106 L132 111" stroke="#2E1E14" stroke-width="3" stroke-linecap="round"/>
+                        {% endif %}
+                    {% endif %}
+
+                    {% if asleep %}
+                        <ellipse cx="100" cy="134" rx="5" ry="4" fill="#2E1E14"/>
+                    {% else %}
+                        <path class="casa-mouth" data-casa-target="mouth" d="{{ this.mouthPath }}" fill="{{ this.mouthFilled ? '#2E1E14' : 'none' }}" stroke="#2E1E14" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        {% if this.mouthFilled %}<path d="M93 138 Q100 146 107 138 Q100 134 93 138 Z" fill="#E07A6A"/>{% endif %}
+                    {% endif %}
+                </g>
+            </g>
+
+            {% for spot in this.dust %}
+                <circle class="casa-dust" data-casa-target="dust" cx="{{ spot.x }}" cy="{{ spot.y }}" r="{{ spot.size / 2 }}" fill="#B9A58C" fill-opacity=".75" style="animation-delay: {{ loop.index0 * 450 }}ms"/>
+            {% endfor %}
+
+            {% if face == 'radiant' and not asleep %}
+                {% for sparkle in [{x: 84, y: 54, size: 22, color: '#E8692C', delay: 0}, {x: 248, y: 124, size: 17, color: '#F6C453', delay: 600}, {x: 254, y: 50, size: 14, color: '#E8692C', delay: 1100}] %}
+                    <path class="animate-twinkle casa-fx" style="animation-delay: {{ sparkle.delay }}ms" transform="translate({{ sparkle.x }} {{ sparkle.y }}) scale({{ sparkle.size / 22 }})" d="M11 0 l3 8 8 3 -8 3 -3 8 -3 -8 -8 -3 8 -3z" fill="{{ sparkle.color }}"/>
+                {% endfor %}
             {% endif %}
-            <ellipse cx="78" cy="110" rx="7" ry="{{ reacting ? 2.5 : 7 }}" fill="#2E1E14"/>
-            <ellipse cx="122" cy="110" rx="7" ry="{{ reacting ? 2.5 : 7 }}" fill="#2E1E14"/>
-            {% if not reacting %}
-                <circle cx="80.5" cy="107" r="2" fill="#FFFFFF"/>
-                <circle cx="124.5" cy="107" r="2" fill="#FFFFFF"/>
+
+            {% if reacting %}
+                {% for heart in [{x: 104, y: 56, size: 22, color: '#E8692C', delay: 0}, {x: 220, y: 72, size: 16, color: '#F6C453', delay: 180}, {x: 160, y: 18, size: 18, color: '#E8692C', delay: 320}] %}
+                    <g transform="translate({{ heart.x }} {{ heart.y }}) scale({{ heart.size / 24 }})">
+                        <path class="animate-float-up casa-fx" style="animation-delay: {{ heart.delay }}ms" d="M12 21 C5 15 1 11 1 6.5 A5.5 5.5 0 0 1 12 4 A5.5 5.5 0 0 1 23 6.5 C23 11 19 15 12 21 Z" fill="{{ heart.color }}"/>
+                    </g>
+                {% endfor %}
             {% endif %}
-            <path d="{{ this.mouthPath }}" fill="{{ this.mouthFilled ? '#2E1E14' : 'none' }}" stroke="#2E1E14" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+            {% if asleep %}
+                <g class="casa-zzz casa-zzz-big" aria-hidden="true">
+                    <text x="218" y="40">Z</text>
+                    <text x="232" y="22" style="animation-delay: 1200ms">z</text>
+                </g>
+            {% endif %}
+
+            {% for cat in this.cats %}
+                <twig:CasaCat :look="cat.look" :x="cat.x" :y="cat.y" :asleep="asleep" :reacting="reacting" :index="loop.index0"/>
+            {% endfor %}
         </svg>
-        {% for spot in this.dust %}
-            <span class="absolute rounded-full bg-dust/75" style="left: {{ spot.x }}px; top: {{ spot.y }}px; width: {{ spot.size }}px; height: {{ spot.size }}px"></span>
-        {% endfor %}
-        {% if mood.value == 'radiant' %}
-            {% for sparkle in [{x: 14, y: 38, size: 22, color: '#E8692C', delay: 0}, {x: 166, y: 108, size: 17, color: '#F6C453', delay: 600}, {x: 172, y: 34, size: 14, color: '#E8692C', delay: 1100}] %}
-                <svg class="animate-twinkle absolute" style="left: {{ sparkle.x }}px; top: {{ sparkle.y }}px; animation-delay: {{ sparkle.delay }}ms" width="{{ sparkle.size }}" height="{{ sparkle.size }}" viewBox="0 0 22 22" aria-hidden="true"><path d="M11 0 l3 8 8 3 -8 3 -3 8 -3 -8 -8 -3 8 -3z" fill="{{ sparkle.color }}"/></svg>
-            {% endfor %}
-        {% endif %}
-        {% if reacting %}
-            {% for heart in [{x: 36, y: 40, size: 22, color: '#E8692C', delay: 0}, {x: 150, y: 56, size: 16, color: '#F6C453', delay: 180}, {x: 92, y: 4, size: 18, color: '#E8692C', delay: 320}] %}
-                <svg class="animate-float-up absolute" style="left: {{ heart.x }}px; top: {{ heart.y }}px; animation-delay: {{ heart.delay }}ms" width="{{ heart.size }}" height="{{ heart.size }}" viewBox="0 0 24 22" aria-hidden="true"><path d="M12 21 C5 15 1 11 1 6.5 A5.5 5.5 0 0 1 12 4 A5.5 5.5 0 0 1 23 6.5 C23 11 19 15 12 21 Z" fill="{{ heart.color }}"/></svg>
-            {% endfor %}
-        {% endif %}
     </div>
 </div>

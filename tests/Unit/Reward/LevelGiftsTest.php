@@ -16,15 +16,24 @@ final class LevelGiftsTest extends TestCase
 
         self::assertSame([], $gifts->forLevel(1, false));
         self::assertSame([GiftKind::TeamBoost], $gifts->forLevel(2, false));
-        self::assertSame([GiftKind::StreakFreeze], $gifts->forLevel(3, false));
+        self::assertSame([GiftKind::StreakFreeze, GiftKind::YellowCard], $gifts->forLevel(3, false));
         self::assertSame([GiftKind::FriendBoost], $gifts->forLevel(4, false));
-        self::assertSame([GiftKind::XpBoost], $gifts->forLevel(5, false));
+        self::assertSame([GiftKind::XpBoost, GiftKind::YellowCard], $gifts->forLevel(5, false));
         self::assertSame([GiftKind::TeamBoost], $gifts->forLevel(6, false));
     }
 
     public function testThePetsGetATreatAtEveryLevel(): void
     {
         self::assertSame([GiftKind::TeamBoost, GiftKind::Treat], (new LevelGifts())->forLevel(2, true));
+    }
+
+    public function testEveryOtherLevelBringsAYellowCard(): void
+    {
+        $gifts = new LevelGifts();
+
+        self::assertNotContains(GiftKind::YellowCard, $gifts->forLevel(2, true));
+        self::assertSame([GiftKind::StreakFreeze, GiftKind::Treat, GiftKind::YellowCard], $gifts->forLevel(3, true));
+        self::assertNotContains(GiftKind::YellowCard, $gifts->forLevel(4, false));
     }
 
     public function testABoostGivesOnePointEveryThreePoints(): void

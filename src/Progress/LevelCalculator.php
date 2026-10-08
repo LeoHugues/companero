@@ -35,7 +35,7 @@ final class LevelCalculator
         return 100 * $level * ($level - 1);
     }
 
-    private static function rank(int $level): string
+    public static function rank(int $level): string
     {
         return self::RANKS[min($level, array_key_last(self::RANKS))];
     }
