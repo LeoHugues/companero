@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Enum\Rarity;
 use App\Enum\TaskCategory;
 use App\Enum\TaskKind;
 use App\Repository\TaskRepository;
@@ -411,6 +412,12 @@ class Task
     public function getLastCompletedBy(): ?Member
     {
         return $this->lastCompletedBy;
+    }
+
+    /** Its card's rarity, from its base points (boosts aside). */
+    public function getRarity(): Rarity
+    {
+        return Rarity::fromPoints($this->points);
     }
 
     public function getCooldownHours(): ?int

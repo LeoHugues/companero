@@ -1,10 +1,12 @@
 {% props view, member, back = 'home' %}
 {% set task = view.task %}
 {% set boost = task_boost(view) %}
-<article {{ attributes.defaults({class: 'card card-hover flex flex-col gap-2.5 p-3.5', id: 'task-' ~ task.id}) }}>
+{% set rarity = task.rarity %}
+<article {{ attributes.defaults({class: 'card card-hover rarity-' ~ rarity.value ~ ' flex flex-col gap-2.5 p-3.5', id: 'task-' ~ task.id, 'data-rarity': rarity.value}) }}>
     <div class="flex items-start justify-between gap-2.5">
         <div class="flex min-w-0 flex-col gap-1">
-            <h3 class="text-[17px] font-bold">
+            <twig:RarityBadge :rarity="rarity" class="self-start"/>
+            <h3 class="text-[17px] leading-snug font-bold [overflow-wrap:anywhere]">
                 <a href="{{ path('task_edit', {id: task.id}) }}" class="text-ink no-underline hover:text-clay-dark">{{ task.title }}</a>
             </h3>
             <p class="meta flex items-center gap-1.5">

@@ -43,6 +43,28 @@ final class TaskFlowTest extends AppTestCase
         self::assertFalse($points->hasEntry($leo, PointReason::Punctuality, new \DateTimeImmutable('-1 hour'), new \DateTimeImmutable('+1 hour')));
     }
 
+    public function testTheMoreATaskIsWorthTheRarerItsCard(): void
+    {
+        $this->client->loginUser($this->foundHousehold());
+        foreach (['Ranger le salon' => '10', 'Grand ménage de la cuisine' => '60'] as $title => $points) {
+            $this->client->request('GET', '/taches/nouvelle');
+            $this->client->submitForm('Ajouter la tâche', ['task[title]' => $title, 'task[kind]' => 'rolling', 'task[rhythmDays]' => '7', 'task[points]' => $points]);
+        }
+        $tasks = static::getContainer()->get(TaskRepository::class);
+        $small = $tasks->findOneBy(['title' => 'Ranger le salon']);
+        $big = $tasks->findOneBy(['title' => 'Grand ménage de la cuisine']);
+
+        $this->client->request('GET', '/taches');
+        self::assertSelectorExists(\sprintf('#task-%d[data-rarity=common]', $small?->getId()));
+        self::assertSelectorTextContains('#task-'.$small?->getId(), 'Commune');
+        self::assertSelectorExists(\sprintf('#task-%d[data-rarity=legendary]', $big?->getId()));
+        self::assertSelectorTextContains('#task-'.$big?->getId(), 'Légendaire');
+
+        // Never done, both are due: the home page shows them with their rarity too.
+        $this->client->request('GET', '/');
+        self::assertSelectorExists(\sprintf('#task-%d.rarity-legendary', $big?->getId()));
+    }
+
     public function testInvalidRecurringTaskIsRejected(): void
     {
         $this->client->loginUser($this->foundHousehold());

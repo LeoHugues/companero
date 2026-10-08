@@ -52,6 +52,22 @@ les barres collectives.
 - La bulle de la Casa est le seul clin d'œil BD : bordure encre et ombre décalée
   de 3 px.
 - **Couleurs plates uniquement** : ni dégradé, ni brillance, ni néon.
+  Seule exception : la **rareté des cartes de tâche**, comme dans un jeu de cartes.
+
+## Rareté des cartes de tâche
+
+Plus une tâche rapporte de points (de base, sans les boosts), plus sa carte est rare. Les
+petites tâches, les plus nombreuses, sont communes.
+
+| Rareté | Points | Carte |
+|---|---|---|
+| Commune | moins de 20 | Plate, comme les autres cartes |
+| Rare | 20 à 29 | Bordure bleue `#3D7FA8`, léger voile bleu en haut |
+| Épique | 30 à 49 | Bordure en dégradé violet `#8E55BF` → rose → bleu, reflet holographique qui balaie la carte toutes les 6 s |
+| Légendaire | 50 et plus | Bordure dorée `#E3A21A` où une lumière fait le tour (4,5 s), halo doré, reflet |
+
+Une pastille en capitales (« RARE », « ÉPIQUE »…) avec un petit diamant rappelle la rareté
+au-dessus du titre. Les animations s'arrêtent si le téléphone demande moins d'animations.
 
 ## La Casa
 

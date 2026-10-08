@@ -24,6 +24,16 @@
   --color-blush: #F2A27A;
   --color-switch-off: #D9C8B0;
 
+  /* Rarity of the task cards, as in card games: blue, purple, gold. */
+  --color-rare: #3D7FA8;
+  --color-rare-ink: #285F80;
+  --color-rare-soft: #E4F0F8;
+  --color-epic: #8E55BF;
+  --color-epic-ink: #6E3A9A;
+  --color-epic-soft: #F2E8FA;
+  --color-legend: #E3A21A;
+  --color-legend-soft: #FFF0C9;
+
   --animate-breathe: breathe 3.2s ease-in-out infinite;
   --animate-bounce-joy: bounce-joy 700ms cubic-bezier(.3, 1.6, .5, 1) both;
   --animate-float-up: float-up 1200ms ease-out both;
@@ -109,6 +119,78 @@
   .plan-room:hover polygon, .plan-room:hover rect, .plan-room:focus-visible polygon { filter: brightness(.93); }
   .plan-room:focus-visible { outline: none; }
   .plan-room:focus-visible polygon { stroke-width: 1.4; }
+}
+
+/*
+ * Task cards by rarity (App\Enum\Rarity): the only shine in the app. A common card stays flat;
+ * a rare one takes a coloured border; an epic one, a gradient border and a holographic sheen
+ * passing over it now and then; a legendary one, a light running around its golden border.
+ */
+@property --rarity-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+/* Unlayered, so that they win over the card utility's border and background. */
+.rarity-rare {
+  border-color: var(--color-rare);
+  background: linear-gradient(160deg, var(--color-rare-soft), var(--color-surface) 45%);
+}
+
+.rarity-epic,
+.rarity-legendary {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  border: 2px solid transparent;
+}
+.rarity-epic {
+  background:
+    linear-gradient(160deg, var(--color-epic-soft), var(--color-surface) 50%) padding-box,
+    linear-gradient(135deg, var(--color-epic), #D77FC4, var(--color-rare), var(--color-epic)) border-box;
+}
+.rarity-legendary {
+  border-width: 2.5px;
+  background:
+    linear-gradient(160deg, var(--color-legend-soft), var(--color-surface) 55%) padding-box,
+    conic-gradient(from var(--rarity-angle), var(--color-legend) 0deg, var(--color-clay) 200deg, var(--color-legend) 270deg, #FFF9E3 315deg, var(--color-legend) 350deg) border-box;
+  box-shadow: 0 6px 22px rgba(227, 162, 26, .28);
+  animation: rarity-orbit 4.5s linear infinite;
+}
+
+/* The sheen: a band of light sweeping across the card. */
+.rarity-epic::after,
+.rarity-legendary::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(105deg, transparent 35%, rgba(255, 255, 255, .7) 47%, rgba(215, 127, 196, .18) 52%, transparent 64%);
+  background-size: 250% 100%;
+  animation: rarity-sheen 6s ease-in-out infinite;
+}
+.rarity-legendary::after {
+  background-image: linear-gradient(105deg, transparent 35%, rgba(255, 255, 255, .8) 47%, rgba(246, 196, 83, .3) 53%, transparent 64%);
+  animation-duration: 4.5s;
+}
+
+.rarity-badge {
+  @apply inline-flex h-5 shrink-0 items-center gap-1 rounded-full px-2 text-[11px] leading-none font-extrabold whitespace-nowrap uppercase tracking-wide;
+}
+.rarity-badge-common { @apply bg-track text-muted; }
+.rarity-badge-rare { @apply bg-rare-soft text-rare-ink; }
+.rarity-badge-epic { @apply bg-epic-soft text-epic-ink; }
+.rarity-badge-legendary {
+  @apply text-ink;
+  background: linear-gradient(100deg, var(--color-legend), var(--color-sun) 50%, var(--color-legend));
+}
+
+@keyframes rarity-orbit { to { --rarity-angle: 360deg; } }
+@keyframes rarity-sheen {
+  0%, 55% { background-position: 120% 0; }
+  100% { background-position: -20% 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {

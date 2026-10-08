@@ -1,15 +1,18 @@
 {% props view, member, back = 'tasks' %}
 {% set task = view.task %}
 {% set status = view.status %}
+{% set rarity = task.rarity %}
 {% set barColor = status.freshness >= 60 ? 'var(--color-sand)' : (status.freshness >= 30 ? 'var(--color-sun)' : 'var(--color-clay)') %}
-<article {{ attributes.defaults({class: 'card card-hover flex items-center gap-3 py-3 pr-3 pl-3.5', id: 'task-' ~ task.id}) }}>
+<article {{ attributes.defaults({class: 'card card-hover rarity-' ~ rarity.value ~ ' flex items-center gap-3 py-3 pr-3 pl-3.5', id: 'task-' ~ task.id, 'data-rarity': rarity.value}) }}>
     <div class="flex min-w-0 flex-1 flex-col gap-1.5">
-        <div class="flex items-baseline justify-between gap-2">
-            <h3 class="text-base font-bold">
-                <a href="{{ path('task_edit', {id: task.id}) }}" class="text-ink no-underline hover:text-clay-dark">{{ task.title }}</a>
-            </h3>
-            <span class="text-xs font-bold whitespace-nowrap {{ status.urgency.isPressing ? 'text-clay-dark' : 'text-muted' }}">{{ task_status_label(task, status) }}</span>
+        {# The rarity and the status on their own line: the title keeps the whole width. #}
+        <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+            <twig:RarityBadge :rarity="rarity"/>
+            <span class="text-xs font-bold {{ status.urgency.isPressing ? 'text-clay-dark' : 'text-muted' }}">{{ task_status_label(task, status) }}</span>
         </div>
+        <h3 class="text-base leading-snug font-bold [overflow-wrap:anywhere]">
+            <a href="{{ path('task_edit', {id: task.id}) }}" class="text-ink no-underline hover:text-clay-dark">{{ task.title }}</a>
+        </h3>
         {% if task.kind.value == 'rolling' %}
             <twig:ProgressBar :value="status.freshness" height="8" :color="barColor" label="Fraîcheur de « {{ task.title }} »"/>
         {% endif %}
@@ -20,5 +23,8 @@
         </p>
         <twig:ReminderNote :view="view" :member="member"/>
     </div>
-    <twig:TaskActions :view="view" :back="back" :member="member" compact/>
+    <div class="flex shrink-0 flex-col items-end gap-1.5">
+        <span class="text-sm font-extrabold whitespace-nowrap text-clay-dark">+{{ task.points + task_boost(view) }} pts</span>
+        <twig:TaskActions :view="view" :back="back" :member="member" compact/>
+    </div>
 </article>
