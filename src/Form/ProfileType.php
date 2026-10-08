@@ -21,7 +21,8 @@ class ProfileType extends AbstractType
             ->add('weeklyGoal', ChoiceType::class, [
                 'label' => 'Mon objectif de la semaine',
                 'expanded' => true,
-                'choices' => array_combine(array_map(static fn (int $goal): string => $goal.' pts', Member::GOAL_CHOICES), Member::GOAL_CHOICES),
+                // 70 points a week ≈ 5 minutes a day.
+                'choices' => array_combine(array_map(static fn (int $goal): string => \sprintf('%d pts · %d min/j', $goal, $goal / 14), Member::GOAL_CHOICES), Member::GOAL_CHOICES),
             ])
             ->add('presenceDays', RangeType::class, [
                 'label' => 'Je suis là combien de jours par semaine ?',

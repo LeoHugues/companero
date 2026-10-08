@@ -39,9 +39,10 @@ final class PagesTest extends AppTestCase
         self::assertResponseRedirects('/profil');
 
         $this->client->request('GET', '/bilan');
-        // 200 pts × 4 days present / 7.
-        self::assertSelectorTextContains('#team-title + p', '/ 114 pts');
+        // 70 pts × 4 days present / 7; the household goal does not change.
+        self::assertSelectorTextContains('[aria-labelledby=members-title]', '/ 40 pts');
         self::assertSelectorTextContains('[aria-labelledby=members-title]', 'là 4 j/7');
+        self::assertSelectorTextContains('#team-title + p', '/ 250 pts');
 
         $this->client->request('GET', '/profil');
         self::assertSame('4', $this->client->getCrawler()->filter('#profile_presenceDays')->attr('value'));

@@ -4,12 +4,13 @@ namespace App\Progress;
 
 use App\Entity\Member;
 
-/** The household's weekly goal is the sum of everyone's goal — reaching it earns a bonus for all. */
+/** The household's own weekly goal, everyone's points together — reaching it earns a bonus for all. */
 final readonly class TeamProgress
 {
     /** @param list<MemberProgress> $members */
     public function __construct(
         public array $members,
+        private int $goal,
     ) {
     }
 
@@ -20,7 +21,7 @@ final readonly class TeamProgress
 
     public function goal(): int
     {
-        return array_sum(array_map(static fn (MemberProgress $p): int => $p->goal, $this->members));
+        return $this->goal;
     }
 
     public function reached(): bool

@@ -13,6 +13,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 class Household
 {
     public const DEFAULT_CLEANING_DAY = 6;
+    public const DEFAULT_WEEKLY_GOAL = 250;
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -28,6 +29,22 @@ class Household
     #[ORM\Column(type: Types::SMALLINT)]
     #[Assert\Range(min: 1, max: 7)]
     private int $cleaningDay = self::DEFAULT_CLEANING_DAY;
+
+    /** The household's own weekly goal, shared by everyone: reaching it earns the team bonus. */
+    #[ORM\Column(type: Types::SMALLINT, options: ['default' => self::DEFAULT_WEEKLY_GOAL])]
+    #[Assert\Range(min: 10, max: 5000)]
+    private int $weeklyGoal = self::DEFAULT_WEEKLY_GOAL;
+
+    /** Weeks in a row with the household goal reached. */
+    #[ORM\Column(type: Types::SMALLINT, options: ['default' => 0])]
+    private int $streak = 0;
+
+    #[ORM\Column(type: Types::SMALLINT, options: ['default' => 0])]
+    private int $bestStreak = 0;
+
+    /** The last week the streak was counted for, so that closing a week twice changes nothing. */
+    #[ORM\Column(type: Types::DATE_IMMUTABLE, nullable: true)]
+    private ?\DateTimeImmutable $streakCountedUntil = null;
 
     /** On the cleaning day, everyone's tasks earn +1 point every 3 points. */
     #[ORM\Column(options: ['default' => true])]
@@ -92,6 +109,37 @@ class Household
     public function isCleaningDay(\DateTimeImmutable $at): bool
     {
         return (int) $at->format('N') === $this->cleaningDay;
+    }
+
+    public function getWeeklyGoal(): int
+    {
+        return $this->weeklyGoal;
+    }
+
+    public function setWeeklyGoal(int $weeklyGoal): void
+    {
+        $this->weeklyGoal = $weeklyGoal;
+    }
+
+    public function getStreak(): int
+    {
+        return $this->streak;
+    }
+
+    public function getBestStreak(): int
+    {
+        return $this->bestStreak;
+    }
+
+    /** Counts a finished week once: extends the streak if the household goal was reached, ends it otherwise. */
+    public function countWeek(\DateTimeImmutable $weekStart, bool $goalReached): void
+    {
+        if (null !== $this->streakCountedUntil && $weekStart <= $this->streakCountedUntil) {
+            return;
+        }
+        $this->streakCountedUntil = $weekStart;
+        $this->streak = $goalReached ? $this->streak + 1 : 0;
+        $this->bestStreak = max($this->bestStreak, $this->streak);
     }
 
     public function hasCleaningDayBoost(): bool

@@ -64,6 +64,7 @@ final readonly class WeekCloser
             }
         }
 
+        $household->countWeek($week->start, $team->reached());
         $this->entityManager->flush();
 
         foreach ($team->members as $progress) {

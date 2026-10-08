@@ -26,7 +26,7 @@ final class WeeklyGoalCalculatorTest extends TestCase
         $member = $this->member();
         $calculator = new WeeklyGoalCalculator();
 
-        self::assertSame(200, $calculator->goalFor($member, 12));
+        self::assertSame(70, $calculator->goalFor($member, 12));
         self::assertSame(0, $calculator->goalFor($member, -1));
     }
 }

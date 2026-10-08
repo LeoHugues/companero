@@ -1,7 +1,7 @@
-{% props team %}
+{% props team, household = null %}
 <section {{ attributes.defaults({class: 'card card-hover flex flex-col gap-2.5 p-3.5'}) }} aria-labelledby="team-title">
     <div class="flex items-baseline justify-between">
-        <h2 id="team-title" class="text-[15px]">Ensemble cette semaine</h2>
+        <h2 id="team-title" class="text-[15px]">Objectif de la maison</h2>
         <p class="text-[15px] font-extrabold">{{ team.points }} <span class="font-semibold text-muted">/ {{ team.goal }} pts</span></p>
     </div>
     <div class="track flex h-3.5">
@@ -18,6 +18,12 @@
         {% endfor %}
     </ul>
     {% if team.reached %}
-        <p class="text-[13px] font-bold text-clay-dark">Objectif collectif atteint : +{{ constant('App\\Review\\WeekCloser::TEAM_BONUS') }} pts pour chacun dimanche soir</p>
+        <p class="text-[13px] font-bold text-clay-dark">Objectif de la maison atteint : +{{ constant('App\\Review\\WeekCloser::TEAM_BONUS') }} pts pour chacun dimanche soir</p>
+    {% endif %}
+    {% if household and household.streak > 0 %}
+        <p class="flex items-center gap-1 text-[13px] font-bold">
+            <twig:Icon name="flame" size="16" stroke="2.4" class="text-clay-dark"/>
+            Série de la coloc : {{ household.streak }} semaine{{ household.streak > 1 ? 's' }} d’affilée{% if household.bestStreak > household.streak %} <span class="font-semibold text-muted">· record {{ household.bestStreak }}</span>{% endif %}
+        </p>
     {% endif %}
 </section>

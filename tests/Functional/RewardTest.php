@@ -140,6 +140,29 @@ final class RewardTest extends AppTestCase
         self::assertSame(1, $leo->getBestStreak());
     }
 
+    public function testTheHouseholdHasItsOwnGoalAndStreak(): void
+    {
+        $leo = $this->foundHousehold();
+        $robin = $this->register($leo, 'Robin');
+        $household = $leo->getHousehold();
+        $household->setWeeklyGoal(200);
+        $closer = static::getContainer()->get(WeekCloser::class);
+        $first = Week::containing(new \DateTimeImmutable())->previous()->previous();
+
+        // Together they reach the household goal, without each reaching their own.
+        $this->points($leo, $first, 60);
+        $this->points($robin, $first, 150);
+        $closer->close($household, $first);
+        $closer->close($household, $first);
+        self::assertSame(1, $household->getStreak());
+        self::assertSame(0, $leo->getStreak());
+        self::assertSame(60 + WeekCloser::TEAM_BONUS, static::getContainer()->get(PointEntryRepository::class)->totalFor($leo));
+
+        $closer->close($household, $first->next());
+        self::assertSame(0, $household->getStreak());
+        self::assertSame(1, $household->getBestStreak());
+    }
+
     private function quickTask(Member $author, int $points, string $title = 'Vider le lave-vaisselle'): Task
     {
         $task = new Task($author->getHousehold(), $author, new \DateTimeImmutable('-1 day'));

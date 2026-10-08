@@ -30,6 +30,6 @@ final readonly class TeamProgressBuilder
                 return new MemberProgress($member, $points[$member->getId()] ?? 0, $this->goals->goalFor($member, $days), $days);
             },
             $household->getMembers()->toArray(),
-        )));
+        )), $household->getWeeklyGoal());
     }
 }

@@ -61,7 +61,7 @@
         </section>
     {% endif %}
 
-    <twig:TeamBar :team="team"/>
+    <twig:TeamBar :team="team" :household="app.user.household"/>
 
     {% if mine is not empty %}
         <section class="flex flex-col gap-2.5" aria-labelledby="mine-title">

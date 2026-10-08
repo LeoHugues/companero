@@ -27,7 +27,7 @@ final class OnboardingTest extends AppTestCase
         self::assertResponseRedirects('/');
         $this->client->followRedirect();
         self::assertSelectorTextContains('h1', 'La Casa');
-        self::assertSelectorTextContains('#team-title', 'Ensemble cette semaine');
+        self::assertSelectorTextContains('#team-title', 'Objectif de la maison');
     }
 
     public function testFoundingFormIsValidated(): void
