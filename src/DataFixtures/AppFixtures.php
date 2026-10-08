@@ -84,11 +84,11 @@ final class AppFixtures extends Fixture
         ['Ranger le placard de l’entrée', 'Entrée', 30, 60, TaskCategory::Cleaning, null],
     ];
 
-    /** Done when needed, in one tap: [title, zone, points, chance of being done on a given day]. */
+    /** Done when needed, in one tap: [title, zone, points, chance of being done on a given day, cooldown in hours]. */
     private const QUICK = [
-        ['Vider le lave-vaisselle', 'Cuisine', 10, 70],
-        ['Ranger la vaisselle de l’égouttoir', 'Cuisine', 5, 50],
-        ['Faire le verre', 'Entrée', 10, 12],
+        ['Vider le lave-vaisselle', 'Cuisine', 10, 70, 6],
+        ['Ranger la vaisselle de l’égouttoir', 'Cuisine', 5, 50, 3],
+        ['Faire le verre', 'Entrée', 10, 12, 48],
     ];
 
     /** @var array<string, Task> */
@@ -214,8 +214,8 @@ final class AppFixtures extends Fixture
             }
         }
 
-        foreach (self::QUICK as [$title, $zone, $points]) {
-            $this->task($household, $author, $createdAt, $title, TaskKind::Quick, $points, $zones[$zone]);
+        foreach (self::QUICK as [$title, $zone, $points, , $cooldown]) {
+            $this->task($household, $author, $createdAt, $title, TaskKind::Quick, $points, $zones[$zone])->setCooldownHours($cooldown);
         }
 
         $bins = $this->task($household, $author, $createdAt, 'Sortir les poubelles', TaskKind::Scheduled, 10, $zones['Entrée']);

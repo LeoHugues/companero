@@ -70,6 +70,10 @@ class TaskType extends AbstractType
             ])
             ->add('scheduledWeekday', WeekdayType::class, ['label' => 'Quel jour ?', 'required' => false, 'placeholder' => 'Choisir…', 'every_day' => true])
             ->add('scheduledTime', TimeType::class, ['label' => 'À quelle heure ?', 'required' => false, 'widget' => 'single_text', 'input' => 'datetime_immutable'])
+            ->add('cooldownHours', DurationType::class, [
+                'label' => 'Pas avant combien de temps à nouveau ?',
+                'help' => 'Une fois faite, elle ne peut pas être refaite avant ce délai. Laisse vide pour aucun délai.',
+            ])
             ->add('dueAt', DateTimeType::class, ['label' => 'Pour quand ?', 'help' => 'Laisse vide si ce n’est pas pressé.', 'required' => false, 'widget' => 'single_text', 'input' => 'datetime_immutable']);
 
         $members = static fn (EntityRepository $members): QueryBuilder => $members->createQueryBuilder('m')

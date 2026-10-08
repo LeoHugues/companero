@@ -97,6 +97,15 @@ class Task
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(onDelete: 'SET NULL')]
+    private ?Member $lastCompletedBy = null;
+
+    /** Once done, it cannot be done again before this many hours (the dishwasher is not emptied twice in a row). */
+    #[ORM\Column(type: Types::SMALLINT, nullable: true)]
+    #[Assert\Range(min: 1, max: 8760)]
+    private ?int $cooldownHours = null;
+
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(onDelete: 'SET NULL')]
     private ?Member $reservedBy = null;
 
     #[ORM\Column(nullable: true)]
@@ -143,14 +152,18 @@ class Task
         if (TaskKind::OneOff !== $this->kind) {
             $this->dueAt = null;
         }
+        if (TaskKind::Quick !== $this->kind) {
+            $this->cooldownHours = null;
+        }
         if (null === $this->assignee || $this->backup === $this->assignee) {
             $this->backup = null;
         }
     }
 
-    public function complete(\DateTimeImmutable $at): void
+    public function complete(\DateTimeImmutable $at, ?Member $by = null): void
     {
         $this->lastCompletedAt = $at;
+        $this->lastCompletedBy = $by;
         $this->release();
 
         if (!$this->kind->isRecurring()) {
@@ -183,6 +196,17 @@ class Task
     public function archive(\DateTimeImmutable $at): void
     {
         $this->archivedAt = $at;
+    }
+
+    /** When it can be done again; null: right now. */
+    public function availableAt(\DateTimeImmutable $now): ?\DateTimeImmutable
+    {
+        if (null === $this->cooldownHours || null === $this->lastCompletedAt) {
+            return null;
+        }
+        $availableAt = $this->lastCompletedAt->modify(\sprintf('+%d hours', $this->cooldownHours));
+
+        return $availableAt > $now ? $availableAt : null;
     }
 
     public function isDaily(): bool
@@ -363,6 +387,21 @@ class Task
     public function getLastCompletedAt(): ?\DateTimeImmutable
     {
         return $this->lastCompletedAt;
+    }
+
+    public function getLastCompletedBy(): ?Member
+    {
+        return $this->lastCompletedBy;
+    }
+
+    public function getCooldownHours(): ?int
+    {
+        return $this->cooldownHours;
+    }
+
+    public function setCooldownHours(?int $cooldownHours): void
+    {
+        $this->cooldownHours = $cooldownHours;
     }
 
     public function getArchivedAt(): ?\DateTimeImmutable

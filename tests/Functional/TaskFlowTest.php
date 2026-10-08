@@ -98,6 +98,52 @@ final class TaskFlowTest extends AppTestCase
         self::assertSame(10, static::getContainer()->get(PointEntryRepository::class)->totalFor($leo));
     }
 
+    public function testAQuickTaskWaitsForItsCooldown(): void
+    {
+        $leo = $this->foundHousehold();
+        $this->client->loginUser($leo);
+        $this->client->request('GET', '/taches/nouvelle');
+        $this->client->submitForm('Ajouter la tâche', [
+            'task[title]' => 'Vider le lave-vaisselle',
+            'task[kind]' => 'quick',
+            'task[points]' => '10',
+            'task[cooldownHours][amount]' => '4',
+            'task[cooldownHours][unit]' => 'hours',
+        ]);
+        $task = static::getContainer()->get(TaskRepository::class)->findOneBy(['title' => 'Vider le lave-vaisselle']);
+        self::assertSame(4, $task?->getCooldownHours());
+
+        $this->client->followRedirect();
+        $this->submitAction('/taches/'.$task->getId().'/fait');
+        $this->client->followRedirect();
+        // Done: no more button until the cooldown is over.
+        self::assertSelectorNotExists('form[action="/taches/'.$task->getId().'/fait"]');
+        self::assertSelectorTextContains('#task-'.$task->getId(), 'Léo · possible à');
+
+        $this->client->request('POST', '/taches/'.$task->getId().'/fait', ['_csrf_token' => 'csrf-token']);
+        $this->client->followRedirect();
+        self::assertSelectorTextContains('[role=status]', 'vient d’être fait par Léo');
+        self::assertSame(10, static::getContainer()->get(PointEntryRepository::class)->totalFor($leo));
+    }
+
+    public function testACooldownCanBeSetInDays(): void
+    {
+        $this->client->loginUser($this->foundHousehold());
+        $this->client->request('GET', '/taches/nouvelle');
+        $this->client->submitForm('Ajouter la tâche', [
+            'task[title]' => 'Faire le verre',
+            'task[kind]' => 'quick',
+            'task[cooldownHours][amount]' => '2',
+            'task[cooldownHours][unit]' => 'days',
+        ]);
+        $task = static::getContainer()->get(TaskRepository::class)->findOneBy(['title' => 'Faire le verre']);
+        self::assertSame(48, $task?->getCooldownHours());
+
+        $this->client->request('GET', '/taches/'.$task->getId().'/modifier');
+        self::assertSame('2', $this->client->getCrawler()->filter('#task_cooldownHours_amount')->attr('value'));
+        self::assertSame('checked', $this->client->getCrawler()->filter('#task_cooldownHours_unit_1')->attr('checked'));
+    }
+
     public function testReservingATask(): void
     {
         $leo = $this->foundHousehold();

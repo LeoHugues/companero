@@ -13,6 +13,15 @@
     <fieldset class="flex flex-col gap-5" data-task-form-target="section" data-kind="one_off">
         {{ form_row(form.dueAt) }}
     </fieldset>
+    <fieldset class="flex flex-col gap-2" data-task-form-target="section" data-kind="quick">
+        {{ form_label(form.cooldownHours) }}
+        <div class="flex items-center gap-3">
+            {{ form_widget(form.cooldownHours.amount, {attr: {class: 'w-24', placeholder: '—'}}) }}
+            {{ form_widget(form.cooldownHours.unit) }}
+        </div>
+        {{ form_help(form.cooldownHours) }}
+        {{ form_errors(form.cooldownHours) }}
+    </fieldset>
 
     {{ form_row(form.category, {attr: {'data-action': 'change->task-form#toggle'}}) }}
     <fieldset class="flex flex-col gap-5" data-task-form-target="category" data-category="pets">

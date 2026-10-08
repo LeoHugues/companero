@@ -28,9 +28,13 @@ final readonly class TaskCompleter
     ) {
     }
 
+    /** @throws TaskNotAvailable when it was done too recently */
     public function complete(Task $task, Member $member): CompletionResult
     {
         $now = $this->clock->now();
+        if (null !== $availableAt = $task->availableAt($now)) {
+            throw new TaskNotAvailable($availableAt);
+        }
         $week = Week::containing($now);
         $status = $this->resolver->resolve(
             $task,
@@ -53,7 +57,7 @@ final readonly class TaskCompleter
         $boostXp = $this->boosts->xp($member, $now)?->bonusFor($task->getPoints()) ?? 0;
         $this->credit($member, PointReason::XpBoost, $boostXp, $task->getTitle(), $now, $completion);
 
-        $task->complete($now);
+        $task->complete($now, $member);
         $this->entityManager->flush();
 
         return new CompletionResult($completion, $task->getPoints(), $bonus, $boostPoints, $boostXp, $this->gifts->catchUp($member, $now));

@@ -13,6 +13,8 @@ final readonly class TaskView
         public TaskStatus $status,
         public ?Member $reservedBy = null,
         public ?Reminder $reminder = null,
+        /** Still in its cooldown: when it can be done again. */
+        public ?\DateTimeImmutable $availableAt = null,
     ) {
     }
 

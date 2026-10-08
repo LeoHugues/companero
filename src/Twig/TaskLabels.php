@@ -57,6 +57,21 @@ final readonly class TaskLabels
         };
     }
 
+    /** "à 15 h 30", "demain à 9 h", "jeudi à 9 h", "le 14/10": when a task in cooldown can be done again. */
+    #[AsTwigFunction('available_again')]
+    public function availableAgain(\DateTimeImmutable $at): string
+    {
+        $days = (int) $this->clock->now()->setTime(0, 0)->diff($at->setTime(0, 0))->format('%r%a');
+        $time = $this->time($at);
+
+        return match (true) {
+            $days <= 0 => 'à '.$time,
+            1 === $days => 'demain à '.$time,
+            $days < 7 => self::weekday((int) $at->format('N')).' à '.$time,
+            default => 'le '.$at->format('d/m'),
+        };
+    }
+
     #[AsTwigFunction('weekday_name')]
     public static function weekday(int $isoDay): string
     {

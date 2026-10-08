@@ -33,6 +33,7 @@ final readonly class TaskBoardBuilder
                 $this->resolver->resolve($task, $now, $household->getCleaningDay(), $doneThisWeek[$task->getId()] ?? 0),
                 $task->reservedByAt($now),
                 $this->reminders->for($task, $household->getMembers()),
+                $task->availableAt($now),
             ),
             $this->tasks->findActive($household),
         ));

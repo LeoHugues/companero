@@ -10,6 +10,8 @@ use App\Repository\CatalogItemRepository;
 use App\Security\HouseholdVoter;
 use App\Task\TaskBoardBuilder;
 use App\Task\TaskCompleter;
+use App\Task\TaskNotAvailable;
+use App\Twig\TaskLabels;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Clock\ClockInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -112,13 +114,19 @@ final class TaskController extends AbstractController
     #[Route('/{id}/fait', name: 'task_complete', requirements: ['id' => '\d+'], methods: ['POST'])]
     #[IsGranted(HouseholdVoter::ACCESS, subject: 'task')]
     #[IsCsrfTokenValid('submit', tokenKey: '_csrf_token')]
-    public function complete(Task $task, #[CurrentUser] Member $member, Request $request, TaskCompleter $completer): RedirectResponse
+    public function complete(Task $task, #[CurrentUser] Member $member, Request $request, TaskCompleter $completer, TaskLabels $labels): RedirectResponse
     {
         if ($task->isArchived()) {
             throw $this->createNotFoundException();
         }
 
-        $result = $completer->complete($task, $member);
+        try {
+            $result = $completer->complete($task, $member);
+        } catch (TaskNotAvailable $notYet) {
+            $this->addFlash('success', \sprintf('« %s » vient d’être fait%s : à nouveau possible %s.', $task->getTitle(), null !== $task->getLastCompletedBy() ? ' par '.$task->getLastCompletedBy()->getName() : '', $labels->availableAgain($notYet->availableAt)));
+
+            return $this->redirectBack($request);
+        }
         $this->addFlash('completion', ['points' => $result->totalPoints(), 'title' => $task->getTitle(), 'xp' => $result->boostXp]);
         if ([] !== $result->gifts) {
             $this->addFlash('gifts', [

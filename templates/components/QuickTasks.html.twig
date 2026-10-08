@@ -1,18 +1,29 @@
 {% props views, back = 'home' %}
-{# Tasks that are never planned: one tap says "I did it". #}
+{# Tasks that are never planned: one tap says "I did it" — unless it was just done. #}
 <ul {{ attributes.defaults({class: 'flex flex-wrap gap-2'}) }}>
     {% for view in views %}
         <li id="task-{{ view.task.id }}">
-            <form method="post" action="{{ path('task_complete', {id: view.task.id}) }}">
-                <input type="hidden" name="_back" value="{{ back }}">
-                <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
-                <button type="submit" aria-label="J’ai fait « {{ view.task.title }} »"
-                        class="flex h-[42px] cursor-pointer items-center gap-2 rounded-full border-[1.5px] border-line bg-surface pr-3.5 pl-2.5 text-sm font-bold text-ink transition hover:border-ink active:scale-95 active:bg-sun">
-                    <span class="flex size-6 items-center justify-center rounded-full bg-track"><twig:Icon name="check" size="14" stroke="3"/></span>
-                    {{ view.task.title }}
-                    <span class="text-xs font-extrabold text-clay-dark">+{{ view.task.points + task_boost(view) }}</span>
-                </button>
-            </form>
+            {% if view.availableAt %}
+                <span class="flex min-h-[42px] items-center gap-2 rounded-full border-[1.5px] border-dashed border-line pr-3.5 pl-2.5 text-sm font-bold text-muted"
+                      title="Fait{{ view.task.lastCompletedBy ? ' par ' ~ view.task.lastCompletedBy.name }}, à nouveau possible {{ available_again(view.availableAt) }}">
+                    <span class="flex size-6 items-center justify-center rounded-full bg-sun text-ink"><twig:Icon name="check" size="14" stroke="3"/></span>
+                    <span class="flex flex-col leading-tight">
+                        <span>{{ view.task.title }}</span>
+                        <span class="text-[11px] font-semibold">{{ view.task.lastCompletedBy ? view.task.lastCompletedBy.name ~ ' · ' }}possible {{ available_again(view.availableAt) }}</span>
+                    </span>
+                </span>
+            {% else %}
+                <form method="post" action="{{ path('task_complete', {id: view.task.id}) }}">
+                    <input type="hidden" name="_back" value="{{ back }}">
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
+                    <button type="submit" aria-label="J’ai fait « {{ view.task.title }} »"
+                            class="flex h-[42px] cursor-pointer items-center gap-2 rounded-full border-[1.5px] border-line bg-surface pr-3.5 pl-2.5 text-sm font-bold text-ink transition hover:border-ink active:scale-95 active:bg-sun">
+                        <span class="flex size-6 items-center justify-center rounded-full bg-track"><twig:Icon name="check" size="14" stroke="3"/></span>
+                        {{ view.task.title }}
+                        <span class="text-xs font-extrabold text-clay-dark">+{{ view.task.points + task_boost(view) }}</span>
+                    </button>
+                </form>
+            {% endif %}
         </li>
     {% endfor %}
 </ul>

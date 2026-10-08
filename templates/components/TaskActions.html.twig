@@ -1,6 +1,16 @@
 {% props view, back, member, compact = false %}
 {% set task = view.task %}
 <div {{ attributes.defaults({class: 'flex items-center gap-3.5'}) }}>
+    {% if view.availableAt %}
+        {# Just done: it cannot be done again before its cooldown is over. #}
+        {% if compact %}
+            <span class="flex size-11 items-center justify-center rounded-full border-[1.5px] border-dashed border-line text-muted" title="À nouveau possible {{ available_again(view.availableAt) }}" aria-label="« {{ task.title }} » à nouveau possible {{ available_again(view.availableAt) }}">
+                <twig:Icon name="clock" size="20"/>
+            </span>
+        {% else %}
+            <span class="flex items-center gap-1.5 text-sm font-bold text-muted"><twig:Icon name="clock" size="18"/> Possible {{ available_again(view.availableAt) }}</span>
+        {% endif %}
+    {% else %}
     <form method="post" action="{{ path('task_complete', {id: task.id}) }}">
         <input type="hidden" name="_back" value="{{ back }}">
         <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
@@ -13,6 +23,7 @@
             <button type="submit" class="btn-primary">C’est fait</button>
         {% endif %}
     </form>
+    {% endif %}
     {% if not compact %}
         {% if view.reservedBy is null %}
             <form method="post" action="{{ path('task_reserve', {id: task.id}) }}">
@@ -29,4 +40,8 @@
             </span>
         {% endif %}
     {% endif %}
+    <a href="{{ path('task_edit', {id: task.id}) }}" aria-label="Réglages de « {{ task.title }} »" title="Réglages de la tâche"
+       class="{{ compact ? 'order-first' : 'ml-auto' }} flex size-9 shrink-0 items-center justify-center rounded-full text-muted no-underline transition hover:bg-track hover:text-ink">
+        <twig:Icon name="settings" size="19"/>
+    </a>
 </div>
