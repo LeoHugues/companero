@@ -1,0 +1,9 @@
+[Unit]
+Description=Companero : clôture de la semaine, le lundi à 0 h 05 (heure de Paris)
+
+[Timer]
+OnCalendar=Mon *-*-* 00:05:00 Europe/Paris
+Persistent=true
+
+[Install]
+WantedBy=timers.target

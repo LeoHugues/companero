@@ -5,10 +5,18 @@
 #   ./scripts/deploy.sh            # dernière version de main (ou de $DEPLOY_BRANCH)
 #   ./scripts/deploy.sh v1.2.0     # une version précise (tag ou commit)
 #
+# Lancé en root, il se relance avec le propriétaire du dossier, pour que var/ reste à PHP.
+#
 # Depuis Windows : .\dev deploy utilisateur@serveur /chemin/vers/companero
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
+
+owner=$(stat -c %U .)
+if [ "$(id -u)" -eq 0 ] && [ "$owner" != root ]; then
+    exec sudo -u "$owner" -- "$PWD/scripts/deploy.sh" "$@"
+fi
+
 export APP_ENV=prod APP_DEBUG=0
 
 step() { printf '\033[36m==> %s\033[0m\n' "$*"; }

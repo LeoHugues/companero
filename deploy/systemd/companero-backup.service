@@ -1,0 +1,11 @@
+# Timer systemd de Companero, à copier dans /etc/systemd/system/ (voir docs/deploiement.md),
+# en adaptant le dossier. L'utilisateur est celui qui fait tourner PHP.
+[Unit]
+Description=Companero : sauvegarde de la base
+
+[Service]
+Type=oneshot
+User=www-data
+WorkingDirectory=/srv/companero
+Environment=APP_ENV=prod
+ExecStart=/usr/bin/php bin/console app:backup --no-interaction
