@@ -39,8 +39,9 @@ Elle est d'abord construite pour une coloc de 4 personnes. Elle pourra ensuite
 | **Foyer** | La colocation. Une instance = un foyer (au moins en V1). |
 | **Membre** | Un colocataire. |
 | **Zone** | Un espace du foyer (cuisine, salon, salle de bain du haut, chambre de X, jardin…) avec la liste des membres qu'il **concerne**. Une zone est *commune* (tout le monde), *partagée* (plusieurs membres) ou *privée* (un seul membre). |
-| **Tâche** | Quelque chose à faire, rattaché à une zone. Elle est **récurrente** (permanente, elle revient) ou **ponctuelle** (elle disparaît une fois faite). |
-| **Catalogue** | Des modèles de tâches ponctuelles prêts à l'emploi (tailler la haie, nettoyer les gouttières, faire une course…), instanciés à la main quand le besoin se présente. |
+| **Modèle** | La règle d'une tâche qui revient : régulière (« tous les 7 jours »), à jour fixe (« le mardi soir ») ou express. Les modèles sont dans l'onglet *Modèles* ; ils ne se font pas, ils produisent des tâches à faire. |
+| **Tâche à faire** | Ce qui attend sur l'accueil, avec sa carte (rareté, urgence, bouton « C'est fait ») : l'occurrence du moment d'un modèle, ou une tâche **ponctuelle** (faite une fois, puis elle disparaît). |
+| **Catalogue** | Des modèles de tâches ponctuelles prêts à l'emploi (tailler la haie, nettoyer les gouttières, faire une course…), lancés à la main quand le besoin se présente. |
 | **Rythme** | Pour une tâche récurrente glissante : l'intervalle idéal entre deux réalisations (« environ tous les 3 jours »). |
 | **Engagement** | Optionnel : le nombre minimum de réalisations par semaine sur lequel le foyer s'engage (« au moins 1 fois par semaine »). |
 | **Jour de ménage** | Un jour de la semaine choisi par le foyer (par exemple le samedi). C'est le rendez-vous où l'on sait que c'est le moment de faire le ménage. Il n'est ni obligatoire ni exclusif : on peut faire les tâches avant ou après. |

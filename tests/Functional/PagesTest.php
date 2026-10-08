@@ -12,7 +12,10 @@ final class PagesTest extends AppTestCase
     {
         yield ['/', 'La Casa'];
         yield ['/taches', 'Les modèles'];
-        yield ['/taches/nouvelle', 'Nouvelle tâche'];
+        yield ['/taches/nouvelle', 'Qu’est-ce que tu veux ajouter ?'];
+        yield ['/taches/nouvelle/a-faire', 'Une tâche à faire'];
+        yield ['/taches/nouvelle/modele', 'Un nouveau modèle'];
+        yield ['/taches/nouvelle/deja-fait', 'J’ai fait quelque chose'];
         yield ['/bilan', 'Bilan de la semaine'];
         yield ['/profil', 'Léo'];
         yield ['/coloc', 'Réglages de la coloc'];
@@ -109,8 +112,8 @@ final class PagesTest extends AppTestCase
     {
         $leo = $this->foundHousehold();
         $this->client->loginUser($leo);
-        $this->client->request('GET', '/taches/nouvelle');
-        $form = $this->client->getCrawler()->selectButton('Ajouter la tâche')->form();
+        $this->client->request('GET', '/taches/nouvelle/modele');
+        $form = $this->client->getCrawler()->selectButton('Créer le modèle')->form();
         $kitchen = array_search('Cuisine', array_map(static fn ($node) => $node->textContent, iterator_to_array($this->client->getCrawler()->filter('#task_zone label'))), true);
         $this->client->submit($form, [
             'task[title]' => 'Plans de travail',

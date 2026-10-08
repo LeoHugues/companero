@@ -14,8 +14,8 @@ final class TaskFlowTest extends AppTestCase
         $leo = $this->foundHousehold();
         $this->client->loginUser($leo);
 
-        $this->client->request('GET', '/taches/nouvelle');
-        $this->client->submitForm('Ajouter la tâche', [
+        $this->client->request('GET', '/taches/nouvelle/modele');
+        $this->client->submitForm('Créer le modèle', [
             'task[title]' => 'Serpillière',
             'task[kind]' => 'rolling',
             'task[rhythmDays]' => '7',
@@ -46,10 +46,10 @@ final class TaskFlowTest extends AppTestCase
     public function testTheRarityOfACardIsChosenWithTheTask(): void
     {
         $this->client->loginUser($this->foundHousehold());
-        $this->client->request('GET', '/taches/nouvelle');
-        $this->client->submitForm('Ajouter la tâche', ['task[title]' => 'Ranger le salon', 'task[kind]' => 'rolling', 'task[rhythmDays]' => '7', 'task[points]' => '60']);
-        $this->client->request('GET', '/taches/nouvelle');
-        $this->client->submitForm('Ajouter la tâche', ['task[title]' => 'Grand ménage de la cuisine', 'task[kind]' => 'rolling', 'task[rhythmDays]' => '7', 'task[points]' => '10', 'task[rarity]' => 'legendary']);
+        $this->client->request('GET', '/taches/nouvelle/modele');
+        $this->client->submitForm('Créer le modèle', ['task[title]' => 'Ranger le salon', 'task[kind]' => 'rolling', 'task[rhythmDays]' => '7', 'task[points]' => '60']);
+        $this->client->request('GET', '/taches/nouvelle/modele');
+        $this->client->submitForm('Créer le modèle', ['task[title]' => 'Grand ménage de la cuisine', 'task[kind]' => 'rolling', 'task[rhythmDays]' => '7', 'task[points]' => '10', 'task[rarity]' => 'legendary']);
         $tasks = static::getContainer()->get(TaskRepository::class);
         $common = $tasks->findOneBy(['title' => 'Ranger le salon']);
         $legendary = $tasks->findOneBy(['title' => 'Grand ménage de la cuisine']);
@@ -75,12 +75,12 @@ final class TaskFlowTest extends AppTestCase
     public function testACardShowsHowPressingItsTaskIs(): void
     {
         $this->client->loginUser($this->foundHousehold());
-        $this->client->request('GET', '/taches/nouvelle');
-        $this->client->submitForm('Ajouter la tâche', ['task[title]' => 'Arroser les plantes', 'task[kind]' => 'rolling', 'task[rhythmDays]' => '3']);
-        $this->client->request('GET', '/taches/nouvelle');
-        $this->client->submitForm('Ajouter la tâche', ['task[title]' => 'Appeler le proprio', 'task[kind]' => 'one_off', 'task[dueAt]' => (new \DateTimeImmutable('-3 days'))->format('Y-m-d\TH:i')]);
-        $this->client->request('GET', '/taches/nouvelle');
-        $this->client->submitForm('Ajouter la tâche', ['task[title]' => 'Tailler la haie', 'task[kind]' => 'one_off']);
+        $this->client->request('GET', '/taches/nouvelle/modele');
+        $this->client->submitForm('Créer le modèle', ['task[title]' => 'Arroser les plantes', 'task[kind]' => 'rolling', 'task[rhythmDays]' => '3']);
+        $this->client->request('GET', '/taches/nouvelle/a-faire');
+        $this->client->submitForm('Ajouter la tâche', ['task[title]' => 'Appeler le proprio', 'task[dueAt]' => (new \DateTimeImmutable('-3 days'))->format('Y-m-d\TH:i')]);
+        $this->client->request('GET', '/taches/nouvelle/a-faire');
+        $this->client->submitForm('Ajouter la tâche', ['task[title]' => 'Tailler la haie']);
         $tasks = static::getContainer()->get(TaskRepository::class);
 
         // Everything there is to do is on the home page, one-off tasks included.
@@ -93,8 +93,8 @@ final class TaskFlowTest extends AppTestCase
     public function testTheAlertsOfACardAreSetWithTheTask(): void
     {
         $this->client->loginUser($this->foundHousehold());
-        $this->client->request('GET', '/taches/nouvelle');
-        $this->client->submitForm('Ajouter la tâche', [
+        $this->client->request('GET', '/taches/nouvelle/modele');
+        $this->client->submitForm('Créer le modèle', [
             'task[title]' => 'Serpillière',
             'task[kind]' => 'rolling',
             'task[rhythmDays]' => '7',
@@ -119,8 +119,8 @@ final class TaskFlowTest extends AppTestCase
     {
         $leo = $this->foundHousehold();
         $this->client->loginUser($leo);
-        $this->client->request('GET', '/taches/nouvelle');
-        $this->client->submitForm('Ajouter la tâche', ['task[title]' => 'Serpillière', 'task[kind]' => 'rolling', 'task[rhythmDays]' => '7', 'task[points]' => '30', 'task[rarity]' => 'rare']);
+        $this->client->request('GET', '/taches/nouvelle/modele');
+        $this->client->submitForm('Créer le modèle', ['task[title]' => 'Serpillière', 'task[kind]' => 'rolling', 'task[rhythmDays]' => '7', 'task[points]' => '30', 'task[rarity]' => 'rare']);
         $task = static::getContainer()->get(TaskRepository::class)->findOneBy(['title' => 'Serpillière']);
 
         $this->client->request('GET', '/');
@@ -144,10 +144,10 @@ final class TaskFlowTest extends AppTestCase
     public function testTheTemplatesAreKeptApartFromWhatThereIsToDo(): void
     {
         $this->client->loginUser($this->foundHousehold());
-        $this->client->request('GET', '/taches/nouvelle');
-        $this->client->submitForm('Ajouter la tâche', ['task[title]' => 'Serpillière', 'task[kind]' => 'rolling', 'task[rhythmDays]' => '7']);
-        $this->client->request('GET', '/taches/nouvelle');
-        $this->client->submitForm('Ajouter la tâche', ['task[title]' => 'Appeler le proprio', 'task[kind]' => 'one_off']);
+        $this->client->request('GET', '/taches/nouvelle/modele');
+        $this->client->submitForm('Créer le modèle', ['task[title]' => 'Serpillière', 'task[kind]' => 'rolling', 'task[rhythmDays]' => '7']);
+        $this->client->request('GET', '/taches/nouvelle/a-faire');
+        $this->client->submitForm('Ajouter la tâche', ['task[title]' => 'Appeler le proprio']);
         $tasks = static::getContainer()->get(TaskRepository::class);
         $mop = $tasks->findOneBy(['title' => 'Serpillière']);
         $call = $tasks->findOneBy(['title' => 'Appeler le proprio']);
@@ -176,8 +176,8 @@ final class TaskFlowTest extends AppTestCase
     public function testADoneOneOffTaskLeavesItsPage(): void
     {
         $this->client->loginUser($this->foundHousehold());
-        $this->client->request('GET', '/taches/nouvelle');
-        $this->client->submitForm('Ajouter la tâche', ['task[title]' => 'Appeler le proprio', 'task[kind]' => 'one_off']);
+        $this->client->request('GET', '/taches/nouvelle/a-faire');
+        $this->client->submitForm('Ajouter la tâche', ['task[title]' => 'Appeler le proprio']);
         $task = static::getContainer()->get(TaskRepository::class)->findOneBy(['title' => 'Appeler le proprio']);
 
         $this->client->request('GET', '/taches/'.$task?->getId());
@@ -192,8 +192,8 @@ final class TaskFlowTest extends AppTestCase
     {
         $this->client->loginUser($this->foundHousehold());
 
-        $this->client->request('GET', '/taches/nouvelle');
-        $this->client->submitForm('Ajouter la tâche', [
+        $this->client->request('GET', '/taches/nouvelle/modele');
+        $this->client->submitForm('Créer le modèle', [
             'task[title]' => 'Aspirateur',
             'task[kind]' => 'rolling',
             'task[rhythmDays]' => '',
@@ -208,10 +208,9 @@ final class TaskFlowTest extends AppTestCase
         $leo = $this->foundHousehold();
         $this->client->loginUser($leo);
 
-        $this->client->request('GET', '/taches/nouvelle');
+        $this->client->request('GET', '/taches/nouvelle/a-faire');
         $this->client->submitForm('Ajouter la tâche', [
             'task[title]' => 'Appeler le proprio',
-            'task[kind]' => 'one_off',
             'task[reserve]' => '1',
         ]);
         $task = static::getContainer()->get(TaskRepository::class)->findOneBy(['title' => 'Appeler le proprio']);
@@ -228,8 +227,8 @@ final class TaskFlowTest extends AppTestCase
     {
         $leo = $this->foundHousehold();
         $this->client->loginUser($leo);
-        $this->client->request('GET', '/taches/nouvelle');
-        $this->client->submitForm('Ajouter la tâche', ['task[title]' => 'Vider le lave-vaisselle', 'task[kind]' => 'quick', 'task[points]' => '10']);
+        $this->client->request('GET', '/taches/nouvelle/modele');
+        $this->client->submitForm('Créer le modèle', ['task[title]' => 'Vider le lave-vaisselle', 'task[kind]' => 'quick', 'task[points]' => '10']);
         $task = static::getContainer()->get(TaskRepository::class)->findOneBy(['title' => 'Vider le lave-vaisselle']);
 
         // Never pressing, but always one tap away on the home page.
@@ -248,8 +247,8 @@ final class TaskFlowTest extends AppTestCase
     {
         $leo = $this->foundHousehold();
         $this->client->loginUser($leo);
-        $this->client->request('GET', '/taches/nouvelle');
-        $this->client->submitForm('Ajouter la tâche', [
+        $this->client->request('GET', '/taches/nouvelle/modele');
+        $this->client->submitForm('Créer le modèle', [
             'task[title]' => 'Vider le lave-vaisselle',
             'task[kind]' => 'quick',
             'task[points]' => '10',
@@ -275,8 +274,8 @@ final class TaskFlowTest extends AppTestCase
     public function testACooldownCanBeSetInDays(): void
     {
         $this->client->loginUser($this->foundHousehold());
-        $this->client->request('GET', '/taches/nouvelle');
-        $this->client->submitForm('Ajouter la tâche', [
+        $this->client->request('GET', '/taches/nouvelle/modele');
+        $this->client->submitForm('Créer le modèle', [
             'task[title]' => 'Faire le verre',
             'task[kind]' => 'quick',
             'task[cooldownHours][amount]' => '2',
@@ -294,8 +293,8 @@ final class TaskFlowTest extends AppTestCase
     {
         $leo = $this->foundHousehold();
         $this->client->loginUser($leo);
-        $this->client->request('GET', '/taches/nouvelle');
-        $this->client->submitForm('Ajouter la tâche', ['task[title]' => 'Racheter du PQ', 'task[kind]' => 'one_off']);
+        $this->client->request('GET', '/taches/nouvelle/a-faire');
+        $this->client->submitForm('Ajouter la tâche', ['task[title]' => 'Racheter du PQ']);
 
         $task = static::getContainer()->get(TaskRepository::class)->findOneBy(['title' => 'Racheter du PQ']);
         // In no hurry, it still waits on the home page.
@@ -313,8 +312,8 @@ final class TaskFlowTest extends AppTestCase
         $leo = $this->foundHousehold();
         $other = $this->foundHousehold('Zoé', 'zoe@example.com', 'Une autre coloc');
         $this->client->loginUser($other);
-        $this->client->request('GET', '/taches/nouvelle');
-        $this->client->submitForm('Ajouter la tâche', ['task[title]' => 'Secret', 'task[kind]' => 'one_off']);
+        $this->client->request('GET', '/taches/nouvelle/a-faire');
+        $this->client->submitForm('Ajouter la tâche', ['task[title]' => 'Secret']);
         $task = static::getContainer()->get(TaskRepository::class)->findOneBy(['title' => 'Secret']);
 
         $this->client->loginUser($leo);

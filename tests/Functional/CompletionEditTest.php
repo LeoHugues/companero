@@ -19,8 +19,8 @@ final class CompletionEditTest extends AppTestCase
         $this->client->loginUser($leo);
         $doneAt = new \DateTimeImmutable('-2 days 10:00');
 
-        $this->client->request('GET', '/taches/nouvelle');
-        $this->client->submitForm('Ajouter la tâche', [
+        $this->client->request('GET', '/taches/nouvelle/modele');
+        $this->client->submitForm('Créer le modèle', [
             'task[title]' => 'Serpillière',
             'task[kind]' => 'rolling',
             'task[rhythmDays]' => '7',

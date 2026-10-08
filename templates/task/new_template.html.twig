@@ -1,0 +1,19 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Un nouveau modèle · Companero{% endblock %}
+
+{# Room for the save bar, fixed at the bottom of the screen. #}
+{% block main_class %}{{ ux_is_native() ? 'pb-28' : 'pb-48' }}{% endblock %}
+
+{% block body %}
+    {{ include('task/_tunnel.html.twig', {
+        step: 2,
+        title: 'Un nouveau modèle',
+        icon: 'repeat',
+        what: 'La règle d’une tâche qui revient. Ses tâches à faire arriveront toutes seules sur l’accueil, quand ce sera le moment.'
+    }) }}
+
+    {{ include('task/_form.html.twig', {submit_label: 'Créer le modèle'}) }}
+{% endblock %}
+
+{% block nav %}{% if not ux_is_native() %}<twig:BottomNav active="new"/>{% endif %}{% endblock %}

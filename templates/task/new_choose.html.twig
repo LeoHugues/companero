@@ -1,0 +1,51 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Ajouter · Companero{% endblock %}
+
+{% block body %}
+    {{ include('task/_tunnel.html.twig', {step: 1, title: 'Qu’est-ce que tu veux ajouter ?'}) }}
+
+    {% set choices = [
+        {
+            route: 'task_new_one_off', icon: 'check', tile: 'bg-sun',
+            title: 'Une tâche à faire',
+            text: 'Une chose à faire une fois. Elle arrive sur l’accueil, et disparaît une fois faite.',
+            example: 'Appeler le proprio, racheter du PQ, tailler la haie…',
+        },
+        {
+            route: 'task_log', icon: 'clock', tile: 'bg-ok-soft',
+            title: 'J’ai fait quelque chose',
+            text: 'Noter une tâche déjà faite, maintenant ou il y a quelques jours. Les points comptent ce jour-là.',
+            example: 'L’aspirateur passé mardi, le chat nourri hier soir…',
+        },
+        {
+            route: 'task_new_template', icon: 'repeat', tile: 'bg-rare-soft',
+            title: 'Un nouveau modèle',
+            text: 'Une tâche qui revient. La maison crée toute seule les tâches à faire, quand c’est le moment.',
+            example: 'La serpillière tous les 7 jours, les poubelles le mardi soir…',
+        },
+    ] %}
+    <ul class="flex flex-col gap-2.5">
+        {% for choice in choices %}
+            <li>
+                <a href="{{ path(choice.route) }}" class="card card-hover flex items-center gap-3.5 p-3.5 text-ink no-underline hover:text-ink">
+                    <span class="flex size-12 shrink-0 items-center justify-center rounded-2xl {{ choice.tile }} text-ink" aria-hidden="true"><twig:Icon :name="choice.icon" size="24" stroke="2.2"/></span>
+                    <span class="flex min-w-0 flex-1 flex-col gap-0.5">
+                        <span class="text-[17px] font-extrabold">{{ choice.title }}</span>
+                        <span class="text-sm leading-snug text-ink-soft">{{ choice.text }}</span>
+                        <span class="text-xs text-muted italic">{{ choice.example }}</span>
+                    </span>
+                    <twig:Icon name="chevron-right" size="20" class="shrink-0 text-muted"/>
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
+
+    <div class="flex items-start gap-2.5">
+        <twig:CasaMini class="shrink-0"/>
+        <p class="bubble mt-2 text-sm">Un <strong>modèle</strong>, c’est la règle (« tous les 7 jours »). Une <strong>tâche à faire</strong>, c’est ce qui attend sur l’accueil, avec sa carte.</p>
+    </div>
+{% endblock %}
+
+{# In the Android app this tunnel is a modal (see App\Native\NativeConfiguration): no bottom navigation. #}
+{% block nav %}{% if not ux_is_native() %}<twig:BottomNav active="new"/>{% endif %}{% endblock %}

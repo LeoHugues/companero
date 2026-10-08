@@ -1,0 +1,25 @@
+{#
+    The header of the "+" tunnel. step 1: choose what it is about; step 2: fill it in.
+    Variables: step, title, and on step 2 icon and what (a reminder of what is being created).
+#}
+<header class="flex flex-col gap-3">
+    <div class="flex items-center justify-between">
+        {% if step > 1 %}
+            <a href="{{ path('task_new') }}" class="-ml-2 flex h-11 items-center gap-1 rounded-full pr-3 pl-2 text-sm font-bold text-ink no-underline hover:bg-track hover:text-ink"><twig:Icon name="arrow-left" size="20" stroke="2.2"/> Changer</a>
+        {% else %}
+            <span></span>
+        {% endif %}
+        <p class="flex items-center gap-1.5 text-xs font-bold text-muted" aria-label="Étape {{ step }} sur 2">
+            <span class="h-1.5 w-6 rounded-full bg-clay"></span><span class="h-1.5 w-6 rounded-full {{ step > 1 ? 'bg-clay' : 'bg-track' }}"></span>
+            Étape {{ step }}/2
+        </p>
+        <a href="{{ ux_is_native() ? '/recede_historical_location' : path('app_home') }}" aria-label="Fermer" class="-mr-2 flex size-11 items-center justify-center rounded-full text-ink"><twig:Icon name="close" size="22" stroke="2.2"/></a>
+    </div>
+    <h1 class="text-[24px] leading-tight">{{ title }}</h1>
+    {% if what is defined %}
+        <p class="flex items-start gap-2.5 rounded-2xl bg-track px-3.5 py-2.5 text-sm font-semibold text-ink-soft">
+            <twig:Icon :name="icon" size="18" class="mt-px shrink-0"/>
+            <span>{{ what }}</span>
+        </p>
+    {% endif %}
+</header>

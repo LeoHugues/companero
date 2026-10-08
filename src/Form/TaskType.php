@@ -28,6 +28,11 @@ use Symfony\Component\Validator\Constraints\LessThanOrEqual;
 /** @extends AbstractType<Task> */
 class TaskType extends AbstractType
 {
+    /** A template: it comes back on its own (regular, on a fixed day) or is reported in one tap (express). */
+    public const TEMPLATE = 'template';
+    /** Something to do once. */
+    public const ONE_OFF = 'one_off';
+
     public function __construct(
         private readonly ClockInterface $clock,
     ) {
@@ -42,14 +47,19 @@ class TaskType extends AbstractType
             ->add('title', TextType::class, [
                 'empty_data' => '',
                 'label' => 'Quoi ?',
-                'attr' => ['placeholder' => 'Ex. Appeler le proprio pour la fuite'],
-            ])
-            ->add('kind', EnumType::class, [
+                'attr' => ['placeholder' => self::ONE_OFF === $options['mode'] ? 'Ex. Appeler le proprio pour la fuite' : 'Ex. Passer la serpillière'],
+            ]);
+        if (self::TEMPLATE === $options['mode']) {
+            $builder->add('kind', EnumType::class, [
                 'class' => TaskKind::class,
-                'label' => 'Elle revient ?',
+                'label' => 'Elle revient comment ?',
+                'help' => 'Régulière : tous les tant de jours. À jour fixe : un jour et une heure (les poubelles le mardi soir). Express : jamais en retard, un appui quand c’est fait.',
                 'expanded' => true,
+                'choices' => [TaskKind::Rolling, TaskKind::Scheduled, TaskKind::Quick],
                 'choice_label' => static fn (TaskKind $kind): string => $kind->label(),
-            ])
+            ]);
+        }
+        $builder
             ->add('category', EnumType::class, [
                 'class' => TaskCategory::class,
                 'label' => 'Type',
@@ -170,7 +180,9 @@ class TaskType extends AbstractType
             'data_class' => Task::class,
             'allow_reservation' => false,
             'allow_done' => false,
+            'mode' => self::TEMPLATE,
         ]);
+        $resolver->setAllowedValues('mode', [self::TEMPLATE, self::ONE_OFF]);
         $resolver->setRequired('household');
         $resolver->setAllowedTypes('household', Household::class);
         $resolver->setAllowedTypes('allow_reservation', 'bool');

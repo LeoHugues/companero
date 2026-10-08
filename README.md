@@ -128,6 +128,12 @@ passe les tests est mis en production automatiquement (voir
 | `src/Native`, `android/` | Appli Android : règles de navigation et coquille Hotwire Native |
 | `scripts/`, `dev.cmd` | Environnement local sous Windows |
 
+Deux notions à ne pas mélanger : les **modèles** (onglet *Modèles* : ce qui revient tout seul,
+les express, le catalogue) et les **tâches à faire** (l'accueil : les cartes, avec leur bouton
+« C'est fait »). Une tâche qui revient n'est qu'une ligne en base : son modèle, dont la tâche à
+faire du moment est calculée. Le bouton + demande d'abord ce qu'on ajoute : une tâche à faire,
+ce qu'on a déjà fait, ou un nouveau modèle.
+
 Le statut d'une tâche n'est jamais stocké : il est **calculé** à partir de ses
 règles et de sa dernière réalisation. Les points forment un **journal** : chaque
 total est une somme de lignes.

@@ -32,7 +32,7 @@
                 {% for task in recurring %}<twig:TemplateRow :task="task"/>{% endfor %}
             </ul>
         {% else %}
-            <p class="meta py-2">Aucun modèle ici. <a href="{{ path('task_new') }}">En créer un</a></p>
+            <p class="meta py-2">Aucun modèle ici. <a href="{{ path('task_new_template') }}">En créer un</a></p>
         {% endif %}
     </section>
 
@@ -57,7 +57,7 @@
             <ul class="card divide-y divide-line px-3.5">
                 {% for item in catalog %}
                     <li>
-                        <a href="{{ path('task_new', {modele: item.id}) }}" class="flex items-center gap-3 py-3 text-ink no-underline hover:text-ink">
+                        <a href="{{ path('task_new_one_off', {modele: item.id}) }}" class="flex items-center gap-3 py-3 text-ink no-underline hover:text-ink">
                             <span class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-track text-ink-soft" aria-hidden="true"><twig:Icon name="layers" size="20"/></span>
                             <span class="flex min-w-0 flex-1 flex-col gap-0.5">
                                 <span class="text-[15px] leading-snug font-bold">{{ item.title }}</span>

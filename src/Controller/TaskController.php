@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-use App\Entity\Gift;
 use App\Entity\Member;
 use App\Entity\Task;
 use App\Form\TaskType;
@@ -10,7 +9,6 @@ use App\Repository\CatalogItemRepository;
 use App\Repository\CompletionRepository;
 use App\Repository\PointEntryRepository;
 use App\Security\HouseholdVoter;
-use App\Task\CompletionResult;
 use App\Task\TaskBoardBuilder;
 use App\Task\TaskCompleter;
 use App\Task\TaskNotAvailable;
@@ -31,6 +29,8 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[Route('/taches')]
 final class TaskController extends AbstractController
 {
+    use CelebratesCompletions;
+
     /** Where the action buttons may send the member back to. */
     private const BACK_ROUTES = ['home' => 'app_home', 'tasks' => 'task_index'];
 
@@ -57,54 +57,6 @@ final class TaskController extends AbstractController
             'zones' => $household->getZones(),
             'current_zone' => $zone,
             'catalog' => $catalog->findForHousehold($household),
-        ]);
-    }
-
-    #[Route('/nouvelle', name: 'task_new', methods: ['GET', 'POST'])]
-    public function new(
-        #[CurrentUser] Member $member,
-        Request $request,
-        CatalogItemRepository $catalog,
-        TaskCompleter $completer,
-        #[MapQueryParameter] ?int $modele = null,
-    ): Response {
-        $household = $member->getHousehold();
-        $task = new Task($household, $member, $this->clock->now());
-
-        $template = null !== $modele ? $catalog->find($modele) : null;
-        if (null !== $template && $template->getHousehold() === $household) {
-            $task->setTitle($template->getTitle());
-            $task->setCategory($template->getCategory());
-            $task->setPoints($template->getPoints());
-        }
-
-        $form = $this->createForm(TaskType::class, $task, ['household' => $household, 'allow_reservation' => true, 'allow_done' => true])->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $task->normalizeSchedule();
-            /** @var ?\DateTimeImmutable $doneAt */
-            $doneAt = $form->get('done')->getData() ? ($form->get('doneAt')->getData() ?? $this->clock->now()) : null;
-            if (null !== $doneAt) {
-                $task->backdateCreation($doneAt);
-            } elseif ($form->get('reserve')->getData()) {
-                $task->reserveFor($member, $this->clock->now()->modify(\sprintf('+%d hours', Task::DEFAULT_RESERVATION_HOURS)));
-            }
-            $this->entityManager->persist($task);
-            $this->entityManager->flush();
-
-            if (null !== $doneAt) {
-                $this->celebrate($completer->complete($task, $member, $doneAt), $member);
-            } else {
-                $this->addFlash('success', \sprintf('« %s » est dans la liste. %s', $task->getTitle(), $task->reservedByAt($this->clock->now()) ? 'Tu t’en occupes.' : 'Je préviens la coloc.'));
-            }
-
-            return $this->redirectToRoute('app_home', status: Response::HTTP_SEE_OTHER);
-        }
-
-        return $this->render('task/new.html.twig', [
-            'form' => $form,
-            'catalog' => $catalog->findForHousehold($household),
-            'template' => $template,
         ]);
     }
 
@@ -148,7 +100,10 @@ final class TaskController extends AbstractController
     #[IsGranted(HouseholdVoter::ACCESS, subject: 'task')]
     public function edit(Task $task, Request $request): Response
     {
-        $form = $this->createForm(TaskType::class, $task, ['household' => $task->getHousehold()])->handleRequest($request);
+        $form = $this->createForm(TaskType::class, $task, [
+            'household' => $task->getHousehold(),
+            'mode' => $task->getKind()->isRecurring() ? TaskType::TEMPLATE : TaskType::ONE_OFF,
+        ])->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             $task->normalizeSchedule();
@@ -180,18 +135,6 @@ final class TaskController extends AbstractController
         $this->celebrate($result, $member);
 
         return $this->redirectBack($request, $task);
-    }
-
-    /** The Casa thanks the member on the next page, and any gift of a new level shows up. */
-    private function celebrate(CompletionResult $result, Member $member): void
-    {
-        $this->addFlash('completion', ['points' => $result->totalPoints(), 'title' => $result->completion->getTask()->getTitle(), 'xp' => $result->boostXp]);
-        if ([] !== $result->gifts) {
-            $this->addFlash('gifts', [
-                'level' => $member->getGiftedLevel(),
-                'labels' => array_map(static fn (Gift $gift): string => $gift->getKind()->label(), $result->gifts),
-            ]);
-        }
     }
 
     #[Route('/{id}/je-m-en-occupe', name: 'task_reserve', requirements: ['id' => '\d+'], methods: ['POST'])]

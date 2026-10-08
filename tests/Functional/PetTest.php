@@ -29,8 +29,8 @@ final class PetTest extends AppTestCase
         $this->client->request('GET', '/coloc');
         $this->client->submitForm('Ajouter l’animal', ['pet[name]' => 'Tishka', 'pet[species]' => PetSpecies::Cat->value]);
 
-        $this->client->request('GET', '/taches/nouvelle');
-        $form = $this->client->getCrawler()->selectButton('Ajouter la tâche')->form();
+        $this->client->request('GET', '/taches/nouvelle/modele');
+        $form = $this->client->getCrawler()->selectButton('Créer le modèle')->form();
         $this->client->submit($form, [
             'task[title]' => 'Nourrir les chats',
             'task[kind]' => 'scheduled',

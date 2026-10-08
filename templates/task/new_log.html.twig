@@ -1,0 +1,28 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}J’ai fait quelque chose · Companero{% endblock %}
+
+{% block main_class %}{{ ux_is_native() ? 'pb-28' : 'pb-48' }}{% endblock %}
+
+{% block body %}
+    {{ include('task/_tunnel.html.twig', {
+        step: 2,
+        title: 'J’ai fait quelque chose',
+        icon: 'clock',
+        what: 'Choisis parmi les modèles de la maison. La tâche repart de ce moment-là, et les points comptent ce jour-là.'
+    }) }}
+
+    {{ form_start(form, {attr: {class: 'flex flex-col gap-5'}}) }}
+        {{ form_row(form.task) }}
+        {{ form_row(form.doneAt) }}
+        <p class="meta">Ce n’est pas dans la liste ? <a href="{{ path('task_new_one_off', {fait: 1}) }}">Noter autre chose</a>, une tâche faite une fois.</p>
+
+        <div class="fixed inset-x-0 z-10 border-t-[1.5px] border-line bg-cream {{ ux_is_native() ? 'bottom-0 pb-[env(safe-area-inset-bottom)]' : 'bottom-[calc(72px+env(safe-area-inset-bottom))]' }}">
+            <div class="mx-auto max-w-md px-5 py-3">
+                <button type="submit" class="btn-primary h-[52px] w-full text-[17px]">C’est fait</button>
+            </div>
+        </div>
+    {{ form_end(form) }}
+{% endblock %}
+
+{% block nav %}{% if not ux_is_native() %}<twig:BottomNav active="new"/>{% endif %}{% endblock %}
