@@ -1,0 +1,8 @@
+# Tâches planifiées de Companero : crontab -e de l'utilisateur qui fait tourner PHP (www-data…),
+# en adaptant le dossier. Le serveur doit être à l'heure de la coloc (timedatectl).
+
+# Lundi peu après minuit : titres, bonus collectif et séries de la semaine écoulée.
+5 0 * * 1  cd /srv/companero && APP_ENV=prod php bin/console app:week:close --no-interaction >> var/cron.log 2>&1
+
+# Chaque nuit : une copie de la base (les 30 dernières sont gardées dans var/backups/).
+30 3 * * *  cd /srv/companero && APP_ENV=prod php bin/console app:backup --no-interaction >> var/cron.log 2>&1

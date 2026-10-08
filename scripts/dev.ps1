@@ -9,6 +9,10 @@
 #                        (adresse du serveur par défaut : http://<IP du PC>:8000)
 #   .\dev console ...    bin/console, par ex. .\dev console app:week:close
 #   .\dev composer ...   Composer, par ex. .\dev composer require --dev phpstan/phpstan
+#   .\dev deploy <ssh> <dossier> [version]
+#                        met à jour la production par SSH, par ex. .\dev deploy moi@serveur /srv/companero
+#   .\dev publish-apk <ssh> <dossier>
+#                        envoie dist\companero.apk sur le serveur (à compiler avec l'adresse publique)
 
 $ErrorActionPreference = 'Stop'
 $ProgressPreference = 'SilentlyContinue'
@@ -235,6 +239,20 @@ function Invoke-Apk([string] $ServerUrl) {
     Write-Host "Pendant que .\dev serve tourne, il se télécharge depuis le téléphone sur http://$(Get-LanIp):8000/companero.apk"
 }
 
+function Invoke-Deploy([string] $Target, [string] $Path, [string] $Version) {
+    if (-not $Target -or -not $Path) { throw 'Usage : .\dev deploy <utilisateur@serveur> <dossier> [version]' }
+    Write-Step "Déploiement sur $Target ($Path)"
+    Invoke-Native ssh $Target "cd '$Path' && ./scripts/deploy.sh $Version"
+}
+
+function Invoke-PublishApk([string] $Target, [string] $Path) {
+    if (-not $Target -or -not $Path) { throw 'Usage : .\dev publish-apk <utilisateur@serveur> <dossier>' }
+    $apk = "$Root\dist\companero.apk"
+    if (-not (Test-Path $apk)) { throw "Pas d'APK : lancez d'abord .\dev apk https://votre-domaine" }
+    Write-Step "Envoi de l'APK sur $Target"
+    Invoke-Native scp $apk "${Target}:$Path/public/companero.apk"
+}
+
 $command = $args[0]
 $rest = @($args | Select-Object -Skip 1)
 switch ($command) {
@@ -244,7 +262,9 @@ switch ($command) {
     'apk' { Invoke-Apk $(if ($rest) { $rest[0] } else { '' }) }
     'console' { Assert-Setup; Use-Tools; Invoke-Console @rest }
     'composer' { Install-Php; Install-Composer; Use-Tools; Invoke-Composer @rest }
+    'deploy' { Invoke-Deploy $rest[0] $rest[1] $(if ($rest.Count -gt 2) { $rest[2] } else { '' }) }
+    'publish-apk' { Invoke-PublishApk $rest[0] $rest[1] }
     default {
-        Get-Content $PSCommandPath -Encoding UTF8 | Select-Object -First 12 | ForEach-Object { $_ -replace '^# ?', '' }
+        Get-Content $PSCommandPath -Encoding UTF8 | Select-Object -First 16 | ForEach-Object { $_ -replace '^# ?', '' }
     }
 }

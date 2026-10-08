@@ -33,3 +33,8 @@
 # Written by `bin/console ux:native:build-configs` at deploy time
 /public/native/
 ###< symfony/ux-native ###
+
+###> production ###
+# The Android app, offered for download by the server (see docs/deploiement.md)
+/public/companero.apk
+###< production ###

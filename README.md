@@ -7,6 +7,7 @@ de **la Casa**, la maison-personnage dont l'humeur suit la propreté du foyer.
 - [Vision produit](docs/vision.md)
 - [Direction artistique](docs/direction-artistique.md)
 - [Inventaire des tâches](docs/inventaire-taches.md)
+- [Mise en production](docs/deploiement.md)
 
 ## Stack
 
@@ -48,6 +49,8 @@ d'invitation affiché dans *Profil › La coloc*.
 .\dev apk            :: compile dist\companero.apk
 .\dev console …      :: bin/console
 .\dev composer …     :: Composer
+.\dev deploy moi@serveur /srv/companero      :: met à jour la production (voir docs/deploiement.md)
+.\dev publish-apk moi@serveur /srv/companero :: y dépose dist\companero.apk
 ```
 
 Au premier `.\dev serve`, autorisez `php.exe` dans le pare-feu Windows (réseaux
