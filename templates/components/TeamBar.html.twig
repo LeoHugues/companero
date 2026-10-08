@@ -1,5 +1,8 @@
-{% props team, household = null, detailed = true %}
-{# detailed: each member's share of the bar and their points (the weekly review); otherwise one gauge for the whole house (home page). #}
+{% props team, household = null, detailed = true, done = null %}
+{#
+    detailed: each member's share of the bar and their points (the weekly review); otherwise one gauge for the whole house (home page).
+    done: {completions, points} of the week, to unfold what earned these points, day by day.
+#}
 <section {{ attributes.defaults({class: 'card card-hover flex flex-col gap-2.5 p-3.5'}) }} aria-labelledby="team-title">
     <div class="flex items-baseline justify-between">
         <h2 id="team-title" class="text-[15px]">Objectif de la maison</h2>
@@ -22,7 +25,61 @@
     {% else %}
         <twig:ProgressBar :value="team.percent" :height="14" label="Objectif de la maison" key="team"/>
     {% endif %}
-    <a href="{{ path('history', {qui: 'coloc'}) }}" class="self-start text-[13px] font-bold">Tout ce que la coloc a fait</a>
+    {% if done is not null %}
+        {% set completions = done.completions %}
+        {% set listed = completions|reduce((sum, c) => sum + (done.points[c.id] ?? 0), 0) %}
+        <details class="team-drawer" id="team-drawer" data-controller="disclosure" data-action="toggle->disclosure#remember turbo:morph-element->disclosure#restore">
+            <summary class="team-drawer-summary">
+                <span class="flex-1">Ce qui a rapporté ces points</span>
+                {% if completions is not empty %}<span class="team-drawer-count">{{ completions|length }}</span>{% endif %}
+                <twig:Icon name="chevron-down" size="18" stroke="2.4" class="team-drawer-chevron"/>
+            </summary>
+            <div class="team-drawer-body">
+                {% if completions is empty %}
+                    <p class="py-2 text-sm text-muted">Rien encore cette semaine : la première tâche ouvre le compteur !</p>
+                {% else %}
+                    {# Who chipped in: everyone's points, in the household's order — never a ranking. #}
+                    <ul class="flex flex-wrap gap-1.5 pt-1" aria-label="Qui a contribué">
+                        {% for progress in team.members|filter(p => p.points > 0) %}
+                            <li class="flex items-center gap-1.5 rounded-full bg-track/70 py-0.5 pr-2.5 pl-0.5 text-xs font-bold">
+                                <twig:Avatar :member="progress.member" size="20"/>{{ progress.member.name }} <span class="text-clay-dark">{{ progress.points }}</span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                    <ol class="flex flex-col">
+                        {% set today = 'now'|date('Y-m-d') %}
+                        {% set yesterday = '-1 day'|date('Y-m-d') %}
+                        {% set previous = null %}
+                        {% for completion in completions %}
+                            {% set day = completion.completedAt|date('Y-m-d') %}
+                            {% if day != previous %}
+                                <li class="team-drawer-day">{{ day == today ? 'Aujourd’hui' : (day == yesterday ? 'Hier' : weekday_name(completion.completedAt|date('N'))|capitalize ~ ' ' ~ completion.completedAt|date('j')) }}</li>
+                                {% set previous = day %}
+                            {% endif %}
+                            <li class="team-drawer-row" style="--i: {{ min(loop.index0, 12) }}">
+                                <twig:Avatar :member="completion.member" size="26"/>
+                                <span class="flex min-w-0 flex-1 flex-col leading-tight">
+                                    <span class="truncate text-sm font-bold">{{ completion.task.title }}</span>
+                                    <span class="text-[11px] font-semibold text-muted">{{ completion.member.name }} · {{ completion.completedAt|date('G\\hi') }}</span>
+                                </span>
+                                <span class="shrink-0 text-sm font-extrabold text-clay-dark">+{{ done.points[completion.id] ?? 0 }}</span>
+                            </li>
+                        {% endfor %}
+                        {% if team.points > listed %}
+                            <li class="team-drawer-row" style="--i: 12">
+                                <span class="flex size-[26px] shrink-0 items-center justify-center rounded-full bg-sun"><twig:Icon name="star" size="14" stroke="2.4"/></span>
+                                <span class="flex-1 text-sm font-bold">Bonus et ajustements</span>
+                                <span class="shrink-0 text-sm font-extrabold text-clay-dark">+{{ team.points - listed }}</span>
+                            </li>
+                        {% endif %}
+                    </ol>
+                {% endif %}
+                <a href="{{ path('history', {qui: 'coloc'}) }}" class="self-start pt-1 text-[13px] font-bold">Tout ce que la coloc a fait</a>
+            </div>
+        </details>
+    {% else %}
+        <a href="{{ path('history', {qui: 'coloc'}) }}" class="self-start text-[13px] font-bold">Tout ce que la coloc a fait</a>
+    {% endif %}
     {% if team.reached %}
         <p class="text-[13px] font-bold text-clay-dark">Objectif de la maison atteint : +{{ constant('App\\Review\\WeekCloser::TEAM_BONUS') }} pts pour chacun dimanche soir</p>
     {% endif %}

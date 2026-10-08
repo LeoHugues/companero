@@ -2,7 +2,10 @@
 
 namespace App\Tests\Functional;
 
+use App\Entity\Task;
+use App\Enum\TaskKind;
 use App\Repository\MemberRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\Attributes\DataProvider;
 
 final class PagesTest extends AppTestCase
@@ -60,10 +63,35 @@ final class PagesTest extends AppTestCase
         $this->client->request('GET', '/');
         self::assertSelectorExists('[aria-labelledby=team-title] [role=progressbar]');
         self::assertSelectorNotExists('[aria-labelledby=team-title] li');
+        self::assertSelectorTextContains('.team-drawer', 'Rien encore cette semaine');
 
         // The weekly review keeps everyone's share.
         $this->client->request('GET', '/bilan');
         self::assertSelectorTextContains('[aria-labelledby=team-title] ul', 'Robin');
+    }
+
+    public function testTheHouseGoalUnfoldsWhatEarnedItsPoints(): void
+    {
+        $leo = $this->foundHousehold();
+        $robin = $this->register($leo, 'Robin');
+        $task = new Task($leo->getHousehold(), $leo, new \DateTimeImmutable('-1 day'));
+        $task->setTitle('Vider le lave-vaisselle');
+        $task->setKind(TaskKind::Quick);
+        $task->setPoints(10);
+        $entityManager = static::getContainer()->get(EntityManagerInterface::class);
+        $entityManager->persist($task);
+        $entityManager->flush();
+
+        $this->client->loginUser($robin);
+        $this->client->request('GET', '/');
+        $this->submitAction('/taches/'.$task->getId().'/fait');
+        $this->client->followRedirect();
+
+        self::assertSelectorTextContains('.team-drawer summary', 'Ce qui a rapporté ces points');
+        self::assertSelectorTextContains('.team-drawer-row', 'Vider le lave-vaisselle');
+        self::assertSelectorTextContains('.team-drawer-row', 'Robin');
+        self::assertSelectorTextContains('.team-drawer-row', '+10');
+        self::assertSelectorTextContains('.team-drawer-day', 'Aujourd’hui');
     }
 
     public function testNobodyAroundAllWeekIsNotAtHome(): void

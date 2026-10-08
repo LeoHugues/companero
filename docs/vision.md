@@ -210,6 +210,8 @@ zone : la salle de bain privée compte autant que la salle de bain partagée.
 - **Objectif de la maison** : un objectif hebdomadaire propre à la coloc (250 pts
   par défaut, réglable), atteint avec les points de tout le monde. La contribution
   de chacun est affichée, avant l'objectif personnel.
+  Sur l'accueil, le module se déplie (« Ce qui a rapporté ces points ») : qui a contribué,
+  sans classement, puis les tâches de la semaine jour par jour, chacune avec ses points.
 - **Deux séries** : la série personnelle (son objectif atteint) et la **série de la
   coloc** (l'objectif de la maison atteint), coopérative.
 - **Plan de la maison** : le vrai plan, vu d'en haut, dessiné d'après
