@@ -1,0 +1,127 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ view.task.title }} · Companero{% endblock %}
+
+{% block body %}
+    {% set task = view.task %}
+    {% set status = view.status %}
+    {% set rarity = task.rarity %}
+    {% set boost = task_boost(view) %}
+
+    <header class="flex items-center justify-between">
+        <a href="{{ ux_is_native() ? '/recede_historical_location' : path('task_index') }}" aria-label="Retour" class="-ml-2 flex size-11 items-center justify-center rounded-full text-ink"><twig:Icon name="arrow-left" size="22" stroke="2.2"/></a>
+        <a href="{{ path('task_edit', {id: task.id}) }}" class="flex h-11 items-center gap-1.5 rounded-full px-3 text-sm font-bold text-ink no-underline hover:bg-track hover:text-ink"><twig:Icon name="settings" size="19"/> Modifier</a>
+    </header>
+
+    {% set done = app.flashes('completion')|first %}
+    {% if done %}
+        <p class="animate-pop rounded-2xl bg-ink px-4 py-3 text-[15px] font-semibold text-cream" role="status">C’est fait : +{{ done.points }} pts, merci !</p>
+    {% endif %}
+
+    {# The card itself, larger. #}
+    <article class="card rarity-{{ rarity.value }} relative flex flex-col gap-3 overflow-hidden py-5 pr-5 pl-7" id="task-{{ task.id }}" data-rarity="{{ rarity.value }}" data-alert="{{ status.alert }}">
+        <span class="urgency-stripe urgency-stripe-{{ status.alert }}" aria-hidden="true"></span>
+        <div class="flex flex-wrap items-center gap-2">
+            <twig:RarityBadge :rarity="rarity"/>
+            <twig:UrgencyPill :view="view"/>
+        </div>
+        <h1 class="text-[26px] leading-tight [overflow-wrap:anywhere]">{{ task.title }}</h1>
+        <p class="text-sm font-semibold text-muted">
+            {{ task.pet.name ?? task.zone.name ?? (task.category.value == 'pets' ? 'Les animaux' : 'Toute la coloc') }} · {{ task.category.label }} · {{ task_rule_label(task) }}
+        </p>
+        {% if task.kind.value == 'rolling' %}
+            {% set barColors = {ok: 'var(--color-ok)', warning: 'var(--color-warn)', danger: 'var(--color-danger)'} %}
+            <div class="flex flex-col gap-1">
+                <twig:ProgressBar :value="status.freshness" height="10" :color="barColors[status.alert]" label="Fraîcheur"/>
+                <p class="text-xs font-bold text-muted">Fraîcheur {{ status.freshness }} %</p>
+            </div>
+        {% endif %}
+        <p class="flex items-baseline gap-2">
+            <span class="text-[32px] leading-none font-extrabold text-clay-dark">+{{ task.points + boost }}</span>
+            <span class="text-sm font-bold text-muted">pts{% if boost %} · dont +{{ boost }} de boost{% endif %}</span>
+        </p>
+        <twig:ReminderNote :view="view" :member="app.user"/>
+        <twig:TaskActions :view="view" :back="'task-' ~ task.id" :member="app.user" class="flex-wrap pt-1"/>
+    </article>
+
+    {% if status.dueAt or status.warningAt or status.lateAt %}
+        <section class="flex flex-col gap-2" aria-labelledby="when-title">
+            <h2 id="when-title" class="section-title">Quand ?</h2>
+            <ol class="card flex flex-col gap-0 divide-y divide-line px-3.5 py-1">
+                {% if status.warningAt %}
+                    <li class="flex items-center gap-3 py-2.5">
+                        <span class="size-3 shrink-0 rounded-full bg-warn" aria-hidden="true"></span>
+                        <span class="flex-1 text-sm font-bold">Orange</span>
+                        <span class="text-sm text-muted">{{ status.warningAt < now ? 'depuis ' : 'à partir de ' }}{{ task_moment(status.warningAt) }}</span>
+                    </li>
+                {% endif %}
+                {% if status.dueAt %}
+                    <li class="flex items-center gap-3 py-2.5">
+                        <span class="size-3 shrink-0 rounded-full bg-clay" aria-hidden="true"></span>
+                        <span class="flex-1 text-sm font-bold">{{ task.kind.value == 'rolling' ? 'Le rythme est atteint' : 'Échéance' }}</span>
+                        <span class="text-sm text-muted">{{ task_moment(status.dueAt) }}</span>
+                    </li>
+                {% endif %}
+                {% if status.lateAt %}
+                    <li class="flex items-center gap-3 py-2.5">
+                        <span class="size-3 shrink-0 rounded-full bg-danger" aria-hidden="true"></span>
+                        <span class="flex-1 text-sm font-bold">Rouge, en retard</span>
+                        <span class="text-sm text-muted">{{ status.lateAt < now ? 'depuis ' : 'après ' }}{{ task_moment(status.lateAt) }}</span>
+                    </li>
+                {% endif %}
+            </ol>
+            <p class="meta">Ces délais se règlent dans <a href="{{ path('task_edit', {id: task.id}) }}">les réglages de la tâche</a>.</p>
+        </section>
+    {% endif %}
+
+    <section class="flex flex-col gap-2" aria-labelledby="about-title">
+        <h2 id="about-title" class="section-title">En bref</h2>
+        <dl class="card grid grid-cols-[auto_1fr] gap-x-4 gap-y-2.5 px-3.5 py-3 text-sm">
+            {% if status.weeklyCommitment %}
+                <dt class="font-bold">Cette semaine</dt>
+                <dd class="text-muted">{{ status.doneThisWeek }} fois sur {{ status.weeklyCommitment }}</dd>
+            {% endif %}
+            <dt class="font-bold">Dernière fois</dt>
+            <dd class="text-muted">{{ task.lastCompletedAt ? task_moment(task.lastCompletedAt) ~ (task.lastCompletedBy ? ', par ' ~ task.lastCompletedBy.name) : 'jamais encore' }}</dd>
+            {% if task.assignee %}
+                <dt class="font-bold">S’en charge</dt>
+                <dd class="text-muted">{{ task.assignee.name }}{% if task.backup %} (sinon {{ task.backup.name }}){% endif %}</dd>
+            {% endif %}
+            {% if view.reservedBy %}
+                <dt class="font-bold">Réservée</dt>
+                <dd class="text-muted">{{ view.isReservedBy(app.user) ? 'par toi' : 'par ' ~ view.reservedBy.name }}</dd>
+            {% endif %}
+            {% if task.cooldownHours %}
+                <dt class="font-bold">Délai</dt>
+                <dd class="text-muted">pas avant {{ task.cooldownHours % 24 == 0 ? (task.cooldownHours // 24) ~ ' j' : task.cooldownHours ~ ' h' }} après l’avoir faite</dd>
+            {% endif %}
+            <dt class="font-bold">Ajoutée</dt>
+            <dd class="text-muted">par {{ task.createdBy.name }} le {{ task.createdAt|date('d/m/Y') }}</dd>
+        </dl>
+    </section>
+
+    <section class="flex flex-col gap-2" aria-labelledby="done-title">
+        <h2 id="done-title" class="section-title">Les dernières fois</h2>
+        {% if completions is not empty %}
+            <ul class="card divide-y divide-line px-3.5 py-1">
+                {% for completion in completions %}
+                    <li>
+                        <a href="{{ path('completion_edit', {id: completion.id}) }}" class="flex items-center gap-2.5 py-2 text-ink no-underline hover:text-ink" aria-label="Corriger : {{ completion.member.name }}, {{ completion.completedAt|date('d/m à G\\hi') }}">
+                            <twig:Avatar :member="completion.member" size="26"/>
+                            <span class="flex min-w-0 flex-1 flex-col">
+                                <span class="text-sm font-bold">{{ completion.member.name }}</span>
+                                <span class="text-xs text-muted">{{ completion.completedAt|format_date(pattern: 'EEEE d MMMM', locale: 'fr') }} à {{ completion.completedAt|date('G\\hi') }}</span>
+                            </span>
+                            <span class="text-sm font-extrabold whitespace-nowrap text-clay-dark">+{{ points[completion.id] ?? 0 }}</span>
+                            <twig:Icon name="edit" size="15" class="shrink-0 text-muted"/>
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="card p-4 text-sm text-muted">Pas encore faite. À qui l’honneur ?</p>
+        {% endif %}
+    </section>
+{% endblock %}
+
+{% block nav %}<twig:BottomNav active="tasks"/>{% endblock %}

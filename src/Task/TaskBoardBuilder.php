@@ -28,14 +28,30 @@ final readonly class TaskBoardBuilder
         $doneThisWeek = $this->completions->countByTask($household, $week->start, $week->end());
 
         return new TaskBoard(array_map(
-            fn (Task $task): TaskView => new TaskView(
-                $task,
-                $this->resolver->resolve($task, $now, $household->getCleaningDay(), $doneThisWeek[$task->getId()] ?? 0),
-                $task->reservedByAt($now),
-                $this->reminders->for($task, $household->getMembers()),
-                $task->availableAt($now),
-            ),
+            fn (Task $task): TaskView => $this->viewOf($task, $now, $doneThisWeek[$task->getId()] ?? 0),
             $this->tasks->findActive($household),
         ));
+    }
+
+    /** One task on its own, for its card's page. */
+    public function view(Task $task): TaskView
+    {
+        $now = $this->clock->now();
+        $week = Week::containing($now);
+
+        return $this->viewOf($task, $now, $this->completions->countForTask($task, $week->start, $week->end()));
+    }
+
+    private function viewOf(Task $task, \DateTimeImmutable $now, int $doneThisWeek): TaskView
+    {
+        $household = $task->getHousehold();
+
+        return new TaskView(
+            $task,
+            $this->resolver->resolve($task, $now, $household->getCleaningDay(), $doneThisWeek),
+            $task->reservedByAt($now),
+            $this->reminders->for($task, $household->getMembers()),
+            $task->availableAt($now),
+        );
     }
 }

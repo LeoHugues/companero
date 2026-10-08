@@ -78,8 +78,9 @@ final readonly class TaskLabels
         return ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'][($isoDay - 1) % 7];
     }
 
-    /** "aujourd'hui 20 h", "demain 20 h", "mardi 20 h", "le 14/10". */
-    private function moment(\DateTimeImmutable $at): string
+    /** "aujourd'hui 20 h", "demain 20 h", "mardi 20 h", "hier 20 h", "le 14/10". */
+    #[AsTwigFunction('task_moment')]
+    public function moment(\DateTimeImmutable $at): string
     {
         $today = $this->clock->now()->setTime(0, 0);
         $days = (int) $today->diff($at->setTime(0, 0))->format('%r%a');
@@ -88,6 +89,7 @@ final readonly class TaskLabels
         return match (true) {
             0 === $days => 'aujourd’hui'.$time,
             1 === $days => 'demain'.$time,
+            -1 === $days => 'hier'.$time,
             $days > 1 && $days < 7 => self::weekday((int) $at->format('N')).$time,
             default => 'le '.$at->format('d/m'),
         };

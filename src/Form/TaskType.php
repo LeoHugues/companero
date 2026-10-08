@@ -7,6 +7,7 @@ use App\Entity\Member;
 use App\Entity\Pet;
 use App\Entity\Task;
 use App\Entity\Zone;
+use App\Enum\Rarity;
 use App\Enum\TaskCategory;
 use App\Enum\TaskKind;
 use Doctrine\ORM\EntityRepository;
@@ -67,6 +68,12 @@ class TaskType extends AbstractType
                     ->setParameter('household', $household)
                     ->orderBy('z.name', 'ASC'),
             ])
+            ->add('rarity', EnumType::class, [
+                'class' => Rarity::class,
+                'label' => 'Rareté de la carte',
+                'expanded' => true,
+                'choice_label' => static fn (Rarity $rarity): string => $rarity->label(),
+            ])
             ->add('points', IntegerType::class, ['label' => 'Ça vaut combien ?', 'attr' => ['min' => 5, 'max' => 500, 'step' => 5]])
             ->add('rhythmDays', IntegerType::class, ['label' => 'Tous les combien de jours ?', 'required' => false, 'attr' => ['min' => 1]])
             ->add('weeklyCommitment', IntegerType::class, [
@@ -80,6 +87,14 @@ class TaskType extends AbstractType
             ->add('cooldownHours', DurationType::class, [
                 'label' => 'Pas avant combien de temps à nouveau ?',
                 'help' => 'Une fois faite, elle ne peut pas être refaite avant ce délai. Laisse vide pour aucun délai.',
+            ])
+            ->add('warningHours', DurationType::class, [
+                'label' => 'Orange combien de temps avant ?',
+                'help' => 'La carte prévient que le moment approche. Vide : automatique (aux 60 % du rythme, ou 2 jours avant l’échéance).',
+            ])
+            ->add('marginHours', DurationType::class, [
+                'label' => 'Rouge combien de temps après ?',
+                'help' => 'Le délai maximum une fois le moment venu ; au-delà, elle est en retard. Vide : 1 jour.',
             ])
             ->add('dueAt', DateTimeType::class, ['label' => 'Pour quand ?', 'help' => 'Laisse vide si ce n’est pas pressé.', 'required' => false, 'widget' => 'single_text', 'input' => 'datetime_immutable']);
 

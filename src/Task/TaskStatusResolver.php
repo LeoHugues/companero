@@ -14,7 +14,7 @@ final class TaskStatusResolver
 {
     private const DAY = 86_400;
     private const HOUR = 3_600;
-    /** Share of the rhythm after which a rolling task starts to show up as "soon". */
+    /** By default, share of the rhythm after which a rolling task starts to show up as "soon". */
     private const SOON_RATIO = 0.6;
     /** A dated task becomes due this long before its deadline… */
     private const LEAD_TIME = self::DAY;
@@ -47,9 +47,13 @@ final class TaskStatusResolver
         $reference = $lastCompletedAt ?? $task->getCreatedAt()->modify(\sprintf('-%d seconds', $rhythm));
         $elapsed = $now->getTimestamp() - $reference->getTimestamp();
         $dueAt = $reference->modify(\sprintf('+%d seconds', $rhythm));
+        // Orange from this long after it was done: set on the task, or at 60 % of the rhythm.
+        $soonAfter = null !== $task->getWarningHours()
+            ? max(0, $rhythm - $task->getWarningHours() * self::HOUR)
+            : (int) ($rhythm * self::SOON_RATIO);
 
         $urgency = match (true) {
-            $elapsed < $rhythm * self::SOON_RATIO => Urgency::Fresh,
+            $elapsed < $soonAfter => Urgency::Fresh,
             $elapsed < $rhythm => Urgency::Soon,
             $elapsed <= $rhythm + $margin => Urgency::Due,
             default => Urgency::Late,
@@ -68,6 +72,8 @@ final class TaskStatusResolver
             overdueDays: Urgency::Late === $urgency ? intdiv($now->getTimestamp() - $dueAt->getTimestamp(), self::DAY) : 0,
             doneThisWeek: null !== $commitment ? $doneThisWeek : null,
             weeklyCommitment: $commitment,
+            warningAt: $reference->modify(\sprintf('+%d seconds', $soonAfter)),
+            lateAt: $dueAt->modify(\sprintf('+%d seconds', $margin)),
         );
     }
 
@@ -81,8 +87,8 @@ final class TaskStatusResolver
         $occurrence = $this->nextOccurrence($task, $after);
 
         return $daily
-            ? $this->deadlineStatus($occurrence, min($task->getMarginHours(), 12), $now, self::DAY, self::DAILY_LEAD_TIME)
-            : $this->deadlineStatus($occurrence, $task->getMarginHours(), $now, 7 * self::DAY);
+            ? $this->deadlineStatus($occurrence, min($task->getMarginHours(), 12), $task->getWarningHours(), $now, self::DAY, self::DAILY_LEAD_TIME)
+            : $this->deadlineStatus($occurrence, $task->getMarginHours(), $task->getWarningHours(), $now, 7 * self::DAY);
     }
 
     private function oneOff(Task $task, \DateTimeImmutable $now): TaskStatus
@@ -92,15 +98,17 @@ final class TaskStatusResolver
             return new TaskStatus(Urgency::Fresh, 100);
         }
 
-        return $this->deadlineStatus($dueAt, $task->getMarginHours(), $now, 7 * self::DAY);
+        return $this->deadlineStatus($dueAt, $task->getMarginHours(), $task->getWarningHours(), $now, 7 * self::DAY);
     }
 
-    private function deadlineStatus(\DateTimeImmutable $deadline, int $marginHours, \DateTimeImmutable $now, int $horizon, int $leadTime = self::LEAD_TIME): TaskStatus
+    /** @param ?int $warningHours how long before the deadline it turns orange; null: twice the lead time */
+    private function deadlineStatus(\DateTimeImmutable $deadline, int $marginHours, ?int $warningHours, \DateTimeImmutable $now, int $horizon, int $leadTime = self::LEAD_TIME): TaskStatus
     {
         $left = $deadline->getTimestamp() - $now->getTimestamp();
+        $warnBefore = null !== $warningHours ? $warningHours * self::HOUR : 2 * $leadTime;
 
         $urgency = match (true) {
-            $left > 2 * $leadTime => Urgency::Fresh,
+            $left > $warnBefore => Urgency::Fresh,
             $left > $leadTime => Urgency::Soon,
             $left >= -$marginHours * self::HOUR => Urgency::Due,
             default => Urgency::Late,
@@ -111,6 +119,8 @@ final class TaskStatusResolver
             freshness: (int) round(100 * $left / $horizon),
             dueAt: $deadline,
             overdueDays: Urgency::Late === $urgency ? intdiv(-$left, self::DAY) : 0,
+            warningAt: $deadline->modify(\sprintf('-%d seconds', $warnBefore)),
+            lateAt: $deadline->modify(\sprintf('+%d hours', $marginHours)),
         );
     }
 

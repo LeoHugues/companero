@@ -46,6 +46,20 @@ final class TaskStatusResolverTest extends TestCase
         self::assertSame($freshness, $status->freshness);
     }
 
+    public function testARollingTaskCanTurnOrangeLater(): void
+    {
+        // Rhythm of 10 days, done Thursday 1st at noon: orange only one day before.
+        $task = $this->rollingTask(10, '2026-10-01 12:00');
+        $task->setWarningHours(24);
+
+        self::assertSame(Urgency::Fresh, $this->resolver->resolve($task, new \DateTimeImmutable('2026-10-08 12:00'), self::SATURDAY)->urgency);
+        $status = $this->resolver->resolve($task, new \DateTimeImmutable('2026-10-10 13:00'), self::SATURDAY);
+        self::assertSame(Urgency::Soon, $status->urgency);
+        self::assertSame('warning', $status->alert());
+        self::assertEquals(new \DateTimeImmutable('2026-10-10 12:00'), $status->warningAt);
+        self::assertEquals(new \DateTimeImmutable('2026-10-12 12:00'), $status->lateAt);
+    }
+
     public function testLateTaskCountsDaysSinceItWasDue(): void
     {
         $task = $this->rollingTask(7, '2026-09-24 10:00');
@@ -120,6 +134,24 @@ final class TaskStatusResolverTest extends TestCase
 
         self::assertSame($expected, $status->urgency);
         self::assertEquals(new \DateTimeImmutable('2026-10-06 20:00'), $status->dueAt);
+    }
+
+    public function testAScheduledTaskCanTurnOrangeEarlier(): void
+    {
+        // Bins every Tuesday at 20:00, last taken out Tuesday 29 September: orange three days before.
+        $task = $this->task(TaskKind::Scheduled);
+        $task->setScheduledWeekday(2);
+        $task->setScheduledTime(new \DateTimeImmutable('20:00'));
+        $task->setWarningHours(72);
+        $task->setMarginHours(2);
+        $task->complete(new \DateTimeImmutable('2026-09-29 19:30'));
+
+        $status = $this->resolver->resolve($task, new \DateTimeImmutable('2026-10-03 21:00'), self::SATURDAY);
+
+        self::assertSame(Urgency::Soon, $status->urgency);
+        self::assertEquals(new \DateTimeImmutable('2026-10-03 20:00'), $status->warningAt);
+        self::assertEquals(new \DateTimeImmutable('2026-10-06 22:00'), $status->lateAt);
+        self::assertSame('danger', $this->resolver->resolve($task, new \DateTimeImmutable('2026-10-06 22:30'), self::SATURDAY)->alert());
     }
 
     public function testScheduledTaskDoneEarlyCoversTheComingOccurrence(): void

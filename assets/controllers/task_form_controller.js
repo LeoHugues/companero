@@ -13,7 +13,7 @@ export default class extends Controller {
         const kind = checked ? checked.value : 'one_off';
 
         this.sectionTargets.forEach((section) => {
-            section.hidden = section.dataset.kind !== kind;
+            section.hidden = !section.dataset.kind.split(' ').includes(kind);
         });
 
         const category = this.element.querySelector('input[name$="[category]"]:checked');

@@ -13,6 +13,25 @@
     <fieldset class="flex flex-col gap-5" data-task-form-target="section" data-kind="one_off">
         {{ form_row(form.dueAt) }}
     </fieldset>
+    {# The card's colour: green while all is well, orange when the moment approaches, red once late. #}
+    <fieldset class="card flex flex-col gap-4 px-3.5 py-3" data-task-form-target="section" data-kind="rolling scheduled one_off">
+        <legend class="sr-only">Alertes</legend>
+        <p class="flex items-center gap-2 text-[15px] font-extrabold">
+            <span class="flex gap-1" aria-hidden="true"><span class="size-2.5 rounded-full bg-ok"></span><span class="size-2.5 rounded-full bg-warn"></span><span class="size-2.5 rounded-full bg-danger"></span></span>
+            Alertes de la carte
+        </p>
+        {% for field in [form.warningHours, form.marginHours] %}
+            <div class="flex flex-col gap-2">
+                {{ form_label(field) }}
+                <div class="flex items-center gap-3">
+                    {{ form_widget(field.amount, {attr: {class: 'w-24', placeholder: '—'}}) }}
+                    {{ form_widget(field.unit) }}
+                </div>
+                {{ form_help(field) }}
+                {{ form_errors(field) }}
+            </div>
+        {% endfor %}
+    </fieldset>
     <fieldset class="flex flex-col gap-2" data-task-form-target="section" data-kind="quick">
         {{ form_label(form.cooldownHours) }}
         <div class="flex items-center gap-3">
@@ -30,6 +49,7 @@
         {{ form_row(form.backup) }}
     </fieldset>
     {{ form_row(form.zone) }}
+    {{ form_row(form.rarity, {row_attr: {class: 'rarity-choice'}, help: 'Pour le plaisir : une tâche rare, épique ou légendaire a une carte qui brille plus.'}) }}
 
     <div class="card flex items-center justify-between gap-3 px-3.5 py-3" data-controller="stepper">
         <div class="flex flex-col gap-0.5">

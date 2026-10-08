@@ -34,6 +34,17 @@
   --color-legend: #E3A21A;
   --color-legend-soft: #FFF0C9;
 
+  /* Urgency of a task, at a glance: all good, the moment approaches (or has come), late. */
+  --color-ok: #3E9B62;
+  --color-ok-ink: #24703F;
+  --color-ok-soft: #E1F2E6;
+  --color-warn: #F0A51C;
+  --color-warn-ink: #8A5200;
+  --color-warn-soft: #FFEFC7;
+  --color-danger: #D7402E;
+  --color-danger-ink: #AD2818;
+  --color-danger-soft: #FDE3DE;
+
   --animate-breathe: breathe 3.2s ease-in-out infinite;
   --animate-bounce-joy: bounce-joy 700ms cubic-bezier(.3, 1.6, .5, 1) both;
   --animate-float-up: float-up 1200ms ease-out both;
@@ -185,6 +196,36 @@
 .rarity-badge-legendary {
   @apply text-ink;
   background: linear-gradient(100deg, var(--color-legend), var(--color-sun) 50%, var(--color-legend));
+}
+
+/* The urgency of a task: a stripe down the left edge of its card, and a pill with its status. */
+.urgency-stripe {
+  position: absolute;
+  inset-block: 0;
+  left: 0;
+  width: 6px;
+  pointer-events: none;
+}
+.urgency-stripe-ok { background: var(--color-ok); }
+.urgency-stripe-warning { background: var(--color-warn); }
+.urgency-stripe-danger {
+  background: var(--color-danger);
+  animation: urgency-pulse 1.6s ease-in-out infinite;
+}
+.urgency-pill {
+  @apply inline-flex h-6 min-w-0 items-center gap-1 rounded-full pr-2.5 pl-1.5 text-xs leading-none font-extrabold;
+}
+.urgency-pill-ok { @apply bg-ok-soft text-ok-ink; }
+.urgency-pill-warning { @apply bg-warn-soft text-warn-ink; }
+.urgency-pill-danger { @apply bg-danger-ink text-white; }
+@keyframes urgency-pulse { 50% { opacity: .45; } }
+
+/* The rarity chips of the task form take the colours of the cards. */
+.rarity-choice input[value=rare]:checked + label { @apply border-rare bg-rare-soft; }
+.rarity-choice input[value=epic]:checked + label { @apply border-epic bg-epic-soft; }
+.rarity-choice input[value=legendary]:checked + label {
+  @apply border-legend;
+  background: linear-gradient(100deg, var(--color-legend-soft), var(--color-sun));
 }
 
 @keyframes rarity-orbit { to { --rarity-angle: 360deg; } }

@@ -68,9 +68,18 @@ class Task
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $dueAt = null;
 
+    /** Once the moment has come, how long it may wait before being late (its card turns red). */
     #[ORM\Column(type: Types::SMALLINT)]
-    #[Assert\Range(min: 0, max: 168)]
+    #[Assert\Range(min: 0, max: 720)]
     private int $marginHours = self::DEFAULT_MARGIN_HOURS;
+
+    /** How long before the moment its card turns orange. Null: the default (see TaskStatusResolver). */
+    #[ORM\Column(type: Types::SMALLINT, nullable: true)]
+    #[Assert\Range(min: 1, max: 8760)]
+    private ?int $warningHours = null;
+
+    #[ORM\Column(enumType: Rarity::class, options: ['default' => 'common'])]
+    private Rarity $rarity = Rarity::Common;
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(onDelete: 'SET NULL')]
@@ -389,9 +398,30 @@ class Task
         return $this->marginHours;
     }
 
-    public function setMarginHours(int $marginHours): void
+    /** Left empty in the form: the default margin. */
+    public function setMarginHours(?int $marginHours): void
     {
-        $this->marginHours = $marginHours;
+        $this->marginHours = $marginHours ?? self::DEFAULT_MARGIN_HOURS;
+    }
+
+    public function getWarningHours(): ?int
+    {
+        return $this->warningHours;
+    }
+
+    public function setWarningHours(?int $warningHours): void
+    {
+        $this->warningHours = $warningHours;
+    }
+
+    public function getRarity(): Rarity
+    {
+        return $this->rarity;
+    }
+
+    public function setRarity(Rarity $rarity): void
+    {
+        $this->rarity = $rarity;
     }
 
     public function getCreatedBy(): Member
@@ -412,12 +442,6 @@ class Task
     public function getLastCompletedBy(): ?Member
     {
         return $this->lastCompletedBy;
-    }
-
-    /** Its card's rarity, from its base points (boosts aside). */
-    public function getRarity(): Rarity
-    {
-        return Rarity::fromPoints($this->points);
     }
 
     public function getCooldownHours(): ?int

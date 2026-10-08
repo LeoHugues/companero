@@ -40,8 +40,4 @@
             </span>
         {% endif %}
     {% endif %}
-    <a href="{{ path('task_edit', {id: task.id}) }}" aria-label="Réglages de « {{ task.title }} »" title="Réglages de la tâche"
-       class="{{ compact ? 'order-first' : 'ml-auto' }} flex size-9 shrink-0 items-center justify-center rounded-full text-muted no-underline transition hover:bg-track hover:text-ink">
-        <twig:Icon name="settings" size="19"/>
-    </a>
 </div>

@@ -35,6 +35,16 @@ enum Urgency: string
         };
     }
 
+    /** The colour of the card: ok (green), warning (orange: soon, or now), danger (red: beyond the margin). */
+    public function alert(): string
+    {
+        return match ($this) {
+            self::Fresh => 'ok',
+            self::Soon, self::Due => 'warning',
+            self::Late => 'danger',
+        };
+    }
+
     public function isPressing(): bool
     {
         return $this->weight() >= self::Due->weight();

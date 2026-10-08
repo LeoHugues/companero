@@ -16,8 +16,17 @@ final readonly class TaskStatus
         public int $overdueDays = 0,
         public ?int $doneThisWeek = null,
         public ?int $weeklyCommitment = null,
+        /** When its card turns orange, and red. */
+        public ?\DateTimeImmutable $warningAt = null,
+        public ?\DateTimeImmutable $lateAt = null,
     ) {
         $this->freshness = max(0, min($freshness, $urgency->maxFreshness()));
+    }
+
+    /** What its card shows at a glance: all good, soon or now, too late. */
+    public function alert(): string
+    {
+        return $this->urgency->alert();
     }
 
     public function hasPendingCommitment(): bool

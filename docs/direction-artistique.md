@@ -54,20 +54,40 @@ les barres collectives.
 - **Couleurs plates uniquement** : ni dégradé, ni brillance, ni néon.
   Seule exception : la **rareté des cartes de tâche**, comme dans un jeu de cartes.
 
-## Rareté des cartes de tâche
+## Cartes de tâche
 
-Plus une tâche rapporte de points (de base, sans les boosts), plus sa carte est rare. Les
-petites tâches, les plus nombreuses, sont communes.
+Une carte montre de haut en bas : la rareté et l'urgence, la roue crantée des réglages en haut
+à droite, le titre, la barre de fraîcheur (tâches régulières), la pièce et le rythme, puis les
+points et le bouton « C'est fait ». Toucher la carte ouvre sa page : la carte en grand, quand
+elle passe en orange et en rouge, qui s'en charge, les dernières fois qu'elle a été faite.
 
-| Rareté | Points | Carte |
+### Urgence
+
+Une bande sur le bord gauche de la carte et une pastille avec le statut :
+
+| État | Couleur | Quand |
 |---|---|---|
-| Commune | moins de 20 | Plate, comme les autres cartes |
-| Rare | 20 à 29 | Bordure bleue `#3D7FA8`, léger voile bleu en haut |
-| Épique | 30 à 49 | Bordure en dégradé violet `#8E55BF` → rose → bleu, reflet holographique qui balaie la carte toutes les 6 s |
-| Légendaire | 50 et plus | Bordure dorée `#E3A21A` où une lumière fait le tour (4,5 s), halo doré, reflet |
+| Tout va bien | vert `#3E9B62` | avant l'alerte |
+| Attention | orange `#F0A51C` | le moment approche, ou il est venu (dans le délai maximum) |
+| En retard | rouge `#D7402E`, la bande pulse | au-delà du délai maximum |
 
-Une pastille en capitales (« RARE », « ÉPIQUE »…) avec un petit diamant rappelle la rareté
-au-dessus du titre. Les animations s'arrêtent si le téléphone demande moins d'animations.
+Les deux délais se règlent pour chaque tâche (« Orange combien de temps avant ? », « Rouge
+combien de temps après ? »). Sans réglage : orange aux 60 % du rythme ou 2 jours avant
+l'échéance, rouge 1 jour après.
+
+### Rareté
+
+Choisie pour chaque tâche dans son formulaire, **commune** par défaut :
+
+| Rareté | Carte |
+|---|---|
+| Commune | Plate, comme les autres cartes |
+| Rare | Bordure bleue `#3D7FA8`, léger voile bleu en haut |
+| Épique | Bordure en dégradé violet `#8E55BF` → rose → bleu, reflet holographique qui balaie la carte toutes les 6 s |
+| Légendaire | Bordure dorée `#E3A21A` où une lumière fait le tour (4,5 s), halo doré, reflet |
+
+Une pastille en capitales (« RARE », « ÉPIQUE »…) avec un petit diamant rappelle la rareté.
+Les animations s'arrêtent si le téléphone demande moins d'animations.
 
 ## La Casa
 

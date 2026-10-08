@@ -7,6 +7,8 @@ use App\Entity\Member;
 use App\Entity\Task;
 use App\Form\TaskType;
 use App\Repository\CatalogItemRepository;
+use App\Repository\CompletionRepository;
+use App\Repository\PointEntryRepository;
 use App\Security\HouseholdVoter;
 use App\Task\CompletionResult;
 use App\Task\TaskBoardBuilder;
@@ -105,6 +107,23 @@ final class TaskController extends AbstractController
         ]);
     }
 
+    #[Route('/{id}', name: 'task_show', requirements: ['id' => '\d+'], methods: ['GET'])]
+    #[IsGranted(HouseholdVoter::ACCESS, subject: 'task')]
+    public function show(Task $task, TaskBoardBuilder $boards, CompletionRepository $completions, PointEntryRepository $points): Response
+    {
+        if ($task->isArchived()) {
+            throw $this->createNotFoundException();
+        }
+        $recent = $completions->findRecentForTask($task);
+
+        return $this->render('task/show.html.twig', [
+            'view' => $boards->view($task),
+            'completions' => $recent,
+            'points' => $points->sumByCompletion($recent),
+            'now' => $this->clock->now(),
+        ]);
+    }
+
     #[Route('/{id}/modifier', name: 'task_edit', requirements: ['id' => '\d+'], methods: ['GET', 'POST'])]
     #[IsGranted(HouseholdVoter::ACCESS, subject: 'task')]
     public function edit(Task $task, Request $request): Response
@@ -116,7 +135,7 @@ final class TaskController extends AbstractController
             $this->entityManager->flush();
             $this->addFlash('success', 'C’est enregistré.');
 
-            return $this->redirectToRoute('task_index', status: Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('task_show', ['id' => $task->getId()], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('task/edit.html.twig', ['form' => $form, 'task' => $task]);
@@ -140,7 +159,7 @@ final class TaskController extends AbstractController
         }
         $this->celebrate($result, $member);
 
-        return $this->redirectBack($request);
+        return $this->redirectBack($request, $task);
     }
 
     /** The Casa thanks the member on the next page, and any gift of a new level shows up. */
@@ -182,11 +201,17 @@ final class TaskController extends AbstractController
         return $this->redirectToRoute('task_index', status: Response::HTTP_SEE_OTHER);
     }
 
-    private function redirectBack(Request $request): RedirectResponse
+    private function redirectBack(Request $request, ?Task $task = null): RedirectResponse
     {
         $back = $request->request->getString('_back');
         if (1 === preg_match('/^zone-(\d+)$/', $back, $zone)) {
             return $this->redirectToRoute('plan_zone', ['id' => (int) $zone[1]], Response::HTTP_SEE_OTHER);
+        }
+        if (1 === preg_match('/^task-(\d+)$/', $back, $id)) {
+            // A one-off task is gone once done: back home then.
+            return null !== $task && $task->isArchived()
+                ? $this->redirectToRoute('app_home', status: Response::HTTP_SEE_OTHER)
+                : $this->redirectToRoute('task_show', ['id' => (int) $id[1]], Response::HTTP_SEE_OTHER);
         }
         $route = self::BACK_ROUTES[$back] ?? 'app_home';
 

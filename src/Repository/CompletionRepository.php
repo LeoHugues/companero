@@ -89,6 +89,20 @@ class CompletionRepository extends ServiceEntityRepository
     }
 
     /** @return list<Completion> latest first */
+    public function findRecentForTask(Task $task, int $limit = 8): array
+    {
+        return $this->createQueryBuilder('c')
+            ->addSelect('m')
+            ->join('c.member', 'm')
+            ->andWhere('c.task = :task')
+            ->setParameter('task', $task)
+            ->orderBy('c.completedAt', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
+
+    /** @return list<Completion> latest first */
     public function findRecentForZone(Zone $zone, \DateTimeImmutable $since, int $limit = 12): array
     {
         return $this->createQueryBuilder('c')

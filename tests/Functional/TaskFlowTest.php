@@ -43,26 +43,116 @@ final class TaskFlowTest extends AppTestCase
         self::assertFalse($points->hasEntry($leo, PointReason::Punctuality, new \DateTimeImmutable('-1 hour'), new \DateTimeImmutable('+1 hour')));
     }
 
-    public function testTheMoreATaskIsWorthTheRarerItsCard(): void
+    public function testTheRarityOfACardIsChosenWithTheTask(): void
     {
         $this->client->loginUser($this->foundHousehold());
-        foreach (['Ranger le salon' => '10', 'Grand ménage de la cuisine' => '60'] as $title => $points) {
-            $this->client->request('GET', '/taches/nouvelle');
-            $this->client->submitForm('Ajouter la tâche', ['task[title]' => $title, 'task[kind]' => 'rolling', 'task[rhythmDays]' => '7', 'task[points]' => $points]);
-        }
+        $this->client->request('GET', '/taches/nouvelle');
+        $this->client->submitForm('Ajouter la tâche', ['task[title]' => 'Ranger le salon', 'task[kind]' => 'rolling', 'task[rhythmDays]' => '7', 'task[points]' => '60']);
+        $this->client->request('GET', '/taches/nouvelle');
+        $this->client->submitForm('Ajouter la tâche', ['task[title]' => 'Grand ménage de la cuisine', 'task[kind]' => 'rolling', 'task[rhythmDays]' => '7', 'task[points]' => '10', 'task[rarity]' => 'legendary']);
         $tasks = static::getContainer()->get(TaskRepository::class);
-        $small = $tasks->findOneBy(['title' => 'Ranger le salon']);
-        $big = $tasks->findOneBy(['title' => 'Grand ménage de la cuisine']);
+        $common = $tasks->findOneBy(['title' => 'Ranger le salon']);
+        $legendary = $tasks->findOneBy(['title' => 'Grand ménage de la cuisine']);
 
+        // Common unless said otherwise, whatever the points.
         $this->client->request('GET', '/taches');
-        self::assertSelectorExists(\sprintf('#task-%d[data-rarity=common]', $small?->getId()));
-        self::assertSelectorTextContains('#task-'.$small?->getId(), 'Commune');
-        self::assertSelectorExists(\sprintf('#task-%d[data-rarity=legendary]', $big?->getId()));
-        self::assertSelectorTextContains('#task-'.$big?->getId(), 'Légendaire');
+        self::assertSelectorExists(\sprintf('#task-%d[data-rarity=common]', $common?->getId()));
+        self::assertSelectorTextContains('#task-'.$common?->getId(), 'Commune');
+        self::assertSelectorExists(\sprintf('#task-%d[data-rarity=legendary]', $legendary?->getId()));
+        self::assertSelectorTextContains('#task-'.$legendary?->getId(), 'Légendaire');
 
         // Never done, both are due: the home page shows them with their rarity too.
         $this->client->request('GET', '/');
-        self::assertSelectorExists(\sprintf('#task-%d.rarity-legendary', $big?->getId()));
+        self::assertSelectorExists(\sprintf('#task-%d.rarity-legendary', $legendary?->getId()));
+
+        $this->client->request('GET', '/taches/'.$common?->getId().'/modifier');
+        $this->client->submitForm('Enregistrer', ['task[rarity]' => 'epic']);
+        self::assertResponseRedirects('/taches/'.$common?->getId());
+        $this->client->followRedirect();
+        self::assertSelectorExists('#task-'.$common?->getId().'.rarity-epic');
+    }
+
+    public function testACardShowsHowPressingItsTaskIs(): void
+    {
+        $this->client->loginUser($this->foundHousehold());
+        $this->client->request('GET', '/taches/nouvelle');
+        $this->client->submitForm('Ajouter la tâche', ['task[title]' => 'Arroser les plantes', 'task[kind]' => 'rolling', 'task[rhythmDays]' => '3']);
+        $this->client->request('GET', '/taches/nouvelle');
+        $this->client->submitForm('Ajouter la tâche', ['task[title]' => 'Appeler le proprio', 'task[kind]' => 'one_off', 'task[dueAt]' => (new \DateTimeImmutable('-3 days'))->format('Y-m-d\TH:i')]);
+        $this->client->request('GET', '/taches/nouvelle');
+        $this->client->submitForm('Ajouter la tâche', ['task[title]' => 'Tailler la haie', 'task[kind]' => 'one_off']);
+        $tasks = static::getContainer()->get(TaskRepository::class);
+
+        $this->client->request('GET', '/taches');
+        self::assertSelectorExists(\sprintf('#task-%d[data-alert=warning]', $tasks->findOneBy(['title' => 'Arroser les plantes'])?->getId()));
+        self::assertSelectorExists(\sprintf('#task-%d[data-alert=danger]', $tasks->findOneBy(['title' => 'Appeler le proprio'])?->getId()));
+        self::assertSelectorExists(\sprintf('#task-%d[data-alert=ok]', $tasks->findOneBy(['title' => 'Tailler la haie'])?->getId()));
+    }
+
+    public function testTheAlertsOfACardAreSetWithTheTask(): void
+    {
+        $this->client->loginUser($this->foundHousehold());
+        $this->client->request('GET', '/taches/nouvelle');
+        $this->client->submitForm('Ajouter la tâche', [
+            'task[title]' => 'Serpillière',
+            'task[kind]' => 'rolling',
+            'task[rhythmDays]' => '7',
+            'task[warningHours][amount]' => '2',
+            'task[warningHours][unit]' => 'days',
+            'task[marginHours][amount]' => '12',
+            'task[marginHours][unit]' => 'hours',
+        ]);
+
+        $task = static::getContainer()->get(TaskRepository::class)->findOneBy(['title' => 'Serpillière']);
+        self::assertSame(48, $task?->getWarningHours());
+        self::assertSame(12, $task?->getMarginHours());
+
+        $this->client->request('GET', '/taches/'.$task->getId().'/modifier');
+        $this->client->submitForm('Enregistrer', ['task[warningHours][amount]' => '', 'task[marginHours][amount]' => '']);
+        $task = static::getContainer()->get(TaskRepository::class)->find($task->getId());
+        self::assertNull($task?->getWarningHours());
+        self::assertSame(Task::DEFAULT_MARGIN_HOURS, $task?->getMarginHours());
+    }
+
+    public function testACardOpensItsPage(): void
+    {
+        $leo = $this->foundHousehold();
+        $this->client->loginUser($leo);
+        $this->client->request('GET', '/taches/nouvelle');
+        $this->client->submitForm('Ajouter la tâche', ['task[title]' => 'Serpillière', 'task[kind]' => 'rolling', 'task[rhythmDays]' => '7', 'task[points]' => '30', 'task[rarity]' => 'rare']);
+        $task = static::getContainer()->get(TaskRepository::class)->findOneBy(['title' => 'Serpillière']);
+
+        $this->client->request('GET', '/taches');
+        self::assertSelectorExists(\sprintf('#task-%d h3 a[href="/taches/%d"]', $task?->getId(), $task?->getId()));
+        self::assertSelectorExists(\sprintf('#task-%d a[href="/taches/%d/modifier"]', $task?->getId(), $task?->getId()));
+
+        $this->client->request('GET', '/taches/'.$task?->getId());
+        self::assertResponseIsSuccessful();
+        self::assertSelectorTextContains('h1', 'Serpillière');
+        self::assertSelectorTextContains('#task-'.$task?->getId(), 'Rare');
+        self::assertSelectorTextContains('[aria-labelledby=done-title]', 'Pas encore faite');
+
+        // Done from its page: back to it, with the latest completion.
+        $this->submitAction('/taches/'.$task?->getId().'/fait');
+        self::assertResponseRedirects('/taches/'.$task?->getId());
+        $this->client->followRedirect();
+        self::assertSelectorTextContains('[role=status]', '+30 pts');
+        self::assertSelectorTextContains('[aria-labelledby=done-title]', 'Léo');
+    }
+
+    public function testADoneOneOffTaskLeavesItsPage(): void
+    {
+        $this->client->loginUser($this->foundHousehold());
+        $this->client->request('GET', '/taches/nouvelle');
+        $this->client->submitForm('Ajouter la tâche', ['task[title]' => 'Appeler le proprio', 'task[kind]' => 'one_off']);
+        $task = static::getContainer()->get(TaskRepository::class)->findOneBy(['title' => 'Appeler le proprio']);
+
+        $this->client->request('GET', '/taches/'.$task?->getId());
+        $this->submitAction('/taches/'.$task?->getId().'/fait');
+
+        self::assertResponseRedirects('/');
+        $this->client->request('GET', '/taches/'.$task?->getId());
+        self::assertResponseStatusCodeSame(404);
     }
 
     public function testInvalidRecurringTaskIsRejected(): void

@@ -1,27 +1,67 @@
-{% props view, member, back = 'home' %}
+{% props view, member, back = 'home', compact = false %}
+{#
+    A task as a card: its rarity (the skin), its urgency (the stripe and the pill), what it is worth.
+    The whole card opens its page; the settings wheel and the action buttons sit above that link.
+    compact: lists (tasks, rooms), with a single "done" button.
+#}
 {% set task = view.task %}
+{% set status = view.status %}
 {% set boost = task_boost(view) %}
 {% set rarity = task.rarity %}
-<article {{ attributes.defaults({class: 'card card-hover rarity-' ~ rarity.value ~ ' flex flex-col gap-2.5 p-3.5', id: 'task-' ~ task.id, 'data-rarity': rarity.value}) }}>
-    <div class="flex items-start justify-between gap-2.5">
-        <div class="flex min-w-0 flex-col gap-1">
-            <twig:RarityBadge :rarity="rarity" class="self-start"/>
-            <h3 class="text-[17px] leading-snug font-bold [overflow-wrap:anywhere]">
-                <a href="{{ path('task_edit', {id: task.id}) }}" class="text-ink no-underline hover:text-clay-dark">{{ task.title }}</a>
-            </h3>
-            <p class="meta flex items-center gap-1.5">
-                <twig:StatusDot :urgency="view.status.urgency"/>
-                <span>
-                    {{ task_status_label(task, view.status) }} · {{ task.pet.name ?? task.zone.name ?? (task.category.value == 'pets' ? 'Les animaux' : 'Toute la coloc') }}
-                    {% if view.status.weeklyCommitment %}· {{ view.status.doneThisWeek }}/{{ view.status.weeklyCommitment }} cette sem.{% endif %}
-                </span>
-            </p>
-            <twig:ReminderNote :view="view" :member="member"/>
-        </div>
-        <p class="flex shrink-0 flex-col items-end">
-            <span class="text-[15px] font-extrabold whitespace-nowrap text-clay-dark">+{{ task.points + boost }} pts</span>
+{% set barColors = {ok: 'var(--color-ok)', warning: 'var(--color-warn)', danger: 'var(--color-danger)'} %}
+{% set barColor = barColors[status.alert] %}
+<article {{ attributes.defaults({
+    class: 'card card-hover rarity-' ~ rarity.value ~ ' relative flex flex-col overflow-hidden ' ~ (compact ? 'gap-1.5 py-3 pr-3 pl-5' : 'gap-2 py-3.5 pr-3.5 pl-5'),
+    id: 'task-' ~ task.id,
+    'data-rarity': rarity.value,
+    'data-alert': status.alert
+}) }}>
+    <span class="urgency-stripe urgency-stripe-{{ status.alert }}" aria-hidden="true"></span>
+
+    <div class="flex items-center gap-2">
+        <twig:RarityBadge :rarity="rarity"/>
+        <twig:UrgencyPill :view="view"/>
+        <a href="{{ path('task_edit', {id: task.id}) }}" aria-label="Réglages de « {{ task.title }} »" title="Réglages de la tâche"
+           class="relative z-10 -my-1.5 -mr-1.5 ml-auto flex size-9 shrink-0 items-center justify-center rounded-full text-muted no-underline transition hover:bg-track hover:text-ink">
+            <twig:Icon name="settings" size="19"/>
+        </a>
+    </div>
+
+    <h3 class="{{ compact ? 'text-base' : 'text-[17px]' }} leading-snug font-bold [overflow-wrap:anywhere]">
+        {# Stretched over the whole card: a tap anywhere opens the card's page. #}
+        <a href="{{ path('task_show', {id: task.id}) }}" class="text-ink no-underline after:absolute after:inset-0 after:content-[''] hover:text-clay-dark">{{ task.title }}</a>
+    </h3>
+
+    {% if task.kind.value == 'rolling' %}
+        <twig:ProgressBar :value="status.freshness" height="6" :color="barColor" label="Fraîcheur de « {{ task.title }} »"/>
+    {% endif %}
+
+    {% set meta %}
+        <p class="text-xs text-muted">
+            {{ task.pet.name ?? task.zone.name ?? (task.category.value == 'pets' ? 'Les animaux' : 'Toute la coloc') }} · {{ task_rule_label(task) }}
+            {% if status.weeklyCommitment %}· {{ status.doneThisWeek }}/{{ status.weeklyCommitment }} cette sem.{% endif %}
+            {% if compact and view.reservedBy %}· {{ view.isReservedBy(member) ? 'tu t’en occupes' : view.reservedBy.name ~ ' s’en occupe' }}{% endif %}
+        </p>
+        <twig:ReminderNote :view="view" :member="member"/>
+    {% endset %}
+    {% set points %}
+        <p class="flex items-baseline gap-1.5">
+            <span class="{{ compact ? 'text-sm' : 'text-[15px]' }} font-extrabold whitespace-nowrap text-clay-dark">+{{ task.points + boost }} pts</span>
             {% if boost %}<span class="flex items-center text-[11px] font-bold whitespace-nowrap text-muted"><twig:Icon name="bolt" size="11" stroke="2.6"/>+{{ boost }} boost</span>{% endif %}
         </p>
-    </div>
-    <twig:TaskActions :view="view" :back="back" :member="member"/>
+    {% endset %}
+
+    {# Only the buttons sit above the card's link. #}
+    {% if compact %}
+        <div class="flex items-end justify-between gap-3">
+            <div class="flex min-w-0 flex-col gap-1">{{ meta }}{{ points }}</div>
+            <twig:TaskActions :view="view" :back="back" :member="member" compact class="relative z-10 shrink-0"/>
+        </div>
+    {% else %}
+        {{ meta }}
+        <div class="flex items-center justify-between gap-3 pt-1">
+            {{ points }}
+            <twig:TaskActions :view="view" :back="back" :member="member" class="relative z-10 flex-row-reverse"/>
+        </div>
+    {% endif %}
 </article>

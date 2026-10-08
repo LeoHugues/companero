@@ -21,7 +21,7 @@
     <section class="flex flex-col gap-2.5" aria-labelledby="zone-tasks-title">
         <h2 id="zone-tasks-title" class="section-title">Ce qui peut être fait</h2>
         {% for view in room.tasks %}
-            <twig:TaskRow :view="view" :member="app.user" :back="'zone-' ~ zone.id"/>
+            <twig:TaskCard :view="view" :member="app.user" :back="'zone-' ~ zone.id" compact/>
         {% else %}
             <p class="meta py-2">Aucune tâche dans cette pièce. <a href="{{ path('task_new') }}">En créer une</a></p>
         {% endfor %}

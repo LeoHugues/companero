@@ -31,7 +31,7 @@
                 <p class="meta font-semibold">un appui quand c’est fait</p>
             </div>
             {% for view in quick %}
-                <twig:TaskRow :view="view" :member="app.user"/>
+                <twig:TaskCard :view="view" :member="app.user" back="tasks" compact/>
             {% endfor %}
         </section>
     {% endif %}
@@ -39,7 +39,7 @@
     <section class="flex flex-col gap-2.5" aria-labelledby="recurring-title">
         <h2 id="recurring-title" class="section-title">Récurrentes</h2>
         {% for view in recurring %}
-            <twig:TaskRow :view="view" :member="app.user"/>
+            <twig:TaskCard :view="view" :member="app.user" back="tasks" compact/>
         {% else %}
             <p class="meta py-2">Aucune tâche récurrente ici. <a href="{{ path('task_new') }}">En créer une</a></p>
         {% endfor %}
@@ -48,7 +48,7 @@
     <section class="flex flex-col gap-2.5" aria-labelledby="oneoff-title">
         <h2 id="oneoff-title" class="section-title mt-1.5">Ponctuelles</h2>
         {% for view in one_off %}
-            <twig:TaskRow :view="view" :member="app.user"/>
+            <twig:TaskCard :view="view" :member="app.user" back="tasks" compact/>
         {% else %}
             <p class="meta py-2">Rien de prévu en dehors du quotidien.</p>
         {% endfor %}
