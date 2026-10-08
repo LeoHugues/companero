@@ -2,6 +2,9 @@
 
 {% block title %}{{ task.title }} · Companero{% endblock %}
 
+{# Room for the save bar, fixed at the bottom of the screen. #}
+{% block main_class %}{{ ux_is_native() ? 'pb-28' : 'pb-48' }}{% endblock %}
+
 {% block body %}
     <header class="flex items-center justify-between">
         <h1 class="text-[22px]">Modifier la tâche</h1>

@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\Entity\Completion;
 use App\Entity\Household;
 use App\Entity\Member;
 use App\Entity\PointEntry;
@@ -60,5 +61,29 @@ class PointEntryRepository extends ServiceEntityRepository
             ->setParameter('to', $to)
             ->getQuery()
             ->getSingleScalarResult();
+    }
+
+    /**
+     * @param list<Completion> $completions
+     *
+     * @return array<int, int> points earned for each completion (bonuses, boosts and adjustments included, XP-only boosts excluded), indexed by completion id
+     */
+    public function sumByCompletion(array $completions): array
+    {
+        if ([] === $completions) {
+            return [];
+        }
+
+        $rows = $this->createQueryBuilder('p')
+            ->select('IDENTITY(p.completion) AS completion', 'SUM(p.points) AS total')
+            ->andWhere('p.completion IN (:completions)')
+            ->andWhere('p.reason != :xpOnly')
+            ->setParameter('completions', $completions)
+            ->setParameter('xpOnly', PointReason::XpBoost)
+            ->groupBy('p.completion')
+            ->getQuery()
+            ->getArrayResult();
+
+        return array_column(array_map(static fn (array $row): array => [(int) $row['completion'], (int) $row['total']], $rows), 1, 0);
     }
 }

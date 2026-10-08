@@ -48,7 +48,10 @@
         {{ form_row(form.reserve) }}
     {% endif %}
 
-    <div class="sticky bottom-[88px] -mx-5 border-t-[1.5px] border-line bg-cream px-5 py-3">
-        <button type="submit" class="btn-primary h-[52px] w-full text-[17px]">{{ submit_label }}</button>
+    {# Always at hand at the bottom of the screen: above the bottom navigation, or at the very bottom in the app's modal. #}
+    <div class="fixed inset-x-0 z-10 border-t-[1.5px] border-line bg-cream {{ ux_is_native() ? 'bottom-0 pb-[env(safe-area-inset-bottom)]' : 'bottom-[calc(72px+env(safe-area-inset-bottom))]' }}">
+        <div class="mx-auto max-w-md px-5 py-3">
+            <button type="submit" class="btn-primary h-[52px] w-full text-[17px]">{{ submit_label }}</button>
+        </div>
     </div>
 {{ form_end(form) }}

@@ -17,6 +17,7 @@
             </li>
         {% endfor %}
     </ul>
+    <a href="{{ path('history', {qui: 'coloc'}) }}" class="self-start text-[13px] font-bold">Tout ce que la coloc a fait</a>
     {% if team.reached %}
         <p class="text-[13px] font-bold text-clay-dark">Objectif de la maison atteint : +{{ constant('App\\Review\\WeekCloser::TEAM_BONUS') }} pts pour chacun dimanche soir</p>
     {% endif %}

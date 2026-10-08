@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\Completion;
 use App\Entity\Household;
+use App\Entity\Member;
 use App\Entity\Task;
 use App\Entity\Zone;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -78,6 +79,23 @@ class CompletionRepository extends ServiceEntityRepository
             ->setParameter('since', $since)
             ->orderBy('c.completedAt', 'DESC')
             ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
+
+    /** @return list<Completion> latest first */
+    public function findForMember(Member $member, \DateTimeImmutable $from, \DateTimeImmutable $to): array
+    {
+        return $this->createQueryBuilder('c')
+            ->addSelect('t', 'z')
+            ->join('c.task', 't')
+            ->leftJoin('t.zone', 'z')
+            ->andWhere('c.member = :member')
+            ->andWhere('c.completedAt >= :from AND c.completedAt < :to')
+            ->setParameter('member', $member)
+            ->setParameter('from', $from)
+            ->setParameter('to', $to)
+            ->orderBy('c.completedAt', 'DESC')
             ->getQuery()
             ->getResult();
     }
