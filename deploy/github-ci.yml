@@ -110,8 +110,11 @@ jobs:
           cache: gradle
           cache-dependency-path: android/**/*.gradle*
 
+      # Le paquet « tools » installé par défaut n'existe plus : seulement platform-tools.
       - uses: android-actions/setup-android@v3
         if: steps.plan.outputs.build == 'true'
+        with:
+          packages: platform-tools
 
       # Toujours la même clé : sans elle, Android refuse d'installer la mise à jour par-dessus l'appli.
       - name: Clé de signature
