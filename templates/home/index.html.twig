@@ -4,24 +4,28 @@
     {% set completion = app.flashes('completion')|first %}
     {% set gifts = app.flashes('gifts')|first %}
 
-    <header class="flex items-center justify-between">
-        {% if is_cleaning_day %}
-            <p class="rounded-full bg-sun px-3 py-1.5 text-[13px] font-bold">{{ weekday_name(now|date('N'))|capitalize }} · jour de ménage</p>
-        {% else %}
-            <p class="rounded-full bg-track px-3 py-1.5 text-[13px] font-bold">{{ weekday_name(now|date('N'))|capitalize }} · ménage {{ weekday_name(app.user.household.cleaningDay) }}</p>
-        {% endif %}
-        <div class="flex items-center gap-2">
-            <form method="post" action="{{ path('presence_toggle') }}">
+    <header class="flex items-center justify-between gap-3">
+        <div class="flex min-w-0 flex-col">
+            <p class="truncate text-[17px] leading-tight font-extrabold">{{ weekday_name(now|date('N'))|capitalize }} {{ now|format_date(pattern: 'd MMMM', locale: 'fr') }}</p>
+            {% if is_cleaning_day %}
+                <p class="flex items-center gap-1 text-[13px] font-bold text-clay-dark"><span class="size-2 rounded-full bg-clay"></span>C’est le jour de ménage</p>
+            {% else %}
+                <p class="truncate text-[13px] font-semibold text-muted">Ménage {{ weekday_name(app.user.household.cleaningDay) }}</p>
+            {% endif %}
+        </div>
+        {# One segmented pill: am I home, my streak, my level. #}
+        <div class="flex h-9 shrink-0 items-stretch overflow-hidden rounded-full border-[1.5px] border-ink bg-surface text-[13px] font-extrabold whitespace-nowrap">
+            <form method="post" action="{{ path('presence_toggle') }}" class="flex">
                 <input type="hidden" name="_back" value="home">
                 <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
                 <button type="submit" aria-pressed="{{ app.user.atHome ? 'true' : 'false' }}" aria-label="{{ app.user.atHome ? 'Je suis à la maison : signaler que je pars' : 'Je ne suis pas là : signaler mon retour' }}"
-                        class="flex h-[30px] cursor-pointer items-center gap-1 rounded-full px-2.5 text-[13px] font-bold transition active:scale-95 {{ app.user.atHome ? 'bg-ink text-cream' : 'border-[1.5px] border-dashed border-muted text-muted' }}">
+                        class="flex cursor-pointer items-center gap-1 pr-2.5 pl-2 transition active:scale-95 {{ app.user.atHome ? 'bg-ink text-cream' : 'text-muted' }}">
                     <twig:Icon :name="app.user.atHome ? 'home' : 'door'" size="16" stroke="2.4"/>{{ app.user.atHome ? 'Là' : 'Pas là' }}
                 </button>
             </form>
-            <a href="{{ path('profile_show') }}" class="flex items-center gap-1 rounded-full border-[1.5px] border-ink px-3 py-1 text-[13px] font-bold text-ink no-underline">
-                Niv. {{ level.number }}
-                {% if app.user.streak > 0 %}<span class="flex items-center text-clay-dark" aria-label="Série de {{ app.user.streak }} semaine{{ app.user.streak > 1 ? 's' }}"> · <twig:Icon name="flame" size="14" stroke="2.4"/>{{ app.user.streak }}</span>{% endif %}
+            <a href="{{ path('profile_show') }}" class="flex items-center gap-2.5 px-2.5 text-ink no-underline hover:bg-track hover:text-ink" aria-label="Niveau {{ level.number }}{{ app.user.streak ? ', série de ' ~ app.user.streak ~ ' semaine' ~ (app.user.streak > 1 ? 's') }}">
+                {% if app.user.streak > 0 %}<span class="flex items-center gap-0.5 text-clay-dark"><twig:Icon name="flame" size="15" stroke="2.4"/>{{ app.user.streak }}</span>{% endif %}
+                <span>Niv. {{ level.number }}</span>
             </a>
         </div>
     </header>
@@ -47,9 +51,10 @@
     />
 
     <section class="flex flex-col gap-1.5" aria-label="Propreté de la Casa">
-        <div class="flex items-baseline justify-between">
+        <div class="flex items-center justify-between gap-2">
             <h1 class="text-lg">La Casa</h1>
-            <p class="text-sm font-bold">Propreté {{ cleanliness }} %</p>
+            <p class="ml-auto text-sm font-bold">Propreté {{ cleanliness }} %</p>
+            <a href="{{ path('household_edit') }}" aria-label="Réglages de la coloc" title="Réglages de la coloc" class="-mr-2 flex size-9 items-center justify-center rounded-full text-muted hover:bg-track hover:text-ink"><twig:Icon name="settings" size="19"/></a>
         </div>
         <twig:ProgressBar :value="cleanliness" label="Propreté de la Casa"/>
     </section>

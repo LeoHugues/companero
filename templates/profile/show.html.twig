@@ -9,7 +9,6 @@
             <h1 class="text-[26px] leading-tight">{{ member.name }}</h1>
             <p class="text-sm font-bold text-clay-dark">Niveau {{ level.number }} · {{ level.rank }}</p>
         </div>
-        <a href="{{ path('household_edit') }}" aria-label="Réglages de la coloc" class="flex size-11 items-center justify-center rounded-full text-ink hover:bg-track"><twig:Icon name="settings"/></a>
     </header>
 
     <section class="card flex flex-col gap-2 p-3.5" aria-label="Expérience">
@@ -133,6 +132,15 @@
             <p class="card p-4 text-sm text-muted">Ton premier titre t’attend au bilan de lundi.</p>
         {% endif %}
     </section>
+
+    <a href="{{ path('household_edit') }}" class="card card-hover flex items-center gap-3 p-3.5 text-ink no-underline hover:text-ink">
+        <span class="flex size-10 shrink-0 items-center justify-center rounded-full bg-sun"><twig:Icon name="home" size="22"/></span>
+        <span class="flex flex-1 flex-col">
+            <span class="text-[15px] font-extrabold">Réglages de la coloc</span>
+            <span class="text-xs text-muted">Objectif de la maison, jour de ménage, colocs, zones, animaux</span>
+        </span>
+        <twig:Icon name="chevron-right" size="20" class="text-muted"/>
+    </a>
 
     <a href="{{ path('app_logout') }}" class="btn-link self-center text-muted" data-turbo="false"><twig:Icon name="logout" size="18"/>&nbsp;Se déconnecter</a>
 {% endblock %}

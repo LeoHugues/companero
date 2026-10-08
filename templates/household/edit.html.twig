@@ -4,12 +4,13 @@
 
 {% block body %}
     <header class="flex items-center justify-between">
-        <h1 class="text-[26px]">La coloc</h1>
-        <a href="{{ path('profile_show') }}" aria-label="Retour au profil" class="flex size-11 items-center justify-center rounded-full text-ink"><twig:Icon name="close" size="22" stroke="2.2"/></a>
+        <h1 class="text-[26px]">Réglages de la coloc</h1>
+        <a href="{{ path('app_home') }}" aria-label="Retour à l’accueil" class="flex size-11 items-center justify-center rounded-full text-ink"><twig:Icon name="close" size="22" stroke="2.2"/></a>
     </header>
 
     {{ form_start(household_form, {attr: {class: 'flex flex-col gap-5'}}) }}
         {{ form_row(household_form.name) }}
+        {{ form_row(household_form.weeklyGoal) }}
         {{ form_row(household_form.cleaningDay, {help: 'Le rendez-vous de la semaine : les engagements sont attendus ce jour-là.'}) }}
         <div class="card px-3.5 py-1">{{ form_row(household_form.cleaningDayBoost) }}</div>
         <button type="submit" class="btn-primary self-start">Enregistrer</button>

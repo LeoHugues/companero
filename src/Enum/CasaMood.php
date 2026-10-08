@@ -20,9 +20,9 @@ enum CasaMood: string
     public function speech(): string
     {
         return match ($this) {
-            self::Dusty => 'Je me sens un peu poussiéreuse… On s’y met ?',
-            self::Okay => 'Ah, ça respire déjà mieux ! Encore un petit effort ?',
-            self::Radiant => 'Je brille ! Vous êtes la meilleure coloc.',
+            self::Dusty => "Je me sens un peu poussiéreuse… On s’y met\u{202F}?",
+            self::Okay => "Ah, ça respire déjà mieux\u{202F}! Encore un petit effort\u{202F}?",
+            self::Radiant => "Je brille\u{202F}! Vous êtes la meilleure coloc.",
         };
     }
 }

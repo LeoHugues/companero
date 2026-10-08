@@ -15,7 +15,7 @@ final class PagesTest extends AppTestCase
         yield ['/taches/nouvelle', 'Nouvelle tâche'];
         yield ['/bilan', 'Bilan de la semaine'];
         yield ['/profil', 'Léo'];
-        yield ['/coloc', 'La coloc'];
+        yield ['/coloc', 'Réglages de la coloc'];
         yield ['/plan', 'Le plan'];
     }
 
