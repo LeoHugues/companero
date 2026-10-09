@@ -304,7 +304,8 @@ final class TaskFlowTest extends AppTestCase
         $this->client->request('POST', '/taches/'.$task?->getId().'/je-m-en-occupe', ['_csrf_token' => 'csrf-token', '_back' => 'home']);
         self::assertResponseRedirects('/');
         $this->client->followRedirect();
-        self::assertSelectorTextContains('#task-'.$task?->getId(), 'Tu t’en occupes');
+        self::assertSelectorExists('#task-'.$task?->getId().' .seat-taken[title="Tu t’en occupes"]');
+        self::assertSelectorTextContains('#task-'.$task?->getId().' .seat-taken', 'Pris par toi');
     }
 
     public function testMembersCannotTouchAnotherHouseholdsTasks(): void
@@ -330,7 +331,10 @@ final class TaskFlowTest extends AppTestCase
         $this->client->loginUser($leo);
         $kitchen = $leo->getHousehold()->getZones()->findFirst(static fn (int $i, Zone $zone): bool => 'Cuisine' === $zone->getName());
         $this->client->request('GET', '/taches/nouvelle/modele');
-        $this->client->submitForm('Créer le modèle', ['task[title]' => 'Plans de travail', 'task[kind]' => 'rolling', 'task[rhythmDays]' => '2', 'task[zone]' => (string) $kitchen?->getId()]);
+        $form = $this->client->getCrawler()->selectButton('Créer le modèle')->form();
+        $this->tickRooms($form, 'Cuisine', 'Salon');
+        $this->client->submit($form, ['task[title]' => 'Plans de travail', 'task[kind]' => 'rolling', 'task[rhythmDays]' => '2']);
+        $living = $leo->getHousehold()->getZones()->findFirst(static fn (int $i, Zone $zone): bool => 'Salon' === $zone->getName());
         $this->client->request('GET', '/taches/nouvelle/modele');
         $this->client->submitForm('Créer le modèle', ['task[title]' => 'Sortir le verre', 'task[kind]' => 'quick', 'task[category]' => 'other']);
 
@@ -338,6 +342,8 @@ final class TaskFlowTest extends AppTestCase
         self::assertSelectorExists('input[type=search][data-filter-target=input]');
         self::assertSelectorTextContains('#fold-piece-zone-'.$kitchen?->getId().' summary', 'Cuisine');
         self::assertSelectorTextContains('#fold-piece-zone-'.$kitchen?->getId(), 'Plans de travail');
+        // In two rooms: in both folds.
+        self::assertSelectorTextContains('#fold-piece-zone-'.$living?->getId(), 'Plans de travail');
         self::assertSelectorTextContains('#fold-piece-coloc', 'Sortir le verre');
 
         $this->client->request('GET', '/taches?par=categorie');
@@ -394,14 +400,16 @@ final class TaskFlowTest extends AppTestCase
         $entrance = $zones->findFirst(static fn (int $i, Zone $zone): bool => 'Entrée' === $zone->getName());
         $living = $zones->findFirst(static fn (int $i, Zone $zone): bool => 'Salon' === $zone->getName());
         $this->client->request('GET', '/taches/nouvelle/modele');
-        $this->client->submitForm('Créer le modèle', ['task[title]' => 'Sortir les poubelles', 'task[kind]' => 'quick', 'task[zone]' => (string) $entrance?->getId()]);
+        $form = $this->client->getCrawler()->selectButton('Créer le modèle')->form();
+        $this->tickRooms($form, 'Entrée');
+        $this->client->submit($form, ['task[title]' => 'Sortir les poubelles', 'task[kind]' => 'quick']);
 
         $this->client->request('GET', '/coloc/zones/'.$entrance?->getId());
         $this->client->submitForm('Rattacher', ['dans' => (string) $living?->getId()]);
         self::assertResponseRedirects('/coloc');
 
         $task = static::getContainer()->get(TaskRepository::class)->findOneBy(['title' => 'Sortir les poubelles']);
-        self::assertSame('Salon', $task?->getZone()?->getName());
+        self::assertSame(['Salon'], array_values($task?->getZones()->map(static fn (Zone $zone): string => $zone->getName())->toArray() ?? []));
         $this->client->request('GET', '/coloc');
         self::assertSelectorTextNotContains('[aria-labelledby=zones-title]', 'Entrée');
     }

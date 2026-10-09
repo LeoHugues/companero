@@ -22,7 +22,7 @@
         </p>
         <h1 class="text-[26px] leading-tight [overflow-wrap:anywhere]">{{ task.title }}</h1>
         <p class="text-[15px] font-semibold text-ink-soft">
-            {{ task.pet.name ?? task.zone.name ?? (task.category.value == 'pets' ? 'Les animaux' : 'Toute la coloc') }} · {{ task_rule_label(task) }}
+            {{ task_place(task) }} · {{ task_rule_label(task) }}
         </p>
     </section>
 

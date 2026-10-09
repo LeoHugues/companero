@@ -39,7 +39,7 @@
                 </div>
                 <ul class="flex flex-wrap gap-2">
                     {% for view in dormant %}
-                        <li data-filter-target="item" data-filter-text="{{ view.task.title }} {{ view.task.zone.name ?? '' }}"><twig:RaiseButton :task="view.task" compact/></li>
+                        <li data-filter-target="item" data-filter-text="{{ view.task.title }} {{ task_place(view.task) }}"><twig:RaiseButton :task="view.task" compact/></li>
                     {% endfor %}
                 </ul>
             </section>

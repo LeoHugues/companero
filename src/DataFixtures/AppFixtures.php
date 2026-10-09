@@ -250,6 +250,11 @@ final class AppFixtures extends Fixture
             $task = $this->task($household, $author, $createdAt, $title, TaskKind::Rolling, $points, $zones[$zone]);
             $task->setRhythmDays($rhythm);
             $task->setWeeklyCommitment($commitment);
+            // The living room's vacuum and mop go through the open kitchen and its toilets too.
+            if ('Salon' === $zone && str_contains($title, 'cuisine')) {
+                $task->addZone($zones['Cuisine']);
+                $task->addZone($zones['WC']);
+            }
             // Done the Sunday before the history starts.
             $task->complete($createdAt->modify('-1 day')->setTime(11, 0));
         }
@@ -402,9 +407,9 @@ final class AppFixtures extends Fixture
 
         return match (true) {
             null !== $task->getAssignee() => $task->getAssignee(),
-            'Chambre de Robin' === $task->getZone()?->getName() => $byName['Robin'],
-            'Chambre de Gab' === $task->getZone()?->getName() => $byName['Gab'],
-            'Chambre de Léo et Léa' === $task->getZone()?->getName() => isset($byName['Léa']) && mt_rand(0, 1) ? $byName['Léa'] : $byName['Léo'],
+            'Chambre de Robin' === ($task->getZones()->first() ?: null)?->getName() => $byName['Robin'],
+            'Chambre de Gab' === ($task->getZones()->first() ?: null)?->getName() => $byName['Gab'],
+            'Chambre de Léo et Léa' === ($task->getZones()->first() ?: null)?->getName() => isset($byName['Léa']) && mt_rand(0, 1) ? $byName['Léa'] : $byName['Léo'],
             default => $present[mt_rand(0, \count($present) - 1)],
         };
     }

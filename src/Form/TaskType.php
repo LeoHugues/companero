@@ -66,12 +66,14 @@ class TaskType extends AbstractType
                 'expanded' => true,
                 'choice_label' => static fn (TaskCategory $category): string => $category->label(),
             ])
-            ->add('zone', EntityType::class, [
+            ->add('zones', EntityType::class, [
                 'class' => Zone::class,
                 'label' => 'Où ?',
+                'help' => 'Une pièce, ou plusieurs (le salon avec la cuisine ouverte et ses toilettes) ; aucune : toute la coloc.',
                 'required' => false,
                 'expanded' => true,
-                'placeholder' => 'Toute la coloc',
+                'multiple' => true,
+                'by_reference' => false,
                 'choice_label' => 'name',
                 'query_builder' => static fn (EntityRepository $zones): QueryBuilder => $zones->createQueryBuilder('z')
                     ->andWhere('z.household = :household')

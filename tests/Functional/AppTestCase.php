@@ -11,6 +11,8 @@ use App\Repository\MemberRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\DomCrawler\Field\ChoiceFormField;
+use Symfony\Component\DomCrawler\Form;
 
 abstract class AppTestCase extends WebTestCase
 {
@@ -75,5 +77,20 @@ abstract class AppTestCase extends WebTestCase
     {
         $form = $this->client->getCrawler()->filter(\sprintf('form[action="%s"]', $action))->form();
         $this->client->submit($form);
+    }
+
+    /** Ticks the rooms of a task form, by name. */
+    protected function tickRooms(Form $form, string ...$rooms): void
+    {
+        foreach ($this->client->getCrawler()->filter('#task_zones label') as $label) {
+            if (\in_array($label->textContent, $rooms, true)) {
+                $box = $this->client->getCrawler()->filter('#'.$label->getAttribute('for'));
+                foreach ($form->get('task[zones]') as $field) {
+                    if ($field instanceof ChoiceFormField && \in_array($box->attr('value'), $field->availableOptionValues(), true)) {
+                        $field->select($box->attr('value'));
+                    }
+                }
+            }
+        }
     }
 }

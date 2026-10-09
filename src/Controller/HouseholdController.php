@@ -95,7 +95,10 @@ final class HouseholdController extends AbstractController
     #[IsCsrfTokenValid('submit', tokenKey: '_csrf_token')]
     public function deleteZone(Zone $zone): RedirectResponse
     {
-        // Its tasks are kept and become "toute la coloc".
+        // Its tasks are kept: in their other rooms, or "toute la coloc".
+        foreach ($this->tasksIn($zone) as $task) {
+            $task->removeZone($zone);
+        }
         $zone->getHousehold()->removeZone($zone);
         $this->entityManager->flush();
 
@@ -112,16 +115,18 @@ final class HouseholdController extends AbstractController
         if (null === $into || $into === $zone || $into->getHousehold() !== $zone->getHousehold()) {
             throw $this->createNotFoundException();
         }
-        foreach ([Task::class, CatalogItem::class] as $class) {
-            $this->entityManager->createQueryBuilder()
-                ->update($class, 'x')
-                ->set('x.zone', ':into')
-                ->where('x.zone = :zone')
-                ->setParameter('into', $into)
-                ->setParameter('zone', $zone)
-                ->getQuery()
-                ->execute();
+        foreach ($this->tasksIn($zone) as $task) {
+            $task->removeZone($zone);
+            $task->addZone($into);
         }
+        $this->entityManager->createQueryBuilder()
+            ->update(CatalogItem::class, 'x')
+            ->set('x.zone', ':into')
+            ->where('x.zone = :zone')
+            ->setParameter('into', $into)
+            ->setParameter('zone', $zone)
+            ->getQuery()
+            ->execute();
         $zone->getHousehold()->removeZone($zone);
         $this->entityManager->flush();
         $this->addFlash('success', \sprintf('« %s » fait maintenant partie de « %s », avec ses tâches.', $zone->getName(), $into->getName()));
@@ -182,5 +187,15 @@ final class HouseholdController extends AbstractController
         $this->addFlash('success', 'Nouveau lien d’invitation créé : l’ancien ne marche plus.');
 
         return $this->redirectToRoute('household_edit', status: Response::HTTP_SEE_OTHER);
+    }
+
+    /** @return list<Task> archived ones included: their history keeps its rooms right */
+    private function tasksIn(Zone $zone): array
+    {
+        return $this->entityManager->getRepository(Task::class)->createQueryBuilder('t')
+            ->andWhere(':zone MEMBER OF t.zones')
+            ->setParameter('zone', $zone)
+            ->getQuery()
+            ->getResult();
     }
 }

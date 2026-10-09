@@ -97,7 +97,7 @@ final class TaskCreationController extends AbstractController
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             if ($form->has('catalog') && $form->get('catalog')->getData() && null === $catalog->findOneByTitle($household, $task->getTitle())) {
-                $this->entityManager->persist(new CatalogItem($household, $task->getTitle(), $task->getCategory(), $task->getPoints(), $task->getZone()));
+                $this->entityManager->persist(new CatalogItem($household, $task->getTitle(), $task->getCategory(), $task->getPoints(), $task->getZones()->first() ?: null));
             }
 
             return $this->save($task, $form, $member);

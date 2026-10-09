@@ -142,13 +142,15 @@ final class PagesTest extends AppTestCase
         $this->client->loginUser($leo);
         $this->client->request('GET', '/taches/nouvelle/modele');
         $form = $this->client->getCrawler()->selectButton('Créer le modèle')->form();
-        $kitchen = array_search('Cuisine', array_map(static fn ($node) => $node->textContent, iterator_to_array($this->client->getCrawler()->filter('#task_zone label'))), true);
-        $this->client->submit($form, [
-            'task[title]' => 'Plans de travail',
-            'task[kind]' => 'rolling',
-            'task[rhythmDays]' => '7',
-            'task[zone]' => $form['task[zone]']->availableOptionValues()[$kitchen],
-        ]);
+        // The kitchen, open on the living room: one task for both.
+        $this->tickRooms($form, 'Cuisine', 'Salon');
+        $this->client->submit($form, ['task[title]' => 'Plans de travail', 'task[kind]' => 'rolling', 'task[rhythmDays]' => '7']);
+
+        $this->client->request('GET', '/plan');
+        self::assertSelectorTextContains('[aria-label="Les pièces"]', 'Salon');
+        $this->client->clickLink('Salon');
+        self::assertSelectorTextContains('[aria-labelledby=zone-tasks-title]', 'Plans de travail');
+        self::assertSelectorTextContains('[aria-labelledby=zone-tasks-title]', 'Cuisine et Salon');
 
         $this->client->request('GET', '/plan');
         self::assertSelectorTextContains('[aria-label="Les pièces"]', 'Cuisine');

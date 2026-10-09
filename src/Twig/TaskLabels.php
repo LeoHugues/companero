@@ -3,6 +3,8 @@
 namespace App\Twig;
 
 use App\Entity\Task;
+use App\Entity\Zone;
+use App\Enum\TaskCategory;
 use App\Enum\TaskKind;
 use App\Enum\Urgency;
 use App\Task\TaskStatus;
@@ -44,6 +46,28 @@ final readonly class TaskLabels
                 TaskKind::Occasional => 'Quand ça arrive',
             },
         };
+    }
+
+    /** "Salon, Cuisine et WC", the pet's name, "Les animaux" or "Toute la coloc". */
+    #[AsTwigFunction('task_place')]
+    public function place(Task $task): string
+    {
+        $rooms = $task->getZones()->map(static fn (Zone $zone): string => $zone->getName())->toArray();
+
+        return match (true) {
+            null !== $task->getPet() => $task->getPet()->getName(),
+            [] !== $rooms => self::list(array_values($rooms)),
+            TaskCategory::Pets === $task->getCategory() => 'Les animaux',
+            default => 'Toute la coloc',
+        };
+    }
+
+    /** @param list<string> $words "a", "a et b", "a, b et c" */
+    public static function list(array $words): string
+    {
+        $last = array_pop($words);
+
+        return [] === $words ? (string) $last : implode(', ', $words).' et '.$last;
     }
 
     #[AsTwigFunction('task_rule_label')]

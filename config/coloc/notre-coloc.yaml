@@ -33,13 +33,13 @@ animaux:
 
 # Le ménage du dimanche : chaque semaine, au moins une fois par semaine.
 taches:
-    - { titre: Aspirateur salon et cuisine, zone: Salon, points: 20, tous_les: 7, par_semaine: 1 }
+    - { titre: Aspirateur salon et cuisine, zones: [Salon, Cuisine, WC], points: 20, tous_les: 7, par_semaine: 1 }
     - { titre: Aspirateur du bureau, zone: Bureau, points: 10, tous_les: 7, par_semaine: 1 }
     - { titre: Aspirateur du couloir, zone: Couloir, points: 10, tous_les: 7, par_semaine: 1 }
     - { titre: Aspirateur de la salle de bain, zone: Salle de bain, points: 10, tous_les: 7, par_semaine: 1 }
     - { titre: Plans de travail (javel ou vinaigre), zone: Cuisine, points: 25, tous_les: 7, par_semaine: 1 }
     - { titre: Nettoyer les toilettes, zone: WC, points: 20, tous_les: 7, par_semaine: 1 }
-    - { titre: Serpillière salon, cuisine et toilettes, zone: Salon, points: 30, tous_les: 7, par_semaine: 1 }
+    - { titre: Serpillière salon, cuisine et toilettes, zones: [Salon, Cuisine, WC], points: 30, tous_les: 7, par_semaine: 1 }
     - { titre: Balayer la grande terrasse, zone: Grande terrasse, points: 20, tous_les: 7, par_semaine: 1 }
     - { titre: Balayer la petite terrasse, zone: Petite terrasse, points: 10, tous_les: 7, par_semaine: 1 }
     - { titre: Balayer la terrasse de l’entrée, zone: Terrasse de l’entrée, points: 10, tous_les: 7, par_semaine: 1 }

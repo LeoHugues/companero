@@ -74,7 +74,7 @@
                                 {% if not mine %}<twig:Avatar :member="completion.member" size="26"/>{% endif %}
                                 <span class="flex min-w-0 flex-1 flex-col">
                                     <span class="truncate text-sm font-bold">{{ completion.task.title }}</span>
-                                    <span class="text-xs text-muted">{{ not mine ? completion.member.name ~ ' · ' }}{{ completion.completedAt|date('G\\hi') }} · {{ completion.task.zone.name ?? completion.task.pet.name ?? (completion.task.category.value == 'pets' ? 'Les animaux' : 'Toute la coloc') }}</span>
+                                    <span class="text-xs text-muted">{{ not mine ? completion.member.name ~ ' · ' }}{{ completion.completedAt|date('G\\hi') }} · {{ task_place(completion.task) }}</span>
                                 </span>
                                 <span class="text-sm font-extrabold whitespace-nowrap text-clay-dark">+{{ history.pointsOf(completion) }}</span>
                                 <twig:Icon name="edit" size="15" class="shrink-0 text-muted"/>
