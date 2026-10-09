@@ -24,7 +24,7 @@
         </p>
         {% for field in [form.warningHours, form.marginHours] %}
             {# An occasional task has no "before": the moment comes when it is raised. #}
-            <div class="flex flex-col gap-2"{% if field == form.warningHours %} data-task-form-target="section" data-kind="rolling scheduled one_off"{% endif %}>
+            <div class="flex flex-col gap-2"{% if field is same as(form.warningHours) %} data-task-form-target="section" data-kind="rolling scheduled one_off"{% endif %}>
                 {{ form_label(field) }}
                 <div class="flex items-center gap-3">
                     {{ form_widget(field.amount, {attr: {class: 'w-24', placeholder: '—'}}) }}

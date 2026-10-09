@@ -43,6 +43,27 @@ final class TaskCreationTest extends AppTestCase
         self::assertSelectorTextContains('[role=status]', 'Le modèle « Serpillière » est créé');
     }
 
+    public function testATaskToDoCanBeEditedWhenItsAlertsAreTheSame(): void
+    {
+        $this->client->loginUser($this->foundHousehold());
+        $this->client->request('GET', '/taches/nouvelle/a-faire');
+        // Orange a day before, red a day after: the two durations used to be compared field by field, endlessly.
+        $this->client->submitForm('Ajouter la tâche', [
+            'task[title]' => 'Déchetterie',
+            'task[dueAt]' => (new \DateTimeImmutable('+2 days'))->format('Y-m-d\TH:i'),
+            'task[warningHours][amount]' => '1',
+            'task[warningHours][unit]' => 'days',
+            'task[marginHours][amount]' => '1',
+            'task[marginHours][unit]' => 'days',
+        ]);
+        $task = static::getContainer()->get(TaskRepository::class)->findOneBy(['title' => 'Déchetterie']);
+
+        $this->client->request('GET', '/taches/'.$task?->getId().'/modifier');
+        self::assertResponseIsSuccessful();
+        $this->client->submitForm('Enregistrer', ['task[title]' => 'Aller à la déchetterie']);
+        self::assertResponseRedirects('/taches/'.$task?->getId());
+    }
+
     public function testNotingWhatWasAlreadyDone(): void
     {
         $leo = $this->foundHousehold();
