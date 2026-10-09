@@ -45,7 +45,7 @@
                 <ul class="card divide-y divide-line px-3.5">
                     {% for task in group.tasks %}
                         {% set occasional = task.kind.value == 'occasional' %}
-                        <twig:TemplateRow :task="task" data-filter-target="item" data-filter-text="{{ task.title }} {{ task.zone.name ?? '' }} {{ task.pet.name ?? '' }} {{ task.category.label }} {{ task.kind.label }}">
+                        <twig:TemplateRow :task="task" data-filter-target="item" data-filter-text="{{ task.title }} {{ task_place(task) }} {{ task.category.label }} {{ task.kind.label }}">
                             {% if occasional and task.raised %}
                                 <span class="raise-awake" title="Signalée : sa carte attend sur l’accueil"><twig:Icon name="siren" size="13" stroke="2.4"/></span>
                             {% elseif occasional %}

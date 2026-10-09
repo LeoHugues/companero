@@ -149,8 +149,9 @@ final readonly class Blueprint
         $task->setKind($kind);
         $task->setCategory($this->category($definition));
         $task->setPoints((int) ($definition['points'] ?? throw new \InvalidArgumentException(\sprintf('« %s » : combien de points ?', $definition['titre']))));
-        if (isset($definition['zone'])) {
-            $task->setZone($zones[$definition['zone']] ?? throw new \InvalidArgumentException(\sprintf('« %s » : zone inconnue « %s ».', $definition['titre'], $definition['zone'])));
+        // "zone: Salon", or "zones: [Salon, Cuisine, WC]" for a task done through several rooms.
+        foreach ((array) ($definition['zones'] ?? $definition['zone'] ?? []) as $name) {
+            $task->addZone($zones[$name] ?? throw new \InvalidArgumentException(\sprintf('« %s » : zone inconnue « %s ».', $definition['titre'], $name)));
         }
 
         return $task;

@@ -51,7 +51,7 @@ final readonly class TaskBoard
     {
         $summaries = [];
         foreach ($zones as $zone) {
-            $summaries[] = new ZoneSummary($zone, array_values(array_filter($this->items, static fn (TaskView $view): bool => $view->task->getZone() === $zone)));
+            $summaries[] = new ZoneSummary($zone, array_values(array_filter($this->items, static fn (TaskView $view): bool => $view->task->isIn($zone))));
         }
         usort($summaries, static fn (ZoneSummary $a, ZoneSummary $b): int => $a->zone->isPrivate() <=> $b->zone->isPrivate());
 
@@ -73,7 +73,7 @@ final readonly class TaskBoard
     {
         return array_values(array_filter(
             $this->items,
-            static fn (TaskView $view): bool => $view->task->getKind()->isPlanned() && (null === $zoneId || $view->task->getZone()?->getId() === $zoneId),
+            static fn (TaskView $view): bool => $view->task->getKind()->isPlanned() && (null === $zoneId || $view->task->getZones()->exists(static fn (int $key, Zone $zone): bool => $zone->getId() === $zoneId)),
         ));
     }
 
@@ -106,7 +106,7 @@ final readonly class TaskBoard
     {
         $occasional = array_values(array_filter(
             $this->items,
-            static fn (TaskView $view): bool => TaskKind::Occasional === $view->task->getKind() && (null === $zoneId || $view->task->getZone()?->getId() === $zoneId),
+            static fn (TaskView $view): bool => TaskKind::Occasional === $view->task->getKind() && (null === $zoneId || $view->task->getZones()->exists(static fn (int $key, Zone $zone): bool => $zone->getId() === $zoneId)),
         ));
         usort($occasional, static fn (TaskView $a, TaskView $b): int => $a->task->getTitle() <=> $b->task->getTitle());
 

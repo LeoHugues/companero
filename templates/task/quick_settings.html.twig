@@ -27,7 +27,7 @@
                     </form>
                     <a href="{{ path('task_template', {id: task.id}) }}" class="flex min-w-0 flex-1 flex-col text-ink no-underline hover:text-ink">
                         <span class="truncate text-[15px] font-bold">{{ task.title }}</span>
-                        <span class="text-xs text-muted">{{ task.quickHidden ? 'pas sur l’accueil' : task.zone.name ?? 'Toute la coloc' }} · +{{ task.points }}</span>
+                        <span class="text-xs text-muted">{{ task.quickHidden ? 'pas sur l’accueil' : task_place(task) }} · +{{ task.points }}</span>
                     </a>
                     <form method="post" action="{{ path('task_quick_arrange', {id: task.id}) }}" class="flex shrink-0 items-center gap-1">
                         <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">

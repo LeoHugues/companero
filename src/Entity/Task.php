@@ -6,6 +6,8 @@ use App\Enum\Rarity;
 use App\Enum\TaskCategory;
 use App\Enum\TaskKind;
 use App\Repository\TaskRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -32,9 +34,18 @@ class Task
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private Household $household;
 
-    #[ORM\ManyToOne]
-    #[ORM\JoinColumn(onDelete: 'SET NULL')]
-    private ?Zone $zone = null;
+    /**
+     * Where it is done: one room, or several (the vacuum of the living room goes through the open
+     * kitchen and its toilets too); none, the whole house. It counts for each of them on the plan.
+     *
+     * @var Collection<int, Zone>
+     */
+    #[ORM\ManyToMany(targetEntity: Zone::class)]
+    #[ORM\JoinTable(name: 'task_zone')]
+    #[ORM\JoinColumn(onDelete: 'CASCADE')]
+    #[ORM\InverseJoinColumn(onDelete: 'CASCADE')]
+    #[ORM\OrderBy(['name' => 'ASC'])]
+    private Collection $zones;
 
     #[ORM\Column(length: 120)]
     #[Assert\NotBlank(message: 'Qu’est-ce qu’il faut faire ?')]
@@ -156,6 +167,7 @@ class Task
         $this->household = $household;
         $this->createdBy = $createdBy;
         $this->createdAt = $createdAt;
+        $this->zones = new ArrayCollection();
     }
 
     #[Assert\Callback]
@@ -311,9 +323,15 @@ class Task
         return null !== $this->archivedAt;
     }
 
+    /** Not in someone's own room. */
     public function isShared(): bool
     {
-        return !$this->zone?->isPrivate();
+        return !$this->zones->exists(static fn (int $key, Zone $zone): bool => $zone->isPrivate());
+    }
+
+    public function isIn(Zone $zone): bool
+    {
+        return $this->zones->contains($zone);
     }
 
     public function getId(): ?int
@@ -326,14 +344,31 @@ class Task
         return $this->household;
     }
 
-    public function getZone(): ?Zone
+    /** @return Collection<int, Zone> */
+    public function getZones(): Collection
     {
-        return $this->zone;
+        return $this->zones;
     }
 
+    public function addZone(Zone $zone): void
+    {
+        if (!$this->zones->contains($zone)) {
+            $this->zones->add($zone);
+        }
+    }
+
+    public function removeZone(Zone $zone): void
+    {
+        $this->zones->removeElement($zone);
+    }
+
+    /** Just this room (or the whole house). */
     public function setZone(?Zone $zone): void
     {
-        $this->zone = $zone;
+        $this->zones->clear();
+        if (null !== $zone) {
+            $this->zones->add($zone);
+        }
     }
 
     public function getTitle(): string

@@ -20,7 +20,7 @@ class TaskRepository extends ServiceEntityRepository
     {
         return $this->createQueryBuilder('t')
             ->addSelect('z', 'r')
-            ->leftJoin('t.zone', 'z')
+            ->leftJoin('t.zones', 'z')
             ->leftJoin('t.reservedBy', 'r')
             ->andWhere('t.household = :household')
             ->andWhere('t.archivedAt IS NULL')

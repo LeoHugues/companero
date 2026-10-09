@@ -287,14 +287,16 @@
   @apply flex size-8 shrink-0 items-center justify-center rounded-full border-[1.5px] border-dashed border-sand text-muted transition;
 }
 .seat:hover .seat-empty { @apply border-ink text-ink; rotate: -12deg; }
-.seat-taken { @apply cursor-default truncate bg-track/60 pl-1 hover:bg-track/60 active:scale-100; }
+.seat-taken { @apply max-w-full cursor-default gap-1.5 bg-track/60 pr-3.5 pl-1 hover:bg-track/60 active:scale-100; }
+.seat-taken > span:last-child > span:last-child { @apply truncate; }
 
 /* "C'est fait": a dark token to collect, the points on it. */
 .done-button {
-  @apply inline-flex h-11 shrink-0 cursor-pointer items-center gap-2 rounded-full border-[1.5px] border-ink bg-sun py-1 pr-1 pl-1 text-[15px] font-extrabold whitespace-nowrap text-ink shadow-[2px_2px_0_var(--color-ink)] transition hover:-translate-y-px hover:shadow-[3px_3px_0_var(--color-ink)] active:translate-y-px active:shadow-none;
+  @apply inline-flex h-11 max-w-full shrink-0 cursor-pointer items-center gap-1.5 rounded-full border-[1.5px] border-ink bg-sun py-1 pr-1 pl-1 text-[15px] font-extrabold whitespace-nowrap text-ink shadow-[2px_2px_0_var(--color-ink)] transition hover:-translate-y-px hover:shadow-[3px_3px_0_var(--color-ink)] active:translate-y-px active:shadow-none;
 }
-.done-button-check { @apply flex size-8 items-center justify-center rounded-full bg-surface text-ink; }
-.done-button-points { @apply ml-0.5 flex h-8 items-center gap-0.5 rounded-full bg-ink px-2.5 text-sm text-sun; }
+.done-button-check { @apply flex size-8 shrink-0 items-center justify-center rounded-full bg-surface text-ink; }
+/* Room for three digits (and the boost's bolt) without pushing the button out of its card. */
+.done-button-points { @apply flex h-8 min-w-11 shrink-0 items-center justify-center gap-0.5 rounded-full bg-ink px-2 text-[13px] tabular-nums text-sun; }
 .done-round {
   @apply flex size-11 cursor-pointer items-center justify-center rounded-full border-[1.5px] border-ink bg-sun text-ink shadow-[2px_2px_0_var(--color-ink)] transition hover:-translate-y-px active:translate-y-px active:shadow-none;
 }

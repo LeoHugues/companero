@@ -5,11 +5,17 @@
 #}
 {% set task = view.task %}
 {% set points = task.currentPoints + boost %}
-<div {{ attributes.defaults({class: 'flex items-center justify-between gap-2'}) }}>
+{# Side by side when they fit; otherwise "C'est fait" goes to its own line, on the right — never squeezed. #}
+{# On a narrow card, the seat keeps only its icon (or the name of who took it): its words are for wider ones. #}
+<div {{ attributes.defaults({class: '@container flex flex-wrap items-center justify-between gap-x-2 gap-y-2'}) }}>
     {% if view.reservedBy %}
-        <span class="seat seat-taken">
+        {# Taken: a face and two short lines, "Pris par / toi". #}
+        <span class="seat seat-taken" title="{{ view.isReservedBy(member) ? 'Tu t’en occupes' : view.reservedBy.name ~ ' s’en occupe' }}">
             <twig:Avatar :member="view.reservedBy" :size="compact ? 22 : 26"/>
-            {{ view.isReservedBy(member) ? 'Tu t’en occupes' : view.reservedBy.name ~ ' s’en occupe' }}
+            <span class="flex flex-col leading-none">
+                <span class="text-[10px] font-bold tracking-wide text-muted uppercase @max-[18.5rem]:sr-only">Pris par</span>
+                <span class="text-[13px] font-extrabold text-ink">{{ view.isReservedBy(member) ? 'toi' : view.reservedBy.name }}</span>
+            </span>
         </span>
     {% elseif compact %}
         <span class="text-sm font-extrabold text-clay-dark">+{{ points }} pts{% if boost %} <twig:Icon name="bolt" size="12" stroke="2.6"/>{% endif %}</span>
@@ -19,7 +25,7 @@
             <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
             <button type="submit" class="seat" aria-label="Je m’en occupe : « {{ task.title }} »">
                 <span class="seat-empty" aria-hidden="true"><twig:Icon name="hand" size="15" stroke="2.2"/></span>
-                Je prends
+                <span class="@max-[18.5rem]:sr-only">Je prends</span>
             </button>
         </form>
     {% endif %}
@@ -30,7 +36,7 @@
             <twig:Icon name="clock" size="15"/> Possible {{ available_again(view.availableAt) }}
         </span>
     {% else %}
-        <form method="post" action="{{ path('task_complete', {id: task.id}) }}" data-controller="done" data-action="submit->done#celebrate">
+        <form method="post" action="{{ path('task_complete', {id: task.id}) }}" data-controller="done" data-action="submit->done#celebrate" class="ml-auto">
             <input type="hidden" name="_back" value="{{ back }}">
             <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
             {% if compact %}

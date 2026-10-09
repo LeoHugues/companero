@@ -39,16 +39,14 @@ class LogCompletionType extends AbstractType
                 'label' => 'Qu’est-ce que tu as fait ?',
                 'placeholder' => 'Choisir…',
                 'choice_label' => 'title',
-                'group_by' => static fn (Task $task): string => TaskKind::Quick === $task->getKind() ? 'Express' : ($task->getZone()?->getName() ?? 'Toute la coloc'),
+                'group_by' => static fn (Task $task): string => TaskKind::Quick === $task->getKind() ? 'Express' : ($task->getZones()->first() ?: null)?->getName() ?? 'Toute la coloc',
                 'query_builder' => static fn (EntityRepository $tasks): QueryBuilder => $tasks->createQueryBuilder('t')
-                    ->leftJoin('t.zone', 'z')
                     ->andWhere('t.household = :household')
                     ->andWhere('t.archivedAt IS NULL')
                     ->andWhere('t.kind != :oneOff')
                     ->setParameter('household', $household)
                     ->setParameter('oneOff', TaskKind::OneOff)
-                    ->orderBy('z.name', 'ASC')
-                    ->addOrderBy('t.title', 'ASC'),
+                    ->orderBy('t.title', 'ASC'),
                 'constraints' => [new NotNull(message: 'Choisis ce que tu as fait.')],
             ])
             ->add('doneAt', DateTimeType::class, [

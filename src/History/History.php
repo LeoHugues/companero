@@ -4,6 +4,7 @@ namespace App\History;
 
 use App\Entity\Completion;
 use App\Entity\Member;
+use App\Entity\Zone;
 use App\Enum\TaskCategory;
 
 /** Everything done over a period, by one member or by the whole household, day by day. */
@@ -78,12 +79,13 @@ final readonly class History
     /** @return list<array{name: string, count: int}> where the work was done, busiest first */
     public function byZone(int $limit = 4): array
     {
-        $counts = array_count_values(array_map(
-            static fn (Completion $c): string => $c->getTask()->getZone()?->getName()
-                ?? $c->getTask()->getPet()?->getName()
-                ?? (TaskCategory::Pets === $c->getTask()->getCategory() ? 'Les animaux' : 'Toute la coloc'),
+        // A task in several rooms counts for each of them.
+        $counts = array_count_values(array_merge([], ...array_map(
+            static fn (Completion $c): array => [] !== ($rooms = $c->getTask()->getZones()->map(static fn (Zone $zone): string => $zone->getName())->toArray())
+                ? array_values($rooms)
+                : [$c->getTask()->getPet()?->getName() ?? (TaskCategory::Pets === $c->getTask()->getCategory() ? 'Les animaux' : 'Toute la coloc')],
             $this->completions,
-        ));
+        )));
         arsort($counts);
 
         return \array_slice(array_map(static fn (string $name, int $count): array => ['name' => $name, 'count' => $count], array_keys($counts), $counts), 0, $limit);

@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\CatalogItem;
 use App\Entity\Member;
 use App\Entity\Task;
+use App\Entity\Zone;
 use App\Enum\TaskCategory;
 use App\Enum\TaskKind;
 use App\Form\TaskType;
@@ -79,7 +80,9 @@ final class TaskController extends AbstractController
     {
         $groups = [];
         foreach ($templates as $task) {
-            [$key, $label, $hint, $rank] = match ($by) {
+            // By room, a task in several rooms is in each of them.
+            $places = 'piece' === $by ? $task->getZones()->map(static fn (Zone $zone): array => ['zone-'.$zone->getId(), $zone->getName(), null, 0])->toArray() : [];
+            foreach ([] !== $places ? $places : [match ($by) {
                 'categorie' => [$task->getCategory()->value, $task->getCategory()->label(), null, array_search($task->getCategory(), TaskCategory::cases(), true)],
                 'frequence' => [$task->getKind()->value, $task->getKind()->label(), match ($task->getKind()) {
                     TaskKind::Rolling => 'Tous les tant de jours, une fois faite.',
@@ -88,12 +91,11 @@ final class TaskController extends AbstractController
                     TaskKind::Occasional => 'Elles dorment jusqu’à ce que ça arrive.',
                     TaskKind::OneOff => null,
                 }, array_search($task->getKind(), [TaskKind::Rolling, TaskKind::Scheduled, TaskKind::Quick, TaskKind::Occasional], true)],
-                default => null !== $task->getZone()
-                    ? ['zone-'.$task->getZone()->getId(), $task->getZone()->getName(), null, 0]
-                    : ['coloc', 'Toute la coloc', null, 1],
-            };
-            $groups[$key] ??= ['key' => $by.'-'.$key, 'label' => $label, 'hint' => $hint, 'rank' => $rank, 'tasks' => []];
-            $groups[$key]['tasks'][] = $task;
+                default => ['coloc', 'Toute la coloc', null, 1],
+            }] as [$key, $label, $hint, $rank]) {
+                $groups[$key] ??= ['key' => $by.'-'.$key, 'label' => $label, 'hint' => $hint, 'rank' => $rank, 'tasks' => []];
+                $groups[$key]['tasks'][] = $task;
+            }
         }
 
         $collator = new \Collator('fr_FR');
