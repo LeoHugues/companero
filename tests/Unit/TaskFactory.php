@@ -18,7 +18,7 @@ trait TaskFactory
 
     private function member(?Household $household = null, string $name = 'Léo'): Member
     {
-        return new Member($household ?? $this->household(), $name, strtolower($name).'@example.com', '#E8692C', new \DateTimeImmutable('2026-01-01'));
+        return new Member($household ?? $this->household(), $name, '#E8692C', new \DateTimeImmutable('2026-01-01'));
     }
 
     private function rollingTask(int $rhythmDays, ?string $lastCompletedAt, ?int $weeklyCommitment = null, int $points = 30, ?Zone $zone = null): Task

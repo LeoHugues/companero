@@ -54,9 +54,10 @@ abstract class AppTestCase extends WebTestCase
     private function onboard(Member $member, bool $onboarded): Member
     {
         if ($onboarded) {
-            $now = new \DateTimeImmutable();
-            $member->finishOnboarding($now);
-            $member->acceptCharter($now);
+            // An hour ago: a change to the charter during the test comes after it (times are kept to the second).
+            $before = new \DateTimeImmutable('-1 hour');
+            $member->finishOnboarding($before);
+            $member->acceptCharter($before);
         }
         static::getContainer()->get(EntityManagerInterface::class)->flush();
 
