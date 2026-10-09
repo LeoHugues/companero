@@ -51,7 +51,7 @@ final readonly class TaskLabels
     /**
      * "Salon, Cuisine et WC", the pet's name, "Les animaux" or "Toute la coloc".
      *
-     * @param bool $short on a card, where space is short: "Salon +2"
+     * @param bool $short on a card, where space is short: "Cuisine et Salon", but "Salon +2" from three rooms on
      */
     #[AsTwigFunction('task_place')]
     public function place(Task $task, bool $short = false): string
@@ -60,7 +60,7 @@ final readonly class TaskLabels
 
         return match (true) {
             null !== $task->getPet() => $task->getPet()->getName(),
-            $short && \count($rooms) > 1 => \sprintf('%s +%d', $rooms[0], \count($rooms) - 1),
+            $short && \count($rooms) > 2 => \sprintf('%s +%d', $rooms[0], \count($rooms) - 1),
             [] !== $rooms => self::list($rooms),
             TaskCategory::Pets === $task->getCategory() => 'Les animaux',
             default => 'Toute la coloc',
