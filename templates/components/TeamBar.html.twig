@@ -81,7 +81,7 @@
         <a href="{{ path('history', {qui: 'coloc'}) }}" class="self-start text-[13px] font-bold">Tout ce que la coloc a fait</a>
     {% endif %}
     {% if team.reached %}
-        <p class="text-[13px] font-bold text-clay-dark">Objectif de la maison atteint : +{{ constant('App\\Review\\WeekCloser::TEAM_BONUS') }} pts pour chacun dimanche soir</p>
+        <p class="text-[13px] font-bold text-clay-dark">Objectif de la maison atteint : +{{ constant('App\\Review\\WeekCloser::TEAM_XP') }} XP pour chacun dimanche soir</p>
     {% endif %}
     {% if household and household.streak > 0 %}
         <p class="flex items-center gap-1 text-[13px] font-bold">

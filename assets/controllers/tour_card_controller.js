@@ -4,7 +4,7 @@ import { burst, buzz } from '../lib/fx.js';
 /*
  * The cards of the tour (templates/onboarding/tour/_demo_card.html.twig): not real tasks, only to
  * try them out. "Je prends" puts your face on it, "C'est fait" throws stars and starts it again;
- * on the gliding card, a slider ages it day by day, as a real one ages between two times it is done
+ * on the gliding card, a slider ages it half a day at a time, as a real one ages between two times it is done
  * (fresh, soon, due on the day, late after it — see Urgency and TaskLabels).
  */
 const RING = 157.1;
@@ -12,10 +12,10 @@ const ALERTS = { fresh: 'ok', soon: 'warning', due: 'warning', late: 'danger' };
 
 export default class extends Controller {
     static targets = ['card', 'medallion', 'ring', 'badge', 'pill', 'pillIcon', 'pillLabel', 'seat', 'taken', 'done', 'slider', 'days', 'message'];
-    static values = { rhythm: { type: Number, default: 4 }, age: { type: Number, default: 4 } };
+    static values = { rhythm: { type: Number, default: 2 }, age: { type: Number, default: 2 } };
 
     connect() {
-        this.show(this.hasSliderTarget ? parseInt(this.sliderTarget.value, 10) || 0 : this.ageValue);
+        this.show(this.hasSliderTarget ? parseFloat(this.sliderTarget.value) || 0 : this.ageValue);
     }
 
     take() {
@@ -45,13 +45,14 @@ export default class extends Controller {
     }
 
     age() {
-        this.show(parseInt(this.sliderTarget.value, 10) || 0);
+        this.show(parseFloat(this.sliderTarget.value) || 0);
         buzz('tick');
     }
 
     show(days) {
         const rhythm = this.rhythmValue;
-        const state = days > rhythm ? 'late' : days === rhythm ? 'due' : days >= Math.ceil(rhythm * 0.6) ? 'soon' : 'fresh';
+        // Due once the rhythm is reached, late a day later (the margin); "soon" from 60 % of it.
+        const state = days >= rhythm + 1 ? 'late' : days >= rhythm ? 'due' : days >= rhythm * 0.6 ? 'soon' : 'fresh';
         const alert = ALERTS[state];
         const left = state === 'due' ? 8 : Math.max(0, Math.min(100, 100 - (days / rhythm) * 100));
 
@@ -65,22 +66,39 @@ export default class extends Controller {
         this.pillLabelTarget.textContent = this.label(state, days, rhythm);
 
         if (this.hasDaysTarget) {
-            this.daysTarget.textContent = days === 0 ? 'Faite aujourd’hui' : days === 1 ? 'Faite hier' : `Faite il y a ${days} jours`;
+            this.daysTarget.textContent = this.since(days);
         }
     }
 
     label(state, days, rhythm) {
         switch (state) {
-            case 'late': return `En retard de ${days - rhythm} j`;
+            case 'late': return `En retard de ${Math.floor(days - rhythm)} j`;
             case 'due': return 'Aujourd’hui';
+            case 'soon': return 'Bientôt';
             default: {
                 const until = rhythm - days;
-                if (state === 'fresh' && days <= 1) {
+                if (days <= 0.5) {
                     return 'Tout propre';
                 }
 
-                return until === 1 ? 'Demain' : `Dans ${until} j`;
+                return until <= 1 ? 'Demain' : `Dans ${Math.ceil(until)} j`;
             }
         }
+    }
+
+    since(days) {
+        const whole = Math.floor(days);
+        const half = days - whole >= 0.5;
+        if (days === 0) {
+            return 'Faite aujourd’hui';
+        }
+        if (whole === 0) {
+            return 'Faite il y a 12 h';
+        }
+        if (whole === 1 && !half) {
+            return 'Faite hier';
+        }
+
+        return `Faite il y a ${whole} jour${whole > 1 ? 's' : ''}${half ? ' et demi' : ''}`;
     }
 }

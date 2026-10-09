@@ -1,7 +1,8 @@
 {% props view, member, back = 'home', compact = false %}
 {#
     A task as a card to play: its medallion (the category, ringed by the time left), its title,
-    where and how often, then "Je prends" and "C'est fait", which shows what it is worth.
+    where and how often (in one short line), the week's commitment as dots, then a note and who is
+    counted on, across the card, and "Je prends" and "C'est fait", which shows what it is worth.
     Its rarity is the card's skin, never written on it; a surprise hidden in it this week makes it one class rarer.
     The whole card opens its page; the settings wheel and the buttons sit above that link.
     compact: lists (rooms), with a single round "done" button.
@@ -19,8 +20,14 @@
     <div class="flex items-start gap-3">
         <twig:TaskMedallion :view="view" :size="compact ? 46 : 56" class="shrink-0"/>
         <div class="flex min-w-0 flex-1 flex-col gap-1">
-            <div class="flex items-center gap-1.5">
+            <div class="flex items-center gap-2">
                 <twig:UrgencyPill :view="view"/>
+                {% if status.weeklyCommitment %}
+                    {# The week's commitment, as dots: one per time it is expected, filled once done. #}
+                    <span class="commit-dots" role="img" aria-label="{{ status.doneThisWeek }} fois sur {{ status.weeklyCommitment }} cette semaine" title="{{ status.doneThisWeek }} fois sur {{ status.weeklyCommitment }} cette semaine">
+                        {%- for i in 1..status.weeklyCommitment %}<span class="commit-dot{{ i <= status.doneThisWeek ? ' is-done' }}"></span>{% endfor -%}
+                    </span>
+                {% endif %}
                 {% if view.bounty %}
                     <span class="bounty-tag bounty-tag-icon" title="Une surprise attend la première personne qui la fait cette semaine" aria-label="Surprise cachée"><twig:Icon name="gift" size="13" stroke="2.6"/></span>
                 {% endif %}
@@ -29,18 +36,22 @@
                 {# Stretched over the whole card: a tap anywhere opens the card's page. #}
                 <a href="{{ path('task_show', {id: task.id}) }}" class="text-ink no-underline after:absolute after:inset-0 after:rounded-[inherit] after:content-[''] hover:text-ink">{{ task.title }}</a>
             </h3>
-            <p class="text-xs font-semibold text-muted">
-                {{ task_place(task) }} · {{ task_rule_label(task) }}
-                {% if status.weeklyCommitment %}· {{ status.doneThisWeek }}/{{ status.weeklyCommitment }} cette sem.{% endif %}
-            </p>
-            {% if task.note %}<p class="flex items-start gap-1 text-xs font-semibold text-ink-soft"><twig:Icon name="edit" size="12" class="mt-px shrink-0"/><span class="line-clamp-2">{{ task.note }}</span></p>{% endif %}
-            <twig:ReminderNote :view="view" :member="member"/>
+            <p class="truncate text-xs font-semibold text-muted" title="{{ task_place(task) }} · {{ task_rule_label(task) }}">{{ task_place(task, true) }} · {{ task_rule_label(task, false) }}</p>
         </div>
         <a href="{{ path('task_edit', {id: task.id}) }}" aria-label="Réglages de « {{ task.title }} »" title="Réglages de la tâche"
            class="relative z-10 -mt-1 -mr-1.5 flex size-8 shrink-0 items-center justify-center rounded-full text-dust no-underline transition hover:bg-track hover:text-ink">
             <twig:Icon name="settings" size="17"/>
         </a>
     </div>
+
+    {# The word about this time and who is counted on: the card's whole width, not a column beside the medallion. #}
+    {% set reminder_note %}<twig:ReminderNote :view="view" :member="member"/>{% endset %}
+    {% if task.note or reminder_note|trim is not empty %}
+        <div class="flex flex-col gap-1.5">
+            {% if task.note %}<p class="task-card-note"><twig:Icon name="edit" size="13" stroke="2.2" class="mt-0.5 shrink-0"/><span class="line-clamp-2">{{ task.note }}</span></p>{% endif %}
+            {{ reminder_note }}
+        </div>
+    {% endif %}
 
     {# Only the buttons sit above the card's link. #}
     <twig:TaskActions :view="view" :back="back" :member="member" :boost="boost" :compact="compact" class="relative z-10"/>

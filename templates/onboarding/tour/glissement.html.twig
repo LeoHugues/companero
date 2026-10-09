@@ -6,11 +6,11 @@
 
 {% block content %}
     <p class="-mt-1 text-[15px] leading-relaxed text-ink-soft">
-        L’aspirateur du salon, c’est environ <strong class="text-ink">tous les 4 jours</strong>. Plus le temps passe depuis la
-        dernière fois, plus la carte devient pressante. Fais glisser le temps pour voir :
+        L’aspirateur ou le coup de balai du salon, c’est environ <strong class="text-ink">tous les 2 jours</strong>. Plus le temps
+        passe depuis la dernière fois, plus la carte devient pressante. Fais glisser le temps pour voir :
     </p>
 
-    {{ include('onboarding/tour/_demo_card.html.twig', {glide: true, age: 2}) }}
+    {{ include('onboarding/tour/_demo_card.html.twig', {glide: true, age: 1}) }}
 
     <ul class="grid grid-cols-2 gap-2 text-[13px] font-bold" aria-label="Les états d’une carte">
         <li class="flex items-center gap-2 rounded-2xl bg-ok-soft px-3 py-2 text-ok-ink"><twig:Icon name="check" size="15" stroke="2.6"/>Fraîche</li>

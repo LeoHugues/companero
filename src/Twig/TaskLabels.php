@@ -48,15 +48,20 @@ final readonly class TaskLabels
         };
     }
 
-    /** "Salon, Cuisine et WC", the pet's name, "Les animaux" or "Toute la coloc". */
+    /**
+     * "Salon, Cuisine et WC", the pet's name, "Les animaux" or "Toute la coloc".
+     *
+     * @param bool $short on a card, where space is short: "Salon +2"
+     */
     #[AsTwigFunction('task_place')]
-    public function place(Task $task): string
+    public function place(Task $task, bool $short = false): string
     {
-        $rooms = $task->getZones()->map(static fn (Zone $zone): string => $zone->getName())->toArray();
+        $rooms = array_values($task->getZones()->map(static fn (Zone $zone): string => $zone->getName())->toArray());
 
         return match (true) {
             null !== $task->getPet() => $task->getPet()->getName(),
-            [] !== $rooms => self::list(array_values($rooms)),
+            $short && \count($rooms) > 1 => \sprintf('%s +%d', $rooms[0], \count($rooms) - 1),
+            [] !== $rooms => self::list($rooms),
             TaskCategory::Pets === $task->getCategory() => 'Les animaux',
             default => 'Toute la coloc',
         };
@@ -70,12 +75,13 @@ final readonly class TaskLabels
         return [] === $words ? (string) $last : implode(', ', $words).' et '.$last;
     }
 
+    /** @param bool $withCommitment false on a card, which shows the week's progress instead */
     #[AsTwigFunction('task_rule_label')]
-    public function ruleLabel(Task $task): string
+    public function ruleLabel(Task $task, bool $withCommitment = true): string
     {
         return match ($task->getKind()) {
             TaskKind::Rolling => \sprintf('tous les %d j', $task->getRhythmDays())
-                .(null !== $task->getWeeklyCommitment() ? \sprintf(' · au moins %d×/sem', $task->getWeeklyCommitment()) : ''),
+                .($withCommitment && null !== $task->getWeeklyCommitment() ? \sprintf(' · au moins %d×/sem', $task->getWeeklyCommitment()) : ''),
             TaskKind::Scheduled => $task->isDaily()
                 ? \sprintf('tous les jours à %s', $this->time($task->getScheduledTime()))
                 : \sprintf('chaque %s à %s', self::weekday((int) $task->getScheduledWeekday()), $this->time($task->getScheduledTime())),

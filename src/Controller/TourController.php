@@ -59,7 +59,7 @@ final class TourController extends AbstractController
                 default => $this->generateUrl('tour_charter'),
             },
             'household' => $household,
-            'team_bonus' => WeekCloser::TEAM_BONUS,
+            'team_xp' => WeekCloser::TEAM_XP,
             'share' => $this->share($household),
         ]);
     }

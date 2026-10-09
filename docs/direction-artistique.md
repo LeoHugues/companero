@@ -65,8 +65,12 @@ Une carte à jouer, douce et chaleureuse :
 - à gauche, le **médaillon** : l'icône de la catégorie (balai, clé, feuille, caddie, patte…) sur
   un fond pastel propre à la catégorie, entouré d'un **anneau** qui se vide avec le temps qui reste
   (il se remplit à l'arrivée sur la page) ;
-- à droite : la rareté (sauf commune), la pastille d'urgence, le petit cadeau d'une surprise, le
-  titre en gras, la pièce et le rythme, qui s'en charge ; la roue crantée, discrète, en haut à droite ;
+- à droite : la pastille d'urgence, les points de l'engagement de la semaine (un par fois attendue,
+  remplis en sauge une fois faits), le petit cadeau d'une surprise, le titre en gras, puis la pièce et
+  le rythme sur **une seule ligne courte** (« Salon +2 · tous les 2 j ») ; la roue crantée, discrète,
+  en haut à droite ;
+- sur toute la largeur, sous l'en-tête : la note de cette fois (dans un cartouche pâle) et qui s'en
+  charge, plutôt qu'empilées à côté du médaillon, ce qui laissait un grand vide sous lui ;
 - en bas : **« Je prends »** — une place vide, cerclée de pointillés, avec une main ; prise, elle
   montre le visage de qui s'en occupe — et **« C'est fait »**, un jeton jaune Casa à bord encre et
   ombre décalée (comme la bulle), avec une coche et ce que la tâche rapporte (« +20 ») dans une

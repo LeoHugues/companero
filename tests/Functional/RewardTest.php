@@ -158,7 +158,10 @@ final class RewardTest extends AppTestCase
         $closer->close($household, $first);
         self::assertSame(1, $household->getStreak());
         self::assertSame(0, $leo->getStreak());
-        self::assertSame(60 + WeekCloser::TEAM_BONUS, static::getContainer()->get(PointEntryRepository::class)->totalFor($leo));
+        // The team bonus is XP: it counts for the level, not for the week's points.
+        $points = static::getContainer()->get(PointEntryRepository::class);
+        self::assertSame(60 + WeekCloser::TEAM_XP, $points->totalFor($leo));
+        self::assertSame(60, $points->sumByMember($household, $first->start, $first->end())[$leo->getId()]);
 
         $closer->close($household, $first->next());
         self::assertSame(0, $household->getStreak());

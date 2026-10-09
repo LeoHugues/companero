@@ -10,7 +10,10 @@ enum PointReason: string
     /** No longer earned, kept for the lines already in the journal. */
     case Rescue = 'rescue';
     case Adjustment = 'adjustment';
+    /** No longer earned (the team bonus is XP now, see TeamXp), kept for the lines already in the journal. */
     case TeamBonus = 'team_bonus';
+    /** The household goal reached: XP for each member present, which does not count for the weekly goal. */
+    case TeamXp = 'team_xp';
     case Boost = 'boost';
     /** Counts for the XP only, not for the weekly goal. */
     case XpBoost = 'xp_boost';
@@ -27,6 +30,7 @@ enum PointReason: string
             self::Rescue => 'Rattrapage',
             self::Adjustment => 'Ajustement',
             self::TeamBonus => 'Bonus collectif',
+            self::TeamXp => 'Bonus collectif d’XP',
             self::Boost => 'Boost',
             self::XpBoost => 'Boost d’XP',
             self::Bounty => 'Surprise',
@@ -37,7 +41,7 @@ enum PointReason: string
     /** @return list<self> the lines that count for the XP only, not for the weekly goal */
     public static function xpOnly(): array
     {
-        return [self::XpBoost, self::BountyXp];
+        return [self::XpBoost, self::BountyXp, self::TeamXp];
     }
 
     /** Kept when a completion is moved: they were earned once, not worked out again from the task. */

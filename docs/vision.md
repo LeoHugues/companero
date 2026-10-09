@@ -244,7 +244,9 @@ des titres secrets viendront plus tard.
 ### Bonus collectif
 
 Quand la coloc atteint l'objectif de la maison,
-chaque membre présent gagne **+50 points** à la clôture de la semaine.
+chaque membre présent gagne **+50 XP** à la clôture de la semaine. De l'XP, pas des points : les
+points mesurent le temps et la pénibilité de ce qui a été fait, on ne les distribue pas. L'XP fait
+monter de niveau (et ouvre des cadeaux), sans compter pour l'objectif perso.
 
 ### Rappels
 

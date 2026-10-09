@@ -76,19 +76,19 @@ Une **fausse carte** qu'on peut toucher, présentée avec trois repères :
 
 **A3. Le glissement**
 
-> « La plupart des tâches glissent : elles n'ont pas de date, elles ont un rythme. L'aspirateur du
-> salon, c'est environ tous les 4 jours. Plus le temps passe depuis la dernière fois, plus la carte
-> devient pressante. »
+> « La plupart des tâches glissent : elles n'ont pas de date, elles ont un rythme. L'aspirateur ou
+> le coup de balai du salon, c'est environ tous les 2 jours. Plus le temps passe depuis la dernière
+> fois, plus la carte devient pressante. »
 
-Un **curseur « jours depuis la dernière fois »** (0 à 8) fait vivre une carte « Aspirateur du salon,
-tous les 4 jours » :
+Un **curseur « depuis la dernière fois »** (de 0 à 4 jours, par demi-journée) fait vivre une carte
+« Aspirateur ou balai au salon, tous les 2 jours » :
 
-| Jours | État de la carte |
+| Depuis | État de la carte |
 |---|---|
-| 0 à 2 | fraîche (sauge), anneau plein |
-| 3 | à prévoir (miel) |
-| 4 | due |
-| 5 et plus | en retard (corail) |
+| 0 à 1 jour | fraîche (sauge), anneau plein |
+| 1 jour et demi | bientôt (miel) |
+| 2 jours | due |
+| 3 jours et plus | en retard (corail) |
 
 Un bouton « C'est fait » sur la carte la remet à zéro, et le curseur revient à 0.
 
@@ -124,7 +124,7 @@ Une ligne, une icône et un exemple pour chaque rythme :
 > « Il y a deux objectifs chaque semaine. »
 
 - **L'objectif de la maison** (sa vraie valeur, par exemple 250 pts) : les points de tout le monde
-  comptent. S'il est atteint, chaque membre présent gagne +50 pts. Il se règle dans les réglages de
+  comptent. S'il est atteint, chaque membre présent gagne +50 XP (pour le niveau, pas pour l'objectif perso). Il se règle dans les réglages de
   la coloc.
 - **Ton objectif** : ce que tu vises toi, au prorata de tes jours de présence. Une série compte les
   semaines où tu l'atteins.

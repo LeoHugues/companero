@@ -20,11 +20,12 @@ use Doctrine\ORM\EntityManagerInterface;
 
 /**
  * Wraps up a finished week: hands out the titles and, if the household reached its
- * collective goal, the team bonus. Safe to run several times.
+ * collective goal, the team bonus: XP, not points, which stay a measure of the work done.
+ * Safe to run several times.
  */
 final readonly class WeekCloser
 {
-    public const TEAM_BONUS = 50;
+    public const TEAM_XP = 50;
 
     public function __construct(
         private EntityManagerInterface $entityManager,
@@ -59,8 +60,8 @@ final readonly class WeekCloser
                 $this->updateStreak($progress, $bonusAt);
             }
 
-            if ($team->reached() && $progress->wasPresent() && !$this->points->hasEntry($member, PointReason::TeamBonus, $week->start, $week->end())) {
-                $this->entityManager->persist(new PointEntry($member, PointReason::TeamBonus, self::TEAM_BONUS, \sprintf('Objectif collectif, semaine %d', $week->number()), $bonusAt));
+            if ($team->reached() && $progress->wasPresent() && !$this->points->hasEntry($member, PointReason::TeamXp, $week->start, $week->end())) {
+                $this->entityManager->persist(new PointEntry($member, PointReason::TeamXp, self::TEAM_XP, \sprintf('Objectif collectif, semaine %d', $week->number()), $bonusAt));
             }
         }
 
