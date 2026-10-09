@@ -7,6 +7,7 @@ de **la Casa**, la maison-personnage dont l'humeur suit la propreté du foyer.
 - [Vision produit](docs/vision.md)
 - [Direction artistique](docs/direction-artistique.md)
 - [Inventaire des tâches](docs/inventaire-taches.md)
+- [Onboarding](docs/onboarding.md)
 - [Mise en production](docs/deploiement.md)
 
 ## Stack
