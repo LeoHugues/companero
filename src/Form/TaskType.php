@@ -19,6 +19,7 @@ use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
 use Symfony\Component\Form\Extension\Core\Type\EnumType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\TimeType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -48,6 +49,13 @@ class TaskType extends AbstractType
                 'empty_data' => '',
                 'label' => 'Quoi ?',
                 'attr' => ['placeholder' => self::ONE_OFF === $options['mode'] ? 'Ex. Appeler le proprio pour la fuite' : 'Ex. Passer la serpillière'],
+            ])
+            // Always on the card; a note for one time takes its place until the task is done.
+            ->add('description', TextareaType::class, [
+                'label' => 'Une précision',
+                'help' => 'Facultatif, toujours affichée sur la carte. Une note pour une fois la remplace, le temps que la tâche soit faite.',
+                'required' => false,
+                'attr' => ['rows' => 2, 'maxlength' => Task::DESCRIPTION_MAX_LENGTH, 'class' => 'min-h-[64px]', 'placeholder' => 'Ex. Aspirateur ou balai, tapis compris'],
             ]);
         if (self::TEMPLATE === $options['mode']) {
             $builder->add('kind', EnumType::class, [

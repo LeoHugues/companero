@@ -22,6 +22,7 @@ class Task
     /** scheduledWeekday value for a task that comes back every day (feeding the cats…). */
     public const EVERY_DAY = 0;
     public const NOTE_MAX_LENGTH = 255;
+    public const DESCRIPTION_MAX_LENGTH = 255;
     /** The ± buttons of a task to do: a few minutes more or less than usual. */
     public const POINT_STEPS = [5, 10, 15];
 
@@ -143,8 +144,16 @@ class Task
     private ?\DateTimeImmutable $raisedAt = null;
 
     /**
+     * The template's own precision ("aspirateur ou balai, tapis compris"): always on the card,
+     * unless a note for this time takes its place.
+     */
+    #[ORM\Column(length: self::DESCRIPTION_MAX_LENGTH, nullable: true)]
+    #[Assert\Length(max: self::DESCRIPTION_MAX_LENGTH)]
+    private ?string $description = null;
+
+    /**
      * A word about this time only ("the bins are in the garage"), not about the template:
-     * it goes away once the task is done.
+     * it goes away once the task is done, and the template's description shows again.
      */
     #[ORM\Column(length: self::NOTE_MAX_LENGTH, nullable: true)]
     #[Assert\Length(max: self::NOTE_MAX_LENGTH)]
@@ -452,6 +461,23 @@ class Task
     public function getNote(): ?string
     {
         return $this->note;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function setDescription(?string $description): void
+    {
+        $description = null !== $description ? trim($description) : null;
+        $this->description = '' === $description ? null : $description;
+    }
+
+    /** What the card says: the note for this time if there is one, otherwise the template's description. */
+    public function getShownNote(): ?string
+    {
+        return $this->note ?? $this->description;
     }
 
     public function setNote(?string $note): void

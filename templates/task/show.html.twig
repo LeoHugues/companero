@@ -28,8 +28,9 @@
             </div>
         </div>
         <h1 class="text-[26px] leading-tight [overflow-wrap:anywhere]">{{ task.title }}</h1>
-        {% if task.note %}
-            <p class="task-note" id="task-note"><twig:Icon name="edit" size="15" class="mt-0.5 shrink-0"/><span>{{ task.note }}</span></p>
+        {% if task.shownNote %}
+            <p class="task-note" id="task-note"><twig:Icon :name="task.note ? 'edit' : 'list'" size="15" class="mt-0.5 shrink-0"/><span>{{ task.shownNote }}</span></p>
+            {% if task.note and task.description %}<p class="-mt-1.5 px-1 text-xs text-muted">Pour cette fois. D’habitude : « {{ task.description }} »</p>{% endif %}
         {% endif %}
         {% if boost %}<p class="flex items-center gap-1 text-sm font-bold text-muted"><twig:Icon name="bolt" size="15" stroke="2.6"/> dont +{{ boost }} de boost</p>{% endif %}
         {% if view.bounty %}
@@ -83,7 +84,7 @@
             <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
             <textarea name="note" class="input min-h-[76px] py-2.5" rows="2" maxlength="{{ constant('App\\Entity\\Task::NOTE_MAX_LENGTH') }}" aria-labelledby="note-title" placeholder="Ex. Les sacs sont dans le garage, attention au vase…">{{ task.note }}</textarea>
             <div class="flex items-center justify-between gap-3">
-                <p class="meta">{{ task.kind.isRecurring ? 'Elle s’efface une fois la tâche faite.' : 'Pour qui s’en occupera.' }}</p>
+                <p class="meta">{{ task.description ? 'Elle remplace la précision de la tâche. ' }}{{ task.kind.isRecurring ? 'Elle s’efface une fois la tâche faite.' : 'Pour qui s’en occupera.' }}</p>
                 <button type="submit" class="btn-primary h-10 shrink-0 px-4 text-sm">{{ task.note ? 'Modifier' : 'Ajouter' }}</button>
             </div>
         </form>

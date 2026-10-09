@@ -61,6 +61,7 @@ Elle est d'abord construite pour une coloc de 4 personnes. Elle pourra ensuite
 | **Carton jaune** | Se gagne (niveaux, surprises) et se donne à un coloc, pour un truc en particulier. Symbolique : aucun point perdu. |
 | **Bilan hebdo** | Le récapitulatif de fin de semaine : engagements tenus, objectifs atteints, titres gagnés. |
 | **Jauge de la maison** | Un indicateur collectif de l'état du foyer (« la maison est propre à 72 % »). |
+| **Précision** | Un mot permanent sur le modèle (« aspirateur ou balai, tapis compris »), toujours affiché sur la carte. Une **note pour cette fois** le remplace jusqu'à ce que la tâche soit faite, puis la précision revient. |
 | **Profil à réclamer** | Un coloc connu par son prénom seulement, préparé par les autres. Il le réclame avec le lien d'invitation (« Je suis Robin ») et y retrouve tout ce qui lui est attaché. |
 | **Découverte** | La visite guidée par la Casa à l'arrivée : l'esprit, les cartes et le glissement, les points, les deux objectifs, la charte, puis ses propres réglages. Voir [l'onboarding](onboarding.md). |
 | **Charte** | Les règles de bon sens de la coloc (« je fais ma vaisselle quand j'ai fini »), écrites par tout le monde. Chacun y adhère (« Ça me va »), et la relit quand elle change. |

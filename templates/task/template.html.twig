@@ -24,6 +24,9 @@
         <p class="text-[15px] font-semibold text-ink-soft">
             {{ task_place(task) }} · {{ task_rule_label(task) }}
         </p>
+        {% if task.description %}
+            <p class="task-note"><twig:Icon name="list" size="15" class="mt-0.5 shrink-0"/><span>{{ task.description }}</span></p>
+        {% endif %}
     </section>
 
     <dl class="card grid grid-cols-[auto_1fr] gap-x-4 gap-y-3 px-3.5 py-3.5 text-sm" aria-label="La règle">

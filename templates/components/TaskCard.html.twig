@@ -2,7 +2,7 @@
 {#
     A task as a card to play: its medallion (the category, ringed by the time left), its title,
     where and how often (in one short line), the week's commitment as dots, then a note and who is
-    counted on, across the card, and "Je prends" and "C'est fait", which shows what it is worth.
+    counted on, across the card (the note for this time, or the template's description), and "Je prends" and "C'est fait", which shows what it is worth.
     Its rarity is the card's skin, never written on it; a surprise hidden in it this week makes it one class rarer.
     The whole card opens its page; the settings wheel and the buttons sit above that link.
     compact: lists (rooms), with a single round "done" button.
@@ -46,9 +46,10 @@
 
     {# The word about this time and who is counted on: the card's whole width, not a column beside the medallion. #}
     {% set reminder_note %}<twig:ReminderNote :view="view" :member="member"/>{% endset %}
-    {% if task.note or reminder_note|trim is not empty %}
+    {# The note for this time if there is one, otherwise the template's own precision. #}
+    {% if task.shownNote or reminder_note|trim is not empty %}
         <div class="flex flex-col gap-1.5">
-            {% if task.note %}<p class="task-card-note"><twig:Icon name="edit" size="13" stroke="2.2" class="mt-0.5 shrink-0"/><span class="line-clamp-2">{{ task.note }}</span></p>{% endif %}
+            {% if task.shownNote %}<p class="task-card-note" title="{{ task.note ? 'Pour cette fois' : 'La précision de la tâche' }}"><twig:Icon :name="task.note ? 'edit' : 'list'" size="13" stroke="2.2" class="mt-0.5 shrink-0"/><span class="line-clamp-2">{{ task.shownNote }}</span></p>{% endif %}
             {{ reminder_note }}
         </div>
     {% endif %}

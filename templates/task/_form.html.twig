@@ -1,5 +1,6 @@
 {{ form_start(form, {attr: {class: 'flex flex-col gap-5', 'data-controller': 'task-form'}}) }}
     {{ form_row(form.title) }}
+    {{ form_row(form.description) }}
     {% if form.kind is defined %}
         {{ form_row(form.kind, {attr: {'data-action': 'change->task-form#toggle'}}) }}
     {% endif %}
