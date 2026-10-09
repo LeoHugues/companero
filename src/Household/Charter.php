@@ -11,12 +11,29 @@ use App\Entity\Household;
  */
 final class Charter
 {
+    /** @var list<array{string, ?string}> the kitchen's: the sink is everyone's, so is what is left in it */
+    public const KITCHEN_RULES = [
+        [
+            'Avant de faire la vaisselle, je vide l’égouttoir : jamais de vaisselle mouillée sur de la vaisselle sèche.',
+            'Posée sur la pile, la vaisselle mouillée trempe celle qui avait séché : plus rien ne sèche, tout finit par sentir le renfermé, et il faut tout relaver.',
+        ],
+        [
+            'Quand j’ai fini avec l’éponge, je la rince et je l’essore.',
+            'Une éponge pleine de restes et d’eau sale devient vite un nid à microbes, et elle sent. Rincée et essorée, elle sèche, sent bon et dure plus longtemps.',
+        ],
+        [
+            'L’évier n’est pas une poubelle : les fins d’assiette vont à la poubelle (ou au compost).',
+            'Les restes bouchent le siphon et sentent mauvais. Et si ça arrive quand même, je nettoie derrière moi.',
+        ],
+    ];
+
     /** @var list<array{string, ?string}> the rule, and why it matters */
     public const DEFAULT_RULES = [
         [
             'Je fais ma vaisselle quand j’ai fini, pas « plus tard ».',
             'Une assiette qui attend en appelle une autre, et l’évier se remplit tout seul. Rincée tout de suite, elle se lave en une minute ; le lendemain, il faut la faire tremper.',
         ],
+        ...self::KITCHEN_RULES,
         [
             'Avant d’aller dormir, je fais un tour : chaussures, pulls, table. Rien ne traîne de mon côté.',
             'Deux minutes le soir, et chacun se lève dans une maison rangée.',

@@ -43,6 +43,13 @@
     {{- parent() -}}
 {%- endblock form_widget_simple -%}
 
+{# A field on several lines looks like the others, and grows with its text. #}
+{%- block textarea_widget -%}
+    {%- set own = attr.class|default('') -%}
+    {%- set attr = attr|merge({class: ('input-area ' ~ ('min-h-' in own ? '' : 'min-h-[84px] ') ~ own)|trim}) -%}
+    {{- parent() -}}
+{%- endblock textarea_widget -%}
+
 {%- block choice_widget_collapsed -%}
     {%- set attr = attr|merge({class: (attr.class|default('') ~ ' input')|trim}) -%}
     {{- parent() -}}

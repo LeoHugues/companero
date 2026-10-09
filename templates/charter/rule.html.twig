@@ -4,7 +4,7 @@
 
 {% block body %}
     <header class="flex items-center justify-between">
-        <h1 class="text-[22px]">Règle n° {{ rule.position + 1 }}</h1>
+        <h1 class="text-[22px]">Modifier la règle n° {{ rule.position + 1 }}</h1>
         <a href="{{ path('charter_show') }}" aria-label="Retour à la charte" class="flex size-11 items-center justify-center rounded-full text-ink"><twig:Icon name="close" size="22" stroke="2.2"/></a>
     </header>
 
@@ -15,21 +15,10 @@
         <button type="submit" class="btn-primary self-start">Enregistrer</button>
     {{ form_end(form) }}
 
-    <section class="flex flex-col gap-2 border-t-[1.5px] border-line pt-4" aria-label="Sa place dans la charte">
-        <div class="flex flex-wrap items-center gap-2">
-            {% for move in [{sens: 'haut', icon: 'arrow-up', label: 'Monter'}, {sens: 'bas', icon: 'arrow-down', label: 'Descendre'}] %}
-                <form method="post" action="{{ path('charter_rule_move', {id: rule.id}) }}">
-                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
-                    <input type="hidden" name="sens" value="{{ move.sens }}">
-                    <button type="submit" class="chip gap-1.5"><twig:Icon :name="move.icon" size="16"/> {{ move.label }}</button>
-                </form>
-            {% endfor %}
-            <form method="post" action="{{ path('charter_rule_delete', {id: rule.id}) }}" class="ml-auto" data-turbo-confirm="Retirer cette règle de la charte ?">
-                <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
-                <button type="submit" class="btn-link gap-1.5 text-muted"><twig:Icon name="trash" size="17"/> Retirer la règle</button>
-            </form>
-        </div>
-    </section>
+    <form method="post" action="{{ path('charter_rule_delete', {id: rule.id}) }}" class="flex justify-center border-t-[1.5px] border-line pt-3" data-turbo-confirm="Retirer cette règle de la charte ?">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
+        <button type="submit" class="btn-link gap-1.5 text-muted"><twig:Icon name="trash" size="17"/> Retirer la règle</button>
+    </form>
 {% endblock %}
 
 {% block nav %}<twig:BottomNav active="profile"/>{% endblock %}

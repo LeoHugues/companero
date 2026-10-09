@@ -30,7 +30,7 @@ class ZoneType extends AbstractType
                 'label' => 'Sa forme sur le plan',
                 'required' => false,
                 'help' => 'Les coins de la pièce sur une grille, « x,y » séparés par des espaces (ex. 20,98 50,98 50,116 20,116), puis « @x,y » pour placer son nom si besoin. Vide : la pièce s’affiche en tuile sous le plan.',
-                'attr' => ['rows' => 3, 'class' => 'h-auto py-2 font-mono text-sm'],
+                'attr' => ['rows' => 3, 'class' => 'font-mono text-sm'],
             ]);
         }
     }

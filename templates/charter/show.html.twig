@@ -7,7 +7,7 @@
         <h1 class="text-[26px]">La charte de la coloc</h1>
         <a href="{{ path('household_edit') }}" aria-label="Retour aux réglages de la coloc" class="flex size-11 items-center justify-center rounded-full text-ink"><twig:Icon name="close" size="22" stroke="2.2"/></a>
     </header>
-    <p class="-mt-2 text-[15px] text-ink-soft">Rien à voir avec l’appli : c’est juste comme ça qu’on vit bien ensemble. Tout le monde peut l’écrire.</p>
+    <p class="-mt-2 text-[15px] text-ink-soft">Rien à voir avec l’appli : c’est juste comme ça qu’on vit bien ensemble. Tout le monde peut l’écrire, la réordonner avec les flèches, ou en rediscuter.</p>
 
     {{ include('charter/_rules.html.twig', {household: household, editable: true}) }}
 
@@ -29,12 +29,21 @@
         {% endif %}
     </section>
 
-    {{ form_start(form, {attr: {class: 'card flex flex-col gap-3 p-3.5'}}) }}
-        {{ form_row(form.text) }}
-        {{ form_row(form.why) }}
-        <p class="meta">Chacun sera invité à relire la charte.</p>
-        <button type="submit" class="btn-primary self-start"><twig:Icon name="plus" size="18" stroke="2.6"/> Ajouter la règle</button>
-    {{ form_end(form) }}
+    <section class="flex flex-col gap-2" aria-labelledby="new-rule-title">
+        <h2 id="new-rule-title" class="section-title">Ajouter une règle</h2>
+        {{ form_start(form, {attr: {class: 'card flex flex-col gap-4 p-3.5'}}) }}
+            {{ form_row(form.text) }}
+            {# The reason is a bonus: folded until someone wants to give one. #}
+            <details class="group flex flex-col gap-2"{{ form.why.vars.value or form.why.vars.errors is not empty ? ' open' }}>
+                <summary class="flex w-fit cursor-pointer list-none items-center gap-1.5 text-sm font-extrabold text-clay-dark"><twig:Icon name="plus" size="16" stroke="2.6" class="transition group-open:rotate-45"/> Expliquer pourquoi</summary>
+                <div class="mt-2">{{ form_row(form.why, {label: 'Pourquoi ? (facultatif)'}) }}</div>
+            </details>
+            <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
+                <button type="submit" class="btn-primary"><twig:Icon name="plus" size="18" stroke="2.6"/> Ajouter la règle</button>
+                <p class="meta">Chacun sera invité à relire la charte.</p>
+            </div>
+        {{ form_end(form) }}
+    </section>
 {% endblock %}
 
 {% block nav %}<twig:BottomNav active="profile"/>{% endblock %}

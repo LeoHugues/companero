@@ -5,7 +5,6 @@ namespace App\Form;
 use App\Entity\CharterRule;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -16,16 +15,18 @@ class CharterRuleType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('text', TextType::class, [
+            // A sentence, often longer than a line on a phone: a field that grows with it.
+            ->add('text', TextareaType::class, [
                 'empty_data' => '',
-                'label' => $options['new'] ? 'Une nouvelle règle' : 'La règle',
-                'attr' => ['placeholder' => 'On ferme la porte du frigo', 'maxlength' => 200],
+                'label' => 'La règle',
+                'help' => 'Une phrase, à la première personne si possible : « je… », « on… ».',
+                'attr' => ['rows' => 2, 'maxlength' => 200, 'placeholder' => 'On ferme bien la porte du frigo', 'class' => 'min-h-[64px]'],
             ])
             ->add('why', TextareaType::class, [
-                'label' => 'Pourquoi ? (facultatif)',
-                'help' => 'Ce qui se déplie sous la règle : une raison, une anecdote, une source.',
+                'label' => 'Pourquoi ?',
+                'help' => 'Facultatif : ce qui se déplie sous la règle. Une raison, une anecdote, une source.',
                 'required' => false,
-                'attr' => ['rows' => 3, 'class' => 'min-h-[84px] py-2.5'],
+                'attr' => ['rows' => 3, 'placeholder' => 'Sinon le joint fatigue, et le frigo glace.'],
             ]);
     }
 

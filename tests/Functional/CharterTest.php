@@ -14,11 +14,11 @@ final class CharterTest extends AppTestCase
         $this->client->loginUser($leo);
 
         $this->client->request('GET', '/coloc/charte');
-        self::assertSelectorCount(6, 'ol[aria-label="La charte de la coloc"] > li');
+        self::assertSelectorCount(9, 'ol[aria-label="La charte de la coloc"] > li');
         $this->client->submitForm('Ajouter la règle', ['charter_rule[text]' => 'On ferme la porte du frigo']);
         self::assertResponseRedirects('/coloc/charte');
         $this->client->followRedirect();
-        self::assertSelectorCount(7, 'ol[aria-label="La charte de la coloc"] > li');
+        self::assertSelectorCount(10, 'ol[aria-label="La charte de la coloc"] > li');
         self::assertSelectorTextContains('main', 'On ferme la porte du frigo');
         // Whoever wrote it agrees to it.
         self::assertTrue($this->reload($leo)->hasAcceptedCharter());
@@ -44,8 +44,11 @@ final class CharterTest extends AppTestCase
         $this->client->submitForm('Enregistrer', ['charter_rule[text]' => 'Je range mes affaires avant de dormir.', 'charter_rule[why]' => '']);
         self::assertResponseRedirects('/coloc/charte');
 
-        $this->client->request('GET', '/coloc/charte/'.$second->getId());
-        $this->client->submitForm('Monter');
+        // Moved up a rank right from the list; the first one cannot go higher.
+        $this->client->request('GET', '/coloc/charte');
+        self::assertSelectorExists(\sprintf('#regle-%d button[value=haut][disabled]', $this->rules($leo)[0]->getId()));
+        $this->client->submit($this->client->getCrawler()->filter(\sprintf('#regle-%d button[value=haut]', $second->getId()))->form());
+        self::assertResponseRedirects('/coloc/charte');
         $rules = $this->rules($leo);
         self::assertSame('Je range mes affaires avant de dormir.', $rules[0]->getText());
         self::assertNull($rules[0]->getWhy());
@@ -53,8 +56,8 @@ final class CharterTest extends AppTestCase
         $this->client->request('GET', '/coloc/charte/'.$second->getId());
         $this->client->submitForm('Retirer la règle');
         self::assertResponseRedirects('/coloc/charte');
-        self::assertCount(5, $this->rules($leo));
-        self::assertSame([0, 1, 2, 3, 4], array_map(static fn (CharterRule $rule): int => $rule->getPosition(), $this->rules($leo)));
+        self::assertCount(8, $this->rules($leo));
+        self::assertSame(range(0, 7), array_map(static fn (CharterRule $rule): int => $rule->getPosition(), $this->rules($leo)));
     }
 
     public function testTheRulesOfAnotherHouseholdAreOutOfReach(): void

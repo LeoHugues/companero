@@ -136,8 +136,9 @@ Tu le choisis à l'étape suivante.
 > « Avant de commencer, les règles de la maison. Rien à voir avec l'appli : c'est juste comme ça
 > qu'on vit bien ensemble. »
 
-La liste des règles de **cette** coloc (voir § 4), puis un bouton **« Ça me va »**, qui enregistre
-l'adhésion avec sa date.
+La liste des règles de **cette** coloc (voir § 4), une invitation (« Elle est à vous » : une règle
+manque, une autre est de trop ou mal dite ? on l'ajoute, on la réécrit, ou on en parle avec les
+autres), puis un bouton **« Ça me va »**, qui enregistre l'adhésion avec sa date.
 
 ### B. Se régler
 
@@ -156,23 +157,28 @@ fait la fête.
 ## 4. La charte de la coloc
 
 Une liste de règles **propre à chaque coloc**, modifiable par tout le monde dans *Réglages de la
-coloc › La charte* : ajouter, modifier, supprimer, réordonner. Chaque règle a un texte court et, en
-option, un « Pourquoi ? » qui se déplie.
+coloc › La charte* : ajouter, modifier, supprimer, et réordonner sur place avec les flèches ▲ ▼ de
+chaque règle. Chaque règle a un texte court et, en option, un « Pourquoi ? » qui se déplie.
 
 Une nouvelle coloc démarre avec ces règles :
 
 1. Je fais ma vaisselle quand j'ai fini, pas « plus tard ».
-2. Avant d'aller dormir, je fais un tour : chaussures, pulls, table. Rien ne traîne de mon côté.
-3. **On fait pipi assis.**
+2. Avant de faire la vaisselle, je vide l'égouttoir : jamais de vaisselle mouillée sur de la vaisselle
+   sèche.
+3. Quand j'ai fini avec l'éponge, je la rince et je l'essore.
+4. L'évier n'est pas une poubelle : les fins d'assiette vont à la poubelle (ou au compost). Et si ça
+   arrive quand même, je nettoie derrière moi.
+5. Avant d'aller dormir, je fais un tour : chaussures, pulls, table. Rien ne traîne de mon côté.
+6. **On fait pipi assis.**
    *Pourquoi ?* Debout, on est environ cinq fois plus loin de la cuvette, le jet se fragmente en
    gouttelettes et éclabousse bien plus loin qu'on ne le croit : la physique l'a montré (Splash Lab
    de BYU, Truscott et Hurd, « Urinal Dynamics », American Physical Society, 2013). Côté santé,
    pas de différence chez les hommes en bonne santé ; assis, la vessie se vide mieux en cas de
    troubles de la prostate (de Jong et al., *PLOS ONE*, 2014). C'est donc une affaire de propreté,
    et c'est celle de tout le monde.
-4. Ce que je finis, je le remplace : papier toilette, sel, éponge… ou je le signale.
-5. Mes affaires ne s'installent pas dans les pièces communes.
-6. Si je ne peux pas faire ce que j'avais pris, je préviens, ou je passe en « Pas là ».
+7. Ce que je finis, je le remplace : papier toilette, sel, éponge… ou je le signale.
+8. Mes affaires ne s'installent pas dans les pièces communes.
+9. Si je ne peux pas faire ce que j'avais pris, je préviens, ou je passe en « Pas là ».
 
 **Adhésion.** Chaque membre adhère à l'étape A7. La page de la charte montre à qui elle va.
 Quand une règle est ajoutée, réécrite ou retirée, celui qui l'a changée y adhère d'office ; les
@@ -180,7 +186,7 @@ autres voient sur l'accueil « La charte de la coloc a changé », jusqu'à ce q
 disent « Ça me va ». Rien n'est bloqué pour autant. Changer l'ordre des règles ne demande rien à
 personne.
 
-Sources de la règle 3 :
+Sources de la règle 6 :
 
 - [BYU Urine Scientists Solve Splash-Back Problem](https://m.cityweekly.net/BuzzBlog/archives/2013/11/11/byu-urine-scientists-solve-splash-back-problem) (City Weekly, 2013)
 - [Science Addresses The Problem Of Pee Splashback](https://www.popsci.com/article/science/science-addresses-problem-pee-splashback/) (Popular Science, 2013)

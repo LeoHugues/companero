@@ -6,7 +6,14 @@
 
 {% block content %}
     {{ include('charter/_rules.html.twig', {household: household}) }}
-    <p class="meta px-1">Elle s’écrit à plusieurs : chacun peut la compléter dans les réglages de la coloc.</p>
+    {# An invitation: the charter is everyone's, to be completed, changed, talked over. #}
+    <div class="card flex items-start gap-3 border-sun p-3.5">
+        <span class="flex size-10 shrink-0 items-center justify-center rounded-full bg-sun"><twig:Icon name="edit" size="20"/></span>
+        <div class="flex flex-col gap-1">
+            <p class="text-[15px] font-extrabold">Elle est à vous</p>
+            <p class="text-sm text-ink-soft">Une règle manque ? Une autre te paraît de trop, ou mal dite ? Ajoute-la, réécris-la, ou parles-en avec les autres : la charte se change à tout moment dans <strong class="text-ink">Réglages de la coloc › La charte</strong>, et chacun est invité à la relire.</p>
+        </div>
+    </div>
 {% endblock %}
 
 {% block next %}

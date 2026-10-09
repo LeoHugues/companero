@@ -5,6 +5,7 @@ namespace App\Tests\Functional;
 use App\Entity\Member;
 use App\Entity\Task;
 use App\Enum\TaskKind;
+use App\Household\Charter;
 use App\Household\MemberRegistrar;
 use App\Repository\MemberRepository;
 use App\Repository\TaskRepository;
@@ -35,7 +36,7 @@ final class OnboardingTest extends AppTestCase
         self::assertResponseRedirects('/decouverte');
         $leo = $this->member('léo');
         self::assertFalse($leo->isOnboarded());
-        self::assertCount(6, $leo->getHousehold()->getCharterRules());
+        self::assertCount(\count(Charter::DEFAULT_RULES), $leo->getHousehold()->getCharterRules());
     }
 
     public function testFoundingFormIsValidated(): void
