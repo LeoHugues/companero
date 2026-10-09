@@ -16,6 +16,22 @@
     {{ form_end(form) }}
 
     <a href="{{ path('plan_zone', {id: zone.id}) }}" class="btn-link self-center">Voir la pièce et ses tâches</a>
+
+    {% set others = zone.household.zones|filter(other => other != zone) %}
+    {% if others is not empty %}
+        {# Part of another room after all: its tasks move there, and it is gone. #}
+        <form method="post" action="{{ path('zone_merge', {id: zone.id}) }}" class="card flex flex-col gap-2.5 p-3.5" data-turbo-confirm="Rattacher « {{ zone.name }} » à une autre pièce ? Elle disparaît, ses tâches y passent.">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
+            <label for="merge-into" class="field-label">Elle fait partie d’une autre pièce ?</label>
+            <div class="flex items-center gap-2">
+                <select id="merge-into" name="dans" class="input flex-1" required>
+                    {% for other in others %}<option value="{{ other.id }}">{{ other.name }}</option>{% endfor %}
+                </select>
+                <button type="submit" class="btn-primary">Rattacher</button>
+            </div>
+            <p class="meta">La zone disparaît ; ses tâches et celles du catalogue passent dans la pièce choisie.</p>
+        </form>
+    {% endif %}
 {% endblock %}
 
 {% block nav %}<twig:BottomNav active="profile"/>{% endblock %}

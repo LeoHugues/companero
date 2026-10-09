@@ -46,7 +46,7 @@ final class AppFixtures extends Fixture
     private const HISTORY_WEEKS = 3;
     private const SUNDAY = 7;
 
-    /** Zones added to the founder's defaults (Cuisine, Salon, Salle de bain, WC, Entrée); true: private. */
+    /** Zones added to the founder's defaults (Cuisine, Salon, Salle de bain, WC; not its Entrée); true: private. */
     private const ZONES = [
         'Bureau' => false,
         'Couloir' => false,
@@ -91,14 +91,14 @@ final class AppFixtures extends Fixture
         ['Nettoyer sous le lave-vaisselle', 'Cuisine', 20, 30, TaskCategory::Cleaning, 25],
         ['Nettoyer le lave-linge', 'Salle de bain', 20, 30, TaskCategory::Cleaning, 12],
         ['Ranger le placard du couloir', 'Couloir', 30, 60, TaskCategory::Cleaning, 50],
-        ['Ranger le placard de l’entrée', 'Entrée', 30, 60, TaskCategory::Cleaning, null],
+        ['Ranger le placard de l’entrée', 'Salon', 30, 60, TaskCategory::Cleaning, null],
     ];
 
     /** Done when needed, in one tap: [title, zone, points, chance of being done on a given day, cooldown in hours]. */
     private const QUICK = [
         ['Vider le lave-vaisselle', 'Cuisine', 10, 70, 6],
         ['Ranger la vaisselle de l’égouttoir', 'Cuisine', 5, 50, 3],
-        ['Faire le verre', 'Entrée', 10, 12, 48],
+        ['Faire le verre', 'Salon', 10, 12, 48],
     ];
 
     /** @var array<string, Task> */
@@ -204,6 +204,11 @@ final class AppFixtures extends Fixture
     {
         $zones = [];
         foreach ($household->getZones() as $zone) {
+            // No entrance here: it is part of the living room.
+            if ('Entrée' === $zone->getName()) {
+                $household->removeZone($zone);
+                continue;
+            }
             $zones[$zone->getName()] = $zone;
         }
         foreach (self::ZONES as $name => $private) {
@@ -256,7 +261,7 @@ final class AppFixtures extends Fixture
             $this->task($household, $author, $createdAt, $title, TaskKind::Quick, $points, $zones[$zone])->setCooldownHours($cooldown);
         }
 
-        $bins = $this->task($household, $author, $createdAt, 'Sortir les poubelles', TaskKind::Scheduled, 10, $zones['Entrée']);
+        $bins = $this->task($household, $author, $createdAt, 'Sortir les poubelles', TaskKind::Scheduled, 10, $zones['Salon']);
         $bins->setScheduledWeekday(self::SUNDAY);
         $bins->setScheduledTime(new \DateTimeImmutable('20:00'));
         $bins->setMarginHours(12);

@@ -4,7 +4,7 @@
 <ul class="grid grid-flow-dense grid-cols-2 gap-[3px] overflow-hidden rounded-[14px] border-[3px] border-ink bg-ink" aria-label="{{ label }}">
     {% for room in rooms %}
         {% set clean = room.cleanliness %}
-        {% set floor = clean >= 92 ? 'bg-surface' : (clean >= 80 ? 'bg-[#FBEFD9]' : (clean >= 50 ? 'bg-[#F8DDA6]' : 'bg-[#F4C6A6]')) %}
+        {% set floor = clean >= 92 ? 'bg-[#B7DF98]' : (clean >= 80 ? 'bg-[#DDEBA6]' : (clean >= 50 ? 'bg-[#F8DDA6]' : 'bg-[#F4C6A6]')) %}
         {# A big room takes the whole width, and the last one fills the gap if any. #}
         <li class="{{ room.tasks|length >= 5 or (loop.last and cells is odd) ? 'col-span-2' : '' }}">
             <a href="{{ path('plan_zone', {id: room.zone.id}) }}" class="flex h-full min-h-[96px] flex-col justify-between gap-2 p-3 text-ink no-underline transition hover:brightness-95 hover:text-ink {{ floor }}"

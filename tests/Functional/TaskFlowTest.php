@@ -385,4 +385,24 @@ final class TaskFlowTest extends AppTestCase
         self::assertSame(20, $task?->getCurrentPoints());
         self::assertNull($task?->getNote());
     }
+
+    public function testARoomCanBecomePartOfAnother(): void
+    {
+        $leo = $this->foundHousehold();
+        $this->client->loginUser($leo);
+        $zones = $leo->getHousehold()->getZones();
+        $entrance = $zones->findFirst(static fn (int $i, Zone $zone): bool => 'Entrée' === $zone->getName());
+        $living = $zones->findFirst(static fn (int $i, Zone $zone): bool => 'Salon' === $zone->getName());
+        $this->client->request('GET', '/taches/nouvelle/modele');
+        $this->client->submitForm('Créer le modèle', ['task[title]' => 'Sortir les poubelles', 'task[kind]' => 'quick', 'task[zone]' => (string) $entrance?->getId()]);
+
+        $this->client->request('GET', '/coloc/zones/'.$entrance?->getId());
+        $this->client->submitForm('Rattacher', ['dans' => (string) $living?->getId()]);
+        self::assertResponseRedirects('/coloc');
+
+        $task = static::getContainer()->get(TaskRepository::class)->findOneBy(['title' => 'Sortir les poubelles']);
+        self::assertSame('Salon', $task?->getZone()?->getName());
+        $this->client->request('GET', '/coloc');
+        self::assertSelectorTextNotContains('[aria-labelledby=zones-title]', 'Entrée');
+    }
 }

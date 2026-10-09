@@ -41,4 +41,20 @@ final class RoomShapeTest extends TestCase
         self::assertSame(['Terrasse', 'entrée'], $fit['lines'] ?? null);
         self::assertLessThanOrEqual(2.3, $fit['size']);
     }
+
+    public function testTheCountOfTasksStaysInsideASlantedRoom(): void
+    {
+        // The living room, under the slanted big terrace: the corner of its box is on the terrace.
+        $living = RoomShape::parse('20,52 45,37 58,44.4 50,54.4 50,81 57,81 57,97 26,97 26,80 20,80 @35,66');
+        $terrace = RoomShape::parse('20,21 71,21 71,51 45,36 20,51');
+        self::assertNotNull($living);
+        self::assertTrue($terrace?->contains($living->maxX() - 2.2, $living->minY() + 2.2));
+
+        [$x, $y] = $living->badge();
+        self::assertTrue($living->contains($x, $y));
+        self::assertFalse($terrace->contains($x, $y));
+
+        // A plain rectangle: its top right corner, as before.
+        self::assertSame([68.8, 94.2], RoomShape::parse('58,92 71,92 71,97 58,97')?->badge());
+    }
 }

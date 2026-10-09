@@ -25,7 +25,6 @@ zones:
     - { nom: Chambre de Léo et Léa, privee: true, plan: '20,117 50,117 50,129 45,129 45,134 20,134 @33,125.5' }
     - { nom: Chambre de Gab, privee: true, plan: '58,130 71,130 71,150 46,150 46,135 58,135 @59,143' }
     - { nom: Bureau, plan: '20,135 45,135 45,150 20,150' }
-    - { nom: Entrée }
     - { nom: Jardin }
 
 animaux:
@@ -45,14 +44,14 @@ taches:
     - { titre: Balayer la petite terrasse, zone: Petite terrasse, points: 10, tous_les: 7, par_semaine: 1 }
     - { titre: Balayer la terrasse de l’entrée, zone: Terrasse de l’entrée, points: 10, tous_les: 7, par_semaine: 1 }
     - { titre: Nettoyer la grande table de la terrasse, zone: Grande terrasse, points: 10, tous_les: 7 } # points estimés
-    - { titre: Sortir les poubelles, zone: Entrée, points: 10, tous_les: 7 } # points estimés ; jour de collecte à préciser
+    - { titre: Sortir les poubelles, zone: Salon, points: 10, tous_les: 7 } # points estimés ; jour de collecte à préciser
     - { titre: Aspirateur de la chambre, zone: Chambre de Léo et Léa, points: 10, tous_les: 7 }
 
 # En un geste, quand c'est fait.
 express:
     - { titre: Vider le lave-vaisselle, zone: Cuisine, points: 10 }
     - { titre: Ranger la vaisselle de l’égouttoir, zone: Cuisine, points: 5 } # points estimés
-    - { titre: Faire le verre, zone: Entrée, points: 10 } # points estimés
+    - { titre: Faire le verre, zone: Salon, points: 10 } # points estimés
 
 # Quand ça arrive : elles dorment jusqu'à ce que quelqu'un les signale.
 occasionnelles:

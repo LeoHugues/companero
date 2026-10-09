@@ -40,6 +40,57 @@ final readonly class RoomShape
         );
     }
 
+    /**
+     * Where the count of tasks to do goes: as high and as far right as it fits inside the room
+     * (the corner of the box around a slanted room may well be in the next room).
+     *
+     * @return array{float, float}
+     */
+    public function badge(float $radius = 2.2): array
+    {
+        for ($y = $this->minY() + $radius; $y <= $this->maxY() - $radius; $y += 0.5) {
+            for ($x = $this->maxX() - $radius; $x >= $this->minX() + $radius; $x -= 0.5) {
+                // Touching a wall is fine: the badge is drawn a little smaller than the room it needs.
+                if ($this->fits($x, $y, 0.95 * $radius)) {
+                    return [round($x, 2), round($y, 2)];
+                }
+            }
+        }
+
+        return [$this->label[0], $this->label[1] - 3];
+    }
+
+    /** A circle around (x, y) is entirely in the room: its centre and eight points of its edge. */
+    private function fits(float $x, float $y, float $radius): bool
+    {
+        if (!$this->contains($x, $y)) {
+            return false;
+        }
+        for ($angle = 0; $angle < 360; $angle += 45) {
+            if (!$this->contains($x + $radius * cos(deg2rad($angle)), $y + $radius * sin(deg2rad($angle)))) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /** Inside the polygon (even–odd rule). */
+    public function contains(float $x, float $y): bool
+    {
+        $inside = false;
+        $count = \count($this->points);
+        for ($i = 0, $j = $count - 1; $i < $count; $j = $i++) {
+            [$xi, $yi] = $this->points[$i];
+            [$xj, $yj] = $this->points[$j];
+            if (($yi > $y) !== ($yj > $y) && $x < ($xj - $xi) * ($y - $yi) / ($yj - $yi) + $xi) {
+                $inside = !$inside;
+            }
+        }
+
+        return $inside;
+    }
+
     /** The "points" attribute of an SVG polygon. */
     public function svgPoints(): string
     {

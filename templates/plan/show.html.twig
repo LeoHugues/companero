@@ -2,9 +2,9 @@
 
 {% block title %}Le plan · Companero{% endblock %}
 
-{# The floor gets darker as a room needs attention; the garden stays green. #}
-{% macro floor(clean) %}{{ clean >= 92 ? '#FFFCF6' : (clean >= 80 ? '#FBEFD9' : (clean >= 50 ? '#F8DDA6' : '#F4C6A6')) }}{% endmacro %}
-{% macro grass(clean) %}{{ clean >= 80 ? '#BFD99A' : (clean >= 50 ? '#D3D99A' : '#E2D29A') }}{% endmacro %}
+{# The floor is green when the room is clean, then turns honey, then coral as it needs attention; the garden around stays pale, not to be mistaken for a clean room. #}
+{% macro floor(clean) %}{{ clean >= 92 ? '#B7DF98' : (clean >= 80 ? '#DDEBA6' : (clean >= 50 ? '#F8DDA6' : '#F4C6A6')) }}{% endmacro %}
+{% macro grass(clean) %}{{ clean >= 80 ? '#EEF3E2' : (clean >= 50 ? '#F2F0DC' : '#F5EAD8') }}{% endmacro %}
 
 {% block body %}
     {% import _self as plan_colors %}
@@ -23,14 +23,21 @@
     {% if plan.drawn %}
         {% set box = plan.viewBox %}
         <svg viewBox="{{ box.x }} {{ box.y }} {{ box.width }} {{ box.height }}" class="w-full select-none" role="group" aria-label="Plan de la maison" font-family="inherit">
+            {# A few tufts of grass on the garden: it is outside, not a room. #}
+            <defs>
+                <pattern id="grass-tufts" width="7" height="6" patternUnits="userSpaceOnUse">
+                    <path d="M1.5 4.2l.4-1.3.4 1.3M5 1.8l.4-1.2.4 1.2" fill="none" stroke="#A9C487" stroke-width="0.3" stroke-linecap="round"/>
+                </pattern>
+            </defs>
             {% if plan.garden %}
                 {% set garden = plan.garden %}
                 <a href="{{ path('plan_zone', {id: garden.zone.id}) }}" aria-label="{{ garden.zone.name }} : propre à {{ garden.cleanliness }} %{{ garden.pressingCount ? ', ' ~ garden.pressingCount ~ ' à faire' }}" class="plan-room">
-                    <rect x="{{ box.x + 0.4 }}" y="{{ box.y + 0.4 }}" width="{{ box.width - 0.8 }}" height="{{ box.height - 0.8 }}" rx="3" fill="{{ plan_colors.grass(garden.cleanliness) }}" stroke="#8DAF62" stroke-width="0.6"/>
-                    <text x="{{ box.x + box.width / 2 }}" y="{{ box.y + box.height - 1.1 }}" text-anchor="middle" font-size="2.1" font-weight="800" fill="#4F6B2E">{{ garden.zone.name }}{{ garden.pressingCount ? ' · ' ~ garden.pressingCount ~ ' à faire' }}</text>
+                    <rect x="{{ box.x + 0.4 }}" y="{{ box.y + 0.4 }}" width="{{ box.width - 0.8 }}" height="{{ box.height - 0.8 }}" rx="3" fill="{{ plan_colors.grass(garden.cleanliness) }}" stroke="#B5CC97" stroke-width="0.6" stroke-dasharray="1.2 0.8"/>
+                    <rect x="{{ box.x + 0.4 }}" y="{{ box.y + 0.4 }}" width="{{ box.width - 0.8 }}" height="{{ box.height - 0.8 }}" rx="3" fill="url(#grass-tufts)"/>
+                    <text x="{{ box.x + box.width / 2 }}" y="{{ box.y + box.height - 1.1 }}" text-anchor="middle" font-size="2.1" font-weight="800" fill="#6B8A48">{{ garden.zone.name }}{{ garden.pressingCount ? ' · ' ~ garden.pressingCount ~ ' à faire' }}</text>
                 </a>
             {% else %}
-                <rect x="{{ box.x + 0.4 }}" y="{{ box.y + 0.4 }}" width="{{ box.width - 0.8 }}" height="{{ box.height - 0.8 }}" rx="3" fill="#D8E6C0"/>
+                <rect x="{{ box.x + 0.4 }}" y="{{ box.y + 0.4 }}" width="{{ box.width - 0.8 }}" height="{{ box.height - 0.8 }}" rx="3" fill="#EEF3E2"/>
             {% endif %}
 
             {# The walls: the gaps between rooms show the dark house underneath. #}
@@ -58,14 +65,17 @@
                         <text x="{{ lx }}" y="{{ top + (label.lines|length - 1) * label.size * 1.1 + 2.6 }}" text-anchor="middle" font-size="1.7" font-weight="700" fill="#7A6555">{{ clean }} %{{ room.zone.private and shape.maxX - shape.minX >= 20 ? ' · privée' }}</text>
                     {% endif %}
                     {% if room.pressingCount %}
-                        <circle cx="{{ shape.maxX - 2.2 }}" cy="{{ shape.minY + 2.2 }}" r="1.6" fill="#E8692C" stroke="#2E1E14" stroke-width="0.35"/>
-                        <text x="{{ shape.maxX - 2.2 }}" y="{{ shape.minY + 2.2 }}" text-anchor="middle" dominant-baseline="central" font-size="1.9" font-weight="800" fill="#2E1E14">{{ room.pressingCount }}</text>
+                        {% set badge = shape.badge %}
+                        <circle cx="{{ badge[0] }}" cy="{{ badge[1] }}" r="1.6" fill="#E8692C" stroke="#2E1E14" stroke-width="0.35"/>
+                        <text x="{{ badge[0] }}" y="{{ badge[1] }}" text-anchor="middle" dominant-baseline="central" font-size="1.9" font-weight="800" fill="#2E1E14">{{ room.pressingCount }}</text>
                     {% endif %}
                 </a>
             {% endfor %}
         </svg>
         <p class="meta flex flex-wrap items-center gap-x-3 gap-y-1">
-            <span>Plus le sol est foncé, plus la pièce a besoin de toi.</span>
+            <span class="flex items-center gap-1"><span class="inline-block size-3 rounded-[3px] border border-ink bg-[#B7DF98]"></span>propre</span>
+            <span class="flex items-center gap-1"><span class="inline-block size-3 rounded-[3px] border border-ink bg-[#F8DDA6]"></span>à surveiller</span>
+            <span class="flex items-center gap-1"><span class="inline-block size-3 rounded-[3px] border border-ink bg-[#F4C6A6]"></span>a besoin de toi</span>
             <span class="flex items-center gap-1"><span class="inline-block size-3 rounded-full border border-ink bg-clay"></span>tâches à faire</span>
         </p>
     {% endif %}
@@ -73,7 +83,7 @@
     {% if plan.others %}
         {% if plan.drawn %}<h2 class="section-title mt-1">Hors du plan</h2>{% endif %}
         {{ include('plan/_tiles.html.twig', {rooms: plan.others, label: plan.drawn ? 'Les autres zones' : 'Les pièces'}) }}
-        {% if plan.drawn is empty %}<p class="meta">Plus le sol est clair, plus la pièce est propre. Donne une forme aux zones dans les <a href="{{ path('household_edit') }}">réglages de la coloc</a> pour dessiner le vrai plan.</p>{% endif %}
+        {% if plan.drawn is empty %}<p class="meta">Vert : la pièce est propre ; plus elle tire vers l’orange, plus elle a besoin de toi. Donne une forme aux zones dans les <a href="{{ path('household_edit') }}">réglages de la coloc</a> pour dessiner le vrai plan.</p>{% endif %}
     {% endif %}
 {% endblock %}
 

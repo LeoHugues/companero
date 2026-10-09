@@ -2,8 +2,10 @@
 
 namespace App\Controller;
 
+use App\Entity\CatalogItem;
 use App\Entity\Member;
 use App\Entity\Pet;
+use App\Entity\Task;
 use App\Entity\Zone;
 use App\Form\HouseholdType;
 use App\Form\PetType;
@@ -95,6 +97,33 @@ final class HouseholdController extends AbstractController
         // Its tasks are kept and become "toute la coloc".
         $zone->getHousehold()->removeZone($zone);
         $this->entityManager->flush();
+
+        return $this->redirectToRoute('household_edit', status: Response::HTTP_SEE_OTHER);
+    }
+
+    /** One room is part of another after all (the entrance, of the living room): its tasks move there. */
+    #[Route('/zones/{id}/fusionner', name: 'zone_merge', requirements: ['id' => '\d+'], methods: ['POST'])]
+    #[IsGranted(HouseholdVoter::ACCESS, subject: 'zone')]
+    #[IsCsrfTokenValid('submit', tokenKey: '_csrf_token')]
+    public function mergeZone(Zone $zone, Request $request): RedirectResponse
+    {
+        $into = $this->entityManager->find(Zone::class, $request->request->getInt('dans'));
+        if (null === $into || $into === $zone || $into->getHousehold() !== $zone->getHousehold()) {
+            throw $this->createNotFoundException();
+        }
+        foreach ([Task::class, CatalogItem::class] as $class) {
+            $this->entityManager->createQueryBuilder()
+                ->update($class, 'x')
+                ->set('x.zone', ':into')
+                ->where('x.zone = :zone')
+                ->setParameter('into', $into)
+                ->setParameter('zone', $zone)
+                ->getQuery()
+                ->execute();
+        }
+        $zone->getHousehold()->removeZone($zone);
+        $this->entityManager->flush();
+        $this->addFlash('success', \sprintf('« %s » fait maintenant partie de « %s », avec ses tâches.', $zone->getName(), $into->getName()));
 
         return $this->redirectToRoute('household_edit', status: Response::HTTP_SEE_OTHER);
     }
