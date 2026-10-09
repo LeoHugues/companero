@@ -24,7 +24,7 @@ final readonly class TaskBonusPreview
     #[AsTwigFunction('task_boost')]
     public function boost(TaskView $view): int
     {
-        return $this->activeBoosts()['points']?->bonusFor($view->task->getPoints()) ?? 0;
+        return $this->activeBoosts()['points']?->bonusFor($view->task->getCurrentPoints()) ?? 0;
     }
 
     /** @return array{points: ?ActiveBoost, xp: ?ActiveBoost} */

@@ -57,13 +57,12 @@ final class TaskFlowTest extends AppTestCase
         // Common unless said otherwise, whatever the points.
         $this->client->request('GET', '/taches');
         self::assertSelectorExists(\sprintf('#template-%d[data-rarity=common]', $common?->getId()));
-        self::assertSelectorTextContains('#template-'.$common?->getId(), 'Commune');
         self::assertSelectorExists(\sprintf('#template-%d[data-rarity=legendary]', $legendary?->getId()));
-        self::assertSelectorTextContains('#template-'.$legendary?->getId(), 'Légendaire');
 
-        // Never done, both are due: the home page shows them with their rarity too.
+        // Never done, both are due: the home page shows them with their rarity too, as the card's skin, never as a word.
         $this->client->request('GET', '/');
         self::assertSelectorExists(\sprintf('#task-%d.rarity-legendary', $legendary?->getId()));
+        self::assertSelectorTextNotContains('#task-'.$legendary?->getId(), 'Légendaire');
 
         $this->client->request('GET', '/taches/'.$common?->getId().'/modifier');
         $this->client->submitForm('Enregistrer', ['task[rarity]' => 'epic']);
@@ -130,7 +129,7 @@ final class TaskFlowTest extends AppTestCase
         $this->client->request('GET', '/taches/'.$task?->getId());
         self::assertResponseIsSuccessful();
         self::assertSelectorTextContains('h1', 'Serpillière');
-        self::assertSelectorTextContains('#task-'.$task?->getId(), 'Rare');
+        self::assertSelectorExists('#task-'.$task?->getId().'.rarity-rare');
         self::assertSelectorTextContains('[aria-labelledby=done-title]', 'Pas encore faite');
 
         // Done from its page: back to it, with the latest completion.
@@ -170,7 +169,7 @@ final class TaskFlowTest extends AppTestCase
         $this->client->request('GET', '/taches/'.$call?->getId().'/modele');
         self::assertResponseStatusCodeSame(404);
         $this->client->request('GET', '/taches/'.$call?->getId());
-        self::assertSelectorTextContains('main', 'À faire · une fois');
+        self::assertSelectorTextContains('[aria-labelledby=about-title]', 'à faire une fois');
     }
 
     public function testADoneOneOffTaskLeavesItsPage(): void
@@ -322,5 +321,42 @@ final class TaskFlowTest extends AppTestCase
 
         $this->client->request('POST', '/taches/'.$task?->getId().'/fait', ['_csrf_token' => 'csrf-token']);
         self::assertResponseStatusCodeSame(403);
+    }
+
+    public function testATaskToDoHasItsOwnNoteAndPoints(): void
+    {
+        $leo = $this->foundHousehold();
+        $this->client->loginUser($leo);
+        $this->client->request('GET', '/taches/nouvelle/modele');
+        $this->client->submitForm('Créer le modèle', ['task[title]' => 'Serpillière', 'task[kind]' => 'rolling', 'task[rhythmDays]' => '7', 'task[points]' => '20']);
+        $task = static::getContainer()->get(TaskRepository::class)->findOneBy(['title' => 'Serpillière']);
+        $id = $task?->getId();
+
+        // This time it is more work: +15, then -5. The template keeps its 20 points.
+        $this->client->request('GET', '/taches/'.$id);
+        $this->client->submitForm('+15');
+        self::assertResponseRedirects('/taches/'.$id);
+        $this->client->followRedirect();
+        $this->client->submitForm('−5');
+        $this->client->followRedirect();
+        self::assertSelectorTextContains('#task-points', '30');
+        self::assertSelectorTextContains('#task-'.$id, '+30');
+
+        $this->client->submitForm('Ajouter', ['note' => 'Les seaux sont au garage']);
+        $this->client->followRedirect();
+        self::assertSelectorTextContains('#task-note', 'Les seaux sont au garage');
+        $this->client->request('GET', '/');
+        self::assertSelectorTextContains('#task-'.$id, 'Les seaux sont au garage');
+
+        $this->client->request('GET', '/taches/'.$id.'/modele');
+        self::assertSelectorTextContains('main', '20 pts');
+
+        // Done: the points of this time, then the next time starts afresh.
+        $this->client->request('GET', '/taches/'.$id);
+        $this->submitAction('/taches/'.$id.'/fait');
+        self::assertSame(30, static::getContainer()->get(PointEntryRepository::class)->totalFor($leo));
+        $task = static::getContainer()->get(TaskRepository::class)->find($id);
+        self::assertSame(20, $task?->getCurrentPoints());
+        self::assertNull($task?->getNote());
     }
 }

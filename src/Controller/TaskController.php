@@ -171,6 +171,38 @@ final class TaskController extends AbstractController
         return $this->redirectBack($request);
     }
 
+    /** "This time it is more (or less) work": the points of the task to do, not of its template. */
+    #[Route('/{id}/points', name: 'task_adjust_points', requirements: ['id' => '\d+'], methods: ['POST'])]
+    #[IsGranted(HouseholdVoter::ACCESS, subject: 'task')]
+    #[IsCsrfTokenValid('submit', tokenKey: '_csrf_token')]
+    public function adjustPoints(Task $task, Request $request): RedirectResponse
+    {
+        $delta = $request->request->getInt('ecart');
+        if ($task->isArchived() || !\in_array(abs($delta), Task::POINT_STEPS, true)) {
+            throw $this->createNotFoundException();
+        }
+        $task->adjustPoints($delta);
+        $this->entityManager->flush();
+
+        return $this->redirectToRoute('task_show', ['id' => $task->getId()], Response::HTTP_SEE_OTHER);
+    }
+
+    /** A word about this time only: it goes away once the task is done. */
+    #[Route('/{id}/note', name: 'task_note', requirements: ['id' => '\d+'], methods: ['POST'])]
+    #[IsGranted(HouseholdVoter::ACCESS, subject: 'task')]
+    #[IsCsrfTokenValid('submit', tokenKey: '_csrf_token')]
+    public function note(Task $task, Request $request): RedirectResponse
+    {
+        if ($task->isArchived()) {
+            throw $this->createNotFoundException();
+        }
+        $task->setNote(mb_substr($request->request->getString('note'), 0, Task::NOTE_MAX_LENGTH));
+        $this->entityManager->flush();
+        $this->addFlash('success', null !== $task->getNote() ? 'La note est ajoutée à la tâche.' : 'La note est retirée.');
+
+        return $this->redirectToRoute('task_show', ['id' => $task->getId()], Response::HTTP_SEE_OTHER);
+    }
+
     #[Route('/{id}/supprimer', name: 'task_delete', requirements: ['id' => '\d+'], methods: ['POST'])]
     #[IsGranted(HouseholdVoter::ACCESS, subject: 'task')]
     #[IsCsrfTokenValid('submit', tokenKey: '_csrf_token')]

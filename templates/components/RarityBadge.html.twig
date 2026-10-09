@@ -1,6 +1,0 @@
-{% props rarity %}
-{# The rarity of a task card (App\Enum\Rarity), shown like in a card game. #}
-<span {{ attributes.defaults({class: 'rarity-badge rarity-badge-' ~ rarity.value}) }}>
-    {%- if rarity.value != 'common' %}<twig:Icon name="gem" size="11" stroke="2.6"/>{% endif -%}
-    {{ rarity.label }}
-</span>

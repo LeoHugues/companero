@@ -2,7 +2,7 @@
 {#
     A task as a card to play: its medallion (the category, ringed by the time left), its title,
     where and how often, then "Je prends" and "C'est fait", which shows what it is worth.
-    Its rarity is the card's skin; a surprise hidden in it this week makes it one class rarer.
+    Its rarity is the card's skin, never written on it; a surprise hidden in it this week makes it one class rarer.
     The whole card opens its page; the settings wheel and the buttons sit above that link.
     compact: lists (rooms), with a single round "done" button.
 #}
@@ -20,7 +20,6 @@
         <twig:TaskMedallion :view="view" :size="compact ? 46 : 56" class="shrink-0"/>
         <div class="flex min-w-0 flex-1 flex-col gap-1">
             <div class="flex items-center gap-1.5">
-                {% if rarity.value != 'common' %}<twig:RarityBadge :rarity="rarity"/>{% endif %}
                 <twig:UrgencyPill :view="view"/>
                 {% if view.bounty %}
                     <span class="bounty-tag bounty-tag-icon" title="Une surprise attend la première personne qui la fait cette semaine" aria-label="Surprise cachée"><twig:Icon name="gift" size="13" stroke="2.6"/></span>
@@ -34,6 +33,7 @@
                 {{ task.pet.name ?? task.zone.name ?? (task.category.value == 'pets' ? 'Les animaux' : 'Toute la coloc') }} · {{ task_rule_label(task) }}
                 {% if status.weeklyCommitment %}· {{ status.doneThisWeek }}/{{ status.weeklyCommitment }} cette sem.{% endif %}
             </p>
+            {% if task.note %}<p class="flex items-start gap-1 text-xs font-semibold text-ink-soft"><twig:Icon name="edit" size="12" class="mt-px shrink-0"/><span class="line-clamp-2">{{ task.note }}</span></p>{% endif %}
             <twig:ReminderNote :view="view" :member="member"/>
         </div>
         <a href="{{ path('task_edit', {id: task.id}) }}" aria-label="Réglages de « {{ task.title }} »" title="Réglages de la tâche"

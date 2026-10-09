@@ -19,6 +19,9 @@ class Task
     public const DEFAULT_RESERVATION_HOURS = 24;
     /** scheduledWeekday value for a task that comes back every day (feeding the cats…). */
     public const EVERY_DAY = 0;
+    public const NOTE_MAX_LENGTH = 255;
+    /** The ± buttons of a task to do: a few minutes more or less than usual. */
+    public const POINT_STEPS = [5, 10, 15];
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -128,6 +131,18 @@ class Task
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $raisedAt = null;
 
+    /**
+     * A word about this time only ("the bins are in the garage"), not about the template:
+     * it goes away once the task is done.
+     */
+    #[ORM\Column(length: self::NOTE_MAX_LENGTH, nullable: true)]
+    #[Assert\Length(max: self::NOTE_MAX_LENGTH)]
+    private ?string $note = null;
+
+    /** More (or fewer) points than the template this time: it was more work, or less. Reset once done. */
+    #[ORM\Column(type: Types::SMALLINT, options: ['default' => 0])]
+    private int $pointsAdjustment = 0;
+
     public function __construct(Household $household, Member $createdBy, \DateTimeImmutable $createdAt)
     {
         $this->household = $household;
@@ -185,6 +200,11 @@ class Task
         // Done: an occasional task goes back to sleep until it is needed again.
         if (null !== $this->raisedAt && $at >= $this->raisedAt) {
             $this->raisedAt = null;
+        }
+        // The note and the extra points were about this time: the next one starts afresh.
+        if ($this->kind->isRecurring()) {
+            $this->note = null;
+            $this->pointsAdjustment = 0;
         }
 
         if (!$this->kind->isRecurring()) {
@@ -346,6 +366,35 @@ class Task
     public function setPoints(int $points): void
     {
         $this->points = $points;
+    }
+
+    /** What doing it this time is worth: the template's points, give or take this time's adjustment. */
+    public function getCurrentPoints(): int
+    {
+        return max(0, $this->points + $this->pointsAdjustment);
+    }
+
+    public function getPointsAdjustment(): int
+    {
+        return $this->pointsAdjustment;
+    }
+
+    /** A few points more, or fewer, this time only: never below nothing, never above the maximum. */
+    public function adjustPoints(int $delta): void
+    {
+        $current = max(0, min(500, $this->getCurrentPoints() + $delta));
+        $this->pointsAdjustment = $current - $this->points;
+    }
+
+    public function getNote(): ?string
+    {
+        return $this->note;
+    }
+
+    public function setNote(?string $note): void
+    {
+        $note = null !== $note ? trim($note) : null;
+        $this->note = '' === $note ? null : $note;
     }
 
     public function getRhythmDays(): ?int

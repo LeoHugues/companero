@@ -22,26 +22,20 @@
     <article class="task-card card rarity-{{ rarity.value }} task-card-{{ status.alert }} relative flex flex-col gap-3 p-5" id="task-{{ task.id }}" data-rarity="{{ rarity.value }}" data-alert="{{ status.alert }}">
         <div class="flex items-center gap-4">
             <twig:TaskMedallion :view="view" :size="84" class="shrink-0"/>
-            <div class="flex min-w-0 flex-col gap-1.5">
-                <div class="flex flex-wrap items-center gap-1.5">
-                    <twig:RarityBadge :rarity="rarity"/>
-                    <twig:UrgencyPill :view="view"/>
-                </div>
-                <p class="text-xs font-extrabold tracking-wide text-muted uppercase">{{ task.kind.value == 'quick' ? 'Express · un appui quand c’est fait' : (task.kind.value == 'occasional' ? 'Occasionnelle · quand ça arrive' : (task.kind.isRecurring ? 'À faire · revient ' ~ task_rule_label(task) : 'À faire · une fois')) }}</p>
+            <div class="flex min-w-0 flex-col items-start gap-1.5">
+                <twig:UrgencyPill :view="view"/>
+                <p class="text-sm font-semibold text-muted">{{ task.pet.name ?? task.zone.name ?? (task.category.value == 'pets' ? 'Les animaux' : 'Toute la coloc') }}</p>
             </div>
         </div>
         <h1 class="text-[26px] leading-tight [overflow-wrap:anywhere]">{{ task.title }}</h1>
-        <p class="text-sm font-semibold text-muted">
-            {{ task.pet.name ?? task.zone.name ?? (task.category.value == 'pets' ? 'Les animaux' : 'Toute la coloc') }} · {{ task.category.label }} · {{ task_rule_label(task) }}
-        </p>
-        {% if task.kind.value == 'rolling' %}
-            <p class="text-xs font-bold text-muted">Fraîcheur <twig:Count :value="status.freshness" :key="'task-' ~ task.id"/> %</p>
+        {% if task.note %}
+            <p class="task-note" id="task-note"><twig:Icon name="edit" size="15" class="mt-0.5 shrink-0"/><span>{{ task.note }}</span></p>
         {% endif %}
         {% if boost %}<p class="flex items-center gap-1 text-sm font-bold text-muted"><twig:Icon name="bolt" size="15" stroke="2.6"/> dont +{{ boost }} de boost</p>{% endif %}
         {% if view.bounty %}
             <p class="flex items-center gap-2.5 rounded-2xl bg-ink px-3 py-2.5 text-sm font-semibold text-cream">
                 <span class="bounty-tag shrink-0"><twig:Icon name="gift" size="12" stroke="2.6"/>Surprise</span>
-                <span>Une surprise attend la première personne qui la fait cette semaine. {% if rarity != task.rarity %}En attendant, la carte passe {{ rarity.label|lower }}.{% endif %}</span>
+                <span>Une surprise attend la première personne qui la fait cette semaine.</span>
             </p>
         {% endif %}
         <twig:ReminderNote :view="view" :member="app.user"/>
@@ -55,39 +49,58 @@
         {% endif %}
     </article>
 
-    {% if status.dueAt or status.warningAt or status.lateAt %}
-        <section class="flex flex-col gap-2" aria-labelledby="when-title">
-            <h2 id="when-title" class="section-title">Quand ?</h2>
-            <ol class="card flex flex-col gap-0 divide-y divide-line px-3.5 py-1">
-                {% if status.warningAt %}
-                    <li class="flex items-center gap-3 py-2.5">
-                        <span class="size-3 shrink-0 rounded-full bg-warn" aria-hidden="true"></span>
-                        <span class="flex-1 text-sm font-bold">Orange</span>
-                        <span class="text-sm text-muted">{{ status.warningAt < now ? 'depuis ' : 'à partir de ' }}{{ task_moment(status.warningAt) }}</span>
-                    </li>
-                {% endif %}
-                {% if status.dueAt %}
-                    <li class="flex items-center gap-3 py-2.5">
-                        <span class="size-3 shrink-0 rounded-full bg-clay" aria-hidden="true"></span>
-                        <span class="flex-1 text-sm font-bold">{{ task.kind.value == 'rolling' ? 'Le rythme est atteint' : 'Échéance' }}</span>
-                        <span class="text-sm text-muted">{{ task_moment(status.dueAt) }}</span>
-                    </li>
-                {% endif %}
-                {% if status.lateAt %}
-                    <li class="flex items-center gap-3 py-2.5">
-                        <span class="size-3 shrink-0 rounded-full bg-danger" aria-hidden="true"></span>
-                        <span class="flex-1 text-sm font-bold">Rouge, en retard</span>
-                        <span class="text-sm text-muted">{{ status.lateAt < now ? 'depuis ' : 'après ' }}{{ task_moment(status.lateAt) }}</span>
-                    </li>
-                {% endif %}
-            </ol>
-            <p class="meta">Ces délais se règlent dans <a href="{{ path(task.kind.isRecurring ? 'task_template' : 'task_edit', {id: task.id}) }}">{{ task.kind.isRecurring ? 'son modèle' : 'les réglages de la tâche' }}</a>.</p>
-        </section>
-    {% endif %}
+    {# This time only: more or less work than usual. The template keeps its points. #}
+    <section class="flex flex-col gap-2" aria-labelledby="points-title">
+        <h2 id="points-title" class="section-title">Ce qu’elle vaut cette fois</h2>
+        <form method="post" action="{{ path('task_adjust_points', {id: task.id}) }}" class="card flex flex-col gap-2.5 px-3.5 py-3">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
+            <div class="flex items-center justify-between gap-1">
+                {% for step in constant('App\\Entity\\Task::POINT_STEPS')|reverse %}
+                    <button type="submit" name="ecart" value="-{{ step }}" class="points-step" aria-label="{{ step }} points de moins" data-haptic="tick"{{ task.currentPoints == 0 ? ' disabled' }}>−{{ step }}</button>
+                {% endfor %}
+                <p class="flex min-w-[4.5rem] flex-col items-center leading-none">
+                    <span class="text-2xl font-extrabold text-clay-dark" id="task-points">{{ task.currentPoints }}</span>
+                    <span class="text-xs font-bold text-muted">pts</span>
+                </p>
+                {% for step in constant('App\\Entity\\Task::POINT_STEPS') %}
+                    <button type="submit" name="ecart" value="{{ step }}" class="points-step" aria-label="{{ step }} points de plus" data-haptic="tick">+{{ step }}</button>
+                {% endfor %}
+            </div>
+            <p class="meta text-center">
+                {%- if task.pointsAdjustment %}
+                    {{ task.pointsAdjustment > 0 ? 'Plus de travail' : 'Moins de travail' }} que d’habitude : {{ task.pointsAdjustment > 0 ? '+' }}{{ task.pointsAdjustment }} pts{{ task.kind.isRecurring ? ' cette fois (le modèle reste à ' ~ task.points ~ ' pts)' }}.
+                {%- else %}
+                    Plus long ou plus dur que prévu ? Ajuste les points{{ task.kind.isRecurring ? ' de cette fois seulement' }}.
+                {%- endif -%}
+            </p>
+        </form>
+    </section>
+
+    {# A word about this time, for whoever does it. #}
+    <section class="flex flex-col gap-2" aria-labelledby="note-title">
+        <h2 id="note-title" class="section-title">{{ task.note ? 'La note' : 'Une note pour cette fois' }}</h2>
+        <form method="post" action="{{ path('task_note', {id: task.id}) }}" class="flex flex-col gap-2">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
+            <textarea name="note" class="input min-h-[76px] py-2.5" rows="2" maxlength="{{ constant('App\\Entity\\Task::NOTE_MAX_LENGTH') }}" aria-labelledby="note-title" placeholder="Ex. Les sacs sont dans le garage, attention au vase…">{{ task.note }}</textarea>
+            <div class="flex items-center justify-between gap-3">
+                <p class="meta">{{ task.kind.isRecurring ? 'Elle s’efface une fois la tâche faite.' : 'Pour qui s’en occupera.' }}</p>
+                <button type="submit" class="btn-primary h-10 shrink-0 px-4 text-sm">{{ task.note ? 'Modifier' : 'Ajouter' }}</button>
+            </div>
+        </form>
+    </section>
 
     <section class="flex flex-col gap-2" aria-labelledby="about-title">
         <h2 id="about-title" class="section-title">En bref</h2>
         <dl class="card grid grid-cols-[auto_1fr] gap-x-4 gap-y-2.5 px-3.5 py-3 text-sm">
+            {% if status.urgency.value == 'late' and status.lateAt %}
+                <dt class="font-bold">Quand</dt>
+                <dd class="font-bold text-danger-ink">en retard depuis {{ task_moment(status.lateAt) }}</dd>
+            {% elseif status.dueAt %}
+                <dt class="font-bold">Quand</dt>
+                <dd class="text-muted">{{ status.dueAt < now ? 'depuis' : 'pour' }} {{ task_moment(status.dueAt) }}</dd>
+            {% endif %}
+            <dt class="font-bold">Revient</dt>
+            <dd class="text-muted">{{ task.kind.isRecurring ? task_rule_label(task) : 'non, à faire une fois' }}</dd>
             {% if status.weeklyCommitment %}
                 <dt class="font-bold">Cette semaine</dt>
                 <dd class="text-muted">{{ status.doneThisWeek }} fois sur {{ status.weeklyCommitment }}</dd>
@@ -104,7 +117,7 @@
             {% endif %}
             {% if task.cooldownHours %}
                 <dt class="font-bold">Délai</dt>
-                <dd class="text-muted">pas avant {{ task.cooldownHours % 24 == 0 ? (task.cooldownHours // 24) ~ ' j' : task.cooldownHours ~ ' h' }} après l’avoir faite</dd>
+                <dd class="text-muted">pas avant {{ duration_label(task.cooldownHours) }} après l’avoir faite</dd>
             {% endif %}
             <dt class="font-bold">Ajoutée</dt>
             <dd class="text-muted">par {{ task.createdBy.name }} le {{ task.createdAt|date('d/m/Y') }}</dd>

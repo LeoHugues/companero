@@ -4,7 +4,7 @@
     to collect: it shows what the task is worth). compact: only the seat taken, and a round button.
 #}
 {% set task = view.task %}
-{% set points = task.points + boost %}
+{% set points = task.currentPoints + boost %}
 <div {{ attributes.defaults({class: 'flex items-center justify-between gap-2'}) }}>
     {% if view.reservedBy %}
         <span class="seat seat-taken">

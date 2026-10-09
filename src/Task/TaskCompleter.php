@@ -49,14 +49,17 @@ final readonly class TaskCompleter
         }
         $status = $this->statusAt($task, $at, $backdated ? $this->completions->findLatestForTask($task, $at)?->getCompletedAt() : $task->getLastCompletedAt());
 
+        // Noted afterwards, it may come before a later completion: that one stays the reference.
+        $current = null === $task->getLastCompletedAt() || $at >= $task->getLastCompletedAt();
+
         $completion = new Completion($task, $member, $at, $status->urgency);
         $this->entityManager->persist($completion);
-        $result = $this->score($completion, $task->getPoints());
+        // The points of this time, adjusted on its card, unless it was an earlier time.
+        $result = $this->score($completion, $current ? $task->getCurrentPoints() : $task->getPoints());
         // Surprises are found doing the task, not noting it afterwards.
         $bounty = $backdated ? null : $this->bounties->claim($completion);
 
-        // Noted afterwards, it may come before a later completion: that one stays the reference.
-        if (null === $task->getLastCompletedAt() || $at >= $task->getLastCompletedAt()) {
+        if ($current) {
             $task->complete($at, $member);
         }
         $this->entityManager->flush();

@@ -30,7 +30,11 @@
         <dt class="font-bold">Vaut</dt>
         <dd class="font-extrabold text-clay-dark">{{ task.points }} pts</dd>
         <dt class="font-bold">Carte</dt>
-        <dd><twig:RarityBadge :rarity="task.rarity"/></dd>
+        <dd class="flex items-center gap-2 text-muted">
+            {# A tiny card in its skin: the rarity is seen, not written on the cards. #}
+            <span class="rarity-{{ task.rarity.value }} inline-block h-6 w-10 shrink-0 rounded-md border-[1.5px] border-line bg-surface" aria-hidden="true"></span>
+            {{ task.rarity.label|lower }}
+        </dd>
         <dt class="font-bold">Catégorie</dt>
         <dd class="text-muted">{{ task.category.label }}</dd>
         {% if task.kind.isPlanned or task.kind.value == 'occasional' %}
