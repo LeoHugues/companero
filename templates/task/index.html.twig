@@ -3,8 +3,9 @@
 {% block title %}Les modèles · Companero{% endblock %}
 
 {#
-    The templates: what comes back in the house (regular, on a fixed day, express) and the catalogue
-    of one-off tasks launched by hand. What there is to do right now is on the home page.
+    The templates: what comes back in the house (regular, on a fixed day, express, occasional) and the
+    catalogue of one-off tasks launched by hand. What there is to do right now is on the home page.
+    A search box, and folds by room, by kind of work or by how they come back.
 #}
 {% block body %}
     <header class="flex items-center justify-between gap-3">
@@ -15,82 +16,82 @@
         <a href="{{ path('plan_show') }}" class="chip shrink-0 gap-1.5"><twig:Icon name="plan" size="18"/> Plan</a>
     </header>
 
-    <nav class="-mx-5 flex gap-2 overflow-x-auto px-5 pb-1" aria-label="Filtrer par zone">
-        <a href="{{ path('task_index') }}" class="chip shrink-0 {{ current_zone is null ? 'chip-active' : '' }}"{% if current_zone is null %} aria-current="page"{% endif %}>Tout</a>
-        {% for zone in zones %}
-            <a href="{{ path('task_index', {zone: zone.id}) }}" class="chip shrink-0 {{ current_zone == zone.id ? 'chip-active' : '' }}"{% if current_zone == zone.id %} aria-current="page"{% endif %}>{{ zone.name }}</a>
-        {% endfor %}
-    </nav>
-
-    <section class="flex flex-col gap-2" aria-labelledby="recurring-title">
-        <div class="flex flex-col">
-            <h2 id="recurring-title" class="section-title">Reviennent toutes seules</h2>
-            <p class="meta">Une tâche à faire arrive sur l’accueil quand c’est le moment.</p>
+    <div class="flex flex-col gap-4" data-controller="filter">
+        <div class="flex flex-col gap-2.5">
+            <label class="relative block">
+                <span class="sr-only">Chercher un modèle</span>
+                <span class="pointer-events-none absolute inset-y-0 left-3.5 flex items-center text-muted"><twig:Icon name="search" size="18"/></span>
+                <input type="search" class="input pl-10" placeholder="Chercher parmi les {{ count }} modèles…" autocomplete="off"
+                       data-filter-target="input" data-action="input->filter#filter">
+            </label>
+            <nav class="flex items-center gap-2" aria-label="Ranger par">
+                <span class="text-sm font-bold text-muted">Ranger par</span>
+                {% for key, label in groupings %}
+                    <a href="{{ path('task_index', {par: key}) }}" class="chip h-8 px-3 text-[13px] {{ grouping == key ? 'chip-active' : '' }}"{% if grouping == key %} aria-current="page"{% endif %}>{{ label }}</a>
+                {% endfor %}
+            </nav>
         </div>
-        {% if recurring is not empty %}
-            <ul class="card divide-y divide-line px-3.5">
-                {% for task in recurring %}<twig:TemplateRow :task="task"/>{% endfor %}
-            </ul>
+
+        {% for group in groups %}
+            <details class="fold" id="fold-{{ group.key }}" open data-filter-target="group" data-controller="disclosure" data-action="toggle->disclosure#remember turbo:morph-element->disclosure#restore">
+                <summary class="fold-summary">
+                    <span class="flex min-w-0 flex-1 flex-col">
+                        <span class="truncate">{{ group.label }}</span>
+                        {% if group.hint %}<span class="text-xs font-semibold text-muted">{{ group.hint }}</span>{% endif %}
+                    </span>
+                    <span class="fold-count">{{ group.tasks|length }}</span>
+                    <twig:Icon name="chevron-down" size="18" stroke="2.4" class="fold-chevron"/>
+                </summary>
+                <ul class="card divide-y divide-line px-3.5">
+                    {% for task in group.tasks %}
+                        {% set occasional = task.kind.value == 'occasional' %}
+                        <twig:TemplateRow :task="task" data-filter-target="item" data-filter-text="{{ task.title }} {{ task.zone.name ?? '' }} {{ task.pet.name ?? '' }} {{ task.category.label }} {{ task.kind.label }}">
+                            {% if occasional and task.raised %}
+                                <span class="raise-awake" title="Signalée : sa carte attend sur l’accueil"><twig:Icon name="siren" size="13" stroke="2.4"/></span>
+                            {% elseif occasional %}
+                                <twig:RaiseButton :task="task" back="tasks" round/>
+                            {% endif %}
+                        </twig:TemplateRow>
+                    {% endfor %}
+                </ul>
+            </details>
         {% else %}
-            <p class="meta py-2">Aucun modèle ici. <a href="{{ path('task_new_template') }}">En créer un</a></p>
+            <p class="card p-4 text-sm text-muted">Aucun modèle encore. <a href="{{ path('task_new_template') }}">En créer un</a> : une tâche qui revient toute seule.</p>
+        {% endfor %}
+
+        {% if catalog is not empty %}
+            <details class="fold" id="fold-catalog" data-filter-target="group" data-controller="disclosure" data-action="toggle->disclosure#remember turbo:morph-element->disclosure#restore">
+                <summary class="fold-summary">
+                    <span class="flex min-w-0 flex-1 flex-col">
+                        <span>Catalogue</span>
+                        <span class="text-xs font-semibold text-muted">Des tâches ponctuelles toutes prêtes : on en lance une quand il le faut.</span>
+                    </span>
+                    <span class="fold-count">{{ catalog|length }}</span>
+                    <twig:Icon name="chevron-down" size="18" stroke="2.4" class="fold-chevron"/>
+                </summary>
+                <ul class="card divide-y divide-line px-3.5">
+                    {% for item in catalog %}
+                        <li class="flex items-center gap-2" data-filter-target="item" data-filter-text="{{ item.title }} {{ item.zone.name ?? '' }} {{ item.category.label }}">
+                            <a href="{{ path('task_new_one_off', {modele: item.id}) }}" class="flex min-w-0 flex-1 items-center gap-3 py-3 text-ink no-underline hover:text-ink">
+                                <span class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-track text-ink-soft" aria-hidden="true"><twig:Icon name="layers" size="20"/></span>
+                                <span class="flex min-w-0 flex-1 flex-col gap-0.5">
+                                    <span class="text-[15px] leading-snug font-bold">{{ item.title }}</span>
+                                    <span class="text-xs text-muted">{{ item.zone ? item.zone.name ~ ' · ' }}{{ item.category.label }}</span>
+                                </span>
+                                <span class="flex h-8 shrink-0 items-center gap-1 rounded-full bg-sun px-3 text-xs font-extrabold">Lancer · {{ item.points }}</span>
+                            </a>
+                            <form method="post" action="{{ path('catalog_delete', {id: item.id}) }}" data-turbo-confirm="Retirer « {{ item.title }} » du catalogue ?">
+                                <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
+                                <button type="submit" class="flex size-8 cursor-pointer items-center justify-center rounded-full text-dust transition hover:bg-track hover:text-ink" aria-label="Retirer « {{ item.title }} » du catalogue"><twig:Icon name="trash" size="16"/></button>
+                            </form>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </details>
         {% endif %}
-    </section>
 
-    {% if occasional is not empty %}
-        <section class="flex flex-col gap-2" aria-labelledby="occasional-title">
-            <div class="flex flex-col">
-                <h2 id="occasional-title" class="section-title">Occasionnelles</h2>
-                <p class="meta">Elles dorment jusqu’à ce que ça arrive : un appui, et leur carte attend sur l’accueil.</p>
-            </div>
-            <ul class="card divide-y divide-line px-3.5">
-                {% for task in occasional %}
-                    <twig:TemplateRow :task="task">
-                        {% if task.raised %}
-                            <span class="raise-awake" title="Signalée : sa carte attend sur l’accueil"><twig:Icon name="siren" size="13" stroke="2.4"/></span>
-                        {% else %}
-                            <twig:RaiseButton :task="task" back="tasks" round/>
-                        {% endif %}
-                    </twig:TemplateRow>
-                {% endfor %}
-            </ul>
-        </section>
-    {% endif %}
-
-    {% if quick is not empty and current_zone is null %}
-        <section class="flex flex-col gap-2" aria-labelledby="quick-title">
-            <div class="flex flex-col">
-                <h2 id="quick-title" class="section-title">Express</h2>
-                <p class="meta">Jamais en retard : un appui sur l’accueil quand c’est fait.</p>
-            </div>
-            <ul class="card divide-y divide-line px-3.5">
-                {% for task in quick %}<twig:TemplateRow :task="task"/>{% endfor %}
-            </ul>
-        </section>
-    {% endif %}
-
-    {% if catalog is not empty and current_zone is null %}
-        <section class="flex flex-col gap-2" aria-labelledby="catalog-title">
-            <div class="flex flex-col">
-                <h2 id="catalog-title" class="section-title">Catalogue</h2>
-                <p class="meta">Des tâches ponctuelles toutes prêtes : on en lance une quand il le faut.</p>
-            </div>
-            <ul class="card divide-y divide-line px-3.5">
-                {% for item in catalog %}
-                    <li>
-                        <a href="{{ path('task_new_one_off', {modele: item.id}) }}" class="flex items-center gap-3 py-3 text-ink no-underline hover:text-ink">
-                            <span class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-track text-ink-soft" aria-hidden="true"><twig:Icon name="layers" size="20"/></span>
-                            <span class="flex min-w-0 flex-1 flex-col gap-0.5">
-                                <span class="text-[15px] leading-snug font-bold">{{ item.title }}</span>
-                                <span class="text-xs text-muted">{{ item.category.label }} · ponctuelle</span>
-                            </span>
-                            <span class="text-sm font-extrabold whitespace-nowrap">{{ item.points }} pts</span>
-                            <span class="flex h-8 shrink-0 items-center gap-1 rounded-full bg-sun px-3 text-xs font-extrabold">Lancer</span>
-                        </a>
-                    </li>
-                {% endfor %}
-            </ul>
-        </section>
-    {% endif %}
+        <p class="card p-4 text-sm text-muted" data-filter-target="empty" hidden>Aucun modèle ne correspond. <a href="{{ path('task_new_template') }}">En créer un</a></p>
+    </div>
 {% endblock %}
 
 {% block nav %}<twig:BottomNav active="tasks"/>{% endblock %}

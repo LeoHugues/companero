@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\CatalogItem;
 use App\Entity\Member;
 use App\Entity\Task;
+use App\Enum\TaskCategory;
 use App\Enum\TaskKind;
 use App\Form\TaskType;
 use App\Repository\CatalogItemRepository;
@@ -42,25 +43,69 @@ final class TaskController extends AbstractController
     ) {
     }
 
+    /** How the list of templates can be sorted: by room, by kind of work, by how they come back. */
+    private const GROUPINGS = ['piece' => 'Pièce', 'categorie' => 'Catégorie', 'frequence' => 'Fréquence'];
+
     #[Route('', name: 'task_index', methods: ['GET'])]
     public function index(
         #[CurrentUser] Member $member,
         TaskBoardBuilder $boards,
         CatalogItemRepository $catalog,
-        #[MapQueryParameter] ?int $zone = null,
+        #[MapQueryParameter] string $par = 'piece',
     ): Response {
         $household = $member->getHousehold();
-        $board = $boards->build($household);
-
+        $par = \array_key_exists($par, self::GROUPINGS) ? $par : 'piece';
         // The templates only: the tasks to do, one-off ones included, are on the home page.
+        $templates = array_values(array_filter(
+            array_map(static fn (TaskView $view): Task => $view->task, $boards->build($household)->items),
+            static fn (Task $task): bool => $task->getKind()->isRecurring(),
+        ));
+
         return $this->render('task/index.html.twig', [
-            'recurring' => array_map(static fn (TaskView $view): Task => $view->task, $board->recurring($zone)),
-            'quick' => array_map(static fn (TaskView $view): Task => $view->task, $board->quick()),
-            'occasional' => array_map(static fn (TaskView $view): Task => $view->task, $board->occasional($zone)),
-            'zones' => $household->getZones(),
-            'current_zone' => $zone,
+            'groups' => $this->group($templates, $par),
+            'grouping' => $par,
+            'groupings' => self::GROUPINGS,
+            'count' => \count($templates),
             'catalog' => $catalog->findForHousehold($household),
         ]);
+    }
+
+    /**
+     * @param list<Task> $templates
+     *
+     * @return list<array{key: string, label: string, hint: ?string, tasks: non-empty-list<Task>}> in a natural order, each by title
+     */
+    private function group(array $templates, string $by): array
+    {
+        $groups = [];
+        foreach ($templates as $task) {
+            [$key, $label, $hint, $rank] = match ($by) {
+                'categorie' => [$task->getCategory()->value, $task->getCategory()->label(), null, array_search($task->getCategory(), TaskCategory::cases(), true)],
+                'frequence' => [$task->getKind()->value, $task->getKind()->label(), match ($task->getKind()) {
+                    TaskKind::Rolling => 'Tous les tant de jours, une fois faite.',
+                    TaskKind::Scheduled => 'Un jour et une heure fixes.',
+                    TaskKind::Quick => 'Un appui sur l’accueil, « En un geste ».',
+                    TaskKind::Occasional => 'Elles dorment jusqu’à ce que ça arrive.',
+                    TaskKind::OneOff => null,
+                }, array_search($task->getKind(), [TaskKind::Rolling, TaskKind::Scheduled, TaskKind::Quick, TaskKind::Occasional], true)],
+                default => null !== $task->getZone()
+                    ? ['zone-'.$task->getZone()->getId(), $task->getZone()->getName(), null, 0]
+                    : ['coloc', 'Toute la coloc', null, 1],
+            };
+            $groups[$key] ??= ['key' => $by.'-'.$key, 'label' => $label, 'hint' => $hint, 'rank' => $rank, 'tasks' => []];
+            $groups[$key]['tasks'][] = $task;
+        }
+
+        $collator = new \Collator('fr_FR');
+        $groups = array_values($groups);
+        usort($groups, static fn (array $a, array $b): int => $a['rank'] <=> $b['rank'] ?: (int) $collator->compare($a['label'], $b['label']));
+
+        return array_map(static function (array $group) use ($collator): array {
+            usort($group['tasks'], static fn (Task $a, Task $b): int => (int) $collator->compare($a->getTitle(), $b->getTitle()));
+            unset($group['rank']);
+
+            return $group;
+        }, $groups);
     }
 
     #[Route('/{id}', name: 'task_show', requirements: ['id' => '\d+'], methods: ['GET'])]

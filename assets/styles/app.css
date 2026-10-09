@@ -784,3 +784,13 @@ body > .casa-particle { position: absolute; z-index: 60; }
 /* On a card of gold, the yellow "C'est fait" token would melt into it. */
 .rarity-legendary .done-button,
 .rarity-legendary .done-round { @apply bg-surface; }
+
+/* The folds of the list of templates: a room, a kind of work, a way of coming back. */
+.fold-summary {
+  @apply flex cursor-pointer list-none items-center gap-2.5 rounded-xl px-1 py-2 text-[17px] font-extrabold transition select-none hover:bg-track/50;
+}
+.fold-summary::-webkit-details-marker { display: none; }
+.fold-count { @apply flex h-6 min-w-6 items-center justify-center rounded-full bg-track px-2 text-xs font-extrabold text-ink-soft; }
+.fold-chevron { @apply shrink-0 text-muted; transition: transform 300ms cubic-bezier(.3, 1.5, .5, 1); }
+.fold[open] .fold-chevron { transform: rotate(180deg); }
+.fold[open] > ul { animation: drawer-open 320ms cubic-bezier(.2, 1.1, .4, 1) both; }

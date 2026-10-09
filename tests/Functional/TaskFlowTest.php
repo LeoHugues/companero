@@ -3,6 +3,7 @@
 namespace App\Tests\Functional;
 
 use App\Entity\Task;
+use App\Entity\Zone;
 use App\Enum\PointReason;
 use App\Repository\PointEntryRepository;
 use App\Repository\TaskRepository;
@@ -321,6 +322,31 @@ final class TaskFlowTest extends AppTestCase
 
         $this->client->request('POST', '/taches/'.$task?->getId().'/fait', ['_csrf_token' => 'csrf-token']);
         self::assertResponseStatusCodeSame(403);
+    }
+
+    public function testTheTemplatesAreFoldedByRoomCategoryOrFrequency(): void
+    {
+        $leo = $this->foundHousehold();
+        $this->client->loginUser($leo);
+        $kitchen = $leo->getHousehold()->getZones()->findFirst(static fn (int $i, Zone $zone): bool => 'Cuisine' === $zone->getName());
+        $this->client->request('GET', '/taches/nouvelle/modele');
+        $this->client->submitForm('Créer le modèle', ['task[title]' => 'Plans de travail', 'task[kind]' => 'rolling', 'task[rhythmDays]' => '2', 'task[zone]' => (string) $kitchen?->getId()]);
+        $this->client->request('GET', '/taches/nouvelle/modele');
+        $this->client->submitForm('Créer le modèle', ['task[title]' => 'Sortir le verre', 'task[kind]' => 'quick', 'task[category]' => 'other']);
+
+        $this->client->request('GET', '/taches');
+        self::assertSelectorExists('input[type=search][data-filter-target=input]');
+        self::assertSelectorTextContains('#fold-piece-zone-'.$kitchen?->getId().' summary', 'Cuisine');
+        self::assertSelectorTextContains('#fold-piece-zone-'.$kitchen?->getId(), 'Plans de travail');
+        self::assertSelectorTextContains('#fold-piece-coloc', 'Sortir le verre');
+
+        $this->client->request('GET', '/taches?par=categorie');
+        self::assertSelectorTextContains('#fold-categorie-cleaning', 'Plans de travail');
+        self::assertSelectorTextContains('#fold-categorie-other', 'Sortir le verre');
+
+        $this->client->request('GET', '/taches?par=frequence');
+        self::assertSelectorTextContains('#fold-frequence-rolling', 'Plans de travail');
+        self::assertSelectorTextContains('#fold-frequence-quick', 'Sortir le verre');
     }
 
     public function testATaskToDoHasItsOwnNoteAndPoints(): void

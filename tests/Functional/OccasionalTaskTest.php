@@ -50,8 +50,9 @@ final class OccasionalTaskTest extends AppTestCase
         $task = static::getContainer()->get(TaskRepository::class)->findOneBy(['title' => 'Réparer la chasse d’eau']);
         self::assertSame(TaskKind::Occasional, $task?->getKind());
 
-        $this->client->request('GET', '/taches');
-        self::assertSelectorTextContains('[aria-labelledby=occasional-title]', 'Réparer la chasse d’eau');
+        $this->client->request('GET', '/taches?par=frequence');
+        self::assertSelectorTextContains('#fold-frequence-occasional', 'Réparer la chasse d’eau');
+        self::assertSelectorExists(\sprintf('#template-%d form[action="/taches/%d/ca-arrive"]', $task?->getId(), $task?->getId()));
         $this->client->request('GET', '/taches/'.$task->getId().'/modele');
         self::assertSelectorTextContains('main', 'Ça arrive !');
     }
