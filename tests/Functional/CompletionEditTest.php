@@ -148,7 +148,7 @@ final class CompletionEditTest extends AppTestCase
         $this->client->request('GET', '/');
         $this->submitAction('/taches/'.$task->getId().'/fait');
 
-        $this->client->loginUser($this->foundHousehold('Zoé', 'zoe@example.com', 'Une autre coloc'));
+        $this->client->loginUser($this->foundHousehold('Zoé', household: 'Une autre coloc'));
         $this->client->request('GET', '/realisations/'.$this->completionOf($task)->getId().'/modifier');
 
         self::assertResponseStatusCodeSame(403);

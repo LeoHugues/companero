@@ -29,6 +29,17 @@
 
     <twig:BoostBanner/>
 
+    {% if not app.user.hasAcceptedCharter %}
+        <a href="{{ path('charter_show') }}" class="card card-hover flex items-center gap-3 border-sun p-3.5 text-ink no-underline hover:text-ink">
+            <span class="flex size-10 shrink-0 items-center justify-center rounded-full bg-sun"><twig:Icon name="flag" size="22"/></span>
+            <span class="flex flex-1 flex-col">
+                <span class="text-[15px] font-extrabold">La charte de la coloc a changé</span>
+                <span class="text-xs text-muted">Jette un œil, et dis si ça te va</span>
+            </span>
+            <twig:Icon name="chevron-right" size="20" class="text-muted"/>
+        </a>
+    {% endif %}
+
     <twig:Casa
         :mood="mood"
         :cleanliness="cleanliness"

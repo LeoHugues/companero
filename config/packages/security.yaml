@@ -6,9 +6,9 @@ security:
 
     providers:
         members:
+            # By username, whatever its case: see MemberRepository::loadUserByIdentifier().
             entity:
                 class: App\Entity\Member
-                property: email
 
     firewalls:
         dev:
@@ -22,7 +22,7 @@ security:
                 check_path: app_login
                 enable_csrf: true
                 default_target_path: app_home
-                username_parameter: email
+                username_parameter: pseudo
                 password_parameter: password
             remember_me:
                 secret: '%kernel.secret%'

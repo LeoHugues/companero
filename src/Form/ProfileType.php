@@ -21,8 +21,7 @@ class ProfileType extends AbstractType
             ->add('weeklyGoal', ChoiceType::class, [
                 'label' => 'Mon objectif de la semaine',
                 'expanded' => true,
-                // 70 points a week ≈ 5 minutes a day.
-                'choices' => array_combine(array_map(static fn (int $goal): string => \sprintf('%d pts · %d min/j', $goal, $goal / 14), Member::GOAL_CHOICES), Member::GOAL_CHOICES),
+                'choices' => self::goalChoices(),
             ])
             ->add('presenceDays', RangeType::class, [
                 'label' => 'Je suis là combien de jours par semaine ?',
@@ -33,6 +32,12 @@ class ProfileType extends AbstractType
             ->add('notifyCleaningDay', CheckboxType::class, ['label' => 'Matin du jour de ménage', 'help' => 'La liste du jour, à 9 h', 'required' => false])
             ->add('notifyOverdue', CheckboxType::class, ['label' => 'Quand une tâche compte sur moi', 'help' => 'Une tâche à faire dont j’ai la charge, ou qu’on vient de signaler : au plus un rappel par jour pour chacune', 'required' => false])
             ->add('notifyWeeklyReview', CheckboxType::class, ['label' => 'Bilan du dimanche soir', 'help' => 'Le résumé de la semaine, à 20 h', 'required' => false]);
+    }
+
+    /** @return array<string, int> 70 points a week ≈ 5 minutes a day */
+    public static function goalChoices(): array
+    {
+        return array_combine(array_map(static fn (int $goal): string => \sprintf('%d pts · %d min/j', $goal, $goal / 14), Member::GOAL_CHOICES), Member::GOAL_CHOICES);
     }
 
     public function configureOptions(OptionsResolver $resolver): void

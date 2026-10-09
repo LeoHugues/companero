@@ -17,7 +17,7 @@ final class CreateHouseholdCommandTest extends AppTestCase
         $tester = $this->command();
         $tester->setInputs(['companero123']);
 
-        $tester->execute(['file' => 'config/coloc/notre-coloc.yaml', '--nom' => 'Léo', '--email' => 'leo@coloc.test']);
+        $tester->execute(['file' => 'config/coloc/notre-coloc.yaml', '--nom' => 'Léo', '--pseudo' => 'Léo']);
 
         $tester->assertCommandIsSuccessful();
         self::assertStringContainsString('/rejoindre/', $tester->getDisplay());
@@ -47,7 +47,7 @@ final class CreateHouseholdCommandTest extends AppTestCase
         $tester = $this->command();
         $tester->setInputs(['court']);
 
-        $tester->execute(['file' => 'config/coloc/notre-coloc.yaml', '--nom' => 'Léo', '--email' => 'leo@coloc.test']);
+        $tester->execute(['file' => 'config/coloc/notre-coloc.yaml', '--nom' => 'Léo', '--pseudo' => 'Léo']);
 
         self::assertSame(1, $tester->getStatusCode());
         self::assertStringContainsString('Au moins 8 caractères', $tester->getDisplay());

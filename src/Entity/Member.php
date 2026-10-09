@@ -11,11 +11,15 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: MemberRepository::class)]
-#[UniqueEntity('email', message: 'Cette adresse est déjà utilisée.')]
+#[UniqueEntity('username', message: 'Ce pseudo est déjà pris.')]
 class Member implements UserInterface, PasswordAuthenticatedUserInterface
 {
     /** 70 points a week: about 5 minutes a day. */
     public const GOAL_CHOICES = [70, 140, 210, 280];
+
+    /** Letters, digits, dots, dashes and underscores: easy to type on a phone, no space. */
+    public const USERNAME_PATTERN = '/^[\p{L}\p{N}._-]+$/u';
+    public const USERNAME_MAX_LENGTH = 30;
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -31,10 +35,14 @@ class Member implements UserInterface, PasswordAuthenticatedUserInterface
     #[Assert\Length(max: 40)]
     private string $name;
 
-    #[ORM\Column(length: 180, unique: true)]
-    #[Assert\NotBlank]
-    #[Assert\Email]
-    private string $email;
+    /**
+     * What one types to log in, in lower case. None yet: the profile waits for its coloc to claim it
+     * with the invitation link (see docs/onboarding.md).
+     */
+    #[ORM\Column(length: self::USERNAME_MAX_LENGTH, unique: true, nullable: true)]
+    #[Assert\Length(min: 2, max: self::USERNAME_MAX_LENGTH, minMessage: 'Au moins {{ limit }} caractères.')]
+    #[Assert\Regex(self::USERNAME_PATTERN, message: 'Des lettres, des chiffres, des points ou des tirets, sans espace.')]
+    private ?string $username = null;
 
     #[ORM\Column]
     private string $password = '';
@@ -76,11 +84,18 @@ class Member implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: Types::SMALLINT, options: ['default' => 0])]
     private int $bestStreak = 0;
 
-    public function __construct(Household $household, string $name, string $email, string $color, \DateTimeImmutable $joinedAt)
+    /** When the onboarding was finished: until then, every page leads to it. */
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $onboardedAt = null;
+
+    /** When the household's charter was last agreed to ("Ça me va"). */
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $charterAcceptedAt = null;
+
+    public function __construct(Household $household, string $name, string $color, \DateTimeImmutable $joinedAt)
     {
         $this->household = $household;
         $this->name = $name;
-        $this->email = mb_strtolower($email);
         $this->color = $color;
         $this->joinedAt = $joinedAt;
         $household->addMember($this);
@@ -106,14 +121,49 @@ class Member implements UserInterface, PasswordAuthenticatedUserInterface
         return mb_strtoupper(mb_substr($this->name, 0, 1));
     }
 
-    public function getEmail(): string
+    public function setName(string $name): void
     {
-        return $this->email;
+        $this->name = $name;
+    }
+
+    public function getUsername(): ?string
+    {
+        return $this->username;
+    }
+
+    public function setUsername(?string $username): void
+    {
+        $this->username = null === $username ? null : self::normalizeUsername($username);
+    }
+
+    /** Typed with a capital, or a space around it, it is the same username. */
+    public static function normalizeUsername(string $username): string
+    {
+        return mb_strtolower(trim($username));
+    }
+
+    /** Someone logs in with this profile; until then, it waits for its coloc to claim it. */
+    public function isClaimed(): bool
+    {
+        return null !== $this->username;
+    }
+
+    public function claim(string $username, string $hashedPassword): void
+    {
+        $this->setUsername($username);
+        $this->password = $hashedPassword;
+    }
+
+    /** Back to a profile to claim, with everything attached to it: only the way in is forgotten. */
+    public function release(): void
+    {
+        $this->username = null;
+        $this->password = '';
     }
 
     public function getUserIdentifier(): string
     {
-        return $this->email;
+        return $this->username ?? '';
     }
 
     /** @return list<string> */
@@ -234,6 +284,34 @@ class Member implements UserInterface, PasswordAuthenticatedUserInterface
     public function getBestStreak(): int
     {
         return $this->bestStreak;
+    }
+
+    public function isOnboarded(): bool
+    {
+        return null !== $this->onboardedAt;
+    }
+
+    public function finishOnboarding(\DateTimeImmutable $at): void
+    {
+        $this->onboardedAt ??= $at;
+    }
+
+    /** Agreed to the household's charter, as it reads now. */
+    public function hasAcceptedCharter(): bool
+    {
+        $updatedAt = $this->household->getCharterUpdatedAt();
+
+        return null !== $this->charterAcceptedAt && (null === $updatedAt || $this->charterAcceptedAt >= $updatedAt);
+    }
+
+    public function acceptCharter(\DateTimeImmutable $at): void
+    {
+        $this->charterAcceptedAt = $at;
+    }
+
+    public function getCharterAcceptedAt(): ?\DateTimeImmutable
+    {
+        return $this->charterAcceptedAt;
     }
 
     public function belongsTo(Household $household): bool

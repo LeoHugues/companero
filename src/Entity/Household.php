@@ -60,6 +60,10 @@ class Household
     #[ORM\Column]
     private \DateTimeImmutable $createdAt;
 
+    /** When a rule of the charter was last written, moved or removed: everyone is asked to read it again. */
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $charterUpdatedAt = null;
+
     /** @var Collection<int, Member> */
     #[ORM\OneToMany(targetEntity: Member::class, mappedBy: 'household')]
     #[ORM\OrderBy(['name' => 'ASC'])]
@@ -75,6 +79,11 @@ class Household
     #[ORM\OrderBy(['name' => 'ASC'])]
     private Collection $pets;
 
+    /** @var Collection<int, CharterRule> */
+    #[ORM\OneToMany(targetEntity: CharterRule::class, mappedBy: 'household', cascade: ['persist'], orphanRemoval: true)]
+    #[ORM\OrderBy(['position' => 'ASC', 'id' => 'ASC'])]
+    private Collection $charterRules;
+
     public function __construct(string $name, \DateTimeImmutable $createdAt)
     {
         $this->name = $name;
@@ -82,6 +91,7 @@ class Household
         $this->members = new ArrayCollection();
         $this->zones = new ArrayCollection();
         $this->pets = new ArrayCollection();
+        $this->charterRules = new ArrayCollection();
         $this->regenerateInviteToken();
     }
 
@@ -196,6 +206,17 @@ class Household
         }
     }
 
+    public function removeMember(Member $member): void
+    {
+        $this->members->removeElement($member);
+    }
+
+    /** @return list<Member> the profiles waiting for their coloc to claim them */
+    public function getUnclaimedMembers(): array
+    {
+        return array_values(array_filter($this->members->toArray(), static fn (Member $member): bool => !$member->isClaimed()));
+    }
+
     /** @return Collection<int, Zone> */
     public function getZones(): Collection
     {
@@ -230,5 +251,59 @@ class Household
     public function removePet(Pet $pet): void
     {
         $this->pets->removeElement($pet);
+    }
+
+    /** @return Collection<int, CharterRule> */
+    public function getCharterRules(): Collection
+    {
+        return $this->charterRules;
+    }
+
+    public function addCharterRule(CharterRule $rule): void
+    {
+        if (!$this->charterRules->contains($rule)) {
+            $rule->setPosition(\count($this->charterRules));
+            $this->charterRules->add($rule);
+        }
+    }
+
+    public function removeCharterRule(CharterRule $rule): void
+    {
+        $this->charterRules->removeElement($rule);
+        $this->renumberCharter(array_values($this->charterRules->toArray()));
+    }
+
+    /** One step up (-1) or down (+1) in the charter. */
+    public function moveCharterRule(CharterRule $rule, int $offset): void
+    {
+        $rules = array_values($this->charterRules->toArray());
+        usort($rules, static fn (CharterRule $a, CharterRule $b): int => $a->getPosition() <=> $b->getPosition());
+        $from = array_search($rule, $rules, true);
+        $to = false === $from ? -1 : $from + $offset;
+        if ($to < 0 || $to >= \count($rules)) {
+            return;
+        }
+        [$rules[$from], $rules[$to]] = [$rules[$to], $rules[$from]];
+        $this->renumberCharter($rules);
+    }
+
+    public function getCharterUpdatedAt(): ?\DateTimeImmutable
+    {
+        return $this->charterUpdatedAt;
+    }
+
+    /** The charter changed: whoever changed it agrees to it, the others are asked to read it again. */
+    public function touchCharter(Member $by, \DateTimeImmutable $at): void
+    {
+        $this->charterUpdatedAt = $at;
+        $by->acceptCharter($at);
+    }
+
+    /** @param list<CharterRule> $rules */
+    private function renumberCharter(array $rules): void
+    {
+        foreach ($rules as $position => $rule) {
+            $rule->setPosition($position);
+        }
     }
 }

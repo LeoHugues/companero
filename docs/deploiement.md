@@ -45,12 +45,22 @@ production. Créez la coloc et votre compte à partir de sa description
 le ménage du dimanche, les tâches express, le catalogue) :
 
 ```bash
-sudo -u www-data php bin/console app:coloc:creer config/coloc/notre-coloc.yaml --nom=Léo --email=vous@exemple.fr
+sudo -u www-data php bin/console app:coloc:creer config/coloc/notre-coloc.yaml --nom=Léo --pseudo=leo
 ```
 
 Le mot de passe est demandé, puis la commande affiche le lien d'invitation à envoyer aux
 autres colocs (il est aussi dans *Réglages de la coloc › Inviter quelqu'un*). Tout se modifie
-ensuite dans l'appli. Pour une coloc sans fichier de description, `https://votre-domaine/bienvenue`
+ensuite dans l'appli. On s'y connecte avec un **pseudo** (`leo`, peu importe les majuscules) et
+un mot de passe.
+
+Pour tout préparer avant que les autres arrivent (leurs tâches, leurs animaux), ajoutez-les par
+leur prénom dans *Réglages de la coloc › Préparer le profil d'un coloc* : avec le lien
+d'invitation, chacun choisit son profil (« Je suis Robin ») et y retrouve tout. Un compte créé
+pour quelqu'un d'autre se remet « à réclamer » sans rien perdre (points, tâches, animaux) :
+
+```bash
+sudo -u www-data php bin/console app:membre:a-reclamer Gab Robin Léa
+``` Pour une coloc sans fichier de description, `https://votre-domaine/bienvenue`
 la crée avec quelques zones et un catalogue par défaut.
 
 Ensuite :

@@ -10,6 +10,7 @@ use App\Entity\Zone;
 use App\Form\HouseholdType;
 use App\Form\PetType;
 use App\Form\ZoneType;
+use App\Household\MemberRegistrar;
 use App\Repository\GiftRepository;
 use App\Security\HouseholdVoter;
 use Doctrine\ORM\EntityManagerInterface;
@@ -151,6 +152,23 @@ final class HouseholdController extends AbstractController
         // Its tasks are kept, for everyone.
         $pet->getHousehold()->removePet($pet);
         $this->entityManager->flush();
+
+        return $this->redirectToRoute('household_edit', status: Response::HTTP_SEE_OTHER);
+    }
+
+    /** A coloc known by their first name only: they claim their profile with the invitation link. */
+    #[Route('/colocs', name: 'household_member_add', methods: ['POST'])]
+    #[IsCsrfTokenValid('submit', tokenKey: '_csrf_token')]
+    public function addMember(#[CurrentUser] Member $member, Request $request, MemberRegistrar $registrar): RedirectResponse
+    {
+        $name = trim($request->request->getString('prenom'));
+        if ('' === $name || mb_strlen($name) > 40) {
+            $this->addFlash('success', 'Il faut un prénom, de 40 caractères au plus.');
+
+            return $this->redirectToRoute('household_edit', status: Response::HTTP_SEE_OTHER);
+        }
+        $registrar->addUnclaimed($member->getHousehold(), $name);
+        $this->addFlash('success', \sprintf('Le profil de %s est prêt : envoie-lui le lien d’invitation pour le réclamer.', $name));
 
         return $this->redirectToRoute('household_edit', status: Response::HTTP_SEE_OTHER);
     }

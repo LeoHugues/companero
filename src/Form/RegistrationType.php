@@ -4,7 +4,6 @@ namespace App\Form;
 
 use App\Household\Registration;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -15,16 +14,19 @@ class RegistrationType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        $builder
-            ->add('name', TextType::class, [
+        if ($options['with_name']) {
+            $builder->add('name', TextType::class, [
                 'label' => 'Ton prénom',
                 'empty_data' => '',
                 'attr' => ['autocomplete' => 'given-name'],
-            ])
-            ->add('email', EmailType::class, [
-                'label' => 'Ton e-mail',
+            ]);
+        }
+        $builder
+            ->add('username', TextType::class, [
+                'label' => 'Ton pseudo',
+                'help' => 'Pour te connecter. Ton prénom fait très bien l’affaire.',
                 'empty_data' => '',
-                'attr' => ['autocomplete' => 'email'],
+                'attr' => ['autocomplete' => 'username', 'autocapitalize' => 'none', 'autocorrect' => 'off', 'spellcheck' => 'false'],
             ])
             ->add('plainPassword', PasswordType::class, [
                 'label' => 'Un mot de passe',
@@ -35,6 +37,11 @@ class RegistrationType extends AbstractType
 
     public function configureOptions(OptionsResolver $resolver): void
     {
-        $resolver->setDefaults(['data_class' => Registration::class]);
+        $resolver->setDefaults([
+            'data_class' => Registration::class,
+            // false: claiming a profile, whose first name is already known.
+            'with_name' => true,
+        ]);
+        $resolver->setAllowedTypes('with_name', 'bool');
     }
 }

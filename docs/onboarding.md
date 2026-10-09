@@ -1,6 +1,6 @@
 # Companero — Onboarding
 
-> Spécification, avant le code. Elle complète la [vision produit](vision.md).
+> Ce que fait l'onboarding, et pourquoi. Il complète la [vision produit](vision.md).
 
 ## 1. Intention
 
@@ -26,8 +26,9 @@ On garde le mot « tâche ». Pas de classement, pas de contrôle : on n'en parl
 | Celui qui rejoint (`/rejoindre/{token}`) | Juste après l'étape « Qui es-tu ? » |
 | Les membres déjà inscrits | À leur prochaine visite, une seule fois |
 
-**Il est obligatoire, et court.** Tant qu'il n'est pas terminé, toute page de l'appli y ramène,
-sauf la déconnexion. On reprend à l'écran où on s'était arrêté.
+**Il est obligatoire, et court.** Tant qu'il n'est pas terminé, toute page de l'appli y ramène
+(`RequireOnboardingListener`), sauf la déconnexion et ce que l'appli Android demande toute seule
+(`/api`). Interrompu, il reprend au début ; l'adhésion à la charte, elle, est gardée.
 
 On peut **relire la partie A** à tout moment depuis le Profil (« Comment ça marche »), et la
 **charte** depuis les réglages de la coloc.
@@ -44,7 +45,8 @@ progression en haut et un bouton « Suivant » en bas. On peut revenir en arriè
 - Les **profils à réclamer** de la coloc, en grands boutons avec leur avatar et leur couleur :
   « Léa », « Robin », « Gab ».
 - « **Je suis quelqu'un d'autre** » : on saisit un prénom, et un nouveau profil est créé.
-- Dans tous les cas, on saisit ensuite **son e-mail et un mot de passe**.
+- Dans tous les cas, on choisit ensuite **un pseudo et un mot de passe**. Pas d'e-mail : le pseudo
+  suffit pour se connecter, sans tenir compte des majuscules (« Léo » ou « léo »).
 
 Réclamer un profil, c'est récupérer **tout ce qui y est attaché** : réalisations, points, niveau,
 tâches dont on a la charge, animaux dont on est le maître, couleur.
@@ -172,8 +174,11 @@ Une nouvelle coloc démarre avec ces règles :
 5. Mes affaires ne s'installent pas dans les pièces communes.
 6. Si je ne peux pas faire ce que j'avais pris, je préviens, ou je passe en « Pas là ».
 
-**Adhésion.** Chaque membre adhère une fois, à l'étape A7. Le Profil et la page de la charte
-montrent qui a adhéré, sans plus.
+**Adhésion.** Chaque membre adhère à l'étape A7. La page de la charte montre à qui elle va.
+Quand une règle est ajoutée, réécrite ou retirée, celui qui l'a changée y adhère d'office ; les
+autres voient sur l'accueil « La charte de la coloc a changé », jusqu'à ce qu'ils la relisent et
+disent « Ça me va ». Rien n'est bloqué pour autant. Changer l'ordre des règles ne demande rien à
+personne.
 
 Sources de la règle 3 :
 
@@ -188,28 +193,30 @@ tâches, être maître d'un animal, apparaître dans les barres collectives. Il 
 
 - **Créer** : *Réglages de la coloc › Les colocs › Ajouter quelqu'un*, avec le prénom seulement.
   Pratique pour tout préparer avant d'envoyer le lien.
-- **Réclamer** : l'étape 0 de l'onboarding. On choisit son profil, puis on donne son e-mail et un
-  mot de passe.
+- **Réclamer** : l'étape 0 de l'onboarding. On choisit son profil, puis un pseudo et un mot de
+  passe.
 - **Libérer** un compte existant, pour réparer une erreur ou remettre en état la prod :
-  `bin/console app:membre:a-reclamer <prénom ou e-mail>`. La commande efface l'e-mail et le mot de
-  passe, et garde tout le reste. Elle refuse de libérer le dernier membre qui a un compte.
+  `bin/console app:membre:a-reclamer <pseudo ou prénom>…`. La commande efface le pseudo et le mot
+  de passe, et garde tout le reste. Elle refuse de libérer le dernier membre qui a un compte.
 
 **Sécurité.** N'importe qui avec le lien d'invitation peut réclamer un profil libre. C'est le même
 niveau de confiance qu'aujourd'hui : le lien suffit déjà pour entrer dans la coloc. Un profil
 réclamé ne l'est plus pour personne d'autre.
 
-**À ajouter au passage.** Le Profil permet de changer son e-mail et son mot de passe.
+**Mon compte.** *Profil › Mon compte* change son pseudo et son mot de passe (le mot de passe
+actuel est demandé).
 
-## 6. Données (pistes)
+## 6. Données
 
-- `Member.email` et `Member.password` deviennent facultatifs : un membre sans e-mail est à réclamer.
-- `Member.onboardedAt` (nullable) : la fin de l'onboarding. Les membres existants démarrent à `null`.
-- `Member.onboardingStep` : l'écran où l'on en est, pour reprendre.
-- `Member.charterAcceptedAt` (nullable).
-- `CharterRule` : `household`, `text`, `why` (nullable), `position`. Les règles par défaut sont
-  créées avec la coloc (`HouseholdFounder`, et le fichier de description pour `app:coloc:creer`).
-- Un écouteur de requête renvoie vers l'onboarding tant que `onboardedAt` est `null`, sauf pour
-  l'onboarding lui-même, la déconnexion et l'API.
+- `Member.username` (nullable, unique, en minuscules) remplace l'e-mail : sans pseudo, le profil
+  est à réclamer. La migration prend ce qui précède le @ de l'ancien e-mail (`leo@…` devient `leo`).
+- `Member.onboardedAt` : la fin de l'onboarding. Les membres existants démarrent à `null`, et
+  passent donc par la découverte à leur prochaine visite.
+- `Member.charterAcceptedAt` et `Household.charterUpdatedAt` : on a adhéré à la charte telle
+  qu'elle est si on l'a fait après son dernier changement.
+- `CharterRule` : `household`, `text`, `why` (facultatif), `position`. Les règles par défaut
+  (`App\Household\Charter`) sont créées avec chaque coloc, et par la migration pour les colocs
+  existantes.
 
 ## 7. Hors périmètre
 
@@ -218,9 +225,10 @@ réclamé ne l'est plus pour personne d'autre.
   valeurs par défaut et les réglages suffisent pour l'instant.
 - Le renommage de « tâche » en « quête ».
 
-## 8. Questions ouvertes
+## 8. Décisions
 
-1. Quand la charte change, faut-il redemander l'adhésion à tout le monde, ou seulement signaler
-   « La charte a changé » ?
-2. L'étape « Qui es-tu ? » montre-t-elle aussi les profils à réclamer quand on crée la coloc depuis
-   `/bienvenue` ? (Non, a priori : il n'y en a pas encore.)
+1. Une charte modifiée est signalée sur l'accueil à ceux qui n'y ont pas encore adhéré ; elle
+   ne bloque rien.
+2. « Qui es-tu ? » n'apparaît que pour rejoindre une coloc qui a des profils à réclamer.
+3. Les explications (A1 à A6) se relisent depuis *Profil › Comment ça marche* ; la charte, depuis
+   *Réglages de la coloc › La charte*.

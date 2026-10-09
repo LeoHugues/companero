@@ -1,0 +1,40 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}La charte · Companero{% endblock %}
+
+{% block body %}
+    <header class="flex items-center justify-between">
+        <h1 class="text-[26px]">La charte de la coloc</h1>
+        <a href="{{ path('household_edit') }}" aria-label="Retour aux réglages de la coloc" class="flex size-11 items-center justify-center rounded-full text-ink"><twig:Icon name="close" size="22" stroke="2.2"/></a>
+    </header>
+    <p class="-mt-2 text-[15px] text-ink-soft">Rien à voir avec l’appli : c’est juste comme ça qu’on vit bien ensemble. Tout le monde peut l’écrire.</p>
+
+    {{ include('charter/_rules.html.twig', {household: household, editable: true}) }}
+
+    <section class="card flex flex-col gap-2.5 p-3.5" aria-labelledby="agreed-title">
+        <h2 id="agreed-title" class="text-[15px]">Ça leur va</h2>
+        <ul class="flex flex-wrap gap-2">
+            {% for member in household.members %}
+                <li class="flex items-center gap-1.5 rounded-full py-1 pr-3 pl-1 text-sm font-bold {{ member.hasAcceptedCharter ? 'bg-ok-soft text-ok-ink' : 'bg-track/60 text-muted' }}">
+                    <twig:Avatar :member="member" size="24"/>{{ member.name }}
+                    {% if member.hasAcceptedCharter %}<twig:Icon name="check" size="14" stroke="2.8"/>{% else %}<span class="text-xs font-semibold">pas encore</span>{% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+        {% if not app.user.hasAcceptedCharter %}
+            <form method="post" action="{{ path('charter_accept') }}">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
+                <button type="submit" class="btn-primary" data-haptic="success"><twig:Icon name="check" size="18" stroke="2.6"/> Ça me va</button>
+            </form>
+        {% endif %}
+    </section>
+
+    {{ form_start(form, {attr: {class: 'card flex flex-col gap-3 p-3.5'}}) }}
+        {{ form_row(form.text) }}
+        {{ form_row(form.why) }}
+        <p class="meta">Chacun sera invité à relire la charte.</p>
+        <button type="submit" class="btn-primary self-start"><twig:Icon name="plus" size="18" stroke="2.6"/> Ajouter la règle</button>
+    {{ form_end(form) }}
+{% endblock %}
+
+{% block nav %}<twig:BottomNav active="profile"/>{% endblock %}

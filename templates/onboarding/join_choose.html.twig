@@ -1,0 +1,25 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Rejoindre {{ household.name }} · Companero{% endblock %}
+{% block main_class %}pb-10{% endblock %}
+
+{% block body %}
+    <twig:Casa :mood="enum('App\\Enum\\CasaMood').Radiant" speech="Bienvenue ! On t’attendait. Tu es… ?" class="mt-4"/>
+
+    <h1 class="text-[26px]">Rejoindre {{ household.name }}</h1>
+    <p class="meta -mt-2">Ton profil est peut-être déjà prêt : choisis-le, tu retrouveras tout ce qui t’attend.</p>
+
+    <ul class="flex flex-col gap-2.5" aria-label="Les profils à réclamer">
+        {% for member in unclaimed %}
+            <li>
+                <a href="{{ path('onboarding_claim', {token: household.inviteToken, member: member.id}) }}" class="card card-hover flex items-center gap-3 p-3.5 text-ink no-underline hover:text-ink">
+                    <twig:Avatar :member="member" size="44"/>
+                    <span class="flex-1 text-[17px] font-extrabold">Je suis {{ member.name }}</span>
+                    <twig:Icon name="chevron-right" size="20" class="text-muted"/>
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
+
+    <a href="{{ path('onboarding_join', {token: household.inviteToken, nouveau: 1}) }}" class="btn-link self-center">Je suis quelqu’un d’autre</a>
+{% endblock %}

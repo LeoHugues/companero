@@ -221,7 +221,25 @@
         <span class="flex size-10 shrink-0 items-center justify-center rounded-full bg-sun"><twig:Icon name="home" size="22"/></span>
         <span class="flex flex-1 flex-col">
             <span class="text-[15px] font-extrabold">Réglages de la coloc</span>
-            <span class="text-xs text-muted">Objectif de la maison, jour de ménage, colocs, zones, animaux</span>
+            <span class="text-xs text-muted">Objectif de la maison, jour de ménage, charte, colocs, zones, animaux</span>
+        </span>
+        <twig:Icon name="chevron-right" size="20" class="text-muted"/>
+    </a>
+
+    <a href="{{ path('tour_start') }}" class="card card-hover flex items-center gap-3 p-3.5 text-ink no-underline hover:text-ink">
+        <span class="flex size-10 shrink-0 items-center justify-center rounded-full bg-track"><twig:Icon name="star" size="22"/></span>
+        <span class="flex flex-1 flex-col">
+            <span class="text-[15px] font-extrabold">Comment ça marche</span>
+            <span class="text-xs text-muted">La Casa réexplique les cartes, les points et les objectifs</span>
+        </span>
+        <twig:Icon name="chevron-right" size="20" class="text-muted"/>
+    </a>
+
+    <a href="{{ path('profile_account') }}" class="card card-hover flex items-center gap-3 p-3.5 text-ink no-underline hover:text-ink">
+        <span class="flex size-10 shrink-0 items-center justify-center rounded-full bg-track"><twig:Icon name="lock" size="22"/></span>
+        <span class="flex flex-1 flex-col">
+            <span class="text-[15px] font-extrabold">Mon compte</span>
+            <span class="text-xs text-muted">Pseudo « {{ member.username }} », mot de passe</span>
         </span>
         <twig:Icon name="chevron-right" size="20" class="text-muted"/>
     </a>

@@ -1,0 +1,28 @@
+{% extends 'onboarding/tour/_layout.html.twig' %}
+
+{% block speech %}Chaque semaine, deux objectifs : un pour la maison, un pour toi.{% endblock %}
+
+{% block heading %}Les objectifs{% endblock %}
+
+{% block content %}
+    <section class="card flex flex-col gap-2 p-3.5" aria-labelledby="house-goal">
+        <div class="flex items-baseline justify-between gap-2">
+            <h2 id="house-goal" class="flex items-center gap-1.5 text-[17px]"><twig:Icon name="home" size="19"/> L’objectif de la maison</h2>
+            <span class="text-[17px] font-extrabold text-clay-dark">{{ household.weeklyGoal }} pts</span>
+        </div>
+        <div class="track h-2.5"><div class="h-full w-2/3 rounded-full bg-clay"></div></div>
+        <p class="text-sm text-ink-soft">Les points de toute la coloc comptent. Atteint, il rapporte <strong class="text-ink">+{{ team_bonus }} pts</strong> à chacun des présents, et fait avancer la série de la coloc. Il se règle dans les réglages de la coloc.</p>
+    </section>
+
+    <section class="card flex flex-col gap-2 p-3.5" aria-labelledby="my-goal">
+        <div class="flex items-baseline justify-between gap-2">
+            <h2 id="my-goal" class="flex items-center gap-1.5 text-[17px]"><twig:Icon name="user" size="19"/> Ton objectif</h2>
+            <span class="text-sm font-extrabold text-muted">de 5 à 20 min/j</span>
+        </div>
+        <div class="track h-2"><div class="h-full w-1/2 rounded-full bg-sun"></div></div>
+        <p class="text-sm text-ink-soft">Ce que tu vises, toi. Il suit tes jours de présence : là 4 jours sur 7, c’est 4/7 de ton objectif. Atteint semaine après semaine, il fait une série.</p>
+        <p class="text-sm font-bold">Pour que la maison atteigne ses {{ household.weeklyGoal }} pts à {{ household.members|length }}, ça fait environ {{ share }} pts chacun.</p>
+    </section>
+
+    <p class="flex items-start gap-2 px-1 text-sm text-ink-soft"><twig:Icon name="chart" size="18" class="shrink-0 text-clay-dark"/> Le dimanche soir, le bilan : ce que chacun a fait, et un titre pour tout le monde.</p>
+{% endblock %}

@@ -6,6 +6,7 @@ use App\Calendar\Week;
 use App\Entity\Gift;
 use App\Entity\Member;
 use App\Enum\GiftKind;
+use App\Form\AccountType;
 use App\Form\ProfileType;
 use App\Presence\PresenceRecorder;
 use App\Progress\LevelProvider;
@@ -14,15 +15,20 @@ use App\Repository\BountyRepository;
 use App\Repository\CompletionRepository;
 use App\Repository\EarnedTitleRepository;
 use App\Repository\GiftRepository;
+use App\Repository\MemberRepository;
 use App\Repository\PresenceRepository;
 use App\Repository\YellowCardRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Clock\ClockInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
+use Symfony\Component\Security\Http\Authenticator\Passport\Badge\RememberMeBadge;
 
 #[Route('/profil')]
 final class ProfileController extends AbstractController
@@ -73,6 +79,39 @@ final class ProfileController extends AbstractController
             'gifts' => $this->groupByKind($gifts->findUnused($member)),
             'friends' => array_values(array_filter($member->getHousehold()->getMembers()->toArray(), static fn (Member $other): bool => $other !== $member)),
         ], new Response(status: $profileForm->isSubmitted() ? Response::HTTP_UNPROCESSABLE_ENTITY : Response::HTTP_OK));
+    }
+
+    /** My username and password. */
+    #[Route('/compte', name: 'profile_account', methods: ['GET', 'POST'])]
+    public function account(
+        #[CurrentUser] Member $member,
+        Request $request,
+        MemberRepository $members,
+        UserPasswordHasherInterface $passwordHasher,
+        Security $security,
+    ): Response {
+        $form = $this->createForm(AccountType::class, ['username' => $member->getUsername()])->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $username = (string) $form->get('username')->getData();
+            $taken = $members->loadUserByIdentifier($username);
+            if (null !== $taken && $taken !== $member) {
+                $form->get('username')->addError(new FormError('Ce pseudo est déjà pris.'));
+            } else {
+                $member->setUsername($username);
+                $newPassword = (string) $form->get('newPassword')->getData();
+                if ('' !== $newPassword) {
+                    $member->setPassword($passwordHasher->hashPassword($member, $newPassword));
+                }
+                $this->entityManager->flush();
+                // Logged in again with the new way in, or the session would no longer recognise them.
+                $security->login($member, 'form_login', 'main', [new RememberMeBadge()]);
+                $this->addFlash('success', 'C’est enregistré.');
+
+                return $this->redirectToRoute('profile_show', status: Response::HTTP_SEE_OTHER);
+            }
+        }
+
+        return $this->render('profile/account.html.twig', ['form' => $form], new Response(status: $form->isSubmitted() ? Response::HTTP_UNPROCESSABLE_ENTITY : Response::HTTP_OK));
     }
 
     /**

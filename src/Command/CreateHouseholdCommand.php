@@ -40,7 +40,7 @@ final readonly class CreateHouseholdCommand
         SymfonyStyle $io,
         #[Argument('Le fichier qui décrit la coloc')] string $file,
         #[Option('Prénom du premier membre')] ?string $nom = null,
-        #[Option('Son adresse e-mail')] ?string $email = null,
+        #[Option('Son pseudo, pour se connecter')] ?string $pseudo = null,
     ): int {
         try {
             $blueprint = Blueprint::fromFile($file);
@@ -60,7 +60,7 @@ final readonly class CreateHouseholdCommand
         $founding->householdName = $blueprint->name();
         $founding->cleaningDay = $blueprint->cleaningDay();
         $founding->name = $nom ?? (string) $io->ask('Ton prénom');
-        $founding->email = $email ?? (string) $io->ask('Ton adresse e-mail');
+        $founding->username = $pseudo ?? (string) $io->ask('Ton pseudo, pour te connecter');
         $founding->plainPassword = (string) $io->askHidden('Ton mot de passe (8 caractères au moins)');
         if (!$this->isValid($io, $founding)) {
             return 1;

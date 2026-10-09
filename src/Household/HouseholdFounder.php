@@ -10,7 +10,7 @@ use App\Enum\TaskCategory;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Clock\ClockInterface;
 
-/** Creates a household, with sensible defaults (zones, catalogue) unless told otherwise, and its first member. */
+/** Creates a household, with sensible defaults (zones, catalogue) unless told otherwise, its charter and its first member. */
 final readonly class HouseholdFounder
 {
     private const ZONES = ['Cuisine', 'Salon', 'Salle de bain', 'WC', 'Entrée'];
@@ -38,6 +38,7 @@ final readonly class HouseholdFounder
     {
         $household = new Household(trim($founding->householdName), $this->clock->now());
         $household->setCleaningDay($founding->cleaningDay);
+        Charter::seed($household);
 
         if ($withDefaults) {
             foreach (self::ZONES as $name) {

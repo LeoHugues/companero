@@ -1,0 +1,46 @@
+{% extends 'base.html.twig' %}
+{#
+    A step of the tour (TourController): where we are, the Casa who speaks, what there is to see,
+    then "Retour" and "Suivant" at the bottom. Read again from the profile (replay), it can be left
+    at any time and ends on the profile.
+#}
+{% block title %}{{ block('heading') }} · Companero{% endblock %}
+{% block main_class %}pb-32{% endblock %}
+
+{% block body %}
+    {% set steps = replay ? 6 : 8 %}
+    <header class="flex items-center gap-3">
+        <ol class="flex flex-1 items-center gap-1.5" aria-label="Étape {{ index + 1 }} sur {{ steps }}">
+            {% for i in 0..(steps - 1) %}
+                <li class="h-1.5 flex-1 rounded-full {{ i <= index ? 'bg-clay' : 'bg-track' }}"{% if i == index %} aria-current="step"{% endif %}></li>
+            {% endfor %}
+        </ol>
+        {% if replay %}
+            <a href="{{ path('profile_show') }}" aria-label="Fermer" class="-mr-2 flex size-10 items-center justify-center rounded-full text-ink"><twig:Icon name="close" size="22" stroke="2.2"/></a>
+        {% endif %}
+    </header>
+
+    {% block casa %}
+        <div class="flex items-end gap-2">
+            <twig:CasaMini :size="64" :happy="true" class="shrink-0"/>
+            <p class="bubble animate-pop mb-6">{% block speech %}{% endblock %}</p>
+        </div>
+    {% endblock %}
+
+    <h1 class="text-[26px] leading-tight">{% block heading %}{% endblock %}</h1>
+
+    {% block content %}{% endblock %}
+
+    <nav class="fixed inset-x-0 bottom-0 z-20 border-t-[1.5px] border-line bg-surface pb-[env(safe-area-inset-bottom)]" aria-label="Étapes">
+        <div class="mx-auto flex h-[76px] max-w-md items-center justify-between gap-3 px-5">
+            {% if previous %}
+                <a href="{{ previous }}" class="btn-link"><twig:Icon name="chevron-left" size="18"/>&nbsp;Retour</a>
+            {% else %}
+                <span></span>
+            {% endif %}
+            {% block next %}
+                <a href="{{ next }}" class="btn-primary h-[52px] px-6 text-[17px]" data-haptic="tick">{{ replay and next == path('profile_show') ? 'Terminer' : 'Suivant' }}<twig:Icon name="chevron-right" size="20" stroke="2.6"/></a>
+            {% endblock %}
+        </div>
+    </nav>
+{% endblock %}

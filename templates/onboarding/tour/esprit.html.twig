@@ -1,0 +1,32 @@
+{% extends 'onboarding/tour/_layout.html.twig' %}
+
+{% block casa %}
+    <twig:Casa :mood="enum('App\\Enum\\CasaMood').Radiant" :speech="'Salut ' ~ app.user.name ~ ' ! Moi, c’est la Casa.'" class="min-h-[230px]"/>
+{% endblock %}
+
+{% block heading %}{{ replay ? 'Comment ça marche' : 'Bienvenue dans ' ~ household.name }}{% endblock %}
+
+{% block content %}
+    <p class="-mt-1 text-[16px] leading-relaxed text-ink-soft">
+        Companero, c’est l’outil de la coloc pour l’intendance de la maison : le ménage, le linge, les poubelles,
+        le jardin, les animaux, les petites réparations, les courses qui manquent…
+    </p>
+
+    <ul class="flex flex-col gap-2.5">
+        {% for item in [
+            {icon: 'list', title: 'Voir ce qui attend', text: 'Toutes les tâches de la maison, et depuis quand elles n’ont pas été faites.'},
+            {icon: 'calendar', title: 'S’organiser ensemble', text: 'Qui s’en occupe, le jour de ménage, un rappel au bon moment.'},
+            {icon: 'star', title: 'Se motiver', text: 'Des points, des objectifs, et une Casa qui rayonne quand on prend soin d’elle.'},
+        ] %}
+            <li class="card flex items-start gap-3 p-3.5 animate-rise" style="animation-delay: {{ loop.index0 * 120 }}ms">
+                <span class="flex size-10 shrink-0 items-center justify-center rounded-full bg-sun"><twig:Icon :name="item.icon" size="21"/></span>
+                <span class="flex flex-col gap-0.5">
+                    <span class="text-[15px] font-extrabold">{{ item.title }}</span>
+                    <span class="text-sm text-ink-soft">{{ item.text }}</span>
+                </span>
+            </li>
+        {% endfor %}
+    </ul>
+
+    {% if not replay %}<p class="meta text-center">Deux minutes de visite, et c’est parti.</p>{% endif %}
+{% endblock %}

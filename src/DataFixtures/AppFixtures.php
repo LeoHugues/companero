@@ -148,6 +148,11 @@ final class AppFixtures extends Fixture
         }
 
         $lea->setAtHome(false, $lastSunday);
+        // The tour is behind them (it can be read again from the profile), the charter agreed to.
+        foreach ($members as $member) {
+            $member->finishOnboarding($start);
+            $member->acceptCharter($start);
+        }
         // When it happens (after the history, which they are no part of): Gizmo was sick this morning; the flush is fine for now.
         $sick = new Task($household, $leo, $start);
         $sick->setTitle('Nettoyer le vomi de Gizmo');
@@ -183,7 +188,7 @@ final class AppFixtures extends Fixture
         $founding->householdName = 'La coloc';
         $founding->cleaningDay = self::SUNDAY;
         $founding->name = 'Léo';
-        $founding->email = 'leo@example.com';
+        $founding->username = 'leo';
         $founding->plainPassword = self::PASSWORD;
 
         return $founding;
@@ -193,7 +198,7 @@ final class AppFixtures extends Fixture
     {
         $registration = new Registration();
         $registration->name = $name;
-        $registration->email = strtolower(str_replace('é', 'e', $name)).'@example.com';
+        $registration->username = str_replace('é', 'e', $name);
         $registration->plainPassword = self::PASSWORD;
 
         return $registration;

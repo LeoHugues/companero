@@ -1,0 +1,28 @@
+{% extends 'onboarding/tour/_layout.html.twig' %}
+
+{% block speech %}Chaque chose à faire est une carte. Essaie celle-ci : elle ne compte pas pour de vrai.{% endblock %}
+
+{% block heading %}Une tâche, une carte{% endblock %}
+
+{% block content %}
+    {{ include('onboarding/tour/_demo_card.html.twig') }}
+
+    <ul class="flex flex-col gap-3 px-1">
+        <li class="flex items-start gap-3">
+            <span class="flex size-8 shrink-0 items-center justify-center rounded-full bg-cat-cleaning"><twig:Icon name="broom" size="17"/></span>
+            <p class="text-[15px]"><strong>Le médaillon</strong> : la catégorie, entourée d’un anneau qui se vide avec le temps.</p>
+        </li>
+        <li class="flex items-start gap-3">
+            <span class="flex size-8 shrink-0 items-center justify-center rounded-full border-[1.5px] border-dashed border-dust text-muted"><twig:Icon name="hand" size="16"/></span>
+            <p class="text-[15px]"><strong>Je prends</strong> : les autres voient que tu t’en occupes.</p>
+        </li>
+        <li class="flex items-start gap-3">
+            <span class="flex size-8 shrink-0 items-center justify-center rounded-full border-[1.5px] border-ink bg-sun"><twig:Icon name="check" size="16" stroke="2.8"/></span>
+            <p class="text-[15px]"><strong>C’est fait</strong> : un appui, et ses points sont à toi. Oublié sur le moment ? On peut le noter après coup.</p>
+        </li>
+        <li class="flex items-start gap-3">
+            <span class="flex size-8 shrink-0 items-center justify-center rounded-full bg-track"><twig:Icon name="settings" size="16"/></span>
+            <p class="text-[15px]"><strong>Toucher la carte</strong> ouvre sa page : quand elle a été faite, par qui, et ses réglages. Tout le monde peut modifier une tâche.</p>
+        </li>
+    </ul>
+{% endblock %}

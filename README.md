@@ -32,8 +32,8 @@ php bin/console tailwind:build --watch      # dans un terminal à part
 symfony serve                               # ou tout serveur PHP pointant sur public/
 ```
 
-Coloc de démo (la nôtre : zones, tâches du dimanche, chats…) : `leo@example.com` / `companero`
-(aussi `lea@`, `robin@`, `gab@`).
+Coloc de démo (la nôtre : zones, tâches du dimanche, chats…) : pseudo `leo`, mot de passe `companero`
+(aussi `lea`, `robin`, `gab`).
 
 Sinon, ouvrez `/bienvenue` pour créer votre coloc, puis partagez le lien
 d'invitation affiché dans *Profil › La coloc*.

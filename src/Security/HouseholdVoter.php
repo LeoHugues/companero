@@ -3,6 +3,7 @@
 namespace App\Security;
 
 use App\Entity\CatalogItem;
+use App\Entity\CharterRule;
 use App\Entity\Completion;
 use App\Entity\Member;
 use App\Entity\Pet;
@@ -15,7 +16,7 @@ use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 /**
  * A member can only see and touch what belongs to their own household.
  *
- * @extends Voter<string, Task|Zone|Pet|Completion|CatalogItem>
+ * @extends Voter<string, Task|Zone|Pet|Completion|CatalogItem|CharterRule>
  */
 final class HouseholdVoter extends Voter
 {
@@ -24,7 +25,7 @@ final class HouseholdVoter extends Voter
     protected function supports(string $attribute, mixed $subject): bool
     {
         return self::ACCESS === $attribute
-            && ($subject instanceof Task || $subject instanceof Zone || $subject instanceof Pet || $subject instanceof Completion || $subject instanceof CatalogItem);
+            && ($subject instanceof Task || $subject instanceof Zone || $subject instanceof Pet || $subject instanceof Completion || $subject instanceof CatalogItem || $subject instanceof CharterRule);
     }
 
     protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token, ?Vote $vote = null): bool

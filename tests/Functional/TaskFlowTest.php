@@ -310,7 +310,7 @@ final class TaskFlowTest extends AppTestCase
     public function testMembersCannotTouchAnotherHouseholdsTasks(): void
     {
         $leo = $this->foundHousehold();
-        $other = $this->foundHousehold('Zoé', 'zoe@example.com', 'Une autre coloc');
+        $other = $this->foundHousehold('Zoé', household: 'Une autre coloc');
         $this->client->loginUser($other);
         $this->client->request('GET', '/taches/nouvelle/a-faire?nouvelle=1');
         $this->client->submitForm('Ajouter la tâche', ['task[title]' => 'Secret']);

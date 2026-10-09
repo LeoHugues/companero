@@ -1,0 +1,19 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mon compte · Companero{% endblock %}
+
+{% block body %}
+    <header class="flex items-center justify-between">
+        <h1 class="text-[26px]">Mon compte</h1>
+        <a href="{{ path('profile_show') }}" aria-label="Retour au profil" class="flex size-11 items-center justify-center rounded-full text-ink"><twig:Icon name="close" size="22" stroke="2.2"/></a>
+    </header>
+
+    {{ form_start(form, {attr: {class: 'flex flex-col gap-5'}}) }}
+        {{ form_row(form.username) }}
+        {{ form_row(form.newPassword) }}
+        {{ form_row(form.currentPassword) }}
+        <button type="submit" class="btn-primary self-start">Enregistrer</button>
+    {{ form_end(form) }}
+{% endblock %}
+
+{% block nav %}<twig:BottomNav active="profile"/>{% endblock %}

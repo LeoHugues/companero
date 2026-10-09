@@ -1,0 +1,45 @@
+{% extends 'onboarding/tour/_layout.html.twig' %}
+
+{% block speech %}Dernière étape : à toi de régler les tiens. Tout se change ensuite dans ton profil.{% endblock %}
+
+{% block heading %}Mes réglages{% endblock %}
+
+{% block content %}
+    {{ form_start(form, {attr: {id: 'tour-settings', class: 'flex flex-col gap-5', 'data-controller': 'presence'}}) }}
+        <section class="flex flex-col gap-2">
+            {{ form_row(form.goal, {label_attr: {class: 'section-title'}, help: 'De 5 à 20 minutes par jour. Pour que la maison atteigne ses ' ~ household.weeklyGoal ~ ' pts, ça fait environ ' ~ share ~ ' pts chacun. Commence petit : tu pourras monter.', attr: {'data-action': 'change->presence#describe'}}) }}
+        </section>
+        <section class="card flex flex-col gap-2 p-3.5" aria-labelledby="presence-title">
+            <div class="flex items-baseline justify-between gap-2">
+                <h2 id="presence-title" class="text-[15px]"><label for="{{ form.presenceDays.vars.id }}">Je suis là combien de jours par semaine ?</label></h2>
+                <output for="{{ form.presenceDays.vars.id }}" class="shrink-0 text-[15px] font-extrabold whitespace-nowrap text-clay-dark" data-presence-target="days"></output>
+            </div>
+            {{ form_widget(form.presenceDays, {attr: {class: 'h-8 w-full cursor-pointer accent-clay', 'data-presence-target': 'slider', 'data-action': 'input->presence#describe', 'aria-describedby': 'presence-help'}}) }}
+            <ol class="-mt-1 flex justify-between px-1 text-[11px] font-bold text-muted" aria-hidden="true">
+                {% for day in 0..7 %}<li class="w-3 text-center">{{ day }}</li>{% endfor %}
+            </ol>
+            <p id="presence-help" class="meta" data-presence-target="help">Ton objectif suit tes jours de présence.</p>
+        </section>
+        <section class="flex flex-col gap-2" aria-labelledby="reminders-title">
+            <h2 id="reminders-title" class="section-title">Mes rappels</h2>
+            {# In the Android app: allow the phone's notifications right here (notifications_controller.js). #}
+            <div class="card flex flex-col gap-2.5 p-3.5" data-controller="notifications">
+                <p class="flex items-center gap-2 text-[15px] font-extrabold"><twig:Icon name="bell" size="18"/> Notifications</p>
+                <p class="text-sm text-ink-soft" data-notifications-target="state">Elles arrivent sur ton téléphone avec l’appli Android de Companero.</p>
+                <div class="flex flex-wrap items-center gap-2" data-notifications-target="actions" hidden>
+                    <button type="button" class="btn-primary h-10 px-4 text-sm" data-notifications-target="allow" data-action="notifications#allow" hidden>Autoriser</button>
+                    <button type="button" class="chip gap-1.5" data-notifications-target="test" data-action="notifications#test" data-haptic="tick"><twig:Icon name="bell" size="16"/> Essayer</button>
+                </div>
+            </div>
+            <div class="card flex flex-col divide-y divide-line px-3.5 py-1">
+                {{ form_row(form.notifyCleaningDay) }}
+                {{ form_row(form.notifyOverdue) }}
+                {{ form_row(form.notifyWeeklyReview) }}
+            </div>
+        </section>
+    {{ form_end(form) }}
+{% endblock %}
+
+{% block next %}
+    <button type="submit" form="tour-settings" class="btn-primary h-[52px] px-6 text-[17px]" data-haptic="success">C’est parti <twig:Icon name="chevron-right" size="20" stroke="2.6"/></button>
+{% endblock %}

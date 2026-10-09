@@ -27,9 +27,9 @@ final class NativeConfiguration
                 'uri' => 'hotwire://fragment/web',
                 'pull_to_refresh_enabled' => true,
             ]),
-            // The bottom navigation and the login switch screens instead of piling them up
+            // The bottom navigation, the login and the steps of the tour switch screens instead of piling them up
             // (including the review's other weeks, and its ± buttons that redirect to a dated week).
-            new Rule(patterns: ['^/?$', '^/taches/?(\?.*)?$', '^/plan$', '^/bilan', '^/profil$', '^/connexion', '^/deconnexion'], properties: [
+            new Rule(patterns: ['^/?$', '^/taches/?(\?.*)?$', '^/plan$', '^/bilan', '^/profil$', '^/connexion', '^/deconnexion', '^/decouverte'], properties: [
                 'presentation' => 'replace_root',
             ]),
             // Task (and completion) forms slide up as modals; their close button recedes to the screen underneath.

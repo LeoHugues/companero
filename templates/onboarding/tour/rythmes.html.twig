@@ -1,0 +1,34 @@
+{% extends 'onboarding/tour/_layout.html.twig' %}
+
+{% block speech %}Certaines tâches marchent autrement. Voici les autres façons de revenir.{% endblock %}
+
+{% block heading %}Les autres rythmes{% endblock %}
+
+{% block content %}
+    {% set day = weekday_name(household.cleaningDay) %}
+    <ul class="flex flex-col gap-2.5">
+        {% for kind in [
+            {icon: 'calendar', title: 'À jour fixe', example: 'Sortir les poubelles, le mardi soir', text: 'Elle revient à date fixe, avec une heure limite.'},
+            {icon: 'repeat', title: 'Avec un engagement', example: 'La serpillière, au moins 1 fois par semaine', text: 'Elle glisse comme les autres ; pas encore faite cette semaine, elle devient due le jour de ménage (' ~ day ~ '), et en retard à la fin de la semaine.'},
+            {icon: 'bolt', title: 'En un geste', example: 'Vider le lave-vaisselle', text: 'Jamais planifiée : un appui sur l’accueil quand c’est fait. Un petit délai évite de la compter deux fois.'},
+            {icon: 'siren', title: 'Ça arrive !', example: 'Nettoyer le vomi du chat', text: 'Elle dort jusqu’à ce que quelqu’un la signale ; alors, il faut s’en occuper vite.'},
+            {icon: 'check', title: 'Une seule fois', example: 'Appeler le proprio avant vendredi', text: 'Une fois faite, elle disparaît. Les idées plus rares (tailler la haie…) attendent dans le catalogue.'},
+        ] %}
+            <li class="card flex items-start gap-3 p-3.5 animate-rise" style="animation-delay: {{ loop.index0 * 90 }}ms">
+                <span class="flex size-10 shrink-0 items-center justify-center rounded-full bg-track"><twig:Icon :name="kind.icon" size="20"/></span>
+                <span class="flex flex-col gap-0.5">
+                    <span class="text-[15px] font-extrabold">{{ kind.title }}</span>
+                    <span class="text-[13px] font-bold text-clay-dark">« {{ kind.example }} »</span>
+                    <span class="text-sm text-ink-soft">{{ kind.text }}</span>
+                </span>
+            </li>
+        {% endfor %}
+    </ul>
+
+    <div class="card flex items-start gap-3 border-sun p-3.5">
+        <span class="mt-1.5 size-2.5 shrink-0 rounded-full bg-clay" aria-hidden="true"></span>
+        <p class="text-[15px]"><strong>Le jour de ménage, c’est le {{ day }}.</strong> Un rendez-vous, pas une obligation : ce qui est fait avant ou après compte tout autant.{% if household.cleaningDayBoost %} Ce jour-là, tout rapporte un peu plus.{% endif %}</p>
+    </div>
+
+    <p class="flex items-start gap-2 px-1 text-sm text-ink-soft"><twig:Icon name="gift" size="18" class="shrink-0 text-clay-dark"/> Et chaque semaine, quelques cartes brillent : elles cachent une surprise pour la première personne qui les fait.</p>
+{% endblock %}

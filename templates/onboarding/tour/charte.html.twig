@@ -1,0 +1,17 @@
+{% extends 'onboarding/tour/_layout.html.twig' %}
+
+{% block speech %}Avant de commencer, les règles de la maison. Rien à voir avec l’appli : c’est juste comme ça qu’on vit bien ensemble.{% endblock %}
+
+{% block heading %}La charte de la coloc{% endblock %}
+
+{% block content %}
+    {{ include('charter/_rules.html.twig', {household: household}) }}
+    <p class="meta px-1">Elle s’écrit à plusieurs : chacun peut la compléter dans les réglages de la coloc.</p>
+{% endblock %}
+
+{% block next %}
+    <form method="post" action="{{ path('tour_charter_accept') }}">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
+        <button type="submit" class="btn-primary h-[52px] px-6 text-[17px]" data-haptic="success"><twig:Icon name="check" size="20" stroke="2.6"/> Ça me va</button>
+    </form>
+{% endblock %}

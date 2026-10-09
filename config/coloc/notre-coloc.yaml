@@ -1,5 +1,5 @@
 # Notre coloc, pour démarrer en production :
-#   php bin/console app:coloc:creer config/coloc/notre-coloc.yaml --nom=Léo --email=…
+#   php bin/console app:coloc:creer config/coloc/notre-coloc.yaml --nom=Léo --pseudo=…
 # Seulement ce qui fait partie de notre routine, telle que décrite par Léo. Les points suivent
 # « 5 min ≈ 10 pts » ; ceux qui n'ont pas été donnés sont marqués « estimé ».
 # Tout se modifie ensuite dans l'appli.

@@ -1,0 +1,63 @@
+{#
+    A card to try out, looking just like a real one (TaskCard, TaskMedallion, UrgencyPill, TaskActions),
+    driven by tour_card_controller.js. glide: a slider ages it day by day.
+#}
+{% set rhythm = rhythm|default(4) %}
+{% set age = age|default(rhythm) %}
+<div class="flex flex-col gap-3" data-controller="tour-card" data-tour-card-rhythm-value="{{ rhythm }}" data-tour-card-age-value="{{ age }}">
+    <article class="task-card card task-card-warning relative flex flex-col gap-3 p-3.5" data-tour-card-target="card" aria-label="Une carte pour essayer">
+        <div class="flex items-start gap-3">
+            <span class="medallion medallion-warning medallion-due shrink-0" style="--size: 56px" aria-hidden="true" data-tour-card-target="medallion">
+                <svg viewBox="0 0 60 60" width="56" height="56">
+                    <circle cx="30" cy="30" r="25" style="fill: var(--color-cat-cleaning)"/>
+                    <circle cx="30" cy="30" r="25" fill="none" style="stroke: var(--color-track)" stroke-width="5"/>
+                    <circle class="medallion-ring" cx="30" cy="30" r="25" fill="none" stroke-width="5" stroke-linecap="round" data-tour-card-target="ring"
+                            stroke-dasharray="157.1" style="--full: 157.1; stroke-dashoffset: 144.5; transition: stroke-dashoffset 400ms ease, stroke 400ms ease" transform="rotate(-90 30 30)"/>
+                </svg>
+                <span class="medallion-icon"><twig:Icon name="broom" size="24" stroke="2.2"/></span>
+                <span class="medallion-badge" data-tour-card-target="badge" hidden>!</span>
+            </span>
+            <div class="flex min-w-0 flex-1 flex-col gap-1">
+                <div class="flex items-center gap-1.5">
+                    <span class="urgency-pill urgency-pill-warning" data-tour-card-target="pill">
+                        <span data-tour-card-target="pillIcon" data-alert="ok" hidden><twig:Icon name="check" size="13" stroke="2.8" class="shrink-0"/></span>
+                        <span data-tour-card-target="pillIcon" data-alert="warning"><twig:Icon name="clock" size="13" stroke="2.8" class="shrink-0"/></span>
+                        <span data-tour-card-target="pillIcon" data-alert="danger" hidden><twig:Icon name="alarm" size="13" stroke="2.8" class="shrink-0"/></span>
+                        <span class="truncate" data-tour-card-target="pillLabel">Aujourd’hui</span>
+                    </span>
+                </div>
+                <h3 class="text-[17px] leading-snug font-extrabold">Passer l’aspirateur au salon</h3>
+                <p class="text-xs font-semibold text-muted">Salon · tous les {{ rhythm }} j</p>
+            </div>
+        </div>
+        <div class="flex items-center justify-between gap-2">
+            <button type="button" class="seat" data-tour-card-target="seat" data-action="tour-card#take">
+                <span class="seat-empty" aria-hidden="true"><twig:Icon name="hand" size="15" stroke="2.2"/></span>
+                Je prends
+            </button>
+            <span class="seat seat-taken" data-tour-card-target="taken" hidden><twig:Avatar :member="app.user" size="26"/> Tu t’en occupes</span>
+            <button type="button" class="done-button" data-tour-card-target="done" data-action="tour-card#done">
+                <span class="done-button-check" aria-hidden="true"><twig:Icon name="check" size="16" stroke="3"/></span>
+                C’est fait
+                <span class="done-button-points">+20</span>
+            </button>
+        </div>
+    </article>
+
+    {% if glide|default(false) %}
+        <div class="card flex flex-col gap-2 p-3.5">
+            <div class="flex items-baseline justify-between gap-2">
+                <label for="tour-days" class="text-[15px] font-extrabold">Le temps passe…</label>
+                <output for="tour-days" class="shrink-0 text-sm font-extrabold text-clay-dark" data-tour-card-target="days"></output>
+            </div>
+            <input type="range" id="tour-days" min="0" max="8" step="1" value="{{ age }}" class="h-8 w-full cursor-pointer accent-clay" data-tour-card-target="slider" data-action="input->tour-card#age">
+            <ol class="-mt-1 flex justify-between px-1 text-[11px] font-bold text-muted" aria-hidden="true">
+                {% for day in 0..8 %}<li class="w-3 text-center">{{ day }}</li>{% endfor %}
+            </ol>
+        </div>
+    {% endif %}
+
+    <p class="animate-pop rounded-2xl bg-ok-soft px-4 py-3 text-[15px] font-bold text-ok-ink" role="status" data-tour-card-target="message" hidden>
+        {{ glide|default(false) ? 'Faite : elle repart à zéro, fraîche comme au premier jour.' : 'Bravo ! Pour de vrai, ces 20 points seraient à toi, et la Casa te dirait merci.' }}
+    </p>
+</div>

@@ -23,30 +23,44 @@ abstract class AppTestCase extends WebTestCase
         $this->client->setServerParameter('HTTP_ORIGIN', 'http://localhost');
     }
 
-    protected function foundHousehold(string $name = 'Léo', string $email = 'leo@example.com', string $household = 'La coloc', bool $cleaningDayBoost = false): Member
+    /** @param bool $onboarded false: the tour is still ahead of them */
+    protected function foundHousehold(string $name = 'Léo', ?string $username = null, string $household = 'La coloc', bool $cleaningDayBoost = false, bool $onboarded = true): Member
     {
         $founding = new Founding();
         $founding->householdName = $household;
         $founding->name = $name;
-        $founding->email = $email;
+        $founding->username = $username ?? $name;
         $founding->plainPassword = 'companero';
 
         $member = static::getContainer()->get(HouseholdFounder::class)->found($founding);
         // Tests must not earn more on the day of the week that happens to be the cleaning day.
         $member->getHousehold()->setCleaningDayBoost($cleaningDayBoost);
-        static::getContainer()->get(EntityManagerInterface::class)->flush();
 
-        return $member;
+        return $this->onboard($member, $onboarded);
     }
 
-    protected function register(Member $founder, string $name): Member
+    /** @param bool $onboarded false: the tour is still ahead of them */
+    protected function register(Member $founder, string $name, bool $onboarded = true): Member
     {
         $registration = new Registration();
         $registration->name = $name;
-        $registration->email = strtolower($name).'@example.com';
+        $registration->username = $name;
         $registration->plainPassword = 'companero';
 
-        return static::getContainer()->get(MemberRegistrar::class)->register($founder->getHousehold(), $registration);
+        return $this->onboard(static::getContainer()->get(MemberRegistrar::class)->register($founder->getHousehold(), $registration), $onboarded);
+    }
+
+    /** The tour is behind them and the charter agreed to: straight to the pages under test. */
+    private function onboard(Member $member, bool $onboarded): Member
+    {
+        if ($onboarded) {
+            $now = new \DateTimeImmutable();
+            $member->finishOnboarding($now);
+            $member->acceptCharter($now);
+        }
+        static::getContainer()->get(EntityManagerInterface::class)->flush();
+
+        return $member;
     }
 
     /** The same member, managed by the entity manager of the current kernel (it is rebooted between requests). */

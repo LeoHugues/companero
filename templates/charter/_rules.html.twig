@@ -1,0 +1,26 @@
+{#
+    The household's charter, rule by rule; "Pourquoi ?" unfolds under a rule that has its reason.
+    editable: a pencil on each rule.
+#}
+<ol class="flex flex-col gap-2.5" aria-label="La charte de la coloc">
+    {% for rule in household.charterRules %}
+        <li class="card flex items-start gap-3 p-3.5">
+            <span class="flex size-7 shrink-0 items-center justify-center rounded-full bg-sun text-sm font-extrabold" aria-hidden="true">{{ loop.index }}</span>
+            <div class="flex min-w-0 flex-1 flex-col gap-1">
+                <p class="text-[15px] leading-snug font-bold [overflow-wrap:anywhere]">{{ rule.text }}</p>
+                {% if rule.why %}
+                    <details class="group">
+                        <summary class="flex cursor-pointer list-none items-center gap-1 text-[13px] font-bold text-clay-dark">Pourquoi ?<twig:Icon name="chevron-down" size="14" stroke="2.6" class="transition group-open:rotate-180"/></summary>
+                        <p class="mt-1.5 text-[13px] leading-relaxed whitespace-pre-line text-ink-soft">{{ rule.why }}</p>
+                    </details>
+                {% endif %}
+            </div>
+            {% if editable|default(false) %}
+                <a href="{{ path('charter_rule_edit', {id: rule.id}) }}" aria-label="Modifier la règle {{ loop.index }}" title="Modifier"
+                   class="-mt-1 -mr-1.5 flex size-9 shrink-0 items-center justify-center rounded-full text-muted hover:bg-track hover:text-ink"><twig:Icon name="edit" size="17"/></a>
+            {% endif %}
+        </li>
+    {% else %}
+        <li class="card p-4 text-sm text-muted">Pas encore de règle : la charte s’écrit à plusieurs.</li>
+    {% endfor %}
+</ol>
