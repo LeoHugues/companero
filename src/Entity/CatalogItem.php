@@ -7,7 +7,10 @@ use App\Repository\CatalogItemRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
-/** A ready-made one-off task (trim the hedge, clean the gutters…) launched by hand when needed. */
+/**
+ * A ready-made one-off task (trim the hedge, clean the gutters…) launched by hand when needed.
+ * A new task to do joins the catalogue, so that next time it is picked rather than typed again.
+ */
 #[ORM\Entity(repositoryClass: CatalogItemRepository::class)]
 class CatalogItem
 {
@@ -29,12 +32,26 @@ class CatalogItem
     #[ORM\Column(type: Types::SMALLINT)]
     private int $points;
 
-    public function __construct(Household $household, string $title, TaskCategory $category, int $points)
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(onDelete: 'SET NULL')]
+    private ?Zone $zone = null;
+
+    public function __construct(Household $household, string $title, TaskCategory $category, int $points, ?Zone $zone = null)
     {
         $this->household = $household;
         $this->title = $title;
         $this->category = $category;
         $this->points = $points;
+        $this->zone = $zone;
+    }
+
+    /** What the task to do it starts from: its title, its kind of work, its points, its room. */
+    public function fill(Task $task): void
+    {
+        $task->setTitle($this->title);
+        $task->setCategory($this->category);
+        $task->setPoints($this->points);
+        $task->setZone($this->zone);
     }
 
     public function getId(): ?int
@@ -60,5 +77,10 @@ class CatalogItem
     public function getPoints(): int
     {
         return $this->points;
+    }
+
+    public function getZone(): ?Zone
+    {
+        return $this->zone;
     }
 }

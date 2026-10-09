@@ -164,6 +164,16 @@ class TaskType extends AbstractType
                 ]);
         }
 
+        if ($options['allow_catalog']) {
+            $builder->add('catalog', CheckboxType::class, [
+                'label' => 'La garder dans le catalogue',
+                'help' => 'La prochaine fois, elle se choisit en un appui au lieu d’être retapée.',
+                'mapped' => false,
+                'required' => false,
+                'data' => true,
+            ]);
+        }
+
         if ($options['allow_reservation']) {
             $builder->add('reserve', CheckboxType::class, [
                 'label' => 'Je m’en occupe',
@@ -180,6 +190,7 @@ class TaskType extends AbstractType
             'data_class' => Task::class,
             'allow_reservation' => false,
             'allow_done' => false,
+            'allow_catalog' => false,
             'mode' => self::TEMPLATE,
         ]);
         $resolver->setAllowedValues('mode', [self::TEMPLATE, self::ONE_OFF]);
@@ -187,5 +198,6 @@ class TaskType extends AbstractType
         $resolver->setAllowedTypes('household', Household::class);
         $resolver->setAllowedTypes('allow_reservation', 'bool');
         $resolver->setAllowedTypes('allow_done', 'bool');
+        $resolver->setAllowedTypes('allow_catalog', 'bool');
     }
 }

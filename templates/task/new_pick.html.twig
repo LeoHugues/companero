@@ -1,0 +1,73 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Une tâche à faire · Companero{% endblock %}
+
+{#
+    Something to do: first among what the house already knows (the catalogue, the occasional tasks
+    asleep), found by typing a few letters; or else a new one, which joins the catalogue.
+#}
+{% block body %}
+    {{ include('task/_tunnel.html.twig', {
+        step: 2,
+        title: 'Une tâche à faire',
+        icon: 'check',
+        what: 'Choisis-la parmi celles que la maison connaît déjà, ou crée-en une nouvelle.'
+    }) }}
+
+    <div class="flex flex-col gap-4" data-controller="filter">
+        <label class="relative block">
+            <span class="sr-only">Chercher une tâche</span>
+            <span class="pointer-events-none absolute inset-y-0 left-3.5 flex items-center text-muted"><twig:Icon name="search" size="18"/></span>
+            <input type="search" class="input pl-10" placeholder="Chercher : vitres, placard, vomi…" autocomplete="off"
+                   data-filter-target="input" data-action="input->filter#filter">
+        </label>
+
+        <a href="{{ path('task_new_one_off', {nouvelle: 1}) }}" data-filter-target="create" class="card card-hover flex items-center gap-3.5 p-3.5 text-ink no-underline hover:text-ink">
+            <span class="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-sun text-ink" aria-hidden="true"><twig:Icon name="plus" size="22" stroke="2.4"/></span>
+            <span class="flex min-w-0 flex-1 flex-col gap-0.5">
+                <span class="text-[16px] font-extrabold">Une nouvelle tâche</span>
+                <span class="text-sm leading-snug text-ink-soft">Elle rejoint le catalogue pour la prochaine fois.</span>
+            </span>
+            <twig:Icon name="chevron-right" size="20" class="shrink-0 text-muted"/>
+        </a>
+
+        {% if dormant is not empty %}
+            <section class="flex flex-col gap-2" aria-labelledby="dormant-title" data-filter-target="group">
+                <div class="flex flex-col">
+                    <h2 id="dormant-title" class="field-label">Ça arrive ?</h2>
+                    <p class="meta">Les occasionnelles : un appui, et leur carte attend sur l’accueil.</p>
+                </div>
+                <ul class="flex flex-wrap gap-2">
+                    {% for view in dormant %}
+                        <li data-filter-target="item" data-filter-text="{{ view.task.title }} {{ view.task.zone.name ?? '' }}"><twig:RaiseButton :task="view.task" compact/></li>
+                    {% endfor %}
+                </ul>
+            </section>
+        {% endif %}
+
+        {% if catalog is not empty %}
+            <section class="flex flex-col gap-2" aria-labelledby="catalog-title" data-filter-target="group">
+                <h2 id="catalog-title" class="field-label">Le catalogue</h2>
+                <ul class="card divide-y divide-line px-3.5">
+                    {% for item in catalog %}
+                        <li data-filter-target="item" data-filter-text="{{ item.title }} {{ item.category.label }} {{ item.zone.name ?? '' }}">
+                            <a href="{{ path('task_new_one_off', {modele: item.id}) }}" class="flex items-center gap-3 py-3 text-ink no-underline hover:text-ink">
+                                <span class="flex min-w-0 flex-1 flex-col gap-0.5">
+                                    <span class="text-[15px] leading-snug font-bold">{{ item.title }}</span>
+                                    <span class="text-xs text-muted">{{ item.zone ? item.zone.name ~ ' · ' }}{{ item.category.label }}</span>
+                                </span>
+                                <span class="text-sm font-extrabold whitespace-nowrap text-clay-dark">+{{ item.points }}</span>
+                                <twig:Icon name="chevron-right" size="18" class="shrink-0 text-muted"/>
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </section>
+        {% endif %}
+
+        <p class="card p-4 text-sm text-muted" data-filter-target="empty" hidden>Rien de tel pour l’instant : crée-la avec « Une nouvelle tâche », elle sera là la prochaine fois.</p>
+    </div>
+{% endblock %}
+
+{# In the Android app this tunnel is a modal (see App\Native\NativeConfiguration): no bottom navigation. #}
+{% block nav %}{% if not ux_is_native() %}<twig:BottomNav active="new"/>{% endif %}{% endblock %}

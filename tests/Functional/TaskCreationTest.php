@@ -3,6 +3,7 @@
 namespace App\Tests\Functional;
 
 use App\Entity\Completion;
+use App\Repository\CatalogItemRepository;
 use App\Repository\CompletionRepository;
 use App\Repository\TaskRepository;
 
@@ -26,7 +27,7 @@ final class TaskCreationTest extends AppTestCase
         $this->client->loginUser($this->foundHousehold());
 
         // Something to do once: no question about how it comes back.
-        $this->client->request('GET', '/taches/nouvelle/a-faire');
+        $this->client->request('GET', '/taches/nouvelle/a-faire?nouvelle=1');
         self::assertSelectorTextContains('main', 'Étape 2/2');
         self::assertSelectorNotExists('input[name="task[kind]"]');
         self::assertSelectorExists('input[name="task[reserve]"]');
@@ -46,7 +47,7 @@ final class TaskCreationTest extends AppTestCase
     public function testATaskToDoCanBeEditedWhenItsAlertsAreTheSame(): void
     {
         $this->client->loginUser($this->foundHousehold());
-        $this->client->request('GET', '/taches/nouvelle/a-faire');
+        $this->client->request('GET', '/taches/nouvelle/a-faire?nouvelle=1');
         // Orange a day before, red a day after: the two durations used to be compared field by field, endlessly.
         $this->client->submitForm('Ajouter la tâche', [
             'task[title]' => 'Déchetterie',
@@ -62,6 +63,40 @@ final class TaskCreationTest extends AppTestCase
         self::assertResponseIsSuccessful();
         $this->client->submitForm('Enregistrer', ['task[title]' => 'Aller à la déchetterie']);
         self::assertResponseRedirects('/taches/'.$task?->getId());
+    }
+
+    public function testATaskToDoIsPickedAmongKnownOnesOrCreatedForNextTime(): void
+    {
+        $this->client->loginUser($this->foundHousehold());
+
+        // First what the house already knows: the catalogue, searchable, and a new one.
+        $crawler = $this->client->request('GET', '/taches/nouvelle/a-faire');
+        self::assertSelectorExists('input[type=search][data-filter-target=input]');
+        self::assertSelectorExists('a[href="/taches/nouvelle/a-faire?nouvelle=1"]');
+        $known = $crawler->filter('a[href^="/taches/nouvelle/a-faire?modele="]');
+        self::assertGreaterThan(0, $known->count());
+
+        // A known one: its form comes filled in, and it does not join the catalogue twice.
+        $this->client->click($known->first()->link());
+        self::assertSelectorNotExists('input[name="task[catalog]"]');
+
+        // A new one joins the catalogue, unless said otherwise.
+        $catalog = static::getContainer()->get(CatalogItemRepository::class);
+        $before = \count($catalog->findAll());
+        $this->client->request('GET', '/taches/nouvelle/a-faire?nouvelle=1&titre=D%C3%A9tartrer+la+bouilloire');
+        self::assertInputValueSame('task[title]', 'Détartrer la bouilloire');
+        $this->client->submitForm('Ajouter la tâche');
+        self::assertResponseRedirects('/');
+        self::assertNotNull($catalog->findOneBy(['title' => 'Détartrer la bouilloire']));
+
+        $this->client->request('GET', '/taches/nouvelle/a-faire?nouvelle=1');
+        $this->client->submitForm('Ajouter la tâche', ['task[title]' => 'Appeler le proprio', 'task[catalog]' => false]);
+        self::assertNull($catalog->findOneBy(['title' => 'Appeler le proprio']));
+        self::assertCount($before + 1, $catalog->findAll());
+
+        // Picked again: it is in the list now.
+        $this->client->request('GET', '/taches/nouvelle/a-faire');
+        self::assertSelectorTextContains('#catalog-title + ul', 'Détartrer la bouilloire');
     }
 
     public function testNotingWhatWasAlreadyDone(): void

@@ -2,12 +2,14 @@
 
 namespace App\Controller;
 
+use App\Entity\CatalogItem;
 use App\Entity\Member;
 use App\Entity\Task;
 use App\Enum\TaskKind;
 use App\Form\LogCompletionType;
 use App\Form\TaskType;
 use App\Repository\CatalogItemRepository;
+use App\Task\TaskBoardBuilder;
 use App\Task\TaskCompleter;
 use App\Task\TaskNotAvailable;
 use App\Twig\TaskLabels;
@@ -49,40 +51,62 @@ final class TaskCreationController extends AbstractController
         return $this->render('task/new_choose.html.twig');
     }
 
+    /**
+     * Something to do: first pick it among the tasks the house already knows (the catalogue, the
+     * occasional tasks asleep), or else create a new one — which joins the catalogue for next time.
+     */
     #[Route('/a-faire', name: 'task_new_one_off', methods: ['GET', 'POST'])]
     public function oneOff(
         #[CurrentUser] Member $member,
         Request $request,
         CatalogItemRepository $catalog,
+        TaskBoardBuilder $boards,
         #[MapQueryParameter] ?int $modele = null,
         #[MapQueryParameter] bool $fait = false,
+        #[MapQueryParameter] bool $nouvelle = false,
+        #[MapQueryParameter] ?string $titre = null,
     ): Response {
         $household = $member->getHousehold();
+        $items = $catalog->findForHousehold($household);
+        $dormant = $boards->build($household)->dormant();
+        if ($request->isMethod('GET') && null === $modele && !$fait && !$nouvelle && ([] !== $items || [] !== $dormant)) {
+            return $this->render('task/new_pick.html.twig', ['catalog' => $items, 'dormant' => $dormant]);
+        }
+
         $task = new Task($household, $member, $this->clock->now());
         $task->setKind(TaskKind::OneOff);
 
         $template = null !== $modele ? $catalog->find($modele) : null;
         if (null !== $template && $template->getHousehold() === $household) {
-            $task->setTitle($template->getTitle());
-            $task->setCategory($template->getCategory());
-            $task->setPoints($template->getPoints());
+            $template->fill($task);
         } else {
             $template = null;
+            $task->setTitle(mb_substr(trim($titre ?? ''), 0, 120));
         }
 
-        $form = $this->createForm(TaskType::class, $task, ['household' => $household, 'mode' => TaskType::ONE_OFF, 'allow_reservation' => true, 'allow_done' => true]);
+        $form = $this->createForm(TaskType::class, $task, [
+            'household' => $household,
+            'mode' => TaskType::ONE_OFF,
+            'allow_reservation' => true,
+            'allow_done' => true,
+            'allow_catalog' => null === $template,
+        ]);
         if ($fait) {
             $form->get('done')->setData(true);
         }
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
+            if ($form->has('catalog') && $form->get('catalog')->getData() && null === $catalog->findOneByTitle($household, $task->getTitle())) {
+                $this->entityManager->persist(new CatalogItem($household, $task->getTitle(), $task->getCategory(), $task->getPoints(), $task->getZone()));
+            }
+
             return $this->save($task, $form, $member);
         }
 
         return $this->render('task/new_one_off.html.twig', [
             'form' => $form,
-            'catalog' => $catalog->findForHousehold($household),
             'template' => $template,
+            'can_pick' => [] !== $items || [] !== $dormant,
         ]);
     }
 

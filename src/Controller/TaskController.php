@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\CatalogItem;
 use App\Entity\Member;
 use App\Entity\Task;
 use App\Enum\TaskKind;
@@ -201,6 +202,19 @@ final class TaskController extends AbstractController
         $this->addFlash('success', null !== $task->getNote() ? 'La note est ajoutée à la tâche.' : 'La note est retirée.');
 
         return $this->redirectToRoute('task_show', ['id' => $task->getId()], Response::HTTP_SEE_OTHER);
+    }
+
+    /** A task of the catalogue no longer needed. */
+    #[Route('/catalogue/{id}/retirer', name: 'catalog_delete', requirements: ['id' => '\d+'], methods: ['POST'])]
+    #[IsGranted(HouseholdVoter::ACCESS, subject: 'item')]
+    #[IsCsrfTokenValid('submit', tokenKey: '_csrf_token')]
+    public function deleteCatalogItem(CatalogItem $item): Response
+    {
+        $this->entityManager->remove($item);
+        $this->entityManager->flush();
+        $this->addFlash('success', \sprintf('« %s » est retirée du catalogue.', $item->getTitle()));
+
+        return $this->redirectToRoute('task_index', status: Response::HTTP_SEE_OTHER);
     }
 
     #[Route('/{id}/supprimer', name: 'task_delete', requirements: ['id' => '\d+'], methods: ['POST'])]

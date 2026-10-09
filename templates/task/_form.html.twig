@@ -67,6 +67,10 @@
     </div>
     {{ form_errors(form.points) }}
 
+    {% if form.catalog is defined %}
+        <div class="card px-3.5 py-1">{{ form_row(form.catalog) }}</div>
+    {% endif %}
+
     {% if form.done is defined %}
         {{ form_row(form.done, {attr: {'data-action': 'change->task-form#toggle', 'data-task-form-target': 'done'}}) }}
         <fieldset class="flex flex-col gap-5" data-task-form-target="doneSection">
