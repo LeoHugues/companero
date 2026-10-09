@@ -76,7 +76,7 @@ final class GiftController extends AbstractController
     {
         $this->assertOwnedBy($gift, $member);
         $friend = $this->friend($member, $request);
-        $reason = $request->request->getString('motif');
+        $reason = trim($request->request->getString('motif'));
         if ('' === trim($reason)) {
             $this->addFlash('success', 'Un carton, c’est pour quelque chose : dis pour quoi.');
 

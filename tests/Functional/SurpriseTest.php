@@ -131,7 +131,10 @@ final class SurpriseTest extends AppTestCase
 
         $this->client->loginUser($leo);
         $this->client->request('GET', '/profil');
-        $this->client->submitForm('Siffler le carton', ['pour' => $robin->getId(), 'motif' => 'La vaisselle qui traîne']);
+        // A real word of justification, not only a few words.
+        $why = 'La vaisselle qui traîne depuis mardi dans l’évier, alors que c’était ton tour cette semaine : la poêle commence à avoir une vie à elle.';
+        self::assertSelectorExists('textarea[name=motif][required]');
+        $this->client->submitForm('Siffler le carton', ['pour' => $robin->getId(), 'motif' => $why]);
         self::assertResponseRedirects();
         $this->client->followRedirect();
         self::assertSelectorTextContains('[role=status]', 'Carton jaune pour Robin !');
@@ -140,7 +143,7 @@ final class SurpriseTest extends AppTestCase
         $this->client->loginUser($robin);
         $this->client->request('GET', '/');
         self::assertSelectorTextContains('dialog', 'Carton jaune de Léo !');
-        self::assertSelectorTextContains('dialog', '« La vaisselle qui traîne »');
+        self::assertSelectorTextContains('dialog', '« '.$why.' »');
         $this->client->request('GET', '/');
         self::assertSelectorNotExists('.reward-dialog-card');
 

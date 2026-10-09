@@ -122,15 +122,18 @@
                                 {% endfor %}
                             </span>
                         </fieldset>
-                        <label class="flex flex-col gap-1">
-                            <span class="text-sm font-bold">Pour quoi ?</span>
-                            <input type="text" name="motif" class="input" maxlength="{{ constant('App\\Entity\\YellowCard::REASON_MAX_LENGTH') }}" required list="card-reasons-{{ gift.id }}" placeholder="La vaisselle qui traîne">
-                            <datalist id="card-reasons-{{ gift.id }}">
-                                {% for reason in ['La vaisselle qui traîne', 'Le linge oublié dans la machine', 'Les chaussures dans l’entrée', 'La lumière restée allumée', 'Le dernier rouleau de PQ non remplacé', 'Les miettes sur le plan de travail'] %}
-                                    <option value="{{ reason }}">
+                        {# Why: a word of justification, required; a few usual ones to start from. #}
+                        <div class="flex flex-col gap-1.5" data-controller="fill">
+                            <label for="card-reason-{{ gift.id }}" class="text-sm font-bold">Pourquoi ce carton ?</label>
+                            <textarea id="card-reason-{{ gift.id }}" name="motif" class="input min-h-[84px] py-2.5" rows="3" required data-fill-target="field"
+                                      maxlength="{{ constant('App\\Entity\\YellowCard::REASON_MAX_LENGTH') }}" placeholder="La vaisselle qui traîne depuis mardi, alors que c’était ton tour…"></textarea>
+                            <span class="flex flex-wrap gap-1.5">
+                                {% for reason in ['La vaisselle qui traîne', 'Le linge oublié dans la machine', 'La lumière restée allumée', 'Le dernier rouleau de PQ non remplacé', 'Les miettes sur le plan de travail'] %}
+                                    <button type="button" class="chip h-7 px-2.5 text-xs" data-action="fill#use" data-fill-text-param="{{ reason }}">{{ reason }}</button>
                                 {% endfor %}
-                            </datalist>
-                        </label>
+                            </span>
+                            <span class="meta">Il le lira avec le carton : dis-lui ce qui ne va pas, gentiment.</span>
+                        </div>
                         <button type="submit" class="btn-primary self-start" data-haptic="card"><span class="yellow-card yellow-card-mini" aria-hidden="true"></span> Siffler le carton</button>
                     </form>
                 {% elseif kind == 'treat' and member.household.pets is not empty %}

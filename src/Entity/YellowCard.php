@@ -13,7 +13,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Entity(repositoryClass: YellowCardRepository::class)]
 class YellowCard
 {
-    public const REASON_MAX_LENGTH = 80;
+    public const REASON_MAX_LENGTH = 200;
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
