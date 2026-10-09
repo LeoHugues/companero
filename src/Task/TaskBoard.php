@@ -63,7 +63,8 @@ final readonly class TaskBoard
     {
         return array_values(array_filter(
             $this->pressing(),
-            static fn (TaskView $view): bool => null !== $view->task->getAssignee() && true === $view->reminder?->isPersonalFor($member),
+            static fn (TaskView $view): bool => null !== $view->reminder
+                && (null !== $view->task->getAssignee() ? $view->reminder->isPersonalFor($member) : [] !== $view->reminder->owners && $view->reminder->concerns($member)),
         ));
     }
 

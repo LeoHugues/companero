@@ -19,11 +19,15 @@ class CompaneroApplication : Application() {
 
         Hotwire.defaultFragmentDestination = WebFragment::class
         Hotwire.registerFragmentDestinations(WebFragment::class)
-        // The phone's vibrations for the pages' feedback (assets/controllers/haptics_controller.js).
+        // The phone's vibrations for the pages' feedback (assets/controllers/haptics_controller.js),
+        // and the profile's notifications card (assets/controllers/notifications_controller.js).
         Hotwire.registerBridgeComponents(
             BridgeComponentFactory("haptics", ::HapticsComponent),
+            BridgeComponentFactory("notifications", ::NotificationsComponent),
         )
 
         Server.loadPathConfiguration(this)
+        // The coloc's reminders, every quarter of an hour (Notifier.kt).
+        Notifier.setUp(this)
     }
 }

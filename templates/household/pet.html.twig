@@ -1,0 +1,20 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ pet.name }} · Companero{% endblock %}
+
+{% block body %}
+    <header class="flex items-center justify-between">
+        <h1 class="flex items-center gap-2 text-[22px]"><twig:Icon name="paw" size="22"/> {{ pet.name }}</h1>
+        <a href="{{ path('household_edit') }}" aria-label="Retour aux réglages de la coloc" class="flex size-11 items-center justify-center rounded-full text-ink"><twig:Icon name="close" size="22" stroke="2.2"/></a>
+    </header>
+
+    {{ form_start(form, {attr: {class: 'flex flex-col gap-5'}}) }}
+        {{ form_row(form.name) }}
+        {{ form_row(form.species) }}
+        {{ form_row(form.description) }}
+        {{ form_row(form.owners) }}
+        <button type="submit" class="btn-primary self-start">Enregistrer</button>
+    {{ form_end(form) }}
+{% endblock %}
+
+{% block nav %}<twig:BottomNav active="profile"/>{% endblock %}

@@ -2,6 +2,7 @@
 
 namespace App\Tests\Unit\Reminder;
 
+use App\Entity\Pet;
 use App\Reminder\ReminderRecipients;
 use App\Tests\Unit\TaskFactory;
 use PHPUnit\Framework\TestCase;
@@ -19,6 +20,30 @@ final class ReminderRecipientsTest extends TestCase
 
         self::assertSame([$leo, $robin], $reminder->recipients);
         self::assertNull($reminder->standingInFor);
+    }
+
+    public function testAPetTaskRemindsItsHumansThenTheOthersWhenNoneOfThemIsHome(): void
+    {
+        [$leo, $robin, $gab] = $this->coloc();
+        $task = $this->task();
+        $pet = new Pet($task->getHousehold(), 'Tishka');
+        $pet->addOwner($leo);
+        $pet->addOwner($gab);
+        $task->setPet($pet);
+
+        $reminder = (new ReminderRecipients())->for($task, [$leo, $robin, $gab]);
+        self::assertSame([$leo, $gab], $reminder->recipients);
+        self::assertFalse($reminder->ownersAway());
+
+        $leo->setAtHome(false, new \DateTimeImmutable());
+        self::assertTrue((new ReminderRecipients())->for($task, [$leo, $robin, $gab])->isPersonalFor($gab));
+
+        // None of its humans is home: whoever is.
+        $gab->setAtHome(false, new \DateTimeImmutable());
+        $reminder = (new ReminderRecipients())->for($task, [$leo, $robin, $gab]);
+        self::assertSame([$robin], $reminder->recipients);
+        self::assertTrue($reminder->ownersAway());
+        self::assertSame([$leo, $gab], $reminder->owners);
     }
 
     public function testTheAssigneeIsRemindedWhenHome(): void

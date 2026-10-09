@@ -68,10 +68,12 @@
                 {% for pet in household.pets %}
                     <li class="flex items-center gap-2.5 py-2">
                         <twig:Icon name="paw" size="20" class="shrink-0 text-clay-dark"/>
-                        <span class="flex flex-1 flex-col">
+                        <a href="{{ path('pet_edit', {id: pet.id}) }}" class="flex flex-1 flex-col text-ink no-underline hover:text-clay-dark">
                             <span class="text-[15px] font-bold">{{ pet.name }}</span>
                             <span class="text-xs text-muted">{{ pet.species.label }}{{ pet.description ? ' · ' ~ pet.description }}</span>
-                        </span>
+                            <span class="text-xs font-semibold {{ pet.owners is empty ? 'text-clay-dark' : 'text-muted' }}">{{ pet.owners is empty ? 'Pas encore de maître : à qui est-il ?' : 'À ' ~ pet.owners|map(o => o.name)|join(', ', ' et ') }}</span>
+                        </a>
+                        <a href="{{ path('pet_edit', {id: pet.id}) }}" aria-label="Réglages de {{ pet.name }}" class="flex size-10 items-center justify-center rounded-full text-muted hover:bg-track hover:text-ink"><twig:Icon name="settings" size="18"/></a>
                         <form method="post" action="{{ path('pet_delete', {id: pet.id}) }}" data-turbo-confirm="Retirer {{ pet.name }} de la coloc ? Ses tâches restent.">
                             <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
                             <button type="submit" aria-label="Retirer {{ pet.name }}" class="flex size-10 cursor-pointer items-center justify-center rounded-full text-muted hover:bg-track hover:text-ink"><twig:Icon name="trash" size="18"/></button>
@@ -84,6 +86,7 @@
             {{ form_row(pet_form.name) }}
             {{ form_row(pet_form.species) }}
             {{ form_row(pet_form.description) }}
+            {{ form_row(pet_form.owners) }}
             <button type="submit" class="btn-primary self-start"><twig:Icon name="plus" size="18" stroke="2.6"/> Ajouter l’animal</button>
         {{ form_end(pet_form) }}
         {% if treats is not empty %}

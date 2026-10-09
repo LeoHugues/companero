@@ -73,4 +73,6 @@ dependencies {
     implementation("androidx.appcompat:appcompat:1.7.0")
     implementation("androidx.core:core-ktx:1.16.0")
     implementation("com.google.android.material:material:1.12.0")
+    // The coloc's reminders, checked every quarter of an hour in the background (Notifier.kt).
+    implementation("androidx.work:work-runtime-ktx:2.10.1")
 }

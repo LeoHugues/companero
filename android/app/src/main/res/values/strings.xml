@@ -17,4 +17,9 @@
     <string name="update_install">Mettre à jour</string>
     <string name="update_later">Plus tard</string>
     <string name="update_installing">Mise à jour de Companero…</string>
+    <string name="notification_channel">Rappels de la coloc</string>
+    <string name="notification_channel_description">Les tâches qui comptent sur toi, celles qu\'on vient de signaler, le jour de ménage, le bilan, les cartons jaunes.</string>
+    <string name="notification_offline">Le serveur ne répond pas : %1$s</string>
+    <string name="notification_logged_out">Connecte-toi dans l\'appli, puis réessaie.</string>
+    <string name="notification_blocked">Les notifications sont bloquées : autorise-les d\'abord.</string>
 </resources>

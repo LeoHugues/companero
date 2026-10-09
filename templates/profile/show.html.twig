@@ -178,6 +178,16 @@
         </section>
         <section class="flex flex-col gap-2" aria-labelledby="reminders-title">
             <h2 id="reminders-title" class="section-title">Rappels</h2>
+            {# The phone's notifications: only through the Android app (see notifications_controller.js). #}
+            <div class="card flex flex-col gap-2.5 p-3.5" data-controller="notifications" id="notifications">
+                <p class="flex items-center gap-2 text-[15px] font-extrabold"><twig:Icon name="bell" size="18"/> Notifications</p>
+                <p class="text-sm text-ink-soft" data-notifications-target="state">Elles arrivent sur ton téléphone avec l’appli Android de Companero, à jour : ouvre cette page dans l’appli pour les autoriser et les tester.</p>
+                <div class="flex flex-wrap items-center gap-2" data-notifications-target="actions" hidden>
+                    <button type="button" class="btn-primary h-10 px-4 text-sm" data-notifications-target="allow" data-action="notifications#allow" hidden>Autoriser</button>
+                    <button type="button" class="chip gap-1.5" data-notifications-target="test" data-action="notifications#test" data-haptic="tick"><twig:Icon name="bell" size="16"/> M’envoyer une notification de test</button>
+                </div>
+                <p class="meta">Ce qui t’arrive : les tâches dont tu as la charge (ou que tu remplaces), celles des animaux dont tu es le maître, celles qu’on vient de signaler, et les cartons jaunes reçus.</p>
+            </div>
             <div class="card flex flex-col divide-y divide-line px-3.5 py-1">
                 {{ form_row(profile_form.notifyCleaningDay) }}
                 {{ form_row(profile_form.notifyOverdue) }}

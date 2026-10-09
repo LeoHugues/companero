@@ -90,6 +90,14 @@ une boîte qui s'ouvre, un chat qui ronronne) : un *bridge component* Hotwire Na
 (`assets/controllers/haptics_controller.js` côté pages, `HapticsComponent.kt` côté appli).
 Une version de l'APK sans ce composant ne vibre pas ; la CI publie celle qui vibre.
 
+Elle affiche aussi les **notifications** de la coloc : toutes les 15 minutes (le minimum d'Android en
+arrière-plan), elle demande au serveur ce qu'il y a à dire (`GET /api/notifications`, voir
+`src/Notification/NoticeBoard.php`) et montre ce qui est nouveau (`Notifier.kt`) : les tâches dont on a la
+charge ou qu'on remplace, celles des animaux dont on est le maître (les autres colocs présents prennent le
+relais quand aucun maître n'est là), les occasionnelles qu'on vient de signaler, le jour de ménage à 9 h,
+le bilan du dimanche à 20 h et les cartons jaunes reçus. Chacune se règle dans *Profil › Rappels*, où un
+bouton envoie aussi une notification de test (composant bridge `notifications`).
+
 L'appli ajoute aussi une tuile **« À la maison »** aux réglages rapides (à côté du
 Wi-Fi et du Bluetooth ; à ajouter en modifiant les tuiles) : un appui bascule entre
 « Là » et « Pas là », avec la session de l'appli. Si personne n'est connecté ou si
@@ -159,3 +167,5 @@ Deux points d'entrée JSON, authentifiés par la session (cookies de la WebView)
   « je suis à la maison ». Le `POST` exige l'en-tête `X-Companero-App` (protection CSRF).
 - `GET /api/rappels` : les tâches pressantes pour lesquelles on compte sur le membre
   (les siennes, celles d'un coloc absent qu'il remplace, celles des animaux).
+- `GET /api/notifications` (`?test=1` pour une notification de test en tête) : ce que le téléphone doit
+  dire au membre, selon ses réglages ; chaque élément a une clé (`key`), montrée une seule fois.

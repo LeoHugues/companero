@@ -6,6 +6,8 @@
     <uses-permission android:name="android.permission.VIBRATE" />
     <!-- Updates itself from the server (Updater.kt): no need to uninstall for a new build. -->
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+    <!-- The coloc's reminders (Notifier.kt), checked every quarter of an hour. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <!-- usesCleartextTraffic: the self-hosted server is plain HTTP on the home Wi-Fi. -->
     <application

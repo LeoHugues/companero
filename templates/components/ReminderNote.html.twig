@@ -2,7 +2,20 @@
 {# Who takes care of the task, and who is reminded when they are away. #}
 {% set task = view.task %}
 {% set reminder = view.reminder %}
-{% if task.assignee and reminder %}
+{% if not task.assignee and reminder and reminder.owners is not empty %}
+    {# A pet's task: its humans first, the others when none of them is home. #}
+    {% set names = reminder.owners|map(m => m == member ? 'toi' : m.name)|join(', ', ' et ') %}
+    <p {{ attributes.defaults({class: 'flex items-center gap-1.5 text-xs font-bold'}) }}>
+        <twig:Icon :name="reminder.ownersAway ? 'door' : 'paw'" size="14" stroke="2.4" class="shrink-0"/>
+        {% if not reminder.ownersAway %}
+            <span class="{{ reminder.concerns(member) ? 'text-clay-dark' : 'text-muted' }}">{{ reminder.concerns(member) ? 'Ton animal : on compte sur toi' : 'Pour ' ~ names }}</span>
+        {% elseif reminder.concerns(member) %}
+            <span class="text-clay-dark">{{ names|capitalize }} {{ reminder.owners|length > 1 ? 'ne sont pas là' : 'n’est pas là' }} : on compte sur toi</span>
+        {% else %}
+            <span class="text-muted">{{ names|capitalize }} {{ reminder.owners|length > 1 ? 'ne sont pas là' : 'n’est pas là' }}{{ reminder.recipients is empty ? ', et personne n’est à la maison' }}</span>
+        {% endif %}
+    </p>
+{% elseif task.assignee and reminder %}
     <p {{ attributes.defaults({class: 'flex items-center gap-1.5 text-xs font-bold'}) }}>
         {% if reminder.standingInFor %}
             <twig:Icon name="door" size="14" stroke="2.4" class="shrink-0"/>

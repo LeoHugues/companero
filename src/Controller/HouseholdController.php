@@ -128,6 +128,21 @@ final class HouseholdController extends AbstractController
         return $this->redirectToRoute('household_edit', status: Response::HTTP_SEE_OTHER);
     }
 
+    #[Route('/animaux/{id}', name: 'pet_edit', requirements: ['id' => '\d+'], methods: ['GET', 'POST'])]
+    #[IsGranted(HouseholdVoter::ACCESS, subject: 'pet')]
+    public function editPet(Pet $pet, Request $request): Response
+    {
+        $form = $this->createForm(PetType::class, $pet, ['household' => $pet->getHousehold(), 'new' => false])->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $this->entityManager->flush();
+            $this->addFlash('success', 'C’est enregistré.');
+
+            return $this->redirectToRoute('household_edit', status: Response::HTTP_SEE_OTHER);
+        }
+
+        return $this->render('household/pet.html.twig', ['pet' => $pet, 'form' => $form], new Response(status: $form->isSubmitted() ? Response::HTTP_UNPROCESSABLE_ENTITY : Response::HTTP_OK));
+    }
+
     #[Route('/animaux/{id}/supprimer', name: 'pet_delete', requirements: ['id' => '\d+'], methods: ['POST'])]
     #[IsGranted(HouseholdVoter::ACCESS, subject: 'pet')]
     #[IsCsrfTokenValid('submit', tokenKey: '_csrf_token')]

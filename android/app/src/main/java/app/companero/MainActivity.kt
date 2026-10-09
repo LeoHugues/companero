@@ -41,11 +41,24 @@ class MainActivity : HotwireActivity() {
         Updater.installIfReady(this)
     }
 
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == Permissions.REQUEST_CODE) {
+            Permissions.answered()
+        }
+    }
+
     override fun navigatorConfigurations() = listOf(
         NavigatorConfiguration(
             name = "main",
-            startLocation = Server.startLocation(this),
+            // Opened from a notification: straight to the page it is about, on this server.
+            startLocation = intent?.getStringExtra(EXTRA_LOCATION)?.takeIf { it.startsWith(Server.url(this)) }
+                ?: Server.startLocation(this),
             navigatorHostId = R.id.main_nav_host,
         )
     )
+
+    companion object {
+        const val EXTRA_LOCATION = "location"
+    }
 }
