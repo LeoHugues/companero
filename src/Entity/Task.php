@@ -139,6 +139,14 @@ class Task
     #[Assert\Length(max: self::NOTE_MAX_LENGTH)]
     private ?string $note = null;
 
+    /** An express task's place in "En un geste" on the home page (null: after the others, by title). */
+    #[ORM\Column(type: Types::SMALLINT, nullable: true)]
+    private ?int $quickPosition = null;
+
+    /** An express task left out of "En un geste" on the home page: still in the templates. */
+    #[ORM\Column(options: ['default' => false])]
+    private bool $quickHidden = false;
+
     /** More (or fewer) points than the template this time: it was more work, or less. Reset once done. */
     #[ORM\Column(type: Types::SMALLINT, options: ['default' => 0])]
     private int $pointsAdjustment = 0;
@@ -384,6 +392,26 @@ class Task
     {
         $current = max(0, min(500, $this->getCurrentPoints() + $delta));
         $this->pointsAdjustment = $current - $this->points;
+    }
+
+    public function getQuickPosition(): ?int
+    {
+        return $this->quickPosition;
+    }
+
+    public function setQuickPosition(?int $quickPosition): void
+    {
+        $this->quickPosition = $quickPosition;
+    }
+
+    public function isQuickHidden(): bool
+    {
+        return $this->quickHidden;
+    }
+
+    public function setQuickHidden(bool $quickHidden): void
+    {
+        $this->quickHidden = $quickHidden;
     }
 
     public function getNote(): ?string

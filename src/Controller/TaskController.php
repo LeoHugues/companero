@@ -108,6 +108,47 @@ final class TaskController extends AbstractController
         }, $groups);
     }
 
+    /** "En un geste" on the home page: which express tasks, in which order. */
+    #[Route('/en-un-geste', name: 'task_quick_settings', methods: ['GET'])]
+    public function quickSettings(#[CurrentUser] Member $member, TaskBoardBuilder $boards): Response
+    {
+        return $this->render('task/quick_settings.html.twig', [
+            'tasks' => array_map(static fn (TaskView $view): Task => $view->task, $boards->build($member->getHousehold())->quick()),
+        ]);
+    }
+
+    /** One place up or down in "En un geste", or shown / left out. */
+    #[Route('/{id}/en-un-geste', name: 'task_quick_arrange', requirements: ['id' => '\d+'], methods: ['POST'])]
+    #[IsGranted(HouseholdVoter::ACCESS, subject: 'task')]
+    #[IsCsrfTokenValid('submit', tokenKey: '_csrf_token')]
+    public function quickArrange(Task $task, Request $request, TaskBoardBuilder $boards): RedirectResponse
+    {
+        if ($task->isArchived() || TaskKind::Quick !== $task->getKind()) {
+            throw $this->createNotFoundException();
+        }
+        $tasks = array_map(static fn (TaskView $view): Task => $view->task, $boards->build($task->getHousehold())->quick());
+        $index = (int) array_search($task, $tasks, true);
+        $action = $request->request->getString('action');
+        $other = match ($action) {
+            'monter' => $index - 1,
+            'descendre' => $index + 1,
+            default => null,
+        };
+        if (null !== $other && isset($tasks[$other])) {
+            [$tasks[$index], $tasks[$other]] = [$tasks[$other], $tasks[$index]];
+        }
+        if ('afficher' === $action || 'masquer' === $action) {
+            $task->setQuickHidden('masquer' === $action);
+        }
+        // Every one gets its place: the order is the one shown on this page.
+        foreach ($tasks as $position => $quick) {
+            $quick->setQuickPosition($position + 1);
+        }
+        $this->entityManager->flush();
+
+        return $this->redirectToRoute('task_quick_settings', status: Response::HTTP_SEE_OTHER);
+    }
+
     #[Route('/{id}', name: 'task_show', requirements: ['id' => '\d+'], methods: ['GET'])]
     #[IsGranted(HouseholdVoter::ACCESS, subject: 'task')]
     public function show(Task $task, TaskBoardBuilder $boards, CompletionRepository $completions, PointEntryRepository $points): Response

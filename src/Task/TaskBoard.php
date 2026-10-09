@@ -76,13 +76,19 @@ final readonly class TaskBoard
         ));
     }
 
-    /** @return list<TaskView> the tasks reported in one tap, by title */
+    /** @return list<TaskView> the tasks reported in one tap, in the order chosen for the home page (then by title) */
     public function quick(): array
     {
         $quick = array_values(array_filter($this->items, static fn (TaskView $view): bool => TaskKind::Quick === $view->task->getKind()));
-        usort($quick, static fn (TaskView $a, TaskView $b): int => $a->task->getTitle() <=> $b->task->getTitle());
+        usort($quick, static fn (TaskView $a, TaskView $b): int => [$a->task->getQuickPosition() ?? \PHP_INT_MAX, $a->task->getTitle()] <=> [$b->task->getQuickPosition() ?? \PHP_INT_MAX, $b->task->getTitle()]);
 
         return $quick;
+    }
+
+    /** @return list<TaskView> the express tasks shown in "En un geste" on the home page */
+    public function quickShown(): array
+    {
+        return array_values(array_filter($this->quick(), static fn (TaskView $view): bool => !$view->task->isQuickHidden()));
     }
 
     /** @return list<TaskView> occasional tasks asleep, ready to be raised when the need arises, by title */

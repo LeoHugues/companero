@@ -57,10 +57,17 @@
         <twig:ProgressBar :value="cleanliness" label="Propreté de la Casa" key="casa"/>
     </section>
 
-    {% if quick is not empty %}
+    {% if quick_count > 0 %}
         <section class="flex flex-col gap-2" aria-labelledby="quick-title">
-            <h2 id="quick-title" class="flex items-center gap-1.5 text-[15px]"><twig:Icon name="bolt" size="18"/> En un geste</h2>
-            <twig:QuickTasks :views="quick"/>
+            <div class="flex items-center justify-between gap-2">
+                <h2 id="quick-title" class="flex items-center gap-1.5 text-[15px]"><twig:Icon name="bolt" size="18"/> En un geste</h2>
+                <a href="{{ path('task_quick_settings') }}" class="-mr-2 flex size-8 items-center justify-center rounded-full text-muted hover:bg-track hover:text-ink" aria-label="Régler « En un geste » : ordre et tâches montrées" title="Ordre et tâches montrées"><twig:Icon name="settings" size="17"/></a>
+            </div>
+            {% if quick is not empty %}
+                <twig:QuickTasks :views="quick"/>
+            {% else %}
+                <p class="meta">Aucune tâche montrée ici : <a href="{{ path('task_quick_settings') }}">choisir lesquelles</a>.</p>
+            {% endif %}
         </section>
     {% endif %}
 

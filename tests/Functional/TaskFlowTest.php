@@ -233,13 +233,13 @@ final class TaskFlowTest extends AppTestCase
 
         // Never pressing, but always one tap away on the home page.
         $this->client->followRedirect();
-        self::assertSelectorTextContains('#quick-title + ul #task-'.$task?->getId(), 'Vider le lave-vaisselle');
+        self::assertSelectorTextContains('[aria-labelledby=quick-title] ul #task-'.$task?->getId(), 'Vider le lave-vaisselle');
         self::assertSelectorTextNotContains('[aria-labelledby=todo-title]', 'Vider le lave-vaisselle');
 
         $this->submitAction('/taches/'.$task?->getId().'/fait');
         $this->client->followRedirect();
         self::assertSelectorTextContains('[data-casa-target=speech]', '+10 pts');
-        self::assertSelectorExists('#quick-title + ul #task-'.$task?->getId());
+        self::assertSelectorExists('[aria-labelledby=quick-title] ul #task-'.$task?->getId());
         self::assertSame(10, static::getContainer()->get(PointEntryRepository::class)->totalFor($leo));
     }
 
@@ -404,5 +404,36 @@ final class TaskFlowTest extends AppTestCase
         self::assertSame('Salon', $task?->getZone()?->getName());
         $this->client->request('GET', '/coloc');
         self::assertSelectorTextNotContains('[aria-labelledby=zones-title]', 'Entrée');
+    }
+
+    public function testTheExpressTasksOfTheHomePageAreOrderedAndChosen(): void
+    {
+        $this->client->loginUser($this->foundHousehold());
+        foreach (['Vider le lave-vaisselle', 'Sortir le verre', 'Arroser le basilic'] as $title) {
+            $this->client->request('GET', '/taches/nouvelle/modele');
+            $this->client->submitForm('Créer le modèle', ['task[title]' => $title, 'task[kind]' => 'quick']);
+        }
+        $tasks = static::getContainer()->get(TaskRepository::class);
+        $basil = $tasks->findOneBy(['title' => 'Arroser le basilic']);
+        $glass = $tasks->findOneBy(['title' => 'Sortir le verre']);
+
+        // By title at first; the dishwasher goes up to the top, the glass is left out.
+        $press = function (string $label): void {
+            $this->client->submit($this->client->getCrawler()->filter(\sprintf('button[aria-label="%s"]', $label))->form());
+            $this->client->followRedirect();
+        };
+        $this->client->request('GET', '/taches/en-un-geste');
+        $press('Descendre « Arroser le basilic »');
+        $press('Descendre « Arroser le basilic »');
+        $press('Ne plus montrer « Sortir le verre » sur l’accueil');
+        self::assertSelectorExists(\sprintf('#quick-%d[data-hidden=true]', $glass?->getId()));
+
+        $crawler = $this->client->request('GET', '/');
+        $shown = $crawler->filter('[aria-labelledby=quick-title] li')->each(static fn ($li): string => (string) $li->attr('id'));
+        self::assertSame(['task-'.$tasks->findOneBy(['title' => 'Vider le lave-vaisselle'])?->getId(), 'task-'.$basil?->getId()], $shown);
+
+        // Still a template, all the same.
+        $this->client->request('GET', '/taches');
+        self::assertSelectorExists('#template-'.$glass?->getId());
     }
 }

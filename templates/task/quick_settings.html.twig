@@ -1,0 +1,45 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}En un geste · Companero{% endblock %}
+
+{# The express tasks of "En un geste", on the home page: their order, and those left out. #}
+{% block body %}
+    <header class="flex items-center justify-between">
+        <a href="{{ ux_is_native() ? '/recede_historical_location' : path('app_home') }}" aria-label="Retour" class="-ml-2 flex size-11 items-center justify-center rounded-full text-ink"><twig:Icon name="arrow-left" size="22" stroke="2.2"/></a>
+        <a href="{{ path('task_new_template') }}" class="flex h-11 items-center gap-1.5 rounded-full px-3 text-sm font-bold text-ink no-underline hover:bg-track hover:text-ink"><twig:Icon name="plus" size="18"/> Une express</a>
+    </header>
+    <div class="flex flex-col gap-1">
+        <h1 class="flex items-center gap-2 text-[24px]"><twig:Icon name="bolt" size="24"/> En un geste</h1>
+        <p class="text-sm text-muted">Les tâches express de l’accueil : dans quel ordre, et lesquelles y montrer. Pour toute la coloc.</p>
+    </div>
+
+    {% if tasks is not empty %}
+        <ol class="card divide-y divide-line px-3.5">
+            {% for task in tasks %}
+                <li id="quick-{{ task.id }}" class="flex items-center gap-2 py-2.5 {{ task.quickHidden ? 'opacity-55' }}" data-hidden="{{ task.quickHidden ? 'true' : 'false' }}">
+                    <form method="post" action="{{ path('task_quick_arrange', {id: task.id}) }}" class="flex items-center gap-2">
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
+                        <button type="submit" name="action" value="{{ task.quickHidden ? 'afficher' : 'masquer' }}" data-haptic="toggle"
+                                class="flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-full border-[1.5px] {{ task.quickHidden ? 'border-dashed border-sand text-muted' : 'border-ink bg-sun text-ink' }} transition active:scale-90"
+                                aria-label="{{ task.quickHidden ? 'Montrer' : 'Ne plus montrer' }} « {{ task.title }} » sur l’accueil" aria-pressed="{{ task.quickHidden ? 'false' : 'true' }}">
+                            <twig:Icon :name="task.quickHidden ? 'eye-off' : 'eye'" size="18"/>
+                        </button>
+                    </form>
+                    <a href="{{ path('task_template', {id: task.id}) }}" class="flex min-w-0 flex-1 flex-col text-ink no-underline hover:text-ink">
+                        <span class="truncate text-[15px] font-bold">{{ task.title }}</span>
+                        <span class="text-xs text-muted">{{ task.quickHidden ? 'pas sur l’accueil' : task.zone.name ?? 'Toute la coloc' }} · +{{ task.points }}</span>
+                    </a>
+                    <form method="post" action="{{ path('task_quick_arrange', {id: task.id}) }}" class="flex shrink-0 items-center gap-1">
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
+                        <button type="submit" name="action" value="monter" class="flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-full border-[1.5px] border-line bg-cream text-ink transition hover:border-ink active:scale-90 disabled:cursor-default disabled:opacity-35" aria-label="Monter « {{ task.title }} »" data-haptic="tick"{{ loop.first ? ' disabled' }}><twig:Icon name="arrow-up" size="17" stroke="2.4"/></button>
+                        <button type="submit" name="action" value="descendre" class="flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-full border-[1.5px] border-line bg-cream text-ink transition hover:border-ink active:scale-90 disabled:cursor-default disabled:opacity-35" aria-label="Descendre « {{ task.title }} »" data-haptic="tick"{{ loop.last ? ' disabled' }}><twig:Icon name="arrow-down" size="17" stroke="2.4"/></button>
+                    </form>
+                </li>
+            {% endfor %}
+        </ol>
+    {% else %}
+        <p class="card p-4 text-sm text-muted">Pas encore de tâche express. <a href="{{ path('task_new_template') }}">En créer une</a> : vider le lave-vaisselle, sortir le verre…</p>
+    {% endif %}
+{% endblock %}
+
+{% block nav %}<twig:BottomNav active="home"/>{% endblock %}
