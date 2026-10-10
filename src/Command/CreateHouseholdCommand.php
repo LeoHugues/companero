@@ -15,6 +15,9 @@ use Psr\Clock\ClockInterface;
 use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Attribute\Option;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\StreamableInputInterface;
+use Symfony\Component\Console\Question\Question;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -37,6 +40,7 @@ final readonly class CreateHouseholdCommand
     }
 
     public function __invoke(
+        InputInterface $input,
         SymfonyStyle $io,
         #[Argument('Le fichier qui décrit la coloc')] string $file,
         #[Option('Prénom du premier membre')] ?string $nom = null,
@@ -61,7 +65,8 @@ final readonly class CreateHouseholdCommand
         $founding->cleaningDay = $blueprint->cleaningDay();
         $founding->name = $nom ?? (string) $io->ask('Ton prénom');
         $founding->username = $pseudo ?? (string) $io->ask('Ton pseudo, pour te connecter');
-        $founding->plainPassword = (string) $io->askHidden('Ton mot de passe (8 caractères au moins)');
+        // Hidden only when typed in a terminal: on Windows, a hidden answer is read from the keyboard, never from a pipe.
+        $founding->plainPassword = (string) $io->askQuestion((new Question('Ton mot de passe (8 caractères au moins)'))->setHidden($this->isTyped($input)));
         if (!$this->isValid($io, $founding)) {
             return 1;
         }
@@ -97,6 +102,13 @@ final readonly class CreateHouseholdCommand
         $io->text(['Lien d’invitation à envoyer aux autres colocs :', $this->urls->generate('onboarding_join', ['token' => $household->getInviteToken()], UrlGeneratorInterface::ABSOLUTE_URL)]);
 
         return 0;
+    }
+
+    private function isTyped(InputInterface $input): bool
+    {
+        $stream = ($input instanceof StreamableInputInterface ? $input->getStream() : null) ?? \STDIN;
+
+        return stream_isatty($stream);
     }
 
     /**
