@@ -121,12 +121,15 @@
             </div>
             {% if mine is not empty %}<p class="shrink-0 text-[13px] font-semibold text-clay-dark">{{ mine|reduce((sum, v) => sum + v.task.currentPoints, 0) }} pts</p>{% endif %}
         </div>
-        {# Their cards side by side, to slide through; the next one shows at the edge. Last, the deck: a card to draw. #}
+        {#
+            Their cards side by side, to slide through; the next one shows at the edge. Last, the deck: a card to draw.
+            Each keeps its id across refreshes: a card dealt slides into the hand, one let go fades out of it (card_motion.js).
+        #}
         <ul class="hand">
             {% for view in mine %}
-                <li class="hand-card"><twig:TaskCard :view="view" :member="app.user"/></li>
+                <li class="hand-card" id="hand-{{ view.task.id }}" data-hand-card><twig:TaskCard :view="view" :member="app.user"/></li>
             {% endfor %}
-            <li class="hand-card"><twig:Deck :view="draw"/></li>
+            <li class="hand-card" id="hand-deck"><twig:Deck :view="draw"/></li>
         </ul>
     </section>
 

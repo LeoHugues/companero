@@ -324,6 +324,8 @@
 .seat-mine { @apply cursor-pointer pr-3 hover:bg-[#E8DDCB] active:scale-95; }
 .seat-leave { @apply -ml-0.5 shrink-0 text-muted transition; }
 .seat-mine:hover .seat-leave { @apply text-ink; }
+/* Tapped, while the page is asked for: the seat sinks a little (card_motion.js). */
+.seat.is-pressed { @apply scale-95 opacity-60; }
 /* Where the title needs the room (the Casa's quests): the seat alone, "Je prends" written small beneath. */
 .seat-stacked { @apply flex w-[52px] shrink-0 cursor-pointer flex-col items-center gap-[3px] text-[10.5px] leading-none font-semibold whitespace-nowrap text-[#8E3F17] transition active:scale-95; }
 .seat-stacked-disc { @apply flex size-8 items-center justify-center rounded-full bg-[#FCE6D6] transition; }
@@ -1040,10 +1042,12 @@ main:has(> p[role="status"]) .home-hero { margin-top: 0; }
   @apply relative z-[1] flex size-full flex-col items-center justify-center gap-2.5 rounded-[18px] border-[3px] border-[#E9DFCF] text-cream;
   background: #C8582A repeating-linear-gradient(45deg, rgba(255, 246, 233, .09) 0 6px, transparent 6px 12px);
   box-shadow: 0 14px 28px -18px rgba(46, 30, 20, .55);
-  transition: transform 220ms cubic-bezier(.3, 1.4, .5, 1);
+  transition: transform 220ms cubic-bezier(.3, 1.4, .5, 1), box-shadow 220ms ease;
 }
 .deck:hover .deck-face { transform: translate(-3px, -4px) rotate(-1.5deg); }
 .deck:active .deck-face { transform: scale(.98); }
+/* Tapped: the top card lifts off the pile while it is dealt (card_motion.js), and settles back once in the hand. */
+.deck.is-dealing .deck-face { transform: translate(-6px, -12px) rotate(-3deg) scale(1.02); box-shadow: 0 22px 34px -18px rgba(46, 30, 20, .6); }
 .deck-plus { @apply flex size-11 items-center justify-center rounded-full bg-cream text-[#C8582A] shadow-[0_4px_10px_-4px_rgba(46,30,20,.5)]; }
 .deck.is-empty { @apply cursor-default; }
 .deck.is-empty::before, .deck.is-empty::after { display: none; }

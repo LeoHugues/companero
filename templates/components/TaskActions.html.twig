@@ -16,7 +16,7 @@
         <form method="post" action="{{ path('task_release', {id: task.id}) }}" class="min-w-0">
             <input type="hidden" name="_back" value="{{ back }}">
             <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
-            <button type="submit" class="seat seat-taken seat-mine" title="Tu t’en occupes — touche pour la laisser" aria-label="Je ne m’en occupe plus : « {{ task.title }} »">
+            <button type="submit" class="seat seat-taken seat-mine" data-seat="{{ task.id }}" data-seat-state="mine" title="Tu t’en occupes — touche pour la laisser" aria-label="Je ne m’en occupe plus : « {{ task.title }} »">
                 <twig:Avatar :member="member" :size="compact ? 22 : 28"/>
                 <span class="truncate">{{ member.name }}</span>
                 <twig:Icon name="close" size="13" stroke="2.4" class="seat-leave"/>
@@ -24,17 +24,17 @@
         </form>
     {% elseif view.reservedBy %}
         {# Taken by someone else: just a face and a name. #}
-        <span class="seat seat-taken" title="{{ view.reservedBy.name ~ ' s’en occupe' }}">
+        <span class="seat seat-taken" data-seat="{{ task.id }}" data-seat-state="taken" title="{{ view.reservedBy.name ~ ' s’en occupe' }}">
             <twig:Avatar :member="view.reservedBy" :size="compact ? 22 : 28"/>
             <span class="truncate">{{ view.reservedBy.name }}</span>
         </span>
     {% elseif compact %}
-        <span class="text-sm font-semibold text-clay-dark">+{{ points }} pts{% if boost %} <twig:Icon name="bolt" size="12" stroke="2.4"/>{% endif %}</span>
+        <span class="text-sm font-semibold text-clay-dark" data-seat="{{ task.id }}" data-seat-state="free">+{{ points }} pts{% if boost %} <twig:Icon name="bolt" size="12" stroke="2.4"/>{% endif %}</span>
     {% else %}
         <form method="post" action="{{ path('task_reserve', {id: task.id}) }}">
             <input type="hidden" name="_back" value="{{ back }}">
             <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
-            <button type="submit" class="seat" aria-label="Je m’en occupe : « {{ task.title }} »">
+            <button type="submit" class="seat" data-seat="{{ task.id }}" data-seat-state="free" aria-label="Je m’en occupe : « {{ task.title }} »">
                 <span class="seat-empty" aria-hidden="true"><twig:Icon name="plus" size="14" stroke="2.4"/></span>
                 Je prends
             </button>
