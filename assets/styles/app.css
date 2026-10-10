@@ -284,17 +284,27 @@
 @keyframes medallion-hop { 0%, 82%, 100% { transform: translateY(0); } 88% { transform: translateY(-4px); } 94% { transform: translateY(0); } 97% { transform: translateY(-1.5px); } }
 @keyframes medallion-wobble { 0%, 76%, 100% { transform: rotate(0); } 80% { transform: rotate(-9deg); } 85% { transform: rotate(8deg); } 90% { transform: rotate(-5deg); } 95% { transform: rotate(3deg); } }
 
-/* "Je prends": a light dotted circle with a plus; once taken, just the face and the name of who took it. */
+/* "Je prends": a warm pill holding an empty seat, a clay dotted circle with a plus; once taken, the face and the name of who took it. */
 .seat {
-  @apply inline-flex h-9 min-w-0 cursor-pointer items-center gap-2 rounded-[10px] pr-2 text-[13px] font-medium whitespace-nowrap text-muted transition hover:text-ink-soft active:scale-95;
+  @apply inline-flex h-[38px] min-w-0 cursor-pointer items-center gap-2 rounded-full bg-[#FCE6D6] pr-[15px] pl-[5px] text-[13.5px] font-semibold whitespace-nowrap text-[#8E3F17] transition hover:bg-[#F9D9C2] active:scale-95;
 }
 .seat-empty {
-  @apply flex size-7 shrink-0 items-center justify-center rounded-full border-[1.2px] border-dashed border-[#DCCFBC] text-[#B3A190] transition;
+  @apply flex size-7 shrink-0 items-center justify-center rounded-full border-[1.5px] border-dashed border-clay bg-surface text-clay transition;
 }
-.seat:hover .seat-empty { @apply border-ink text-ink; rotate: 90deg; }
-.seat-small { @apply h-8 pr-1 text-[12.5px]; }
-.seat-small .seat-empty { @apply size-[26px]; }
-.seat-taken { @apply max-w-full cursor-default font-semibold text-ink hover:text-ink active:scale-100; }
+.seat:hover .seat-empty, .seat-stacked:hover .seat-empty { @apply border-solid; rotate: 90deg; }
+.seat-taken { @apply max-w-full cursor-default bg-[#F0E8DB] pr-3.5 text-ink hover:bg-[#F0E8DB] active:scale-100; }
+/* Where the title needs the room (the Casa's quests): the seat alone, "Je prends" written small beneath. */
+.seat-stacked { @apply flex w-[52px] shrink-0 cursor-pointer flex-col items-center gap-[3px] text-[10.5px] leading-none font-semibold whitespace-nowrap text-[#8E3F17] transition active:scale-95; }
+.seat-stacked-disc { @apply flex size-8 items-center justify-center rounded-full bg-[#FCE6D6] transition; }
+.seat-stacked:hover .seat-stacked-disc { @apply bg-[#F9D9C2]; }
+.seat-stacked .seat-empty { @apply size-6; }
+/* A card too narrow for the pill beside "C'est fait" (the hand): "Je prends" turns into the seat, its words small beneath. */
+.task-actions { container-type: inline-size; }
+@container (max-width: 18.75rem) {
+  .seat:not(.seat-taken) { @apply h-auto w-[52px] flex-col gap-[3px] bg-transparent p-0 text-[10.5px] leading-none hover:bg-transparent; }
+  .seat:not(.seat-taken) .seat-empty { @apply m-1 size-6; box-shadow: 0 0 0 4px #FCE6D6; }
+  .seat:not(.seat-taken):hover .seat-empty { box-shadow: 0 0 0 4px #F9D9C2; }
+}
 
 /* ▲ ▼ beside a rule of the charter: a small round button, faded at the ends of the list. */
 .rank-button {
@@ -895,6 +905,24 @@ main:has(> p[role="status"]) .home-hero { margin-top: 0; }
 .hand-card { @apply w-[300px] max-w-[85%] shrink-0 snap-start; }
 .hand-card > .play-card { height: 100%; }
 .hand-card > .play-card > .play-card-face { height: 100%; }
+
+/* The deck at the end of the hand: a card's size, face down like the back of a card turned over, two more beneath. */
+.deck { @apply relative block size-full min-h-[208px] w-full cursor-pointer rounded-[18px] text-center; }
+.deck::before, .deck::after { content: ''; position: absolute; border-radius: 18px; }
+.deck::before { inset: 5px -7px -5px 7px; background: #A9532A; opacity: .35; }
+.deck::after { inset: 2.5px -3.5px -2.5px 3.5px; background: #B4521F; opacity: .6; }
+.deck-face {
+  @apply relative z-[1] flex size-full flex-col items-center justify-center gap-2.5 rounded-[18px] border-[3px] border-[#E9DFCF] text-cream;
+  background: #C8582A repeating-linear-gradient(45deg, rgba(255, 246, 233, .09) 0 6px, transparent 6px 12px);
+  box-shadow: 0 14px 28px -18px rgba(46, 30, 20, .55);
+  transition: transform 220ms cubic-bezier(.3, 1.4, .5, 1);
+}
+.deck:hover .deck-face { transform: translate(-3px, -4px) rotate(-1.5deg); }
+.deck:active .deck-face { transform: scale(.98); }
+.deck-plus { @apply flex size-11 items-center justify-center rounded-full bg-cream text-[#C8582A] shadow-[0_4px_10px_-4px_rgba(46,30,20,.5)]; }
+.deck.is-empty { @apply cursor-default; }
+.deck.is-empty::before, .deck.is-empty::after { display: none; }
+.deck.is-empty .deck-face { @apply border-[1.5px] border-dashed border-[#DCCFBC] bg-none text-muted shadow-none; background-color: transparent; transform: none; }
 
 /* "Prendre soin de la Casa": the filters, then the groups of urgency. */
 .segmented { @apply grid grid-cols-3 gap-0.5 rounded-[13px] bg-track/70 p-[3px]; }

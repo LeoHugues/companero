@@ -75,8 +75,8 @@
                     <form method="post" action="{{ path('task_reserve', {id: view.task.id}) }}" class="shrink-0">
                         <input type="hidden" name="_back" value="home">
                         <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
-                        <button type="submit" class="seat seat-small" aria-label="Je m’en occupe : « {{ view.task.title }} »">
-                            <span class="seat-empty" aria-hidden="true"><twig:Icon name="plus" size="12" stroke="2"/></span>
+                        <button type="submit" class="seat-stacked" aria-label="Je m’en occupe : « {{ view.task.title }} »">
+                            <span class="seat-stacked-disc" aria-hidden="true"><span class="seat-empty"><twig:Icon name="plus" size="12" stroke="2.6"/></span></span>
                             Je prends
                         </button>
                     </form>
@@ -101,24 +101,23 @@
         </a>
     {% endif %}
 
-    {% if mine is not empty %}
-        {% set late = mine|filter(v => v.status.urgency.value == 'late')|length %}
-        <section class="flex flex-col gap-3.5" aria-labelledby="mine-title">
-            <div class="flex items-end justify-between gap-3">
-                <div>
-                    <h2 id="mine-title" class="home-title">À toi de jouer</h2>
-                    <p class="mt-1 text-[13px] text-muted">{{ mine|length }} carte{{ mine|length > 1 ? 's' }}{{ late ? ' · ' ~ late ~ ' en retard' }}</p>
-                </div>
-                <p class="shrink-0 text-[13px] font-semibold text-clay-dark">{{ mine|reduce((sum, v) => sum + v.task.currentPoints, 0) }} pts</p>
+    {% set late = mine|filter(v => v.status.urgency.value == 'late')|length %}
+    <section class="flex flex-col gap-3.5" aria-labelledby="mine-title">
+        <div class="flex items-end justify-between gap-3">
+            <div>
+                <h2 id="mine-title" class="home-title">À toi de jouer</h2>
+                <p class="mt-1 text-[13px] text-muted">{{ mine is empty ? 'Aucune carte en main' : mine|length ~ ' carte' ~ (mine|length > 1 ? 's') ~ (late ? ' · ' ~ late ~ ' en retard') }}</p>
             </div>
-            {# Their cards side by side, to slide through; the next one shows at the edge. #}
-            <ul class="hand">
-                {% for view in mine %}
-                    <li class="hand-card"><twig:TaskCard :view="view" :member="app.user"/></li>
-                {% endfor %}
-            </ul>
-        </section>
-    {% endif %}
+            {% if mine is not empty %}<p class="shrink-0 text-[13px] font-semibold text-clay-dark">{{ mine|reduce((sum, v) => sum + v.task.currentPoints, 0) }} pts</p>{% endif %}
+        </div>
+        {# Their cards side by side, to slide through; the next one shows at the edge. Last, the deck: a card to draw. #}
+        <ul class="hand">
+            {% for view in mine %}
+                <li class="hand-card"><twig:TaskCard :view="view" :member="app.user"/></li>
+            {% endfor %}
+            <li class="hand-card"><twig:Deck :view="draw"/></li>
+        </ul>
+    </section>
 
     <twig:TeamBar :team="team" :household="app.user.household" :detailed="false" :done="done_this_week"/>
 

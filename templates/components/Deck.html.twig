@@ -1,0 +1,25 @@
+{% props view = null %}
+{#
+    The deck at the end of "À toi de jouer": a pile of cards face down, the size of a card. A tap deals one,
+    the card the Casa asks for first (TaskBoard::draw), and puts it in the hand. Nothing free left: an empty spot.
+#}
+{% if view %}
+    <form method="post" action="{{ path('task_reserve', {id: view.task.id}) }}" class="h-full">
+        <input type="hidden" name="_back" value="home">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
+        <button type="submit" class="deck" data-haptic="press" aria-label="Piocher une carte">
+            <span class="deck-face">
+                <span class="deck-plus" aria-hidden="true"><twig:Icon name="plus" size="20" stroke="2.6"/></span>
+                <span class="text-[15px] font-bold">Piocher</span>
+                <span class="-mt-1.5 text-xs font-medium opacity-85">une carte</span>
+            </span>
+        </button>
+    </form>
+{% else %}
+    <div class="deck is-empty">
+        <span class="deck-face">
+            <span class="text-[15px] font-semibold">Rien à piocher</span>
+            <span class="-mt-1.5 text-xs">Toutes les cartes sont prises</span>
+        </span>
+    </div>
+{% endif %}

@@ -309,6 +309,23 @@ final class TaskFlowTest extends AppTestCase
         self::assertSelectorTextContains('#task-'.$task?->getId().' .seat-taken', 'Léo');
     }
 
+    public function testDrawingACardFromTheDeck(): void
+    {
+        $leo = $this->foundHousehold();
+        $this->client->loginUser($leo);
+        $this->client->request('GET', '/taches/nouvelle/a-faire?nouvelle=1');
+        $this->client->submitForm('Ajouter la tâche', ['task[title]' => 'Racheter du PQ']);
+
+        // An empty hand still shows, with its deck: a tap deals one card into it.
+        $this->client->request('GET', '/');
+        self::assertSelectorTextContains('[aria-labelledby=mine-title]', 'Aucune carte en main');
+        $this->client->submitForm('Piocher une carte');
+        self::assertResponseRedirects('/');
+        $this->client->followRedirect();
+        self::assertSelectorTextContains('[aria-labelledby=mine-title]', '1 carte');
+        self::assertSelectorExists('[aria-labelledby=mine-title] .seat-taken[title="Tu t’en occupes"]');
+    }
+
     public function testMembersCannotTouchAnotherHouseholdsTasks(): void
     {
         $leo = $this->foundHousehold();

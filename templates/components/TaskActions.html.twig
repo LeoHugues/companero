@@ -1,17 +1,20 @@
 {% props view, back, member, boost = 0, compact = false %}
 {#
-    "Je prends" (an empty seat, a dotted circle with a plus, then the face and name of who took it) and
+    "Je prends" (a warm pill with an empty seat, a dotted circle with a plus; then the face and name of who took it) and
     "C'est fait" (a button of the Casa's yellow: a tick, the words, then what the task is worth).
     compact: only the seat taken, and a round button.
 #}
 {% set task = view.task %}
 {% set points = task.currentPoints + boost %}
-{# Side by side when they fit; otherwise "C'est fait" goes to its own line, on the right — never squeezed. #}
-<div {{ attributes.defaults({class: 'relative z-[2] flex flex-wrap items-center justify-between gap-x-2 gap-y-2'}) }}>
+{#
+    Side by side when they fit; otherwise "C'est fait" goes to its own line, on the right — never squeezed.
+    On a narrow card (the hand), "Je prends" is the seat alone, its words small beneath (app.css).
+#}
+<div {{ attributes.defaults({class: 'task-actions relative z-[2] flex flex-wrap items-center justify-between gap-x-2 gap-y-2'}) }}>
     {% if view.reservedBy %}
         {# Taken: just a face and a name. #}
         <span class="seat seat-taken" title="{{ view.isReservedBy(member) ? 'Tu t’en occupes' : view.reservedBy.name ~ ' s’en occupe' }}">
-            <twig:Avatar :member="view.reservedBy" :size="compact ? 22 : 26"/>
+            <twig:Avatar :member="view.reservedBy" :size="compact ? 22 : 28"/>
             <span class="truncate">{{ view.reservedBy.name }}</span>
         </span>
     {% elseif compact %}
@@ -21,7 +24,7 @@
             <input type="hidden" name="_back" value="{{ back }}">
             <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
             <button type="submit" class="seat" aria-label="Je m’en occupe : « {{ task.title }} »">
-                <span class="seat-empty" aria-hidden="true"><twig:Icon name="plus" size="13" stroke="2"/></span>
+                <span class="seat-empty" aria-hidden="true"><twig:Icon name="plus" size="14" stroke="2.4"/></span>
                 Je prends
             </button>
         </form>

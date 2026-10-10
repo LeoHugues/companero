@@ -23,8 +23,22 @@ final class TaskArtTest extends TestCase
         yield ['Nettoyer les vitres du salon', 'window'];
         yield ['Nettoyer la grande table de la terrasse', 'terrace'];
         yield ['Plans de travail (javel ou vinaigre)', 'counter'];
-        yield ['Vider le lave-vaisselle', 'counter'];
-        yield ['Tondre autour de la maison', null];
+        yield ['Ranger la vaisselle de l’égouttoir', 'counter'];
+        yield ['Vider le lave-vaisselle', 'dishwasher'];
+        yield ['Nettoyer sous le lave-vaisselle', 'dishwasher'];
+        yield ['Nettoyer le frigo', 'fridge'];
+        yield ['Nettoyer le lave-linge', 'washer'];
+        yield ['Ranger et nettoyer les placards', 'cupboard'];
+        yield ['Ranger le placard de l’entrée', 'cupboard'];
+        yield ['Nettoyer le parking', 'parking'];
+        yield ['A/R Déchetterie', 'dump'];
+        yield ['Nettoyer et ranger le tiroir à couverts', 'cutlery'];
+        yield ['Nettoyer vomi Gizmo', 'mess'];
+        yield ['Toile d’araignée', 'cobweb'];
+        yield ['Tondre autour de la maison', 'mower'];
+        yield ['Tonte tour de la maison', 'mower'];
+        yield ['Ranger le salon', 'sofa'];
+        yield ['Aspirateur salon et cuisine', 'vacuum'];
         yield ['Ranger la console', null];
     }
 

@@ -95,6 +95,19 @@ final class TaskBoardTest extends TestCase
         self::assertSame([$hidden, $late], $board->quests(2));
     }
 
+    public function testTheDeckDealsTheCasasFirstQuestOtherwiseTheMostPressingFreeTask(): void
+    {
+        $taken = new TaskView($this->rollingTask(7, null), new TaskStatus(Urgency::Late, 0), reservedBy: $this->member());
+        $resting = new TaskView($this->rollingTask(7, null), new TaskStatus(Urgency::Fresh, 95), availableAt: new \DateTimeImmutable('2026-10-11'));
+        $fresh = new TaskView($this->rollingTask(7, null), new TaskStatus(Urgency::Fresh, 90));
+        $soon = new TaskView($this->rollingTask(7, null), new TaskStatus(Urgency::Soon, 40));
+
+        self::assertSame($soon, (new TaskBoard([$taken, $soon, $fresh]))->draw());
+        // No quest left: a free task in no hurry still makes a card to draw, but not one resting after it was done.
+        self::assertSame($fresh, (new TaskBoard([$taken, $resting, $fresh]))->draw());
+        self::assertNull((new TaskBoard([$taken, $resting]))->draw());
+    }
+
     public function testTheHandOfAMemberHoldsWhatTheyTookAndWhatIsCountedOnThem(): void
     {
         $leo = $this->member();

@@ -52,6 +52,7 @@ final class HomeController extends AbstractController
         return $this->render('home/index.html.twig', [
             'mine' => $mine,
             'quests' => $board->quests(),
+            'draw' => $board->draw(),
             'groups' => $groups,
             'for_me' => $forMe,
             'care_counts' => [
