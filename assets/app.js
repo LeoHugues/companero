@@ -1,4 +1,7 @@
 import './stimulus_bootstrap.js';
+// The CSRF double-submit, on every page from the start: Symfony's forms would otherwise load it lazily,
+// and once a form has used it, the home page's own forms (sent without it) were turned away until the session ended.
+import './controllers/csrf_protection_controller.js';
 import './styles/app.css';
 import { buzz } from './lib/fx.js';
 
