@@ -95,13 +95,23 @@ final class TaskBoardTest extends TestCase
         self::assertSame([$hidden, $late], $board->quests(2));
     }
 
-    public function testTheDeckDealsTheCasasFirstQuestOtherwiseTheMostPressingFreeTask(): void
+    public function testTheDeckDealsTheMostPressingFreeTaskFirst(): void
     {
         $taken = new TaskView($this->rollingTask(7, null), new TaskStatus(Urgency::Late, 0), reservedBy: $this->member());
         $resting = new TaskView($this->rollingTask(7, null), new TaskStatus(Urgency::Fresh, 95), availableAt: new \DateTimeImmutable('2026-10-11'));
         $fresh = new TaskView($this->rollingTask(7, null), new TaskStatus(Urgency::Fresh, 90));
         $soon = new TaskView($this->rollingTask(7, null), new TaskStatus(Urgency::Soon, 40));
+        $due = new TaskView($this->rollingTask(7, null), new TaskStatus(Urgency::Due, 10));
+        $late = new TaskView($this->rollingTask(7, null), new TaskStatus(Urgency::Late, 0));
+        $surprise = $this->rollingTask(7, null);
+        $freshSurprise = new TaskView($surprise, new TaskStatus(Urgency::Fresh, 90), bounty: new Bounty($surprise, new \DateTimeImmutable('2026-10-05'), BountyKind::Points, 15));
+        $dueSurprise = new TaskView($surprise, new TaskStatus(Urgency::Due, 20), bounty: new Bounty($surprise, new \DateTimeImmutable('2026-10-05'), BountyKind::Points, 15));
 
+        // Late before due, due before soon: a surprise does not jump ahead of a more pressing task…
+        self::assertSame($late, (new TaskBoard([$taken, $soon, $freshSurprise, $due, $late]))->draw());
+        self::assertSame($due, (new TaskBoard([$soon, $freshSurprise, $due]))->draw());
+        // …but comes first among those as pressing.
+        self::assertSame($dueSurprise, (new TaskBoard([$soon, $due, $dueSurprise]))->draw());
         self::assertSame($soon, (new TaskBoard([$taken, $soon, $fresh]))->draw());
         // No quest left: a free task in no hurry still makes a card to draw, but not one resting after it was done.
         self::assertSame($fresh, (new TaskBoard([$taken, $resting, $fresh]))->draw());

@@ -1,7 +1,7 @@
 {% props view = null %}
 {#
     The deck at the end of "À toi de jouer": a pile of cards face down, the size of a card. A tap deals one,
-    the card the Casa asks for first (TaskBoard::draw), and puts it in the hand. Nothing free left: an empty spot.
+    the most pressing free card, late ones first (TaskBoard::draw), and puts it in the hand. Nothing free left: an empty spot.
 #}
 {% if view %}
     <form method="post" action="{{ path('task_reserve', {id: view.task.id}) }}" class="h-full">

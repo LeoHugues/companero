@@ -11,9 +11,20 @@
     On a narrow card (the hand), "Je prends" is the seat alone, its words small beneath (app.css).
 #}
 <div {{ attributes.defaults({class: 'task-actions relative z-[2] flex flex-wrap items-center justify-between gap-x-2 gap-y-2'}) }}>
-    {% if view.reservedBy %}
-        {# Taken: just a face and a name. #}
-        <span class="seat seat-taken" title="{{ view.isReservedBy(member) ? 'Tu t’en occupes' : view.reservedBy.name ~ ' s’en occupe' }}">
+    {% if view.isReservedBy(member) %}
+        {# Taken by me: my face and my name; a tap lets it go, and "Je prends" is back. #}
+        <form method="post" action="{{ path('task_release', {id: task.id}) }}" class="min-w-0">
+            <input type="hidden" name="_back" value="{{ back }}">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
+            <button type="submit" class="seat seat-taken seat-mine" title="Tu t’en occupes — touche pour la laisser" aria-label="Je ne m’en occupe plus : « {{ task.title }} »">
+                <twig:Avatar :member="member" :size="compact ? 22 : 28"/>
+                <span class="truncate">{{ member.name }}</span>
+                <twig:Icon name="close" size="13" stroke="2.4" class="seat-leave"/>
+            </button>
+        </form>
+    {% elseif view.reservedBy %}
+        {# Taken by someone else: just a face and a name. #}
+        <span class="seat seat-taken" title="{{ view.reservedBy.name ~ ' s’en occupe' }}">
             <twig:Avatar :member="view.reservedBy" :size="compact ? 22 : 28"/>
             <span class="truncate">{{ view.reservedBy.name }}</span>
         </span>

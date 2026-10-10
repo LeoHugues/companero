@@ -134,7 +134,7 @@ final class SurpriseTest extends AppTestCase
         // A real word of justification, not only a few words.
         $why = 'La vaisselle qui traîne depuis mardi dans l’évier, alors que c’était ton tour cette semaine : la poêle commence à avoir une vie à elle.';
         self::assertSelectorExists('textarea[name=motif][required]');
-        $this->client->submitForm('Siffler le carton', ['pour' => $robin->getId(), 'motif' => $why]);
+        $this->client->submitForm('Siffler le carton', ['pour' => [$robin->getId()], 'motif' => $why]);
         self::assertResponseRedirects();
         $this->client->followRedirect();
         self::assertSelectorTextContains('[role=status]', 'Carton jaune pour Robin !');
@@ -152,6 +152,29 @@ final class SurpriseTest extends AppTestCase
         self::assertCount(1, static::getContainer()->get(YellowCardRepository::class)->findReceivedBy($this->reload($robin)));
     }
 
+    public function testAYellowCardCanBeGivenToSeveralColocsAtOnce(): void
+    {
+        $leo = $this->foundHousehold();
+        $robin = $this->register($leo, 'Robin');
+        $lea = $this->register($leo, 'Léa');
+        $gift = new Gift($this->reload($leo), GiftKind::YellowCard, 'Niveau 3', new \DateTimeImmutable());
+        $this->persist($gift);
+
+        $this->client->loginUser($leo);
+        $this->client->request('GET', '/profil');
+        self::assertSelectorCount(2, 'input[type=checkbox][name="pour[]"]');
+        $this->client->request('POST', '/cadeaux/'.$gift->getId().'/carton', ['_csrf_token' => 'csrf-token', 'pour' => [$robin->getId(), $lea->getId()], 'motif' => 'Les miettes sur le plan de travail']);
+        self::assertResponseRedirects();
+        $this->client->followRedirect();
+        self::assertSelectorTextContains('[role=status]', 'Carton jaune pour Robin et Léa !');
+
+        // One gift, a card for each.
+        $cards = static::getContainer()->get(YellowCardRepository::class);
+        self::assertCount(1, $cards->findReceivedBy($this->reload($robin)));
+        self::assertCount(1, $cards->findReceivedBy($this->reload($lea)));
+        self::assertTrue(static::getContainer()->get(GiftRepository::class)->find($gift->getId())?->isUsed());
+    }
+
     public function testAYellowCardIsForSomeoneElseAndSaysWhatFor(): void
     {
         $leo = $this->foundHousehold();
@@ -160,9 +183,12 @@ final class SurpriseTest extends AppTestCase
         $this->persist($gift);
 
         $this->client->loginUser($leo);
-        $this->client->request('POST', '/cadeaux/'.$gift->getId().'/carton', ['_csrf_token' => 'csrf-token', 'pour' => $leo->getId(), 'motif' => 'Moi-même']);
+        $this->client->request('POST', '/cadeaux/'.$gift->getId().'/carton', ['_csrf_token' => 'csrf-token', 'pour' => [$leo->getId()], 'motif' => 'Moi-même']);
         self::assertResponseStatusCodeSame(400);
-        $this->client->request('POST', '/cadeaux/'.$gift->getId().'/carton', ['_csrf_token' => 'csrf-token', 'pour' => $robin->getId(), 'motif' => '  ']);
+        $this->client->request('POST', '/cadeaux/'.$gift->getId().'/carton', ['_csrf_token' => 'csrf-token', 'pour' => [$robin->getId(), $leo->getId()], 'motif' => 'Nous deux']);
+        self::assertResponseStatusCodeSame(400);
+        $this->client->request('POST', '/cadeaux/'.$gift->getId().'/carton', ['_csrf_token' => 'csrf-token', 'pour' => [$robin->getId()], 'motif' => '  ']);
+        $this->client->request('POST', '/cadeaux/'.$gift->getId().'/carton', ['_csrf_token' => 'csrf-token', 'motif' => 'Pour personne']);
         self::assertFalse(static::getContainer()->get(GiftRepository::class)->find($gift->getId())?->isUsed());
     }
 

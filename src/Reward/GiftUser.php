@@ -58,13 +58,24 @@ final readonly class GiftUser
         $this->entityManager->flush();
     }
 
-    /** A yellow card for a coloc, about something in particular. */
-    public function giveCard(Gift $gift, Member $friend, string $reason): YellowCard
+    /**
+     * A yellow card for one coloc or several at once, about something in particular: each gets their own.
+     *
+     * @param non-empty-list<Member> $friends
+     *
+     * @return list<YellowCard>
+     */
+    public function giveCard(Gift $gift, array $friends, string $reason): array
     {
         $this->assertUsable($gift);
         $reason = trim($reason);
-        if (GiftKind::YellowCard !== $gift->getKind() || $friend === $gift->getOwner() || !$friend->belongsTo($gift->getOwner()->getHousehold())) {
-            throw new \InvalidArgumentException('A yellow card is for another member of the household.');
+        if (GiftKind::YellowCard !== $gift->getKind() || [] === $friends) {
+            throw new \InvalidArgumentException('A yellow card is for other members of the household.');
+        }
+        foreach ($friends as $friend) {
+            if ($friend === $gift->getOwner() || !$friend->belongsTo($gift->getOwner()->getHousehold())) {
+                throw new \InvalidArgumentException('A yellow card is for other members of the household.');
+            }
         }
         if ('' === $reason || mb_strlen($reason) > YellowCard::REASON_MAX_LENGTH) {
             throw new \InvalidArgumentException('A yellow card says what it is about.');
@@ -72,11 +83,15 @@ final readonly class GiftUser
 
         $now = $this->clock->now();
         $gift->use($now);
-        $card = new YellowCard($gift->getOwner(), $friend, $reason, $now);
-        $this->entityManager->persist($card);
+        $cards = [];
+        foreach ($friends as $friend) {
+            if (!isset($cards[spl_object_id($friend)])) {
+                $this->entityManager->persist($cards[spl_object_id($friend)] = new YellowCard($gift->getOwner(), $friend, $reason, $now));
+            }
+        }
         $this->entityManager->flush();
 
-        return $card;
+        return array_values($cards);
     }
 
     public function offer(Gift $gift, Member $friend): void

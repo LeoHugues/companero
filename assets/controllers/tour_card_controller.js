@@ -24,6 +24,12 @@ export default class extends Controller {
         buzz('tick');
     }
 
+    leave() {
+        this.takenTarget.hidden = true;
+        this.seatTarget.hidden = false;
+        buzz('tick');
+    }
+
     done() {
         const button = this.doneTarget;
         button.classList.add('is-done-pressed');

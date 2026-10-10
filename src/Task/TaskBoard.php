@@ -92,16 +92,27 @@ final readonly class TaskBoard
         return \array_slice($quests, 0, $limit);
     }
 
-    /** The card "Piocher" deals, one at a time: the Casa's first quest, otherwise the most pressing free task — null once none is left. */
+    /**
+     * The card "Piocher" deals, one at a time: the most pressing free task — late first, then the ones whose moment
+     * has come —, a hidden surprise first among those as pressing; null once none is left.
+     */
     public function draw(): ?TaskView
     {
-        foreach ([...$this->quests(1), ...$this->toCareFor()] as $view) {
-            if ($view->isFree() && null === $view->availableAt) {
+        $drawn = null;
+        foreach ($this->toCareFor() as $view) {
+            if (!$view->isFree() || null !== $view->availableAt) {
+                continue;
+            }
+            if (null !== $drawn && $view->status->urgency !== $drawn->status->urgency) {
+                break;
+            }
+            if (null !== $view->bounty) {
                 return $view;
             }
+            $drawn ??= $view;
         }
 
-        return null;
+        return $drawn;
     }
 
     /** @return list<TaskView> what "Prendre soin de la Casa" lists: everything but the express tasks and the occasional ones still asleep */

@@ -305,8 +305,33 @@ final class TaskFlowTest extends AppTestCase
         $this->client->request('POST', '/taches/'.$task?->getId().'/je-m-en-occupe', ['_csrf_token' => 'csrf-token', '_back' => 'home']);
         self::assertResponseRedirects('/');
         $this->client->followRedirect();
-        self::assertSelectorExists('#task-'.$task?->getId().' .seat-taken[title="Tu t’en occupes"]');
+        self::assertSelectorExists('#task-'.$task?->getId().' .seat-mine');
         self::assertSelectorTextContains('#task-'.$task?->getId().' .seat-taken', 'Léo');
+
+        // A tap on my name lets it go: "Je prends" is back, for everyone.
+        $this->client->submit($this->client->getCrawler()->filter('#task-'.$task?->getId().' .seat-mine')->form());
+        self::assertResponseRedirects('/');
+        $this->client->followRedirect();
+        self::assertSelectorNotExists('#task-'.$task?->getId().' .seat-taken');
+        self::assertSelectorTextContains('#task-'.$task?->getId(), 'Je prends');
+    }
+
+    public function testOnlyWhoTookATaskCanLetItGo(): void
+    {
+        $leo = $this->foundHousehold();
+        $robin = $this->register($leo, 'Robin');
+        $this->client->loginUser($leo);
+        $this->client->request('GET', '/taches/nouvelle/a-faire?nouvelle=1');
+        $this->client->submitForm('Ajouter la tâche', ['task[title]' => 'Racheter du PQ']);
+        $task = static::getContainer()->get(TaskRepository::class)->findOneBy(['title' => 'Racheter du PQ']);
+        $this->client->request('POST', '/taches/'.$task?->getId().'/je-m-en-occupe', ['_csrf_token' => 'csrf-token', '_back' => 'home']);
+
+        $this->client->loginUser($robin);
+        $this->client->request('POST', '/taches/'.$task?->getId().'/je-laisse', ['_csrf_token' => 'csrf-token', '_back' => 'home']);
+        $this->client->followRedirect();
+        // Robin sees Léo's name, not a button to let it go.
+        self::assertSelectorTextContains('#task-'.$task?->getId().' .seat-taken', 'Léo');
+        self::assertSelectorNotExists('#task-'.$task?->getId().' .seat-mine');
     }
 
     public function testDrawingACardFromTheDeck(): void
@@ -323,7 +348,7 @@ final class TaskFlowTest extends AppTestCase
         self::assertResponseRedirects('/');
         $this->client->followRedirect();
         self::assertSelectorTextContains('[aria-labelledby=mine-title]', '1 carte');
-        self::assertSelectorExists('[aria-labelledby=mine-title] .seat-taken[title="Tu t’en occupes"]');
+        self::assertSelectorExists('[aria-labelledby=mine-title] .seat-mine');
     }
 
     public function testMembersCannotTouchAnotherHouseholdsTasks(): void

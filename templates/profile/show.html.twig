@@ -109,15 +109,15 @@
                         </form>
                     {% endif %}
                 {% elseif kind == 'yellow_card' and friends is not empty %}
-                    {# Those who do things may hand out cards: to someone, about something in particular. #}
+                    {# Those who do things may hand out cards: to one coloc or several at once, about something in particular. #}
                     <form method="post" action="{{ path('gift_card', {id: gift.id}) }}" class="flex flex-col gap-2.5">
                         <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
                         <fieldset class="flex flex-wrap items-center gap-2">
-                            <legend class="sr-only">Pour qui ?</legend>
+                            <legend class="sr-only">Pour qui ? Un ou plusieurs</legend>
                             <span class="text-sm font-bold">Pour</span>
                             <span class="choice-chips">
                                 {% for friend in friends %}
-                                    <input type="radio" name="pour" value="{{ friend.id }}" id="card-{{ gift.id }}-{{ friend.id }}" required{{ loop.first ? ' checked' }}>
+                                    <input type="checkbox" name="pour[]" value="{{ friend.id }}" id="card-{{ gift.id }}-{{ friend.id }}"{{ loop.first ? ' checked' }}>
                                     <label for="card-{{ gift.id }}-{{ friend.id }}" class="gap-1.5"><twig:Avatar :member="friend" size="20"/>{{ friend.name }}</label>
                                 {% endfor %}
                             </span>

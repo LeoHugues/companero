@@ -242,6 +242,20 @@ final class TaskController extends AbstractController
         return $this->redirectBack($request);
     }
 
+    /** Changed one's mind: the task taken goes back to the pile, "Je prends" again for everyone. */
+    #[Route('/{id}/je-laisse', name: 'task_release', requirements: ['id' => '\d+'], methods: ['POST'])]
+    #[IsGranted(HouseholdVoter::ACCESS, subject: 'task')]
+    #[IsCsrfTokenValid('submit', tokenKey: '_csrf_token')]
+    public function release(Task $task, #[CurrentUser] Member $member, Request $request): RedirectResponse
+    {
+        if ($task->reservedByAt($this->clock->now()) === $member) {
+            $task->release();
+            $this->entityManager->flush();
+        }
+
+        return $this->redirectBack($request);
+    }
+
     /** "Ça arrive": an occasional task is needed now — its card shows up on the home page until someone does it. */
     #[Route('/{id}/ca-arrive', name: 'task_raise', requirements: ['id' => '\d+'], methods: ['POST'])]
     #[IsGranted(HouseholdVoter::ACCESS, subject: 'task')]

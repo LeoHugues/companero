@@ -320,6 +320,10 @@
 }
 .seat:hover .seat-empty, .seat-stacked:hover .seat-empty { @apply border-solid; rotate: 90deg; }
 .seat-taken { @apply max-w-full cursor-default bg-[#F0E8DB] pr-3.5 text-ink hover:bg-[#F0E8DB] active:scale-100; }
+/* Taken by me: a tap lets it go, a small cross says so. */
+.seat-mine { @apply cursor-pointer pr-3 hover:bg-[#E8DDCB] active:scale-95; }
+.seat-leave { @apply -ml-0.5 shrink-0 text-muted transition; }
+.seat-mine:hover .seat-leave { @apply text-ink; }
 /* Where the title needs the room (the Casa's quests): the seat alone, "Je prends" written small beneath. */
 .seat-stacked { @apply flex w-[52px] shrink-0 cursor-pointer flex-col items-center gap-[3px] text-[10.5px] leading-none font-semibold whitespace-nowrap text-[#8E3F17] transition active:scale-95; }
 .seat-stacked-disc { @apply flex size-8 items-center justify-center rounded-full bg-[#FCE6D6] transition; }

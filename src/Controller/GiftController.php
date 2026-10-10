@@ -36,7 +36,7 @@ final class GiftController extends AbstractController
     public function activate(Gift $gift, #[CurrentUser] Member $member, Request $request): RedirectResponse
     {
         $this->assertOwnedBy($gift, $member);
-        $friend = GiftKind::FriendBoost === $gift->getKind() ? $this->friend($member, $request) : null;
+        $friend = GiftKind::FriendBoost === $gift->getKind() ? $this->friend($member, $request->request->getInt('pour')) : null;
 
         try {
             $this->giftUser->activate($gift, $friend);
@@ -58,7 +58,7 @@ final class GiftController extends AbstractController
     public function offer(Gift $gift, #[CurrentUser] Member $member, Request $request): RedirectResponse
     {
         $this->assertOwnedBy($gift, $member);
-        $friend = $this->friend($member, $request);
+        $friend = $this->friend($member, $request->request->getInt('pour'));
 
         try {
             $this->giftUser->offer($gift, $friend);
@@ -75,7 +75,13 @@ final class GiftController extends AbstractController
     public function card(Gift $gift, #[CurrentUser] Member $member, Request $request): RedirectResponse
     {
         $this->assertOwnedBy($gift, $member);
-        $friend = $this->friend($member, $request);
+        // One coloc or several at once: each gets their own card.
+        $friends = array_map(fn (mixed $id): Member => $this->friend($member, (int) $id), array_unique($request->request->all('pour')));
+        if ([] === $friends) {
+            $this->addFlash('success', 'Un carton, c’est pour quelqu’un : choisis à qui.');
+
+            return $this->back();
+        }
         $reason = trim($request->request->getString('motif'));
         if ('' === trim($reason)) {
             $this->addFlash('success', 'Un carton, c’est pour quelque chose : dis pour quoi.');
@@ -84,11 +90,13 @@ final class GiftController extends AbstractController
         }
 
         try {
-            $this->giftUser->giveCard($gift, $friend, $reason);
+            $this->giftUser->giveCard($gift, array_values($friends), $reason);
         } catch (\InvalidArgumentException|\LogicException $exception) {
             throw new BadRequestHttpException($exception->getMessage(), $exception);
         }
-        $this->addFlash('card_given', ['to' => $friend->getName(), 'reason' => trim($reason)]);
+        $names = array_map(static fn (Member $friend): string => $friend->getName(), array_values($friends));
+        $last = array_pop($names);
+        $this->addFlash('card_given', ['to' => [] === $names ? $last : implode(', ', $names).' et '.$last, 'reason' => trim($reason)]);
 
         return $this->back();
     }
@@ -138,9 +146,9 @@ final class GiftController extends AbstractController
         }
     }
 
-    private function friend(Member $member, Request $request): Member
+    private function friend(Member $member, int $id): Member
     {
-        $friend = $this->members->find($request->request->getInt('pour'));
+        $friend = $this->members->find($id);
         if (null === $friend || $friend === $member || !$friend->belongsTo($member->getHousehold())) {
             throw new BadRequestHttpException('Choose another member of the household.');
         }

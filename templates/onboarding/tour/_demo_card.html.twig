@@ -35,13 +35,14 @@
                 <span class="seat-empty" aria-hidden="true"><twig:Icon name="hand" size="15" stroke="2.2"/></span>
                 <span class="@max-[18.5rem]:sr-only">Je prends</span>
             </button>
-            <span class="seat seat-taken" title="Tu t’en occupes" data-tour-card-target="taken" hidden>
+            <button type="button" class="seat seat-taken seat-mine" title="Tu t’en occupes — touche pour la laisser" data-tour-card-target="taken" data-action="tour-card#leave" hidden>
                 <twig:Avatar :member="app.user" size="26"/>
                 <span class="flex flex-col leading-none">
                     <span class="text-[10px] font-bold tracking-wide text-muted uppercase @max-[18.5rem]:sr-only">Pris par</span>
                     <span class="text-[13px] font-extrabold text-ink">toi</span>
                 </span>
-            </span>
+                <twig:Icon name="close" size="13" stroke="2.4" class="seat-leave"/>
+            </button>
             <button type="button" class="done-button ml-auto" data-tour-card-target="done" data-action="tour-card#done">
                 <span class="done-button-check" aria-hidden="true"><twig:Icon name="check" size="16" stroke="3"/></span>
                 C’est fait
