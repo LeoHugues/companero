@@ -32,4 +32,10 @@ final readonly class TaskView
     {
         return $this->reservedBy === $member;
     }
+
+    /** Nobody took it, nobody is in charge of it: up for grabs. */
+    public function isFree(): bool
+    {
+        return null === $this->reservedBy && null === $this->task->getAssignee();
+    }
 }

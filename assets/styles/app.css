@@ -284,16 +284,17 @@
 @keyframes medallion-hop { 0%, 82%, 100% { transform: translateY(0); } 88% { transform: translateY(-4px); } 94% { transform: translateY(0); } 97% { transform: translateY(-1.5px); } }
 @keyframes medallion-wobble { 0%, 76%, 100% { transform: rotate(0); } 80% { transform: rotate(-9deg); } 85% { transform: rotate(8deg); } 90% { transform: rotate(-5deg); } 95% { transform: rotate(3deg); } }
 
-/* "Je prends": an empty seat with a hand; once taken, the face of who took it. */
+/* "Je prends": a light dotted circle with a plus; once taken, just the face and the name of who took it. */
 .seat {
-  @apply inline-flex h-10 min-w-0 cursor-pointer items-center gap-2 rounded-full pr-3 pl-1 text-[13px] font-bold whitespace-nowrap text-ink-soft transition hover:bg-track active:scale-95;
+  @apply inline-flex h-9 min-w-0 cursor-pointer items-center gap-2 rounded-[10px] pr-2 text-[13px] font-medium whitespace-nowrap text-muted transition hover:text-ink-soft active:scale-95;
 }
 .seat-empty {
-  @apply flex size-8 shrink-0 items-center justify-center rounded-full border-[1.5px] border-dashed border-sand text-muted transition;
+  @apply flex size-7 shrink-0 items-center justify-center rounded-full border-[1.2px] border-dashed border-[#DCCFBC] text-[#B3A190] transition;
 }
-.seat:hover .seat-empty { @apply border-ink text-ink; rotate: -12deg; }
-.seat-taken { @apply max-w-full cursor-default gap-1.5 bg-track/60 pr-3.5 pl-1 hover:bg-track/60 active:scale-100; }
-.seat-taken > span:last-child > span:last-child { @apply truncate; }
+.seat:hover .seat-empty { @apply border-ink text-ink; rotate: 90deg; }
+.seat-small { @apply h-8 pr-1 text-[12.5px]; }
+.seat-small .seat-empty { @apply size-[26px]; }
+.seat-taken { @apply max-w-full cursor-default font-semibold text-ink hover:text-ink active:scale-100; }
 
 /* ▲ ▼ beside a rule of the charter: a small round button, faded at the ends of the list. */
 .rank-button {
@@ -307,19 +308,20 @@
 
 /* A word about this time, across the card. */
 .task-card-note {
-  @apply flex items-start gap-1.5 rounded-xl bg-track/45 px-2.5 py-1.5 text-[13px] leading-snug font-semibold text-ink-soft;
+  @apply flex items-start gap-1.5 rounded-xl bg-track/45 px-2.5 py-1.5 text-[13px] leading-snug font-medium text-ink-soft;
 }
 
-/* "C'est fait": a dark token to collect, the points on it. */
+/* "C'est fait": the Casa's yellow, a tick in a pale square, the words, then what the task is worth. */
 .done-button {
-  @apply inline-flex h-11 max-w-full shrink-0 cursor-pointer items-center gap-1.5 rounded-full border-[1.5px] border-ink bg-sun py-1 pr-1 pl-1 text-[15px] font-extrabold whitespace-nowrap text-ink shadow-[2px_2px_0_var(--color-ink)] transition hover:-translate-y-px hover:shadow-[3px_3px_0_var(--color-ink)] active:translate-y-px active:shadow-none;
+  @apply inline-flex h-[38px] max-w-full shrink-0 cursor-pointer items-center gap-2 rounded-[11px] bg-[#F1C75A] py-0 pr-3 pl-1.5 text-[13.5px] font-semibold whitespace-nowrap text-ink shadow-[inset_0_-2px_0_rgba(46,30,20,.14)] transition hover:bg-[#F4D06F] active:scale-[.96];
 }
-.done-button-check { @apply flex size-8 shrink-0 items-center justify-center rounded-full bg-surface text-ink; }
-/* Room for three digits (and the boost's bolt) without pushing the button out of its card. */
-.done-button-points { @apply flex h-8 min-w-11 shrink-0 items-center justify-center gap-0.5 rounded-full bg-ink px-2 text-[13px] tabular-nums text-sun; }
+.done-button-check { @apply flex size-[26px] shrink-0 items-center justify-center rounded-lg bg-surface/75 text-ink; }
+.done-button-points { @apply flex shrink-0 items-center gap-0.5 border-l border-ink/20 pl-2.5 font-bold tabular-nums; }
 .done-round {
-  @apply flex size-11 cursor-pointer items-center justify-center rounded-full border-[1.5px] border-ink bg-sun text-ink shadow-[2px_2px_0_var(--color-ink)] transition hover:-translate-y-px active:translate-y-px active:shadow-none;
+  @apply flex size-10 cursor-pointer items-center justify-center rounded-xl bg-[#F1C75A] text-ink shadow-[inset_0_-2px_0_rgba(46,30,20,.14)] transition hover:bg-[#F4D06F] active:scale-95;
 }
+/* Just done: it rests until its cooldown is over. */
+.done-resting { @apply ml-auto flex items-center gap-1.5 rounded-[10px] border border-dashed border-line px-2.5 py-1.5 text-xs font-medium text-muted; }
 
 /* The ± buttons of a task to do: a few points more or less, this time only. */
 .points-step {
@@ -816,3 +818,242 @@ body > .casa-particle { position: absolute; z-index: 60; }
 .fold-chevron { @apply shrink-0 text-muted; transition: transform 300ms cubic-bezier(.3, 1.5, .5, 1); }
 .fold[open] .fold-chevron { transform: rotate(180deg); }
 .fold[open] > ul { animation: drawer-open 320ms cubic-bezier(.2, 1.1, .4, 1) both; }
+
+/*
+ * The home page: the Casa planted across the whole width, the card of the house's state straddling
+ * her ground, then the cards. Calmer than the rest of the app: hairlines and soft shadows rather than
+ * ink outlines, lighter weights, small capitals for the labels (docs/direction-artistique.md).
+ */
+@utility eyebrow { @apply text-[11px] font-semibold tracking-[.1em] text-muted uppercase; }
+@utility sheet { @apply rounded-[22px] bg-surface shadow-[0_1px_0_rgba(46,30,20,.04),0_12px_32px_-18px_rgba(46,30,20,.3)]; }
+@utility home-title { @apply text-[21px] leading-tight font-bold tracking-tight; }
+
+/* Full bleed: out of the page's margins, up to its top (unless a message sits above it). */
+.home-hero { position: relative; margin: -1.25rem -1.25rem 0; }
+main:has(> p[role="status"]) .home-hero { margin-top: 0; }
+.home-hero-top { position: absolute; inset: 14px 16px auto; z-index: 3; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.home-presence {
+  @apply flex h-9 cursor-pointer items-center gap-1.5 rounded-[11px] border border-[#E4D9C8] bg-surface/70 pr-3 pl-2.5 text-[13px] font-semibold text-muted transition active:scale-95;
+}
+.home-presence.is-home { @apply border-ink bg-ink text-surface; }
+.home-me { position: relative; display: block; width: 40px; height: 40px; }
+.home-me-level {
+  @apply absolute -right-1.5 -bottom-1 flex h-[19px] min-w-[19px] items-center justify-center rounded-[7px] border-2 border-[#F2E4CF] bg-ink px-1 text-[10.5px] font-bold text-sun;
+}
+.home-plan {
+  @apply absolute top-[68px] right-4 z-[3] flex h-8 items-center gap-1.5 rounded-[10px] bg-surface/90 pr-3 pl-2.5 text-[12.5px] font-semibold text-ink no-underline shadow-[0_4px_12px_-6px_rgba(46,30,20,.35)] hover:bg-surface hover:text-ink;
+}
+
+/* La Casa in her landscape: the stage is placed on the landscape's own coordinates (Casa.html.twig). */
+.casa-hero { position: relative; width: 100%; aspect-ratio: 380 / 372; overflow: hidden; }
+.casa-hero-land { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.casa-hero .casa-stage { position: absolute; left: 5.26%; top: 35.48%; width: 89.47%; }
+.casa-hero-bubble {
+  position: absolute;
+  top: 66px;
+  left: 16px;
+  z-index: 3;
+  max-width: min(220px, 58%);
+  padding: 10px 14px 11px;
+  border: 1.2px solid var(--color-ink);
+  border-radius: 16px;
+  background: var(--color-surface);
+  font-size: 14.5px;
+  line-height: 1.38;
+  font-weight: 500;
+  box-shadow: 0 12px 24px -14px rgba(46, 30, 20, .5);
+}
+.casa-hero-bubble::after {
+  content: '';
+  position: absolute;
+  right: 26%;
+  bottom: -7px;
+  width: 12px;
+  height: 12px;
+  border-right: 1.2px solid var(--color-ink);
+  border-bottom: 1.2px solid var(--color-ink);
+  background: var(--color-surface);
+  transform: rotate(45deg);
+}
+.casa-cloud { animation: casa-cloud 40s ease-in-out infinite alternate; }
+@keyframes casa-cloud { to { transform: translateX(18px); } }
+
+/* The state of the house: her cleanliness, the steps of her moods on the gauge, and a task she asks for. */
+/* -60px: over the last 44px of her ground, the page's gap of 16px aside. */
+.casa-state { @apply sheet relative z-[2] -mt-[60px] flex flex-col gap-3.5 px-4 pt-4 pb-3.5; }
+.casa-gauge { position: relative; }
+.casa-gauge-step { position: absolute; top: -4px; width: 2px; height: 16px; margin-left: -1px; border-radius: 1px; background: rgba(46, 30, 20, .18); }
+.casa-gauge-step.is-next { background: var(--color-clay); }
+.quest { @apply flex items-center gap-2.5 rounded-[15px] bg-[#F6EFE3] py-2.5 pr-2 pl-2.5; }
+.quest.is-coming { animation: pop 380ms cubic-bezier(.2, 1.5, .4, 1) both; }
+.quest-next {
+  @apply -ml-1 flex size-[30px] shrink-0 cursor-pointer items-center justify-center rounded-[9px] text-[#B3A190] transition hover:bg-track hover:text-ink;
+}
+
+/* "À toi de jouer": the cards of the hand, side by side, to slide through. */
+.hand { @apply -mx-5 flex snap-x snap-mandatory gap-3 overflow-x-auto px-5 pt-1 pb-4 [scrollbar-width:none]; }
+.hand-card { @apply w-[300px] max-w-[85%] shrink-0 snap-start; }
+.hand-card > .play-card { height: 100%; }
+.hand-card > .play-card > .play-card-face { height: 100%; }
+
+/* "Prendre soin de la Casa": the filters, then the groups of urgency. */
+.segmented { @apply grid grid-cols-3 gap-0.5 rounded-[13px] bg-track/70 p-[3px]; }
+.segmented button { @apply h-9 cursor-pointer rounded-[10px] text-[13.5px] font-semibold text-muted transition; }
+.segmented button[aria-pressed="true"] { @apply bg-surface text-ink shadow-[0_1px_2px_rgba(46,30,20,.12),0_4px_10px_-6px_rgba(46,30,20,.3)]; }
+.care-group { @apply flex flex-col gap-3; }
+.care-group-title { @apply mt-1 flex cursor-default list-none items-center gap-2 text-[11px] font-semibold tracking-[.1em] uppercase select-none; }
+.care-group-title::-webkit-details-marker { display: none; }
+summary.care-group-title { cursor: pointer; }
+.care-group-dot { @apply size-[7px] shrink-0 rounded-full; }
+.care-group-count { @apply text-dust; }
+.care-group-fold { @apply ml-auto text-[12.5px] font-medium tracking-normal text-muted normal-case; }
+details[open] .care-group-fold { font-size: 0; }
+details[open] .care-group-fold::after { content: 'Replier'; font-size: 12.5px; }
+.care-group-title.is-late { color: var(--color-danger-ink); }
+.care-group-title.is-late .care-group-dot { background: var(--color-danger); }
+.care-group-title.is-due, .care-group-title.is-soon { color: var(--color-warn-ink); }
+.care-group-title.is-due .care-group-dot, .care-group-title.is-soon .care-group-dot { background: var(--color-warn); }
+.care-group-title.is-fresh { color: var(--color-ok-ink); }
+.care-group-title.is-fresh .care-group-dot { background: var(--color-ok); }
+.sheet-empty { @apply rounded-[18px] border border-dashed border-line p-4 text-sm text-muted; }
+
+/* "En un geste": quiet chips, ticked in one tap. */
+.quick-chip {
+  @apply flex h-11 cursor-pointer items-center gap-2 rounded-xl border border-line bg-surface pr-3.5 pl-2.5 text-sm font-medium whitespace-nowrap text-ink transition hover:border-ink active:scale-95;
+}
+.quick-chip-tick { @apply flex size-[22px] shrink-0 items-center justify-center rounded-full bg-track text-muted; }
+.quick-chip.is-resting { @apply h-auto min-h-11 cursor-default border-dashed bg-transparent py-1.5 text-muted hover:border-line active:scale-100; }
+.quick-chip.is-resting .quick-chip-tick { @apply bg-ok text-surface; }
+
+/* The goal of the house, on the home page: the days under its gauge, the drawer of what earned the points. */
+.goal-days { @apply grid grid-cols-7 text-center text-[10px] font-semibold tracking-wider text-dust; }
+.goal-days .is-today { @apply text-ink; }
+.sheet .team-drawer { @apply mx-0 rounded-none border-t border-line/80; }
+.sheet .team-drawer-summary { @apply h-[46px] rounded-none px-0 py-0 text-[13.5px] font-semibold text-ink hover:bg-transparent; }
+.sheet .team-drawer-count { @apply h-auto min-w-0 bg-transparent px-0 text-xs font-semibold text-muted; }
+.sheet .team-drawer-body { @apply px-0 pb-3; }
+
+/*
+ * A task as a playing card (templates/components/TaskCard.html.twig): its value and suit in the corner,
+ * its picture in an arch, a thin line for the time left. Its rarity is the finish of its edge: paper,
+ * silver, pearl, gold — the rarer, the more it shines, without ever shouting.
+ */
+.play-card {
+  position: relative;
+  display: block;
+  padding: 3px;
+  border-radius: 18px;
+  background: #E9DFCF;
+  box-shadow: 0 1px 0 rgba(46, 30, 20, .05), 0 14px 28px -18px rgba(46, 30, 20, .42);
+  transform-style: preserve-3d;
+  transition: transform 620ms cubic-bezier(.3, .7, .25, 1);
+}
+.play-card-face {
+  position: relative;
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) auto;
+  column-gap: 12px;
+  padding: 14px 14px 12px 12px;
+  border-radius: 15px;
+  background: var(--color-surface);
+  backface-visibility: hidden;
+}
+.play-card-compact .play-card-face { grid-template-columns: 28px minmax(0, 1fr); padding: 12px 12px 10px 10px; }
+.play-card-index { @apply flex flex-col items-center gap-[7px] pt-px text-ink; }
+.play-card-value { @apply text-[21px] leading-none font-bold tracking-[-.03em] tabular-nums; }
+.play-card-status { @apply flex min-w-0 items-center gap-1.5 text-[10.5px] font-semibold tracking-[.09em] text-muted uppercase; }
+.play-card-dot { @apply size-[7px] shrink-0 rounded-full bg-ok; }
+.play-card-warning .play-card-dot { @apply bg-warn; }
+.play-card-danger .play-card-dot { @apply bg-danger; animation: play-card-dot 2.4s ease-in-out infinite; }
+.play-card-title { @apply mt-1.5 mb-[3px] text-base leading-snug font-semibold [overflow-wrap:anywhere]; }
+.play-card-meta { @apply truncate text-[12.5px] text-muted; }
+.play-card-time { @apply relative mt-[11px] h-[3px] overflow-hidden rounded-sm bg-track; }
+.play-card-time > span { @apply absolute inset-y-0 left-0 rounded-sm bg-ok; }
+.play-card-warning .play-card-time > span { @apply bg-warn; }
+.play-card-danger .play-card-time > span { @apply bg-danger; }
+.play-card-notes { @apply col-span-full mt-3 flex flex-col gap-1.5; }
+.play-card-actions { @apply col-span-full mt-3 border-t border-[#F0E8DB] pt-[11px]; }
+.play-card-compact .play-card-actions { @apply mt-2.5 pt-2; }
+.play-card-surprise {
+  @apply absolute -top-[7px] right-3.5 z-[3] flex h-[22px] items-center gap-[5px] rounded-[7px] bg-ink pr-[9px] pl-[7px] text-[10px] font-semibold tracking-[.1em] text-[#F1C964] uppercase shadow-[0_6px_12px_-6px_rgba(46,30,20,.6)];
+}
+.play-card-surprise svg { animation: play-card-glint 2.8s ease-in-out infinite; }
+@keyframes play-card-dot { 50% { box-shadow: 0 0 0 4px rgba(224, 108, 85, .18); } }
+@keyframes play-card-glint { 0%, 70%, 100% { transform: scale(1) rotate(0); } 80% { transform: scale(1.35) rotate(45deg); } }
+
+/* Its picture, in an arch; without one, its category. */
+.vignette { position: relative; display: block; width: 60px; height: 78px; overflow: hidden; border-radius: 30px 30px 9px 9px; }
+.vignette::after { content: ''; position: absolute; inset: 0; border-radius: inherit; box-shadow: inset 0 0 0 1px rgba(46, 30, 20, .08); }
+.vignette svg { display: block; }
+.vignette-category { @apply flex size-full items-center justify-center text-ink-soft; }
+.vignette-small { width: 40px; height: 52px; flex-shrink: 0; border-radius: 20px 20px 7px 7px; }
+.vignette-small > svg { width: 40px; height: 52px; }
+.vignette-small .vignette-category svg { width: 20px; height: 20px; }
+
+/* The finishes of its edge, and their light. */
+.play-card-rare { background: linear-gradient(120deg, #B7CDE0, #6F93B2 22%, #F4F8FB 40%, #6A8CAA 58%, #C3D6E6 76%, #7E9DB8 90%, #B7CDE0) 0 0 / 250% 100%; animation: play-card-foil 9s linear infinite; }
+.play-card-epic {
+  background: linear-gradient(120deg, #CDB2EC, #F4CFE2, #BFE6DB, #F8EDB8, #CFC6F4, #C2A2E8, #F4CFE2, #CDB2EC) 0 0 / 300% 100%;
+  box-shadow: 0 1px 0 rgba(46, 30, 20, .05), 0 14px 30px -16px rgba(142, 85, 191, .45);
+  animation: play-card-foil 8s linear infinite;
+}
+.play-card-legendary {
+  background: linear-gradient(120deg, #B07D24, #F7E2A0, #C7962F, #FFF4CF, #B8862C, #F3DB93, #B07D24) 0 0 / 300% 100%;
+  box-shadow: 0 1px 0 rgba(46, 30, 20, .05), 0 0 0 1px rgba(227, 169, 46, .25), 0 16px 34px -14px rgba(176, 125, 36, .7);
+  animation: play-card-foil 6s linear infinite;
+}
+.play-card-rare .play-card-face { background: radial-gradient(circle at 100% 0, rgba(183, 205, 224, .35), transparent 45%), var(--color-surface); }
+.play-card-epic .play-card-face { background: radial-gradient(circle at 100% 0, rgba(205, 178, 236, .38), transparent 48%), radial-gradient(circle at 0 100%, rgba(191, 230, 219, .3), transparent 42%), var(--color-surface); }
+.play-card-legendary .play-card-face { background: radial-gradient(circle at 100% 0, rgba(247, 226, 160, .55), transparent 52%), #FFFBF0; }
+.play-card-rare .play-card-value { color: #44708F; }
+.play-card-epic .play-card-value { color: #7B57A8; }
+.play-card-legendary .play-card-value { color: #A07018; }
+.play-card-rare::after, .play-card-epic::after, .play-card-legendary::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: 18px;
+  pointer-events: none;
+  background: linear-gradient(110deg, transparent 38%, rgba(255, 255, 255, .5) 48%, rgba(255, 255, 255, 0) 58%) 130% 0 / 280% 100%;
+  animation: play-card-sweep 7s ease-in-out infinite;
+}
+.play-card-rare::after { opacity: .7; animation-duration: 9s; }
+.play-card-epic::after { background-image: linear-gradient(110deg, transparent 36%, rgba(244, 207, 226, .35) 44%, rgba(255, 255, 255, .55) 48%, rgba(191, 230, 219, .35) 53%, transparent 60%); }
+.play-card-legendary::after { background-image: linear-gradient(110deg, transparent 36%, rgba(255, 244, 207, .75) 48%, transparent 60%); animation-duration: 5s; }
+.play-card-legendary .play-card-face::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(circle at 86% 14%, #FFF4CF 0 1.2px, transparent 2.2px), radial-gradient(circle at 93% 30%, #F3DB93 0 1px, transparent 2px), radial-gradient(circle at 74% 8%, #fff 0 1px, transparent 2px);
+  animation: rarity-stars 2.6s ease-in-out infinite;
+}
+@keyframes play-card-foil { to { background-position: 300% 0; } }
+@keyframes play-card-sweep { 0%, 62% { background-position: 130% 0; } 100% { background-position: -30% 0; } }
+
+/* Done: it turns over to show its back, terracotta, with what it earned. */
+.play-card-back {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 18px;
+  background-color: #C8582A;
+  background-image: repeating-linear-gradient(45deg, rgba(255, 252, 246, .14) 0 1px, transparent 1px 11px), repeating-linear-gradient(-45deg, rgba(255, 252, 246, .14) 0 1px, transparent 1px 11px);
+  color: var(--color-surface);
+  transform: rotateY(180deg);
+  backface-visibility: hidden;
+}
+.play-card-back::before { content: ''; position: absolute; inset: 7px; border: 1px solid rgba(255, 252, 246, .45); border-radius: 12px; }
+.play-card-back-in { position: relative; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 10px 20px; border-radius: 12px; background: #C8582A; }
+.play-card-back-points { font-size: 26px; line-height: 1.1; font-weight: 700; letter-spacing: -.02em; }
+.play-card-back-thanks { font-size: 10px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; opacity: .85; }
+.play-card.is-turning { transform: perspective(1100px) rotateY(180deg); }
+.play-card.is-turning::after { display: none; }
+@media (prefers-reduced-motion: reduce) {
+  .play-card.is-turning .play-card-face { visibility: hidden; }
+  .play-card.is-turning, .play-card.is-turning .play-card-back { transform: none; }
+}

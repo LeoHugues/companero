@@ -20,6 +20,28 @@ enum CasaMood: string
         };
     }
 
+    /** Her mood in a few words, as a title above the cleanliness gauge. */
+    public function title(): string
+    {
+        return match ($this) {
+            self::Neglected => 'Un peu négligée',
+            self::Dusty => 'Un peu poussiéreuse',
+            self::Okay => 'Contente',
+            self::Radiant => 'Rayonnante',
+        };
+    }
+
+    /** @return array{int, string}|null the cleanliness of her next mood, and what it changes — none once radiant */
+    public function next(): ?array
+    {
+        return match ($this) {
+            self::Neglected => [55, 'elle respire'],
+            self::Dusty => [80, 'elle sourit'],
+            self::Okay => [92, 'elle rayonne'],
+            self::Radiant => null,
+        };
+    }
+
     public function speech(): string
     {
         return match ($this) {

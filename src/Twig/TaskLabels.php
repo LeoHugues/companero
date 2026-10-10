@@ -7,7 +7,9 @@ use App\Entity\Zone;
 use App\Enum\TaskCategory;
 use App\Enum\TaskKind;
 use App\Enum\Urgency;
+use App\Task\TaskArt;
 use App\Task\TaskStatus;
+use App\Task\TaskView;
 use Psr\Clock\ClockInterface;
 use Twig\Attribute\AsTwigFunction;
 
@@ -89,6 +91,29 @@ final readonly class TaskLabels
             TaskKind::Quick => 'express',
             TaskKind::Occasional => 'quand ça arrive',
         };
+    }
+
+    /** What the Casa says in her bubble when she offers a task to the one looking at the home page. */
+    #[AsTwigFunction('casa_quest_line')]
+    public function questLine(TaskView $view): string
+    {
+        $title = "«\u{202F}".$view->task->getTitle()."\u{202F}»";
+
+        return match (true) {
+            null !== $view->bounty => "Psst… {$title} cache une surprise.",
+            Urgency::Late === $view->status->urgency => $view->status->overdueDays > 0
+                ? \sprintf("%s traîne depuis %d jour%s. Tu t’en charges\u{202F}?", $title, $view->status->overdueDays, $view->status->overdueDays > 1 ? 's' : '')
+                : "{$title} attend encore. Tu t’en charges\u{202F}?",
+            Urgency::Due === $view->status->urgency => "C’est le moment pour {$title}. Un coup de main\u{202F}?",
+            default => "{$title} arrive bientôt. Tu prends de l’avance\u{202F}?",
+        };
+    }
+
+    /** The picture of a task card, guessed from its title (App\Task\TaskArt), null for its category's icon. */
+    #[AsTwigFunction('task_art')]
+    public function art(Task $task): ?string
+    {
+        return TaskArt::of($task);
     }
 
     /** "à 15 h 30", "demain à 9 h", "jeudi à 9 h", "le 14/10": when a task in cooldown can be done again. */

@@ -62,7 +62,7 @@ final class TaskFlowTest extends AppTestCase
 
         // Never done, both are due: the home page shows them with their rarity too, as the card's skin, never as a word.
         $this->client->request('GET', '/');
-        self::assertSelectorExists(\sprintf('#task-%d.rarity-legendary', $legendary?->getId()));
+        self::assertSelectorExists(\sprintf('#task-%d.play-card-legendary', $legendary?->getId()));
         self::assertSelectorTextNotContains('#task-'.$legendary?->getId(), 'Légendaire');
 
         $this->client->request('GET', '/taches/'.$common?->getId().'/modifier');
@@ -124,8 +124,9 @@ final class TaskFlowTest extends AppTestCase
         $task = static::getContainer()->get(TaskRepository::class)->findOneBy(['title' => 'Serpillière']);
 
         $this->client->request('GET', '/');
+        // The card opens its page, where its settings are: no wheel on the card itself.
         self::assertSelectorExists(\sprintf('#task-%d h3 a[href="/taches/%d"]', $task?->getId(), $task?->getId()));
-        self::assertSelectorExists(\sprintf('#task-%d a[href="/taches/%d/modifier"]', $task?->getId(), $task?->getId()));
+        self::assertSelectorNotExists(\sprintf('#task-%d a[href="/taches/%d/modifier"]', $task?->getId(), $task?->getId()));
 
         $this->client->request('GET', '/taches/'.$task?->getId());
         self::assertResponseIsSuccessful();
@@ -305,7 +306,7 @@ final class TaskFlowTest extends AppTestCase
         self::assertResponseRedirects('/');
         $this->client->followRedirect();
         self::assertSelectorExists('#task-'.$task?->getId().' .seat-taken[title="Tu t’en occupes"]');
-        self::assertSelectorTextContains('#task-'.$task?->getId().' .seat-taken', 'Pris par toi');
+        self::assertSelectorTextContains('#task-'.$task?->getId().' .seat-taken', 'Léo');
     }
 
     public function testMembersCannotTouchAnotherHouseholdsTasks(): void

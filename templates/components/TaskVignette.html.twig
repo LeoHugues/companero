@@ -1,0 +1,56 @@
+{% props task %}
+{#
+    The little picture in the arch of a task card: a vacuum cleaner, the toilet, the bin… guessed from
+    the title (App\Task\TaskArt); otherwise the task's category, its icon on its colour.
+    Flat shapes in the palette of the Casa, the ink only for small details.
+#}
+{% set art = task_art(task) %}
+<span {{ attributes.defaults({class: 'vignette'}) }} aria-hidden="true">
+    {% if art %}
+        <svg viewBox="0 0 64 84" width="60" height="78">
+            {% if art == 'vacuum' %}
+                <rect width="64" height="84" fill="#F1E2CC"/><rect x="38" y="12" width="16" height="12" rx="1.5" fill="#FFFCF6"/><path d="M40 22 l4 -5 3 3 2 -2 3 4z" fill="#9DB07F"/>
+                <rect y="62" width="64" height="22" fill="#E2CCA8"/>
+                <path d="M28 54 C18 52 14 42 17 34" fill="none" stroke="#2E1E14" stroke-width="2.2" stroke-linecap="round"/><path d="M17 34 L12 64" stroke="#8C5A3C" stroke-width="2.4" stroke-linecap="round"/>
+                <rect x="5" y="63" width="14" height="4" rx="2" fill="#2E1E14"/><rect x="25" y="47" width="32" height="20" rx="10" fill="#C9673A"/><rect x="29" y="47" width="24" height="5" rx="2.5" fill="#E2B04A"/>
+                <circle cx="31" cy="68" r="3.5" fill="#2E1E14"/><circle cx="51" cy="68" r="3.5" fill="#2E1E14"/>
+            {% elseif art == 'mop' %}
+                <rect width="64" height="84" fill="#F1E2CC"/><rect y="62" width="64" height="22" fill="#E2CCA8"/>
+                <path d="M36 44 Q47 28 58 44" fill="none" stroke="#2E1E14" stroke-width="1.4"/><path d="M34 44 H60 L57 70 Q57 72 55 72 H39 Q37 72 37 70Z" fill="#5B87A6"/><ellipse cx="47" cy="44" rx="13" ry="3" fill="#A9C8DE"/>
+                <path d="M30 4 L18 60" stroke="#8C5A3C" stroke-width="3" stroke-linecap="round"/><rect x="9" y="59" width="18" height="4" rx="2" fill="#A9532A"/>
+                <path d="M11 63 q-3 6 -5 9 M15 63 q-1 7 -2 10 M19 63 q0 7 2 10 M23 63 q2 6 5 9" stroke="#FFFCF6" stroke-width="2.4" stroke-linecap="round" fill="none"/>
+            {% elseif art == 'plumbing' %}
+                <rect width="64" height="84" fill="#DFE8EF"/><path d="M0 16H64M0 32H64M0 48H64M16 0V64M32 0V64M48 0V64" stroke="#CFDCE6" stroke-width="1"/><rect y="64" width="64" height="20" fill="#D0DCE6"/>
+                <rect x="16" y="18" width="30" height="26" rx="3" fill="#FFFCF6"/><rect x="14" y="15" width="34" height="4" rx="2" fill="#E7DCCB"/><rect x="29" y="44" width="4" height="12" fill="#9AA6AF"/>
+                <path d="M31 58 q-4 6 0 8 q4 -2 0 -8z" fill="#6E9FC4"/><ellipse cx="31" cy="74" rx="12" ry="2.5" fill="#A9C8DE"/>
+                <g transform="translate(50 26) rotate(30)"><rect x="-2.5" y="2" width="5" height="26" rx="2.5" fill="#7D8791"/><path d="M-7 0 A7 7 0 1 1 7 0 L3 0 L3 -5 L-3 -5 L-3 0Z" fill="#7D8791"/></g>
+            {% elseif art == 'toilet' %}
+                <rect width="64" height="84" fill="#DFE8EF"/><path d="M0 16H64M0 32H64M0 48H64M16 0V64M32 0V64M48 0V64" stroke="#CFDCE6" stroke-width="1"/><rect y="64" width="64" height="20" fill="#D0DCE6"/>
+                <rect x="34" y="22" width="20" height="22" rx="3" fill="#FFFCF6"/><rect x="32" y="19" width="24" height="4" rx="2" fill="#E7DCCB"/><rect x="14" y="41" width="42" height="5" rx="2.5" fill="#E7DCCB"/>
+                <path d="M16 46 H54 Q54 60 38 62 L37 70 H29 L28 62 Q16 59 16 46Z" fill="#FFFCF6"/><ellipse cx="34" cy="72" rx="16" ry="2.5" fill="#BCCBD8"/>
+            {% elseif art == 'bin' %}
+                <rect width="64" height="84" fill="#EFE3D0"/><rect y="64" width="64" height="20" fill="#E0CFB4"/>
+                <path d="M27 30 l2 -7 4 4 2 -5 3 8z" fill="#FFFCF6"/><path d="M20 34 H46 L43 70 Q43 72 41 72 H25 Q23 72 23 70Z" fill="#7E9A68"/>
+                <path d="M28 40 L28.5 66 M33 40 V66 M38 40 L37.5 66" stroke="#64804F" stroke-width="1.6" stroke-linecap="round"/><rect x="17" y="28" width="32" height="7" rx="3" fill="#64804F" transform="rotate(-8 33 31)"/>
+            {% elseif art == 'window' %}
+                <rect width="64" height="84" fill="#F1E2CC"/><rect y="68" width="64" height="16" fill="#E2CCA8"/><rect x="10" y="12" width="44" height="50" rx="3" fill="#FFFCF6"/>
+                <rect x="14" y="16" width="17" height="20" rx="1" fill="#CFE1EC"/><rect x="33" y="16" width="17" height="20" rx="1" fill="#CFE1EC"/><rect x="14" y="38" width="17" height="20" rx="1" fill="#CFE1EC"/><rect x="33" y="38" width="17" height="20" rx="1" fill="#CFE1EC"/>
+                <circle cx="43" cy="24" r="4.5" fill="#EDB843"/><path d="M18 31 L26 19 M37 54 L46 41" stroke="#FFFCF6" stroke-width="2" stroke-linecap="round"/><rect x="6" y="60" width="52" height="5" rx="2" fill="#D8BE98"/>
+            {% elseif art == 'terrace' %}
+                <rect width="64" height="84" fill="#DCE8EE"/><circle cx="48" cy="16" r="6" fill="#EDB843"/>
+                <rect y="36" width="64" height="2.5" fill="#B08A63"/><path d="M6 38V58M18 38V58M30 38V58M42 38V58M54 38V58" stroke="#B08A63" stroke-width="2.5"/>
+                <rect y="58" width="64" height="26" fill="#D6B88E"/><path d="M0 66H64M0 74H64" stroke="#C4A57A" stroke-width="1"/>
+                <path d="M46 6 L30 60" stroke="#8C5A3C" stroke-width="3" stroke-linecap="round"/><path d="M21 60 L38 62 L38 74 L17 71Z" fill="#D9A441"/>
+                <path d="M50 72 q5 -5 8 0 q-4 4 -8 0z" fill="#C9673A"/><path d="M8 70 q4 -6 8 -1 q-4 4 -8 1z" fill="#A9532A"/>
+            {% elseif art == 'counter' %}
+                <rect width="64" height="84" fill="#E4EBDB"/><path d="M0 14H64M0 30H64M14 0V46M34 0V46M54 0V46" stroke="#D3DEC8" stroke-width="1"/>
+                <rect y="46" width="64" height="6" fill="#8C5A3C"/><rect y="52" width="64" height="32" fill="#D8BE98"/>
+                <rect x="6" y="58" width="24" height="20" rx="2" fill="none" stroke="#C4A57A" stroke-width="1.2"/><rect x="34" y="58" width="24" height="20" rx="2" fill="none" stroke="#C4A57A" stroke-width="1.2"/>
+                <rect x="12" y="26" width="12" height="20" rx="3" fill="#FFFCF6"/><rect x="13.5" y="32" width="9" height="7" rx="1" fill="#A9C8DE"/><path d="M14 26 V21 H22 L26 17 H20 V21" fill="#C9673A"/>
+                <rect x="34" y="39" width="18" height="7" rx="2" fill="#EDB843"/><rect x="34" y="39" width="18" height="2.5" rx="1" fill="#7E9A68"/>
+            {% endif %}
+        </svg>
+    {% else %}
+        <span class="vignette-category" style="background: var(--color-cat-{{ task.category.value }})"><twig:Icon :name="task.category.icon" size="26" stroke="1.8"/></span>
+    {% endif %}
+</span>

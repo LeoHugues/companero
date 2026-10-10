@@ -2,24 +2,45 @@
     La Casa and the cats of the coloc. The scene is one SVG (340 × 196, from y = 22): the house in the middle,
     a cat on each side. Everything that moves on its own is CSS (app.css, "La Casa");
     what answers a touch is casa_controller.js.
+    hero: planted across the whole width in her landscape — sky, sun, hills, a green ground melting into the page —
+    with a small bubble at the top left (the home page). The landscape uses the scene's own coordinates,
+    so that the stage sits on its ground whatever the width.
 #}
 {% set face = this.face.value %}
 {% set asleep = this.asleep %}
-<div {{ attributes.defaults({class: 'casa relative flex flex-col items-center justify-end'}) }}
+{% set shadow = hero ? '#B8C996' : '#F0DFC6' %}
+<div {{ attributes.defaults({class: hero ? 'casa casa-hero' : 'casa relative flex flex-col items-center justify-end'}) }}
      data-controller="casa"
      data-casa-reacting-value="{{ reacting ? 'true' : 'false' }}"
      data-casa-rest-speech-value="{{ this.restSpeech }}"
      data-casa-taps-value="{{ this.taps|json_encode }}"
      data-casa-mood-value="{{ mood.value }}"
      data-casa-asleep-value="{{ asleep ? 'true' : 'false' }}">
-    {% if showSpeech %}
-        <p class="bubble animate-pop relative z-10 mb-1 ml-14 max-w-[240px] self-start" data-casa-target="speech" aria-live="polite">{{ speech ?? this.restSpeech }}</p>
+    {% if hero %}
+        <svg class="casa-hero-land" viewBox="-20 -110 380 372" preserveAspectRatio="none" aria-hidden="true">
+            <rect x="-20" y="-110" width="380" height="372" fill="{{ asleep ? '#E3D9CC' : '#F2E4CF' }}"/>
+            {% if asleep %}
+                <circle cx="300" cy="26" r="17" fill="#FBF3E3"/><circle cx="292" cy="20" r="15" fill="#E3D9CC"/>
+            {% else %}
+                <circle cx="300" cy="26" r="20" fill="#F5D896"/>
+            {% endif %}
+            <g fill="#FAF1E4" class="casa-cloud"><circle cx="232" cy="64" r="8"/><circle cx="243" cy="58" r="11"/><circle cx="256" cy="64" r="7"/><rect x="225" y="62" width="38" height="8" rx="4"/></g>
+            <g fill="#FAF1E4" class="casa-cloud" style="animation-delay: -9s"><circle cx="-2" cy="86" r="7"/><circle cx="8" cy="81" r="9"/><circle cx="19" cy="86" r="6"/><rect x="-8" y="84" width="32" height="7" rx="3.5"/></g>
+            <ellipse cx="10" cy="214" rx="170" ry="42" fill="{{ face == 'neglected' ? '#E3E0C4' : '#DDE6C9' }}"/>
+            <ellipse cx="340" cy="218" rx="150" ry="38" fill="{{ face == 'neglected' ? '#DBD8BA' : '#D3DFBC' }}"/>
+            <rect x="-20" y="192" width="380" height="70" fill="{{ face == 'neglected' ? '#D3D3AE' : '#CCDAAF' }}"/>
+            {# The ground melts into the page, under the card of the house's state. #}
+            <path d="M-20 238 Q170 226 360 238 V262 H-20Z" fill="#FFF6E9"/>
+        </svg>
     {% endif %}
-    <div class="casa-stage relative w-full max-w-[340px] select-none" data-casa-target="stage"
+    {% if showSpeech %}
+        <p class="{{ hero ? 'casa-hero-bubble animate-pop' : 'bubble animate-pop relative z-10 mb-1 ml-14 max-w-[240px] self-start' }}" data-casa-target="speech" aria-live="polite">{{ speech ?? this.restSpeech }}</p>
+    {% endif %}
+    <div class="casa-stage {{ hero ? '' : 'relative w-full max-w-[340px]' }} select-none" data-casa-target="stage"
          data-action="pointerdown->casa#press pointermove->casa#move pointerup->casa#release pointercancel->casa#cancel pointerleave->casa#cancel">
         <svg viewBox="0 22 340 196" class="block h-auto w-full overflow-visible" role="img" aria-label="La Casa, propre à {{ cleanliness }} %{{ asleep ? ', elle dort' }}">
             {# The ground: her shadow, a few tufts of grass, flowers when she is well. #}
-            <ellipse cx="170" cy="189" rx="66" ry="7" fill="#F0DFC6"/>
+            <ellipse cx="170" cy="189" rx="66" ry="7" fill="{{ shadow }}"/>
             {% for tuft in [{x: 112, y: 190, flip: false}, {x: 229, y: 190, flip: true}] %}
                 <g transform="translate({{ tuft.x }} {{ tuft.y }}){{ tuft.flip ? ' scale(-1 1)' }}" class="casa-tuft">
                     <path d="M-7 0 Q-8 -9 -11 -13 M-2 0 Q-2 -11 0 -16 M3 0 Q5 -8 9 -11" fill="none" stroke="{{ face == 'neglected' ? '#B39A6E' : '#7FA84E' }}" stroke-width="3" stroke-linecap="round"/>
@@ -131,7 +152,7 @@
             {% endif %}
 
             {% for cat in this.cats %}
-                <twig:CasaCat :look="cat.look" :x="cat.x" :y="cat.y" :asleep="asleep" :reacting="reacting" :index="loop.index0"/>
+                <twig:CasaCat :look="cat.look" :x="cat.x" :y="cat.y" :asleep="asleep" :reacting="reacting" :index="loop.index0" :shadow="shadow"/>
             {% endfor %}
         </svg>
     </div>

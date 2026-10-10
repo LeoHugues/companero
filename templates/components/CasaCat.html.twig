@@ -1,4 +1,4 @@
-{% props look, x, y, asleep = false, reacting = false, index = 0 %}
+{% props look, x, y, asleep = false, reacting = false, index = 0, shadow = '#F0DFC6' %}
 {#
     A cat of the coloc around the Casa (App\Pet\CatLook), drawn from the bottom centre of its paws.
     Small cats sit, big ones lie like a loaf. It blinks, swishes its tail, twitches an ear; tap it and it meows.
@@ -13,7 +13,7 @@
        style="animation-delay: {{ 120 + index * 160 }}ms">
         {% if look.loaf %}
             {# Lying down, paws tucked in: a big loaf. #}
-            <ellipse cx="0" cy="1" rx="44" ry="5" fill="#F0DFC6"/>
+            <ellipse cx="0" cy="1" rx="44" ry="5" fill="{{ shadow }}"/>
             <path d="M-42 -2 C-47 -30 -26 -46 0 -46 C26 -46 47 -30 42 -2 Z" fill="{{ fur }}"/>
             {% if look.fluffy %}
                 <path d="M-42 -4 l-5 -4 4 -3 -6 -5 5 -2 -4 -6 6 0" fill="{{ fur }}"/>
@@ -37,7 +37,7 @@
             {% set headY = -40 %}
         {% else %}
             {# Sitting up, tail curled around. #}
-            <ellipse cx="0" cy="1" rx="26" ry="4.5" fill="#F0DFC6"/>
+            <ellipse cx="0" cy="1" rx="26" ry="4.5" fill="{{ shadow }}"/>
             <g class="casa-cat-tail" style="transform-origin: 16px -4px; animation-delay: {{ delay }}ms">
                 <path d="M16 -4 C38 -2 44 -28 32 -46" fill="none" stroke="{{ fur }}" stroke-width="{{ tail }}" stroke-linecap="round"/>
                 {% if look.striped %}<path d="M36 -20 l-5 1 M38 -32 l-5 -1" stroke="{{ stripes }}" stroke-width="2.6" stroke-linecap="round"/>{% endif %}

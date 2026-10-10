@@ -5,6 +5,7 @@ namespace App\Task;
 use App\Entity\Member;
 use App\Entity\Zone;
 use App\Enum\TaskKind;
+use App\Enum\Urgency;
 
 /** Every active task of a household with its current status, most pressing first. */
 final readonly class TaskBoard
@@ -66,6 +67,36 @@ final readonly class TaskBoard
             static fn (TaskView $view): bool => null !== $view->reminder
                 && (null !== $view->task->getAssignee() ? $view->reminder->isPersonalFor($member) : [] !== $view->reminder->owners && $view->reminder->concerns($member)),
         ));
+    }
+
+    /** @return list<TaskView> the member's hand on the home page: what they took, and what is counted on them */
+    public function inHandOf(Member $member): array
+    {
+        $counted = $this->pressingFor($member);
+
+        return array_values(array_filter($this->items, static fn (TaskView $view): bool => $view->isReservedBy($member) || \in_array($view, $counted, true)));
+    }
+
+    /**
+     * @return list<TaskView> what the Casa asks for, at most $limit: free tasks whose moment approaches or has come,
+     *                        a hidden surprise first — never an express task, nor one resting after it was done
+     */
+    public function quests(int $limit = 4): array
+    {
+        $quests = array_values(array_filter($this->items, static fn (TaskView $view): bool => $view->isFree()
+            && null === $view->availableAt
+            && TaskKind::Quick !== $view->task->getKind()
+            && (Urgency::Fresh !== $view->status->urgency || null !== $view->bounty)));
+        usort($quests, static fn (TaskView $a, TaskView $b): int => (null === $a->bounty) <=> (null === $b->bounty));
+
+        return \array_slice($quests, 0, $limit);
+    }
+
+    /** @return list<TaskView> what "Prendre soin de la Casa" lists: everything but the express tasks and the occasional ones still asleep */
+    public function toCareFor(): array
+    {
+        return array_values(array_filter($this->items, static fn (TaskView $view): bool => TaskKind::Quick !== $view->task->getKind()
+            && (TaskKind::Occasional !== $view->task->getKind() || $view->task->isRaised())));
     }
 
     /** @return list<TaskView> */

@@ -20,8 +20,6 @@ use Symfony\Component\Security\Http\Attribute\CurrentUser;
 
 final class HomeController extends AbstractController
 {
-    private const UPCOMING_LIMIT = 3;
-
     #[Route('/', name: 'app_home', methods: ['GET'])]
     public function __invoke(
         #[CurrentUser] Member $member,
@@ -35,23 +33,35 @@ final class HomeController extends AbstractController
         $household = $member->getHousehold();
         $now = $clock->now();
         $board = $boards->build($household);
-        $upcoming = \array_slice(array_values(array_filter($board->items, static fn (TaskView $view): bool => Urgency::Soon === $view->status->urgency)), 0, self::UPCOMING_LIMIT);
-        $mine = $board->pressingFor($member);
-        // Everything there is to do lives here: one-off tasks too, even when they are in no hurry.
+        $mine = $board->inHandOf($member);
         // What earned the household's points this week, for the "Objectif de la maison" to unfold.
         $week = Week::containing($now);
         $doneThisWeek = $completions->findForHousehold($household, $week->start, $week->end());
-        $later = array_values(array_filter($board->oneOff(), static fn (TaskView $view): bool => Urgency::Fresh === $view->status->urgency));
+        // "Prendre soin de la Casa": everything there is to do, by urgency; the fresh ones fold away under "Plus tard".
+        $care = $board->toCareFor();
+        $groups = [];
+        foreach ([Urgency::Late, Urgency::Due, Urgency::Soon, Urgency::Fresh] as $urgency) {
+            $groups[$urgency->value] = array_values(array_filter($care, static fn (TaskView $view): bool => $urgency === $view->status->urgency));
+        }
+        // Its filters: "Pour moi" (what I took, what I am in charge of or counted on for), "Libres", "Tout".
+        $forMe = array_map(
+            static fn (TaskView $view): int => (int) $view->task->getId(),
+            array_values(array_filter($care, static fn (TaskView $view): bool => \in_array($view, $mine, true) || $view->task->getAssignee() === $member)),
+        );
 
         return $this->render('home/index.html.twig', [
-            'board' => $board,
             'mine' => $mine,
-            'pressing' => array_values(array_filter($board->pressing(), static fn (TaskView $view): bool => !\in_array($view, $mine, true))),
+            'quests' => $board->quests(),
+            'groups' => $groups,
+            'for_me' => $forMe,
+            'care_counts' => [
+                'mine' => \count($forMe),
+                'free' => \count(array_filter($care, static fn (TaskView $view): bool => $view->isFree())),
+                'all' => \count($care),
+            ],
             'quick' => $board->quickShown(),
             'quick_count' => \count($board->quick()),
             'dormant' => $board->dormant(),
-            'upcoming' => $upcoming,
-            'later' => $later,
             'cleanliness' => $board->cleanliness(),
             'mood' => CasaMood::fromCleanliness($board->cleanliness()),
             'team' => $teamProgress->build($household, $week),

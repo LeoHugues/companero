@@ -52,7 +52,7 @@ final class SurpriseTest extends AppTestCase
         $this->client->loginUser($leo);
         $this->client->request('GET', '/');
         // A common card hiding a surprise looks rare until someone finds it.
-        self::assertSelectorExists('#task-'.$task->getId().'.rarity-rare');
+        self::assertSelectorExists('#task-'.$task->getId().'[data-rarity=rare]');
         self::assertSelectorExists('#task-'.$task->getId().' [aria-label="Surprise cachée"]');
 
         $this->submitAction('/taches/'.$task->getId().'/fait');

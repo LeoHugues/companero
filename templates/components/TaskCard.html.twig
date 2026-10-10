@@ -1,59 +1,75 @@
 {% props view, member, back = 'home', compact = false %}
 {#
-    A task as a card to play: its medallion (the category, ringed by the time left), its title,
-    where and how often (in one short line), the week's commitment as dots, then a note and who is
-    counted on, across the card (the note for this time, or the template's description), and "Je prends" and "C'est fait", which shows what it is worth.
-    Its rarity is the card's skin, never written on it; a surprise hidden in it this week makes it one class rarer.
-    The whole card opens its page; the settings wheel and the buttons sit above that link.
-    compact: lists (rooms), with a single round "done" button.
+    A task as a playing card. In its corner, like a card's index: what it is worth and the suit of its
+    category. Then how pressing it is (a dot and a word), its title, where and how often, the time left as
+    a thin line, and its picture in an arch (TaskVignette). Across the card: the note for this time (or the
+    template's precision) and who is counted on; at the bottom, "Je prends" and "C'est fait".
+    Its rarity is the finish of its edge — paper, silver, pearl, gold — never written on it; a surprise
+    hidden in it this week makes it one class rarer, with a small "Surprise" tag.
+    Once done, it turns over (done_controller.js): its back says thank you.
+    The whole card opens its page, where its settings are; only the buttons sit above that link.
+    compact: lists (rooms), without the picture, with a single round "done" button.
 #}
 {% set task = view.task %}
 {% set status = view.status %}
 {% set boost = task_boost(view) %}
 {% set rarity = view.rarity %}
+{# The time left: an occasional task asleep is full, a fresh one never looks almost empty. #}
+{% set left = task.kind.value == 'occasional' and not task.raised ? 100 : (status.urgency.value == 'fresh' ? max(status.freshness, 70) : status.freshness) %}
 <article {{ attributes.defaults({
-    class: 'task-card card card-hover rarity-' ~ rarity.value ~ ' task-card-' ~ status.alert ~ ' relative flex flex-col ' ~ (compact ? 'gap-2 p-3' : 'gap-3 p-3.5'),
+    class: 'play-card play-card-' ~ rarity.value ~ ' play-card-' ~ status.alert ~ (compact ? ' play-card-compact'),
     id: 'task-' ~ task.id,
     'data-rarity': rarity.value,
     'data-alert': status.alert
 }) }}>
-    <div class="flex items-start gap-3">
-        <twig:TaskMedallion :view="view" :size="compact ? 46 : 56" class="shrink-0"/>
-        <div class="flex min-w-0 flex-1 flex-col gap-1">
-            <div class="flex items-center gap-2">
-                <twig:UrgencyPill :view="view"/>
+    {% if view.bounty %}
+        <span class="play-card-surprise" role="img" aria-label="Surprise cachée" title="Une surprise attend la première personne qui la fait cette semaine">
+            <svg width="9" height="9" viewBox="0 0 10 10" aria-hidden="true"><path d="M5 0 L6.2 3.8 L10 5 L6.2 6.2 L5 10 L3.8 6.2 L0 5 L3.8 3.8Z" fill="currentColor"/></svg>Surprise
+        </span>
+    {% endif %}
+    <div class="play-card-face">
+        <div class="play-card-index" aria-hidden="true">
+            <span class="play-card-value">{{ task.currentPoints }}</span>
+            <twig:Icon :name="task.category.icon" size="17" stroke="1.8"/>
+        </div>
+        <div class="min-w-0">
+            <p class="play-card-status">
+                <span class="play-card-dot"></span>
+                <span class="truncate">{{ task_status_label(task, status) }}</span>
                 {% if status.weeklyCommitment %}
                     {# The week's commitment, as dots: one per time it is expected, filled once done. #}
                     <span class="commit-dots" role="img" aria-label="{{ status.doneThisWeek }} fois sur {{ status.weeklyCommitment }} cette semaine" title="{{ status.doneThisWeek }} fois sur {{ status.weeklyCommitment }} cette semaine">
                         {%- for i in 1..status.weeklyCommitment %}<span class="commit-dot{{ i <= status.doneThisWeek ? ' is-done' }}"></span>{% endfor -%}
                     </span>
                 {% endif %}
-                {% if view.bounty %}
-                    <span class="bounty-tag bounty-tag-icon" title="Une surprise attend la première personne qui la fait cette semaine" aria-label="Surprise cachée"><twig:Icon name="gift" size="13" stroke="2.6"/></span>
-                {% endif %}
-            </div>
-            <h3 class="{{ compact ? 'text-base' : 'text-[17px]' }} leading-snug font-extrabold [overflow-wrap:anywhere]">
+            </p>
+            <h3 class="play-card-title">
                 {# Stretched over the whole card: a tap anywhere opens the card's page. #}
-                <a href="{{ path('task_show', {id: task.id}) }}" class="text-ink no-underline after:absolute after:inset-0 after:rounded-[inherit] after:content-[''] hover:text-ink">{{ task.title }}</a>
+                <a href="{{ path('task_show', {id: task.id}) }}" class="text-ink no-underline after:absolute after:inset-0 after:z-[1] after:rounded-[inherit] after:content-[''] hover:text-ink">{{ task.title }}</a>
             </h3>
-            <p class="truncate text-xs font-semibold text-muted" title="{{ task_place(task) }} · {{ task_rule_label(task) }}">{{ task_place(task, true) }} · {{ task_rule_label(task, false) }}</p>
+            <p class="play-card-meta" title="{{ task_place(task) }} · {{ task_rule_label(task) }}">{{ task_place(task, true) }} · {{ task_rule_label(task, false) }}</p>
+            <div class="play-card-time" aria-hidden="true"><span style="width: {{ left }}%"></span></div>
         </div>
-        <a href="{{ path('task_edit', {id: task.id}) }}" aria-label="Réglages de « {{ task.title }} »" title="Réglages de la tâche"
-           class="relative z-10 -mt-1 -mr-1.5 flex size-8 shrink-0 items-center justify-center rounded-full text-dust no-underline transition hover:bg-track hover:text-ink">
-            <twig:Icon name="settings" size="17"/>
-        </a>
+        {% if not compact %}<twig:TaskVignette :task="task"/>{% endif %}
+
+        {# The word about this time and who is counted on: the card's whole width. #}
+        {% set reminder_note %}<twig:ReminderNote :view="view" :member="member"/>{% endset %}
+        {# The note for this time if there is one, otherwise the template's own precision. #}
+        {% if task.shownNote or reminder_note|trim is not empty %}
+            <div class="play-card-notes">
+                {% if task.shownNote %}<p class="task-card-note" title="{{ task.note ? 'Pour cette fois' : 'La précision de la tâche' }}"><twig:Icon :name="task.note ? 'edit' : 'list'" size="13" stroke="2" class="mt-0.5 shrink-0"/><span class="line-clamp-2">{{ task.shownNote }}</span></p>{% endif %}
+                {{ reminder_note }}
+            </div>
+        {% endif %}
+
+        {# Only the buttons sit above the card's link. #}
+        <twig:TaskActions :view="view" :back="back" :member="member" :boost="boost" :compact="compact" class="play-card-actions"/>
     </div>
-
-    {# The word about this time and who is counted on: the card's whole width, not a column beside the medallion. #}
-    {% set reminder_note %}<twig:ReminderNote :view="view" :member="member"/>{% endset %}
-    {# The note for this time if there is one, otherwise the template's own precision. #}
-    {% if task.shownNote or reminder_note|trim is not empty %}
-        <div class="flex flex-col gap-1.5">
-            {% if task.shownNote %}<p class="task-card-note" title="{{ task.note ? 'Pour cette fois' : 'La précision de la tâche' }}"><twig:Icon :name="task.note ? 'edit' : 'list'" size="13" stroke="2.2" class="mt-0.5 shrink-0"/><span class="line-clamp-2">{{ task.shownNote }}</span></p>{% endif %}
-            {{ reminder_note }}
-        </div>
-    {% endif %}
-
-    {# Only the buttons sit above the card's link. #}
-    <twig:TaskActions :view="view" :back="back" :member="member" :boost="boost" :compact="compact" class="relative z-10"/>
+    <div class="play-card-back" aria-hidden="true">
+        <span class="play-card-back-in">
+            <twig:Icon name="home" size="24" stroke="1.6"/>
+            <span class="play-card-back-points">+{{ task.currentPoints + boost }}</span>
+            <span class="play-card-back-thanks">Merci {{ member.name }}</span>
+        </span>
+    </div>
 </article>

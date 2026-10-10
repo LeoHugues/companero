@@ -2,7 +2,10 @@
 
 namespace App\Tests\Unit\Task;
 
+use App\Entity\Bounty;
 use App\Entity\Zone;
+use App\Enum\BountyKind;
+use App\Enum\TaskKind;
 use App\Enum\Urgency;
 use App\Task\TaskBoard;
 use App\Task\TaskStatus;
@@ -63,5 +66,59 @@ final class TaskBoardTest extends TestCase
     public function testEmptyHouseIsSpotless(): void
     {
         self::assertSame(100, (new TaskBoard([]))->cleanliness());
+    }
+
+    public function testTheCasaAsksForFreeTasksWhoseMomentHasComeASurpriseFirst(): void
+    {
+        $robin = $this->member(name: 'Robin');
+        $late = new TaskView($this->rollingTask(7, null), new TaskStatus(Urgency::Late, 0));
+        $soon = new TaskView($this->rollingTask(7, null), new TaskStatus(Urgency::Soon, 40));
+        $taken = new TaskView($this->rollingTask(7, null), new TaskStatus(Urgency::Late, 0), reservedBy: $robin);
+        $assigned = $this->rollingTask(7, null);
+        $assigned->setAssignee($robin);
+        $surprise = $this->rollingTask(7, null);
+        $hidden = new TaskView($surprise, new TaskStatus(Urgency::Fresh, 90), bounty: new Bounty($surprise, new \DateTimeImmutable('2026-10-05'), BountyKind::Points, 15));
+
+        $board = new TaskBoard([
+            $late,
+            $soon,
+            $taken,
+            new TaskView($assigned, new TaskStatus(Urgency::Due, 10)),
+            new TaskView($this->rollingTask(7, null), new TaskStatus(Urgency::Fresh, 90)),
+            new TaskView($this->task(TaskKind::Quick), new TaskStatus(Urgency::Due, 10)),
+            new TaskView($this->rollingTask(7, null), new TaskStatus(Urgency::Due, 10), availableAt: new \DateTimeImmutable('2026-10-11')),
+            $hidden,
+        ]);
+
+        // Nobody took them, nobody is in charge: a surprise first, then the most pressing — never an express task, nor one resting.
+        self::assertSame([$hidden, $late, $soon], $board->quests());
+        self::assertSame([$hidden, $late], $board->quests(2));
+    }
+
+    public function testTheHandOfAMemberHoldsWhatTheyTookAndWhatIsCountedOnThem(): void
+    {
+        $leo = $this->member();
+        $mine = new TaskView($this->rollingTask(7, null), new TaskStatus(Urgency::Fresh, 90), reservedBy: $leo);
+        $theirs = new TaskView($this->rollingTask(7, null), new TaskStatus(Urgency::Late, 0), reservedBy: $this->member(name: 'Léa'));
+
+        self::assertSame([$mine], (new TaskBoard([$theirs, $mine]))->inHandOf($leo));
+    }
+
+    public function testTheListToCareForLeavesOutExpressTasksAndOccasionalOnesAsleep(): void
+    {
+        $asleep = $this->task(TaskKind::Occasional);
+        $raised = $this->task(TaskKind::Occasional);
+        $raised->raise(new \DateTimeImmutable('2026-10-10'));
+        $rolling = new TaskView($this->rollingTask(7, null), new TaskStatus(Urgency::Soon, 40));
+        $raisedView = new TaskView($raised, new TaskStatus(Urgency::Due, 10));
+
+        $board = new TaskBoard([
+            $rolling,
+            $raisedView,
+            new TaskView($asleep, new TaskStatus(Urgency::Fresh, 100)),
+            new TaskView($this->task(TaskKind::Quick), new TaskStatus(Urgency::Fresh, 100)),
+        ]);
+
+        self::assertSame([$raisedView, $rolling], $board->toCareFor());
     }
 }

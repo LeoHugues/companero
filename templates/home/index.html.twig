@@ -1,90 +1,144 @@
 {% extends 'base.html.twig' %}
 
 {% block body %}
-    <header class="flex items-center justify-between gap-3">
-        <div class="flex min-w-0 flex-col">
-            <p class="truncate text-[17px] leading-tight font-extrabold">{{ weekday_name(now|date('N'))|capitalize }} {{ now|format_date(pattern: 'd MMMM', locale: 'fr') }}</p>
-            {% if is_cleaning_day %}
-                <p class="flex items-center gap-1 text-[13px] font-bold text-clay-dark"><span class="size-2 rounded-full bg-clay"></span>C’est le jour de ménage</p>
-            {% else %}
-                <p class="truncate text-[13px] font-semibold text-muted">Ménage {{ weekday_name(app.user.household.cleaningDay) }}</p>
-            {% endif %}
-        </div>
-        {# One segmented pill: am I home, my streak, my level. #}
-        <div class="flex h-9 shrink-0 items-stretch overflow-hidden rounded-full border-[1.5px] border-ink bg-surface text-[13px] font-extrabold whitespace-nowrap">
-            <form method="post" action="{{ path('presence_toggle') }}" class="flex">
-                <input type="hidden" name="_back" value="home">
-                <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
-                <button type="submit" data-haptic="toggle" aria-pressed="{{ app.user.atHome ? 'true' : 'false' }}" aria-label="{{ app.user.atHome ? 'Je suis à la maison : signaler que je pars' : 'Je ne suis pas là : signaler mon retour' }}"
-                        class="flex cursor-pointer items-center gap-1 pr-2.5 pl-2 transition active:scale-95 {{ app.user.atHome ? 'bg-ink text-cream' : 'text-muted' }}">
-                    <twig:Icon :name="app.user.atHome ? 'home' : 'door'" size="16" stroke="2.4"/>{{ app.user.atHome ? 'Là' : 'Pas là' }}
-                </button>
-            </form>
-            <a href="{{ path('profile_show') }}" class="flex items-center gap-2.5 px-2.5 text-ink no-underline hover:bg-track hover:text-ink" aria-label="Niveau {{ level.number }}{{ app.user.streak ? ', série de ' ~ app.user.streak ~ ' semaine' ~ (app.user.streak > 1 ? 's') }}">
-                {% if app.user.streak > 0 %}<span class="flex items-center gap-0.5 text-clay-dark"><twig:Icon name="flame" size="15" stroke="2.4"/>{{ app.user.streak }}</span>{% endif %}
-                <span>Niv. {{ level.number }}</span>
-            </a>
-        </div>
-    </header>
+    {% set quest = quests|first %}
+    {#
+        The top of the page: the Casa planted across the whole width, the date and "am I home" on her sky.
+        Her bubble asks for a hand with a free task; the card of the house's state straddles her ground:
+        her cleanliness, and that task, which "Une autre ?" swaps (quest_controller.js).
+    #}
+    <div class="contents" data-controller="quest">
+        <section class="home-hero" aria-labelledby="casa-title">
+            <h1 id="casa-title" class="sr-only">La Casa</h1>
+            <header class="home-hero-top">
+                <div class="flex min-w-0 flex-col gap-0.5">
+                    <p class="truncate text-base leading-tight font-semibold">{{ weekday_name(now|date('N'))|capitalize }} {{ now|format_date(pattern: 'd MMMM', locale: 'fr') }}</p>
+                    <p class="flex items-center gap-1.5 text-[13px] font-medium text-clay-dark"><span class="size-1.5 rounded-full bg-clay"></span>{{ is_cleaning_day ? 'C’est le jour de ménage' : 'Ménage ' ~ weekday_name(app.user.household.cleaningDay) }}</p>
+                </div>
+                <div class="flex shrink-0 items-center gap-2">
+                    <form method="post" action="{{ path('presence_toggle') }}">
+                        <input type="hidden" name="_back" value="home">
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
+                        <button type="submit" data-haptic="toggle" aria-pressed="{{ app.user.atHome ? 'true' : 'false' }}" aria-label="{{ app.user.atHome ? 'Je suis à la maison : signaler que je pars' : 'Je ne suis pas là : signaler mon retour' }}"
+                                class="home-presence {{ app.user.atHome ? 'is-home' }}">
+                            <twig:Icon :name="app.user.atHome ? 'home' : 'door'" size="16" stroke="1.8"/>{{ app.user.atHome ? 'Là' : 'Pas là' }}
+                        </button>
+                    </form>
+                    <a href="{{ path('profile_show') }}" class="home-me" aria-label="Mon profil : niveau {{ level.number }}{{ app.user.streak ? ', série de ' ~ app.user.streak ~ ' semaine' ~ (app.user.streak > 1 ? 's') }}">
+                        <svg viewBox="0 0 40 40" width="40" height="40" class="-rotate-90" aria-hidden="true">
+                            <circle cx="20" cy="20" r="18" fill="none" stroke="var(--color-track)" stroke-width="2.5"/>
+                            <circle cx="20" cy="20" r="18" fill="none" stroke="var(--color-sun)" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="113.1" stroke-dashoffset="{{ (113.1 * (1 - level.progress / 100))|round(1) }}"/>
+                        </svg>
+                        <twig:Avatar :member="app.user" size="28" class="absolute inset-0 m-auto"/>
+                        <span class="home-me-level">{{ level.number }}</span>
+                    </a>
+                </div>
+            </header>
+
+            <twig:Casa
+                hero
+                :mood="mood"
+                :cleanliness="cleanliness"
+                :reacting="just_done is not same as(false)"
+                :speech="just_done ? 'Merci ' ~ app.user.name ~ ' ! +' ~ just_done.points ~ ' pts pour toi.' : (quest ? casa_quest_line(quest) : null)"
+            />
+
+            <a href="{{ path('plan_show') }}" class="home-plan" aria-label="Le plan de la maison"><twig:Icon name="plan" size="16" stroke="1.8"/>Plan</a>
+        </section>
+
+        <section class="casa-state" aria-label="État de la Casa">
+            <div class="flex items-end justify-between gap-3">
+                <div class="min-w-0">
+                    <p class="eyebrow">Propreté de la Casa</p>
+                    <h2 class="mt-1 text-xl leading-tight font-bold tracking-tight">{{ mood.title }}</h2>
+                </div>
+                <p class="shrink-0 text-[30px] leading-none font-bold tracking-tight"><twig:Count :value="cleanliness" key="casa"/><span class="text-base font-semibold text-muted"> %</span></p>
+            </div>
+            {% set next = mood.next %}
+            <div class="casa-gauge">
+                <twig:ProgressBar :value="cleanliness" :height="8" label="Propreté de la Casa" key="casa"/>
+                {% for step in [55, 80, 92] %}
+                    <span class="casa-gauge-step {{ next and next[0] == step ? 'is-next' }}" style="left: {{ step }}%" aria-hidden="true"></span>
+                {% endfor %}
+            </div>
+            <p class="-mt-1 text-[12.5px] text-muted">
+                {% if next %}<span class="font-semibold text-clay-dark">+{{ next[0] - cleanliness }} %</span> et {{ next[1] }}{% else %}Elle rayonne : bravo la coloc.{% endif %}
+            </p>
+
+            {% for view in quests %}
+                <div class="quest" data-quest-target="quest" data-line="{{ casa_quest_line(view) }}" {{ not loop.first ? 'hidden' }}>
+                    <twig:TaskVignette :task="view.task" class="vignette-small"/>
+                    <div class="min-w-0 flex-1">
+                        <p class="line-clamp-2 text-[14.5px] leading-tight font-semibold"><a href="{{ path('task_show', {id: view.task.id}) }}" class="text-ink no-underline hover:text-ink">{{ view.task.title }}</a></p>
+                        <p class="mt-0.5 text-xs text-muted">+{{ view.task.currentPoints + task_boost(view) }} pts · {{ task_status_label(view.task, view.status)|lower }}</p>
+                    </div>
+                    <form method="post" action="{{ path('task_reserve', {id: view.task.id}) }}" class="shrink-0">
+                        <input type="hidden" name="_back" value="home">
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
+                        <button type="submit" class="seat seat-small" aria-label="Je m’en occupe : « {{ view.task.title }} »">
+                            <span class="seat-empty" aria-hidden="true"><twig:Icon name="plus" size="12" stroke="2"/></span>
+                            Je prends
+                        </button>
+                    </form>
+                    {% if quests|length > 1 %}
+                        <button type="button" class="quest-next" data-action="quest#next" data-haptic="tick" aria-label="Une autre quête" title="Une autre"><twig:Icon name="repeat" size="15" stroke="1.8"/></button>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </section>
+    </div>
 
     <twig:BoostBanner/>
 
     {% if not app.user.hasAcceptedCharter %}
-        <a href="{{ path('charter_show') }}" class="card card-hover flex items-center gap-3 border-sun p-3.5 text-ink no-underline hover:text-ink">
-            <span class="flex size-10 shrink-0 items-center justify-center rounded-full bg-sun"><twig:Icon name="flag" size="22"/></span>
+        <a href="{{ path('charter_show') }}" class="sheet flex items-center gap-3 p-3.5 text-ink no-underline hover:text-ink">
+            <span class="flex size-10 shrink-0 items-center justify-center rounded-full bg-sun"><twig:Icon name="flag" size="22" stroke="1.8"/></span>
             <span class="flex flex-1 flex-col">
-                <span class="text-[15px] font-extrabold">La charte de la coloc a changé</span>
+                <span class="text-[15px] font-semibold">La charte de la coloc a changé</span>
                 <span class="text-xs text-muted">Jette un œil, et dis si ça te va</span>
             </span>
             <twig:Icon name="chevron-right" size="20" class="text-muted"/>
         </a>
     {% endif %}
 
-    <twig:Casa
-        :mood="mood"
-        :cleanliness="cleanliness"
-        :reacting="just_done is not same as(false)"
-        :speech="just_done ? 'Merci ' ~ app.user.name ~ ' ! +' ~ just_done.points ~ ' pts pour toi' ~ (just_done.xp|default(0) ? ' (et +' ~ just_done.xp ~ ' XP)') ~ '.' : null"
-        class="min-h-[262px]"
-    />
+    {% if mine is not empty %}
+        {% set late = mine|filter(v => v.status.urgency.value == 'late')|length %}
+        <section class="flex flex-col gap-3.5" aria-labelledby="mine-title">
+            <div class="flex items-end justify-between gap-3">
+                <div>
+                    <h2 id="mine-title" class="home-title">À toi de jouer</h2>
+                    <p class="mt-1 text-[13px] text-muted">{{ mine|length }} carte{{ mine|length > 1 ? 's' }}{{ late ? ' · ' ~ late ~ ' en retard' }}</p>
+                </div>
+                <p class="shrink-0 text-[13px] font-semibold text-clay-dark">{{ mine|reduce((sum, v) => sum + v.task.currentPoints, 0) }} pts</p>
+            </div>
+            {# Their cards side by side, to slide through; the next one shows at the edge. #}
+            <ul class="hand">
+                {% for view in mine %}
+                    <li class="hand-card"><twig:TaskCard :view="view" :member="app.user"/></li>
+                {% endfor %}
+            </ul>
+        </section>
+    {% endif %}
 
-    <section class="flex flex-col gap-1.5" aria-label="Propreté de la Casa">
-        <div class="flex items-center justify-between gap-2">
-            <h1 class="text-lg">La Casa</h1>
-            <p class="ml-auto text-sm font-bold">Propreté <twig:Count :value="cleanliness" key="casa"/> %</p>
-            {# A shortcut to the plan of the house: a little floor plan of its own. #}
-            <a href="{{ path('plan_show') }}" class="plan-shortcut" aria-label="Le plan de la maison" title="Le plan de la maison">
-                <svg viewBox="0 0 28 28" width="26" height="26" aria-hidden="true">
-                    <rect x="2" y="2" width="24" height="24" rx="4" fill="#FFFCF6" stroke="#2E1E14" stroke-width="2"/>
-                    <rect x="4.5" y="4.5" width="10" height="9" rx="1.5" fill="#F6C453"/>
-                    <rect x="16" y="4.5" width="7.5" height="13" rx="1.5" fill="#F2A27A"/>
-                    <rect x="4.5" y="15" width="10" height="8.5" rx="1.5" fill="#D9B48C"/>
-                    <rect x="16" y="19" width="7.5" height="4.5" rx="1.5" fill="#E8692C"/>
-                </svg>
-                <span>Plan</span>
-            </a>
-            <a href="{{ path('household_edit') }}" aria-label="Réglages de la coloc" title="Réglages de la coloc" class="-mr-2 flex size-9 items-center justify-center rounded-full text-muted hover:bg-track hover:text-ink"><twig:Icon name="settings" size="19"/></a>
-        </div>
-        <twig:ProgressBar :value="cleanliness" label="Propreté de la Casa" key="casa"/>
-    </section>
+    <twig:TeamBar :team="team" :household="app.user.household" :detailed="false" :done="done_this_week"/>
 
     {% if quick_count > 0 %}
-        <section class="flex flex-col gap-2" aria-labelledby="quick-title">
-            <div class="flex items-center justify-between gap-2">
-                <h2 id="quick-title" class="flex items-center gap-1.5 text-[15px]"><twig:Icon name="bolt" size="18"/> En un geste</h2>
-                <a href="{{ path('task_quick_settings') }}" class="-mr-2 flex size-8 items-center justify-center rounded-full text-muted hover:bg-track hover:text-ink" aria-label="Régler « En un geste » : ordre et tâches montrées" title="Ordre et tâches montrées"><twig:Icon name="settings" size="17"/></a>
+        <section class="-mx-5 flex flex-col gap-3" aria-labelledby="quick-title">
+            <div class="flex items-baseline justify-between gap-2 px-5">
+                <h2 id="quick-title" class="eyebrow">En un geste</h2>
+                <a href="{{ path('task_quick_settings') }}" class="text-[12.5px] font-semibold text-muted no-underline hover:text-ink" aria-label="Régler « En un geste » : ordre et tâches montrées">Régler</a>
             </div>
             {% if quick is not empty %}
-                <twig:QuickTasks :views="quick"/>
+                <twig:QuickTasks :views="quick" class="px-5"/>
             {% else %}
-                <p class="meta">Aucune tâche montrée ici : <a href="{{ path('task_quick_settings') }}">choisir lesquelles</a>.</p>
+                <p class="meta px-5">Aucune tâche montrée ici : <a href="{{ path('task_quick_settings') }}">choisir lesquelles</a>.</p>
             {% endif %}
         </section>
     {% endif %}
 
     {% if dormant is not empty %}
-        <section class="flex flex-col gap-2" aria-labelledby="raise-title">
-            <h2 id="raise-title" class="flex items-center gap-1.5 text-[15px]"><twig:Icon name="siren" size="18"/> Ça arrive ?</h2>
+        <section class="flex flex-col gap-2.5" aria-labelledby="raise-title">
+            <h2 id="raise-title" class="eyebrow">Ça arrive ?</h2>
             <ul class="flex flex-wrap gap-2">
                 {% for view in dormant %}
                     <li><twig:RaiseButton :task="view.task" compact/></li>
@@ -93,47 +147,43 @@
         </section>
     {% endif %}
 
-    <twig:TeamBar :team="team" :household="app.user.household" :detailed="false" :done="done_this_week"/>
-
-    {% if mine is not empty %}
-        <section class="flex flex-col gap-2.5" aria-labelledby="mine-title">
-            <h2 id="mine-title" class="pt-0.5 text-xl">On compte sur toi</h2>
-            {% for view in mine %}
-                <twig:TaskCard :view="view" :member="app.user"/>
+    {# Everything there is to do, by urgency — the fresh ones folded under "Plus tard"; filtered by care_controller.js. #}
+    <section class="flex flex-col gap-3.5" aria-labelledby="todo-title" data-controller="care" data-action="turbo:morph@window->care#apply">
+        <div class="flex items-baseline gap-2.5">
+            <h2 id="todo-title" class="home-title">Prendre soin de la Casa</h2>
+            <span class="text-[15px] font-semibold text-dust">{{ care_counts.all }}</span>
+        </div>
+        <div class="segmented" role="group" aria-label="Afficher">
+            {% for filter, label in {mine: 'Pour moi', free: 'Libres', all: 'Tout'} %}
+                <button type="button" aria-pressed="{{ filter == 'all' ? 'true' : 'false' }}" data-care-target="button" data-action="care#show" data-care-filter-param="{{ filter }}" data-haptic="tick">
+                    {{ label }} <span class="font-medium text-dust">{{ care_counts[filter] }}</span>
+                </button>
             {% endfor %}
-        </section>
-    {% endif %}
+        </div>
 
-    <section class="flex flex-col gap-2.5" aria-labelledby="todo-title">
-        <h2 id="todo-title" class="pt-0.5 text-xl">Prendre soin de la Casa</h2>
-        {% for view in pressing %}
-            <twig:TaskCard :view="view" :member="app.user"/>
-        {% else %}
-            <p class="card p-4 text-[15px]">Rien d’urgent : la Casa est contente. Profites-en !</p>
+        {% set titles = {late: 'En retard', due: 'C’est le moment', soon: 'Bientôt', fresh: 'Plus tard'} %}
+        {% for urgency, views in groups|filter(views => views is not empty) %}
+            {% set cards %}
+                <ul class="flex flex-col gap-3">
+                    {% for view in views %}
+                        <li data-care-target="item" data-mine="{{ view.task.id in for_me ? 1 : 0 }}" data-free="{{ view.isFree ? 1 : 0 }}"><twig:TaskCard :view="view" :member="app.user"/></li>
+                    {% endfor %}
+                </ul>
+            {% endset %}
+            {% if urgency == 'fresh' %}
+                <details class="care-group" id="care-later" data-care-target="group" aria-labelledby="later-title" data-controller="disclosure" data-action="toggle->disclosure#remember turbo:morph-element->disclosure#restore">
+                    <summary class="care-group-title is-{{ urgency }}"><span class="care-group-dot"></span><span id="later-title">{{ titles[urgency] }}</span><span class="care-group-count" data-care-count>{{ views|length }}</span><span class="care-group-fold">Afficher</span></summary>
+                    {{ cards }}
+                </details>
+            {% else %}
+                <div class="care-group" data-care-target="group" aria-labelledby="{{ urgency }}-title">
+                    <h3 class="care-group-title is-{{ urgency }}"><span class="care-group-dot"></span><span id="{{ urgency }}-title">{{ titles[urgency] }}</span><span class="care-group-count" data-care-count>{{ views|length }}</span></h3>
+                    {{ cards }}
+                </div>
+            {% endif %}
         {% endfor %}
+        <p class="sheet-empty" data-care-target="empty" {{ care_counts.all ? 'hidden' }}>Rien ici : la Casa est contente. Profites-en !</p>
     </section>
-
-    {% if upcoming is not empty %}
-        <section class="flex flex-col gap-2.5" aria-labelledby="soon-title">
-            <h2 id="soon-title" class="section-title">Bientôt</h2>
-            {% for view in upcoming %}
-                <twig:TaskCard :view="view" :member="app.user"/>
-            {% endfor %}
-        </section>
-    {% endif %}
-
-    {% if later is not empty %}
-        <section class="flex flex-col gap-2.5" aria-labelledby="later-title">
-            <h2 id="later-title" class="section-title">Pas pressé</h2>
-            {% for view in later %}
-                <twig:TaskCard :view="view" :member="app.user"/>
-            {% endfor %}
-        </section>
-    {% endif %}
-
-    <p class="flex items-center justify-center gap-5">
-        <a href="{{ path('task_index') }}" class="btn-link">Les modèles</a>
-    </p>
 {% endblock %}
 
 {% block nav %}<twig:BottomNav active="home"/>{% endblock %}

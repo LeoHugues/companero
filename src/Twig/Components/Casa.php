@@ -29,6 +29,8 @@ final class Casa
     public ?string $speech = null;
     public bool $reacting = false;
     public bool $showSpeech = true;
+    /** Planted across the whole width, in her landscape (the home page); otherwise on her own, a bubble above. */
+    public bool $hero = false;
 
     public function __construct(
         private readonly Security $security,

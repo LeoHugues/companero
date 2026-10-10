@@ -1,39 +1,36 @@
 {% props view, back, member, boost = 0, compact = false %}
 {#
-    "Je prends" (an empty seat waiting for someone, then their face) and "C'est fait" (a token
-    to collect: it shows what the task is worth). compact: only the seat taken, and a round button.
+    "Je prends" (an empty seat, a dotted circle with a plus, then the face and name of who took it) and
+    "C'est fait" (a button of the Casa's yellow: a tick, the words, then what the task is worth).
+    compact: only the seat taken, and a round button.
 #}
 {% set task = view.task %}
 {% set points = task.currentPoints + boost %}
 {# Side by side when they fit; otherwise "C'est fait" goes to its own line, on the right — never squeezed. #}
-{# On a narrow card, the seat keeps only its icon (or the name of who took it): its words are for wider ones. #}
-<div {{ attributes.defaults({class: '@container flex flex-wrap items-center justify-between gap-x-2 gap-y-2'}) }}>
+<div {{ attributes.defaults({class: 'relative z-[2] flex flex-wrap items-center justify-between gap-x-2 gap-y-2'}) }}>
     {% if view.reservedBy %}
-        {# Taken: a face and two short lines, "Pris par / toi". #}
+        {# Taken: just a face and a name. #}
         <span class="seat seat-taken" title="{{ view.isReservedBy(member) ? 'Tu t’en occupes' : view.reservedBy.name ~ ' s’en occupe' }}">
             <twig:Avatar :member="view.reservedBy" :size="compact ? 22 : 26"/>
-            <span class="flex flex-col leading-none">
-                <span class="text-[10px] font-bold tracking-wide text-muted uppercase @max-[18.5rem]:sr-only">Pris par</span>
-                <span class="text-[13px] font-extrabold text-ink">{{ view.isReservedBy(member) ? 'toi' : view.reservedBy.name }}</span>
-            </span>
+            <span class="truncate">{{ view.reservedBy.name }}</span>
         </span>
     {% elseif compact %}
-        <span class="text-sm font-extrabold text-clay-dark">+{{ points }} pts{% if boost %} <twig:Icon name="bolt" size="12" stroke="2.6"/>{% endif %}</span>
+        <span class="text-sm font-semibold text-clay-dark">+{{ points }} pts{% if boost %} <twig:Icon name="bolt" size="12" stroke="2.4"/>{% endif %}</span>
     {% else %}
         <form method="post" action="{{ path('task_reserve', {id: task.id}) }}">
             <input type="hidden" name="_back" value="{{ back }}">
             <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
             <button type="submit" class="seat" aria-label="Je m’en occupe : « {{ task.title }} »">
-                <span class="seat-empty" aria-hidden="true"><twig:Icon name="hand" size="15" stroke="2.2"/></span>
-                <span class="@max-[18.5rem]:sr-only">Je prends</span>
+                <span class="seat-empty" aria-hidden="true"><twig:Icon name="plus" size="13" stroke="2"/></span>
+                Je prends
             </button>
         </form>
     {% endif %}
 
     {% if view.availableAt %}
         {# Just done: it cannot be done again before its cooldown is over. #}
-        <span class="flex items-center gap-1.5 rounded-full border-[1.5px] border-dashed border-line px-3 py-2 text-xs font-bold text-muted" title="À nouveau possible {{ available_again(view.availableAt) }}">
-            <twig:Icon name="clock" size="15"/> Possible {{ available_again(view.availableAt) }}
+        <span class="done-resting" title="À nouveau possible {{ available_again(view.availableAt) }}">
+            <twig:Icon name="clock" size="15" stroke="1.8"/> Possible {{ available_again(view.availableAt) }}
         </span>
     {% else %}
         <form method="post" action="{{ path('task_complete', {id: task.id}) }}" data-controller="done" data-action="submit->done#celebrate" class="ml-auto">
@@ -41,13 +38,13 @@
             <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
             {% if compact %}
                 <button type="submit" aria-label="Marquer « {{ task.title }} » comme fait" class="done-round" data-haptic="press">
-                    <twig:Icon name="check" size="20" stroke="2.8"/>
+                    <twig:Icon name="check" size="19" stroke="2.6"/>
                 </button>
             {% else %}
                 <button type="submit" class="done-button" data-haptic="press">
-                    <span class="done-button-check" aria-hidden="true"><twig:Icon name="check" size="16" stroke="3"/></span>
+                    <span class="done-button-check" aria-hidden="true"><twig:Icon name="check" size="14" stroke="2.6"/></span>
                     C’est fait
-                    <span class="done-button-points">+{{ points }}{% if boost %}<twig:Icon name="bolt" size="11" stroke="2.8"/>{% endif %}</span>
+                    <span class="done-button-points">+{{ points }}{% if boost %}<twig:Icon name="bolt" size="11" stroke="2.4"/>{% endif %}</span>
                 </button>
             {% endif %}
         </form>
