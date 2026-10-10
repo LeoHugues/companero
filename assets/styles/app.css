@@ -1152,18 +1152,22 @@ details[open] .care-group-fold::after { content: 'Replier'; font-size: 12.5px; }
   border-radius: 18px;
   background: #E9DFCF;
   box-shadow: 0 1px 0 rgba(46, 30, 20, .05), 0 14px 28px -18px rgba(46, 30, 20, .42);
-  transform-style: preserve-3d;
   transition: transform 620ms cubic-bezier(.3, .7, .25, 1);
 }
 .play-card-face {
   position: relative;
   display: grid;
   grid-template-columns: 28px minmax(0, 1fr) auto;
+  /*
+   * Three rows: the head (index, words, picture), the notes, the foot. A card stretched to the height of
+   * its neighbours (the hand) gives the extra to the notes' row only, so its foot stays at the bottom
+   * instead of the extra being spread as gaps between every row.
+   */
+  grid-template-rows: auto 1fr auto;
   column-gap: 12px;
   padding: 14px 14px 12px 12px;
   border-radius: 15px;
   background: var(--color-surface);
-  backface-visibility: hidden;
 }
 .play-card-compact .play-card-face { grid-template-columns: 28px minmax(0, 1fr); padding: 12px 12px 10px 10px; }
 .play-card-index { @apply flex flex-col items-center gap-[7px] pt-px text-ink; }
@@ -1178,8 +1182,8 @@ details[open] .care-group-fold::after { content: 'Replier'; font-size: 12.5px; }
 .play-card-time > span { @apply absolute inset-y-0 left-0 rounded-sm bg-ok; }
 .play-card-warning .play-card-time > span { @apply bg-warn; }
 .play-card-danger .play-card-time > span { @apply bg-danger; }
-.play-card-notes { @apply col-span-full mt-3 flex flex-col gap-1.5; }
-.play-card-actions { @apply col-span-full mt-3 border-t border-[#F0E8DB] pt-[11px]; }
+.play-card-notes { @apply col-span-full row-start-2 mt-3 flex flex-col gap-1.5 self-start; }
+.play-card-actions { @apply col-span-full row-start-3 mt-3 self-end border-t border-[#F0E8DB] pt-[11px]; }
 .play-card-compact .play-card-actions { @apply mt-2.5 pt-2; }
 /*
  * A surprise: the card is wrapped like a present. A terracotta ribbon across its top right corner
@@ -1193,7 +1197,6 @@ details[open] .care-group-fold::after { content: 'Replier'; font-size: 12.5px; }
   border-radius: 18px;
   overflow: hidden;
   pointer-events: none;
-  backface-visibility: hidden;
   background: linear-gradient(225deg, transparent 17px, #C8582A 17px 18px, var(--color-clay) 18px 20px, rgba(255, 246, 233, .55) 20px 21px, var(--color-clay) 21px 35px, rgba(255, 246, 233, .55) 35px 36px, var(--color-clay) 36px 38px, #C8582A 38px 39px, transparent 39px);
 }
 .play-card-bow {
@@ -1272,13 +1275,23 @@ details[open] .care-group-fold::after { content: 'Replier'; font-size: 12.5px; }
   background-image: repeating-linear-gradient(45deg, rgba(255, 252, 246, .14) 0 1px, transparent 1px 11px), repeating-linear-gradient(-45deg, rgba(255, 252, 246, .14) 0 1px, transparent 1px 11px);
   color: var(--color-surface);
   transform: rotateY(180deg);
-  backface-visibility: hidden;
+  visibility: hidden;
 }
 .play-card-back::before { content: ''; position: absolute; inset: 7px; border: 1px solid rgba(255, 252, 246, .45); border-radius: 12px; }
 .play-card-back-in { position: relative; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 10px 20px; border-radius: 12px; background: #C8582A; }
 .play-card-back-points { font-size: 26px; line-height: 1.1; font-weight: 700; letter-spacing: -.02em; }
 .play-card-back-thanks { font-size: 10px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; opacity: .85; }
-.play-card.is-turning { transform: perspective(1100px) rotateY(180deg); }
+/*
+ * The card is a 3D object only while it turns. At rest, a face with a hidden back made its own GPU
+ * layer, which the Android WebView did not always resize when the card's height changed in place
+ * (a note added, the page refreshed after "C'est fait"): the face was cut short over its foot, or
+ * left a gap below it.
+ */
+.play-card.is-turning { transform-style: preserve-3d; transform: perspective(1100px) rotateY(180deg); }
+.play-card.is-turning .play-card-face,
+.play-card.is-turning .play-card-ribbon,
+.play-card.is-turning .play-card-back { backface-visibility: hidden; }
+.play-card.is-turning .play-card-back { visibility: visible; }
 .play-card.is-turning::after { display: none; }
 @media (prefers-reduced-motion: reduce) {
   .play-card.is-turning .play-card-face { visibility: hidden; }
