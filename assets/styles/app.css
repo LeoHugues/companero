@@ -971,6 +971,8 @@ main:has(> p[role="status"]) .home-hero { margin-top: 0; }
  */
 .state-switch {
   @apply absolute top-0 left-1/2 z-[3] grid -translate-x-1/2 -translate-y-1/2 grid-cols-2 rounded-full bg-track p-[3px];
+  /* Its own width: left at 50%, it would otherwise be squeezed into the right half of the sheet. */
+  width: max-content;
   box-shadow: 0 0 0 3px var(--color-surface);
 }
 .state-switch::before {
@@ -990,6 +992,10 @@ main:has(> p[role="status"]) .home-hero { margin-top: 0; }
 .state-switch button[aria-selected="true"] svg { @apply text-clay; }
 .state-switch button[aria-controls="state-team"][aria-selected="true"] svg { color: #D4931C; }
 .state-switch button:active svg { scale: .85; }
+/* A narrower phone: the words closer to their drawing, a little less room on each side. */
+@media (max-width: 379px) {
+  .state-switch button { @apply gap-1 px-[11px]; }
+}
 
 /*
  * The stage of the two faces: while they cross, its height glides from one to the other (state_switch_controller.js),
