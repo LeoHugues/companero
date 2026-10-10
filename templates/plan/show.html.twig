@@ -2,88 +2,193 @@
 
 {% block title %}Le plan · Companero{% endblock %}
 
-{# The floor is green when the room is clean, then turns honey, then coral as it needs attention; the garden around stays pale, not to be mistaken for a clean room. #}
-{% macro floor(clean) %}{{ clean >= 92 ? '#B7DF98' : (clean >= 80 ? '#DDEBA6' : (clean >= 50 ? '#F8DDA6' : '#F4C6A6')) }}{% endmacro %}
-{% macro grass(clean) %}{{ clean >= 80 ? '#EEF3E2' : (clean >= 50 ? '#F2F0DC' : '#F5EAD8') }}{% endmacro %}
+{#
+    The house seen from above, in the home page's calm: the garden around it with its bushes, light walls,
+    each room's floor tinted by its mood (sage, then honey, then coral), dust lying in the rooms that need it,
+    a sparkle in the spotless ones, and the count of what is pressing in a terracotta badge that hops.
+    Below, room by room, the one that needs you most first.
+#}
+{% macro floor(mood) %}{{ {radiant: '#FFFCF6', okay: '#FCF6EA', dusty: '#FBEACB', neglected: '#F8D9CC'}[mood.value] }}{% endmacro %}
+{% macro dot(mood) %}{{ {radiant: '#6E9A4C', okay: '#6E9A4C', dusty: '#E9A53A', neglected: '#E06C55'}[mood.value] }}{% endmacro %}
+{# The floor's material, guessed from the room's name: tiles where there is water, planks outside, parquet elsewhere. #}
+{% macro material(name) %}{% set n = name|lower %}{{ n matches '/cuisine|bain|sdb|wc|toilette|douche|buanderie|cellier/' ? 'tiles' : (n matches '/terrasse|balcon|véranda|veranda|patio|cour/' ? 'deck' : (n matches '/couloir|entrée|hall|escalier|palier/' ? '' : 'parquet')) }}{% endmacro %}
+{% macro bush(x, y, size = 1) %}
+    <g transform="translate({{ x }} {{ y }}) scale({{ size }})" class="plan-bush">
+        <circle cx="-0.95" cy="0.35" r="1.05" fill="#B2C78C"/>
+        <circle cx="0.95" cy="0.35" r="1.05" fill="#B2C78C"/>
+        <circle cx="0" cy="-0.45" r="1.3" fill="#BED29A"/>
+        <circle cx="-0.35" cy="-0.85" r="0.45" fill="#CFDDB2"/>
+        <circle cx="0.75" cy="-0.1" r="0.24" fill="#F2A27A"/>
+        <circle cx="-0.9" cy="0.5" r="0.2" fill="#FFFCF6"/>
+    </g>
+{% endmacro %}
 
 {% block body %}
-    {% import _self as plan_colors %}
-    <header class="flex items-center justify-between gap-3">
-        <div class="flex flex-col gap-0.5">
-            <h1 class="text-[26px]">Le plan</h1>
-            <p class="text-sm text-muted">La maison vue d’en haut : touche une pièce.</p>
+    {% import _self as plan_ui %}
+    {% set rooms = plan.drawn|map(item => item.room)|merge(plan.garden ? [plan.garden] : [])|merge(plan.others) %}
+    {% set needing = rooms|filter(room => room.cleanliness < 80)|length %}
+    <header class="flex items-end justify-between gap-3">
+        <div class="min-w-0">
+            <p class="eyebrow">La maison vue d’en haut</p>
+            <h1 class="mt-1 text-[26px] leading-tight font-bold tracking-tight">Le plan</h1>
         </div>
-        <a href="{{ path('task_index') }}" class="chip shrink-0 gap-1.5"><twig:Icon name="list" size="18"/> Liste</a>
+        <a href="{{ path('task_index') }}" class="plan-list-link"><twig:Icon name="list" size="16" stroke="1.9"/>Liste</a>
     </header>
+    {% if rooms is not empty %}
+        <p class="-mt-2 text-[13.5px] text-muted">
+            {{ rooms|length }} pièce{{ rooms|length > 1 ? 's' }} ·
+            {% if needing %}<span class="font-semibold text-clay-dark">{{ needing }} {{ needing > 1 ? 'ont' : 'a' }} besoin de toi</span>{% else %}tout brille{% endif %}
+            · touche une pièce
+        </p>
+    {% endif %}
 
-    {% if plan.drawn is empty and plan.others is empty %}
-        <p class="card p-4 text-sm text-muted">Pas encore de pièces. <a href="{{ path('household_edit') }}">Ajoute des zones</a> pour dessiner le plan.</p>
+    {% if rooms is empty %}
+        <p class="sheet-empty">Pas encore de pièces. <a href="{{ path('household_edit') }}">Ajoute des zones</a> pour dessiner le plan.</p>
     {% endif %}
 
     {% if plan.drawn %}
         {% set box = plan.viewBox %}
-        <svg viewBox="{{ box.x }} {{ box.y }} {{ box.width }} {{ box.height }}" class="w-full select-none" role="group" aria-label="Plan de la maison" font-family="inherit">
-            {# A few tufts of grass on the garden: it is outside, not a room. #}
-            <defs>
-                <pattern id="grass-tufts" width="7" height="6" patternUnits="userSpaceOnUse">
-                    <path d="M1.5 4.2l.4-1.3.4 1.3M5 1.8l.4-1.2.4 1.2" fill="none" stroke="#A9C487" stroke-width="0.3" stroke-linecap="round"/>
-                </pattern>
-            </defs>
-            {% if plan.garden %}
-                {% set garden = plan.garden %}
-                <a href="{{ path('plan_zone', {id: garden.zone.id}) }}" aria-label="{{ garden.zone.name }} : propre à {{ garden.cleanliness }} %{{ garden.pressingCount ? ', ' ~ garden.pressingCount ~ ' à faire' }}" class="plan-room">
-                    <rect x="{{ box.x + 0.4 }}" y="{{ box.y + 0.4 }}" width="{{ box.width - 0.8 }}" height="{{ box.height - 0.8 }}" rx="3" fill="{{ plan_colors.grass(garden.cleanliness) }}" stroke="#B5CC97" stroke-width="0.6" stroke-dasharray="1.2 0.8"/>
-                    <rect x="{{ box.x + 0.4 }}" y="{{ box.y + 0.4 }}" width="{{ box.width - 0.8 }}" height="{{ box.height - 0.8 }}" rx="3" fill="url(#grass-tufts)"/>
-                    <text x="{{ box.x + box.width / 2 }}" y="{{ box.y + box.height - 1.1 }}" text-anchor="middle" font-size="2.1" font-weight="800" fill="#6B8A48">{{ garden.zone.name }}{{ garden.pressingCount ? ' · ' ~ garden.pressingCount ~ ' à faire' }}</text>
-                </a>
-            {% else %}
-                <rect x="{{ box.x + 0.4 }}" y="{{ box.y + 0.4 }}" width="{{ box.width - 0.8 }}" height="{{ box.height - 0.8 }}" rx="3" fill="#EEF3E2"/>
-            {% endif %}
+        {% set house = plan.houseBox %}
+        <section class="plan-sheet" aria-label="Le plan">
+            <svg viewBox="{{ box.x }} {{ box.y }} {{ box.width }} {{ box.height }}" class="block w-full select-none" role="group" aria-label="Plan de la maison" font-family="inherit">
+                <defs>
+                    <pattern id="grass-tufts" width="7" height="6" patternUnits="userSpaceOnUse">
+                        <path d="M1.5 4.2l.4-1.3.4 1.3M5 1.8l.4-1.2.4 1.2" fill="none" stroke="#AFC48C" stroke-width="0.28" stroke-linecap="round"/>
+                    </pattern>
+                    {# The dust lying in a room that needs a hand, like the dust around the Casa. #}
+                    {# The floors: parquet, tiles, the planks of a terrace — barely there, the mood's tint shows through. #}
+                    <pattern id="floor-parquet" width="6" height="3" patternUnits="userSpaceOnUse">
+                        <path d="M0 0.05H6M0 1.55H6M0.05 0V1.5M3.05 1.5V3" fill="none" stroke="#8C5A3C" stroke-opacity=".1" stroke-width="0.1"/>
+                    </pattern>
+                    <pattern id="floor-tiles" width="2.4" height="2.4" patternUnits="userSpaceOnUse">
+                        <path d="M0 0.05H2.4M0.05 0V2.4" fill="none" stroke="#8C5A3C" stroke-opacity=".11" stroke-width="0.1"/>
+                    </pattern>
+                    <pattern id="floor-deck" width="9" height="1.3" patternUnits="userSpaceOnUse">
+                        <rect width="9" height="1.3" fill="#C9A47C" fill-opacity=".1"/>
+                        <path d="M0 0.05H9M4.5 0.05V1.3" fill="none" stroke="#8C5A3C" stroke-opacity=".14" stroke-width="0.1"/>
+                    </pattern>
+                    <pattern id="room-dust" width="5.5" height="4.6" patternUnits="userSpaceOnUse">
+                        <circle cx="1.2" cy="1.1" r="0.32" fill="#B9A58C" opacity=".55"/>
+                        <circle cx="3.9" cy="3.3" r="0.24" fill="#B9A58C" opacity=".45"/>
+                        <circle cx="4.6" cy="0.8" r="0.16" fill="#B9A58C" opacity=".4"/>
+                    </pattern>
+                </defs>
 
-            {# The walls: the gaps between rooms show the dark house underneath. #}
-            {% set house = plan.houseBox %}
-            <rect x="{{ house.x }}" y="{{ house.y }}" width="{{ house.width }}" height="{{ house.height }}" rx="0.8" fill="#4A3628"/>
+                {# The garden all around: outside, not a room. #}
+                {% set dry = plan.garden and plan.garden.mood.value in ['dusty', 'neglected'] %}
+                {% set garden_body %}
+                    <rect x="{{ box.x }}" y="{{ box.y }}" width="{{ box.width }}" height="{{ box.height }}" rx="3.2" fill="{{ dry ? '#E6E3C6' : '#DCE6C6' }}"/>
+                    <rect x="{{ box.x }}" y="{{ box.y }}" width="{{ box.width }}" height="{{ box.height }}" rx="3.2" fill="url(#grass-tufts)"/>
+                    {% set g = constant('App\\Plan\\HousePlan::GARDEN') / 2 %}
+                    {% for spot in [
+                        [box.x + g, box.y + g, 1.2], [box.x + box.width * 0.5, box.y + g, 0.95], [box.x + box.width - g, box.y + g, 1.3],
+                        [box.x + g, box.y + box.height * 0.36, 1.05], [box.x + box.width - g, box.y + box.height * 0.55, 1.1],
+                        [box.x + g, box.y + box.height * 0.72, 0.95], [box.x + box.width - g, box.y + box.height * 0.84, 1],
+                        [box.x + g, box.y + box.height - g, 1.25], [box.x + box.width - g, box.y + box.height - g, 1.15],
+                    ] %}{{ plan_ui.bush(spot[0], spot[1], spot[2]) }}{% endfor %}
+                {% endset %}
+                {% if plan.garden %}
+                    {% set garden = plan.garden %}
+                    <a href="{{ path('plan_zone', {id: garden.zone.id}) }}" aria-label="{{ garden.zone.name }} : propre à {{ garden.cleanliness }} %{{ garden.pressingCount ? ', ' ~ garden.pressingCount ~ ' à faire' }}" class="plan-room">
+                        {{ garden_body }}
+                        <text x="{{ box.x + box.width / 2 }}" y="{{ box.y + box.height - 1.15 }}" text-anchor="middle" font-size="1.8" font-weight="600" fill="#5E7C3E" letter-spacing=".08">{{ garden.zone.name }}{{ garden.pressingCount ? ' · ' ~ garden.pressingCount ~ ' à faire' }}</text>
+                    </a>
+                {% else %}
+                    {{ garden_body }}
+                {% endif %}
 
-            {% for item in plan.drawn %}
-                {% set room = item.room %}
-                {% set shape = item.shape %}
-                {% set clean = room.cleanliness %}
-                {% set name = room.zone.name|replace({'Chambre de ': 'Ch. ', 'Salle de bain': 'SDB', 'Terrasse de l’entrée': 'Terrasse entrée'}) %}
-                <a href="{{ path('plan_zone', {id: room.zone.id}) }}" aria-label="{{ room.zone.name }} : propre à {{ clean }} %{{ room.pressingCount ? ', ' ~ room.pressingCount ~ ' à faire' }}" class="plan-room">
-                    <polygon points="{{ shape.svgPoints }}" fill="{{ plan_colors.floor(clean) }}" stroke="#2E1E14" stroke-width="0.7" stroke-linejoin="round"/>
-                    {% set lx = shape.label[0] %}
-                    {% set ly = shape.label[1] %}
-                    {% if shape.upright or shape.low %}
-                        {% set label = shape.fit(name, 1.9, 1.2) %}
-                        <text transform="translate({{ lx }} {{ ly }}){{ shape.upright ? ' rotate(-90)' }}" text-anchor="middle" dominant-baseline="central" font-size="{{ label.size|round(2) }}" font-weight="800" fill="#2E1E14">{{ name }}</text>
-                    {% else %}
-                        {% set label = shape.fit(name) %}
-                        {% set top = ly - (label.lines|length - 1) * label.size * 0.55 - 0.6 %}
-                        <text x="{{ lx }}" y="{{ top }}" text-anchor="middle" font-size="{{ label.size|round(2) }}" font-weight="800" fill="#2E1E14">
-                            {%- for line in label.lines %}<tspan x="{{ lx }}" dy="{{ loop.first ? 0 : (label.size * 1.1)|round(2) }}">{{ line }}</tspan>{% endfor -%}
-                        </text>
-                        <text x="{{ lx }}" y="{{ top + (label.lines|length - 1) * label.size * 1.1 + 2.6 }}" text-anchor="middle" font-size="1.7" font-weight="700" fill="#7A6555">{{ clean }} %{{ room.zone.private and shape.maxX - shape.minX >= 20 ? ' · privée' }}</text>
-                    {% endif %}
-                    {% if room.pressingCount %}
-                        {% set badge = shape.badge %}
-                        <circle cx="{{ badge[0] }}" cy="{{ badge[1] }}" r="1.6" fill="#E8692C" stroke="#2E1E14" stroke-width="0.35"/>
-                        <text x="{{ badge[0] }}" y="{{ badge[1] }}" text-anchor="middle" dominant-baseline="central" font-size="1.9" font-weight="800" fill="#2E1E14">{{ room.pressingCount }}</text>
-                    {% endif %}
-                </a>
-            {% endfor %}
-        </svg>
-        <p class="meta flex flex-wrap items-center gap-x-3 gap-y-1">
-            <span class="flex items-center gap-1"><span class="inline-block size-3 rounded-[3px] border border-ink bg-[#B7DF98]"></span>propre</span>
-            <span class="flex items-center gap-1"><span class="inline-block size-3 rounded-[3px] border border-ink bg-[#F8DDA6]"></span>à surveiller</span>
-            <span class="flex items-center gap-1"><span class="inline-block size-3 rounded-[3px] border border-ink bg-[#F4C6A6]"></span>a besoin de toi</span>
-            <span class="flex items-center gap-1"><span class="inline-block size-3 rounded-full border border-ink bg-clay"></span>tâches à faire</span>
-        </p>
+                {# The house: a soft shadow on the grass, then its walls, light, showing between the rooms. #}
+                <rect x="{{ house.x - 0.3 }}" y="{{ house.y + 0.2 }}" width="{{ house.width + 0.6 }}" height="{{ house.height + 0.9 }}" rx="1.4" fill="#2E1E14" opacity=".1"/>
+                <rect x="{{ house.x - 0.3 }}" y="{{ house.y - 0.3 }}" width="{{ house.width + 0.6 }}" height="{{ house.height + 0.6 }}" rx="1.2" fill="#D3BFA3"/>
+
+                {% for item in plan.drawn %}
+                    {% set room = item.room %}
+                    {% set shape = item.shape %}
+                    {% set clean = room.cleanliness %}
+                    {% set mood = room.mood %}
+                    {% set name = room.zone.name|replace({'Chambre de ': 'Ch. ', 'Salle de bain': 'SDB', 'Terrasse de l’entrée': 'Terrasse entrée'}) %}
+                    <a href="{{ path('plan_zone', {id: room.zone.id}) }}" aria-label="{{ room.zone.name }} : propre à {{ clean }} %{{ room.pressingCount ? ', ' ~ room.pressingCount ~ ' à faire' }}" class="plan-room">
+                        <polygon points="{{ shape.svgPoints }}" fill="{{ plan_ui.floor(mood) }}" stroke="#D3BFA3" stroke-width="0.55" stroke-linejoin="round"/>
+                        {% set material = plan_ui.material(room.zone.name)|trim %}
+                        {% if material %}<polygon points="{{ shape.svgPoints }}" fill="url(#floor-{{ material }})" pointer-events="none"/>{% endif %}
+                        {% if mood.value in ['dusty', 'neglected'] %}
+                            <polygon points="{{ shape.svgPoints }}" fill="url(#room-dust)" class="plan-dust" pointer-events="none"/>
+                        {% endif %}
+                        {% set lx = shape.label[0] %}
+                        {% set ly = shape.label[1] %}
+                        {% if shape.upright or shape.low %}
+                            {% set label = shape.fit(name, 1.8, 1.2) %}
+                            <text transform="translate({{ lx }} {{ ly }}){{ shape.upright ? ' rotate(-90)' }}" text-anchor="middle" dominant-baseline="central" font-size="{{ label.size|round(2) }}" font-weight="700" fill="#2E1E14">{{ name }}</text>
+                        {% else %}
+                            {% set label = shape.fit(name, 2.1) %}
+                            {% set top = ly - (label.lines|length - 1) * label.size * 0.55 - 0.6 %}
+                            <text x="{{ lx }}" y="{{ top }}" text-anchor="middle" font-size="{{ label.size|round(2) }}" font-weight="700" fill="#2E1E14">
+                                {%- for line in label.lines %}<tspan x="{{ lx }}" dy="{{ loop.first ? 0 : (label.size * 1.1)|round(2) }}">{{ line }}</tspan>{% endfor -%}
+                            </text>
+                            {# Its cleanliness, after a dot of its mood's colour. #}
+                            {% set state = clean ~ ' %' ~ (room.zone.private and shape.maxX - shape.minX >= 20 ? ' · privée' : '') %}
+                            {% set sy = top + (label.lines|length - 1) * label.size * 1.1 + 2.5 %}
+                            {% set half = state|length * 0.42 %}
+                            <circle cx="{{ lx + 0.6 - half - 1 }}" cy="{{ sy - 0.52 }}" r="0.5" fill="{{ plan_ui.dot(mood) }}"/>
+                            <text x="{{ lx + 0.6 }}" y="{{ sy }}" text-anchor="middle" font-size="1.6" font-weight="600" fill="#7A6555">{{ state }}</text>
+                        {% endif %}
+                        {% if room.pressingCount %}
+                            {% set badge = shape.badge %}
+                            <g class="plan-badge">
+                                <circle cx="{{ badge[0] }}" cy="{{ badge[1] }}" r="1.75" fill="#E8692C" stroke="#FFFCF6" stroke-width="0.45"/>
+                                <text x="{{ badge[0] }}" y="{{ badge[1] }}" text-anchor="middle" dominant-baseline="central" font-size="1.85" font-weight="800" fill="#2E1E14">{{ room.pressingCount }}</text>
+                            </g>
+                        {% elseif clean >= 100 and not shape.low %}
+                            {% set badge = shape.badge %}
+                            <path class="plan-sparkle" d="M{{ badge[0] }} {{ badge[1] - 1.3 }} l.38 .92 .92 .38 -.92 .38 -.38 .92 -.38 -.92 -.92 -.38 .92 -.38z" fill="#E9A53A"/>
+                        {% endif %}
+                    </a>
+                {% endfor %}
+            </svg>
+            <p class="plan-legend">
+                <span><i style="background: #6E9A4C"></i>propre</span>
+                <span><i style="background: #E9A53A"></i>à surveiller</span>
+                <span><i style="background: #E06C55"></i>a besoin de toi</span>
+                <span><b>2</b>à faire</span>
+            </p>
+        </section>
+    {% elseif plan.others %}
+        {{ include('plan/_tiles.html.twig', {rooms: plan.others, label: 'Les pièces'}) }}
+        <p class="meta">Vert : la pièce est propre ; plus elle tire vers l’orange, plus elle a besoin de toi. Donne une forme aux zones dans les <a href="{{ path('household_edit') }}">réglages de la coloc</a> pour dessiner le vrai plan.</p>
     {% endif %}
 
-    {% if plan.others %}
-        {% if plan.drawn %}<h2 class="section-title mt-1">Hors du plan</h2>{% endif %}
-        {{ include('plan/_tiles.html.twig', {rooms: plan.others, label: plan.drawn ? 'Les autres zones' : 'Les pièces'}) }}
-        {% if plan.drawn is empty %}<p class="meta">Vert : la pièce est propre ; plus elle tire vers l’orange, plus elle a besoin de toi. Donne une forme aux zones dans les <a href="{{ path('household_edit') }}">réglages de la coloc</a> pour dessiner le vrai plan.</p>{% endif %}
+    {% if plan.drawn %}
+        {# Room by room: the one that needs a hand first, the spotless ones last. #}
+        <section class="flex flex-col gap-3" aria-labelledby="rooms-title">
+            <div>
+                <h2 id="rooms-title" class="home-title">Pièce par pièce</h2>
+                <p class="mt-1 text-[13px] text-muted">Celles qui ont besoin de toi d’abord</p>
+            </div>
+            <ul class="sheet flex flex-col px-3.5 py-1" aria-label="Les pièces">
+                {% for room in rooms|sort((a, b) => a.cleanliness <=> b.cleanliness ?: b.pressingCount <=> a.pressingCount) %}
+                    {% set clean = room.cleanliness %}
+                    {% set off_plan = room in plan.others %}
+                    <li class="plan-row-item">
+                        <a href="{{ path('plan_zone', {id: room.zone.id}) }}" class="plan-row">
+                            <twig:CasaMini :size="38" :mood="room.mood" class="shrink-0"/>
+                            <span class="flex min-w-0 flex-1 flex-col gap-1.5">
+                                <span class="flex items-baseline justify-between gap-2">
+                                    <span class="truncate text-[15px] font-semibold">{{ room.zone.name }}</span>
+                                    <span class="shrink-0 text-[13px] font-semibold tabular-nums">{{ clean }} %</span>
+                                </span>
+                                <span class="plan-row-gauge is-{{ room.mood.value }}"><span style="width: {{ max(clean, 3) }}%"></span></span>
+                                <span class="flex items-center gap-1.5 text-xs text-muted">
+                                    {% if room.pressingCount %}<span class="plan-row-count">{{ room.pressingCount }} à faire</span>{% elseif room.tasks is empty %}Rien de prévu{% else %}Rien d’urgent{% endif %}
+                                    {% if room.zone.private %}<span>· privée</span>{% endif %}
+                                    {% if off_plan %}<span>· hors du plan</span>{% endif %}
+                                </span>
+                            </span>
+                            <twig:Icon name="chevron-right" size="18" class="shrink-0 text-dust"/>
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </section>
     {% endif %}
 {% endblock %}
 

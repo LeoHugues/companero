@@ -98,7 +98,8 @@
 }
 
 @layer base {
-  html { -webkit-tap-highlight-color: transparent; }
+  /* No browser pull to refresh, nor its bounce: the Casa does it (pull_refresh_controller.js). */
+  html { -webkit-tap-highlight-color: transparent; overscroll-behavior-y: none; }
   body { @apply bg-cream font-sans text-ink antialiased; }
   h1, h2, h3 { @apply font-extrabold; }
   a { @apply text-clay-dark hover:text-ink; }
@@ -160,10 +161,36 @@
 @layer components {
   .plan-room { @apply cursor-pointer; }
   .plan-room polygon, .plan-room rect { transition: filter 150ms; }
-  .plan-room:hover polygon, .plan-room:hover rect, .plan-room:focus-visible polygon { filter: brightness(.93); }
+  .plan-room:hover polygon, .plan-room:hover > rect, .plan-room:focus-visible polygon { filter: brightness(.95); }
   .plan-room:focus-visible { outline: none; }
-  .plan-room:focus-visible polygon { stroke-width: 1.4; }
+  .plan-room:focus-visible polygon:first-child { stroke: var(--color-ink); stroke-width: .5; }
 }
+
+/*
+ * The plan (templates/plan/show.html.twig), in the home page's calm: the house on a sheet, its garden
+ * and bushes, light walls, floors tinted by mood; the badges of what is pressing hop now and then,
+ * the spotless rooms twinkle. Below it, room by room.
+ */
+.plan-sheet { @apply sheet flex flex-col gap-3 p-2.5 pb-3; }
+.plan-sheet svg { border-radius: 16px; }
+.plan-badge { transform-box: fill-box; transform-origin: 50% 100%; animation: medallion-hop 3.4s ease-in-out infinite; }
+.plan-sparkle { transform-box: fill-box; transform-origin: center; animation: twinkle 2.4s ease-in-out infinite; }
+.plan-bush { pointer-events: none; }
+.plan-legend { @apply flex flex-wrap items-center justify-center gap-x-3.5 gap-y-1 px-2 text-xs text-muted; }
+.plan-legend span { @apply flex items-center gap-1.5; }
+.plan-legend i { @apply size-[7px] rounded-full; }
+.plan-legend b { @apply flex size-4 items-center justify-center rounded-full bg-clay text-[10px] font-extrabold text-ink; }
+.plan-list-link {
+  @apply flex h-9 shrink-0 items-center gap-1.5 rounded-[11px] bg-surface pr-3 pl-2.5 text-[13px] font-semibold text-ink no-underline shadow-[0_1px_0_rgba(46,30,20,.04),0_6px_16px_-8px_rgba(46,30,20,.35)] transition hover:text-ink active:scale-95;
+}
+.plan-row-item + .plan-row-item { @apply border-t border-line/70; }
+.plan-row { @apply flex items-center gap-3 py-2.5 text-ink no-underline transition hover:text-ink active:scale-[.98]; }
+.plan-row:hover .text-dust { @apply text-ink; }
+.plan-row-gauge { @apply relative block h-[5px] overflow-hidden rounded-full bg-track; }
+.plan-row-gauge > span { @apply absolute inset-y-0 left-0 rounded-full bg-ok; }
+.plan-row-gauge.is-dusty > span { @apply bg-warn; }
+.plan-row-gauge.is-neglected > span { @apply bg-danger; }
+.plan-row-count { @apply rounded-full bg-[#FCE6D6] px-2 py-px font-semibold text-[#8E3F17]; }
 
 /*
  * Task cards by rarity (App\Enum\Rarity): the only shine in the app. A common card stays flat;
@@ -561,22 +588,10 @@ body > .casa-particle { position: absolute; z-index: 60; }
   100% { transform: translateY(0) rotate(0) scale(1); }
 }
 
-/* The card hides a surprise this week: a little ribbon that wiggles now and then. */
-.bounty-tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  height: 20px;
-  padding: 0 8px 0 6px;
-  border-radius: 999px;
-  background: var(--color-ink);
-  color: var(--color-sun);
-  font-size: 11px;
-  font-weight: 800;
-  white-space: nowrap;
-}
-.bounty-tag-icon { width: 24px; height: 24px; flex-shrink: 0; justify-content: center; padding: 0; }
-.bounty-tag svg { animation: bounty-wiggle 3.2s ease-in-out infinite; transform-origin: 50% 80%; }
+/* The card hides a surprise this week (its page): a soft terracotta note, its gift wiggling now and then — the card's ribbon, in words. */
+.bounty-note { @apply flex items-center gap-2.5 rounded-2xl bg-[#FCE6D6] py-2.5 pr-3.5 pl-2.5 text-sm leading-snug font-medium text-[#8E3F17]; }
+.bounty-note-icon { @apply flex size-9 shrink-0 items-center justify-center rounded-full bg-clay text-ink; }
+.bounty-note-icon svg { animation: bounty-wiggle 3.2s ease-in-out infinite; transform-origin: 50% 80%; }
 @keyframes bounty-wiggle { 0%, 80%, 100% { transform: rotate(0) scale(1); } 85% { transform: rotate(-16deg) scale(1.2); } 90% { transform: rotate(14deg) scale(1.2); } 95% { transform: rotate(-6deg); } }
 
 .plan-shortcut {
@@ -811,6 +826,63 @@ body > .casa-particle { position: absolute; z-index: 60; }
   100% { transform: translate(calc(-50% + var(--dx, 0px)), calc(-50% + var(--dy, 0px))) scale(1) rotate(160deg); opacity: 0; }
 }
 
+/*
+ * Pull to refresh (templates/base.html.twig, pull_refresh_controller.js): a little Casa in a bubble comes
+ * down from above the screen, by --pull, while the terracotta ring fills (--progress). Curious ("oh")
+ * on the way, smiling once far enough; she hops while the page refreshes, then beams and goes back up.
+ */
+.pull-refresh {
+  position: fixed;
+  top: calc(env(safe-area-inset-top) - 64px);
+  left: 50%;
+  z-index: 60;
+  display: flex;
+  width: 56px;
+  height: 56px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: var(--color-surface);
+  box-shadow: 0 1px 0 rgba(46, 30, 20, .04), 0 10px 24px -10px rgba(46, 30, 20, .45);
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, var(--pull, 0px)) scale(calc(.75 + .25 * var(--progress, 0)));
+  transition: transform 420ms cubic-bezier(.3, 1.4, .5, 1), opacity 250ms;
+}
+.pull-refresh.is-pulling, .pull-refresh.is-ready, .pull-refresh.is-refreshing, .pull-refresh.is-done { opacity: 1; }
+.pull-refresh.is-pulling { transition: none; }
+.pull-refresh-ring { position: absolute; inset: 0; }
+.pull-refresh-arc { transition: stroke-dashoffset 120ms linear; }
+.pull-refresh.is-pulling .pull-refresh-arc { transition: none; }
+.pull-refresh-casa { position: relative; overflow: visible; transform-origin: 50% 85%; rotate: calc((1 - var(--progress, 0)) * -14deg); transition: rotate 300ms cubic-bezier(.3, 1.6, .5, 1); }
+.pull-refresh.is-pulling .pull-refresh-casa { transition: none; }
+.pull-refresh-joy, .pull-refresh-smile, .pull-refresh-cheek { opacity: 0; }
+.pull-refresh.is-ready .pull-refresh-oh, .pull-refresh.is-refreshing .pull-refresh-oh, .pull-refresh.is-done .pull-refresh-oh { opacity: 0; }
+.pull-refresh.is-ready .pull-refresh-smile, .pull-refresh.is-refreshing .pull-refresh-smile, .pull-refresh.is-done .pull-refresh-smile,
+.pull-refresh.is-ready .pull-refresh-cheek, .pull-refresh.is-refreshing .pull-refresh-cheek, .pull-refresh.is-done .pull-refresh-cheek { opacity: 1; }
+.pull-refresh.is-ready .pull-refresh-casa { animation: pull-refresh-perk 420ms cubic-bezier(.3, 1.6, .5, 1); }
+.pull-refresh.is-refreshing .pull-refresh-casa { rotate: 0deg; animation: pull-refresh-hop 620ms cubic-bezier(.3, 1.4, .5, 1) infinite; }
+.pull-refresh.is-refreshing .pull-refresh-arc { stroke-dasharray: 34 123; stroke-dashoffset: 0 !important; }
+.pull-refresh.is-refreshing .pull-refresh-ring { animation: pull-refresh-spin 900ms linear infinite; }
+.pull-refresh.is-done .pull-refresh-eyes { opacity: 0; }
+.pull-refresh.is-done .pull-refresh-joy { opacity: 1; }
+.pull-refresh.is-done .pull-refresh-arc { stroke: var(--color-ok); stroke-dashoffset: 0 !important; }
+.pull-refresh.is-done .pull-refresh-casa { rotate: 0deg; animation: pull-refresh-joy 600ms cubic-bezier(.3, 1.6, .5, 1) both; }
+.pull-refresh-eyes { transform-box: fill-box; transform-origin: center; animation: casa-blink 3.2s infinite; }
+@keyframes pull-refresh-perk { 0% { scale: 1; } 40% { scale: 1.15 .9; } 100% { scale: 1; } }
+@keyframes pull-refresh-hop {
+  0%, 100% { transform: translateY(0) scale(1, 1); }
+  20% { transform: translateY(0) scale(1.1, .88); }
+  55% { transform: translateY(-6px) scale(.95, 1.06); }
+}
+@keyframes pull-refresh-spin { to { rotate: 360deg; } }
+@keyframes pull-refresh-joy {
+  0% { transform: scale(1, 1); }
+  25% { transform: scale(1.12, .88); }
+  55% { transform: translateY(-7px) scale(.95, 1.06); }
+  100% { transform: translateY(0) scale(1, 1); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
@@ -890,7 +962,47 @@ main:has(> p[role="status"]) .home-hero { margin-top: 0; }
 
 /* The state of the house: her cleanliness, the steps of her moods on the gauge, and a task she asks for. */
 /* -60px: over the last 44px of her ground, the page's gap of 16px aside. */
-.casa-state { @apply sheet relative z-[2] -mt-[60px] flex flex-col gap-3.5 px-4 pt-4 pb-3.5; }
+.casa-state { @apply sheet relative z-[2] -mt-[60px] flex flex-col gap-3.5 px-4 pt-[26px] pb-3.5; }
+/*
+ * Its two faces, the Casa's cleanliness and the goal of the house. The switch between them is a pill inlaid
+ * in the sheet's edge, half on the Casa's grass: the sand of the home's filters, ringed with the sheet's own
+ * surface, no shadow under it. A cream thumb slides under the open face, whose drawing takes its colour
+ * (the house in terracotta, the cup in honey).
+ */
+.state-switch {
+  @apply absolute top-0 left-1/2 z-[3] grid -translate-x-1/2 -translate-y-1/2 grid-cols-2 rounded-full bg-track p-[3px];
+  box-shadow: 0 0 0 3px var(--color-surface);
+}
+.state-switch::before {
+  content: '';
+  position: absolute;
+  inset: 3px auto 3px 3px;
+  width: calc(50% - 3px);
+  border-radius: 999px;
+  background: var(--color-surface);
+  box-shadow: 0 1px 2px rgba(46, 30, 20, .12);
+  transition: translate 380ms cubic-bezier(.3, 1.3, .5, 1);
+}
+.casa-state[data-face="team"] .state-switch::before { translate: 100% 0; }
+.state-switch button { @apply relative flex h-7 cursor-pointer items-center justify-center gap-1.5 rounded-full px-[13px] text-[12.5px] font-semibold whitespace-nowrap text-[#6B5646] transition-colors duration-300 hover:text-ink; }
+.state-switch button svg { @apply shrink-0 text-[#8C7461] transition-colors duration-300; }
+.state-switch button[aria-selected="true"] { @apply text-ink; }
+.state-switch button[aria-selected="true"] svg { @apply text-clay; }
+.state-switch button[aria-controls="state-team"][aria-selected="true"] svg { color: #D4931C; }
+.state-switch button:active svg { scale: .85; }
+
+/*
+ * The stage of the two faces: while they cross, its height glides from one to the other (state_switch_controller.js),
+ * the face leaving slides away and fades out of the flow, the face coming slides in from the side the thumb goes to.
+ */
+.state-faces { position: relative; }
+.state-faces.is-switching { overflow-x: visible; overflow-y: clip; transition: height 420ms cubic-bezier(.3, 1, .4, 1); }
+.state-face { @apply flex flex-col gap-3.5; }
+.state-face.is-leaving { position: absolute; inset: 0 0 auto; pointer-events: none; animation: state-face-out 240ms cubic-bezier(.4, 0, 1, 1) both; }
+.state-face.is-coming { animation: state-face-in 420ms cubic-bezier(.2, 1, .3, 1) 60ms both; }
+@keyframes state-face-out { to { opacity: 0; translate: calc(var(--dir, 1) * -14px) 0; } }
+@keyframes state-face-in { from { opacity: 0; translate: calc(var(--dir, 1) * 14px) 0; } }
+.state-face .team-drawer { @apply -mb-2; }
 .casa-gauge { position: relative; }
 .casa-gauge-step { position: absolute; top: -4px; width: 2px; height: 16px; margin-left: -1px; border-radius: 1px; background: rgba(46, 30, 20, .18); }
 .casa-gauge-step.is-next { background: var(--color-clay); }
@@ -900,8 +1012,11 @@ main:has(> p[role="status"]) .home-hero { margin-top: 0; }
   @apply -ml-1 flex size-[30px] shrink-0 cursor-pointer items-center justify-center rounded-[9px] text-[#B3A190] transition hover:bg-track hover:text-ink;
 }
 
-/* "À toi de jouer": the cards of the hand, side by side, to slide through. */
-.hand { @apply -mx-5 flex snap-x snap-mandatory gap-3 overflow-x-auto px-5 pt-1 pb-4 [scrollbar-width:none]; }
+/*
+ * "À toi de jouer": the cards of the hand, side by side, to slide through. The scroll padding is
+ * where a card snaps to: without it, the first card snapped back against the screen's edge.
+ */
+.hand { @apply -mx-5 flex snap-x snap-mandatory scroll-px-5 gap-3 overflow-x-auto px-5 pt-1 pb-4 [scrollbar-width:none]; }
 .hand-card { @apply w-[300px] max-w-[85%] shrink-0 snap-start; }
 .hand-card > .play-card { height: 100%; }
 .hand-card > .play-card > .play-card-face { height: 100%; }
@@ -923,6 +1038,64 @@ main:has(> p[role="status"]) .home-hero { margin-top: 0; }
 .deck.is-empty { @apply cursor-default; }
 .deck.is-empty::before, .deck.is-empty::after { display: none; }
 .deck.is-empty .deck-face { @apply border-[1.5px] border-dashed border-[#DCCFBC] bg-none text-muted shadow-none; background-color: transparent; transform: none; }
+
+/*
+ * The bottom bar (templates/components/BottomNav.html.twig): thin, on the surface, a hairline and a soft
+ * shadow above it. In its middle, a bump of the same surface lifts "Ajouter", a round terracotta button
+ * that stands out of the bar. The open page's drawing fills in with the Casa's colours and pops.
+ */
+.nav-bar {
+  position: fixed;
+  inset: auto 0 0;
+  z-index: 20;
+  padding-bottom: env(safe-area-inset-bottom);
+  background: var(--color-surface);
+  box-shadow: 0 -1px 0 var(--color-line), 0 -14px 30px -22px rgba(46, 30, 20, .35);
+}
+.nav-bar-bump {
+  position: absolute;
+  bottom: calc(100% - 4px);
+  left: 50%;
+  translate: -50% 0;
+  filter: drop-shadow(0 -6px 8px rgba(46, 30, 20, .05));
+  pointer-events: none;
+}
+.nav-bar-items { @apply relative mx-auto grid h-[58px] max-w-md grid-cols-5 items-stretch px-2; }
+.nav-bar-items > li { @apply flex justify-center; }
+.nav-bar-link, .nav-bar-add {
+  @apply flex w-full max-w-[76px] flex-col items-center justify-end gap-[3px] pb-[7px] no-underline transition;
+}
+.nav-bar-link { @apply text-muted hover:text-ink; }
+.nav-bar-link:active .nav-bar-icon { scale: .88; }
+.nav-bar-label { @apply text-[10.5px] leading-none font-semibold tracking-[.01em]; }
+.nav-bar-icon { @apply flex size-[26px] items-center justify-center; transition: scale 160ms cubic-bezier(.3, 1.6, .5, 1); }
+.nav-bar-icon svg [class^="nav-"] { transition: fill 200ms, stroke 200ms; }
+.nav-bar-link.is-current { @apply text-ink; }
+.nav-bar-link.is-current .nav-bar-label { @apply font-bold; }
+.nav-bar-link.is-current .nav-bar-icon { animation: nav-pop 520ms cubic-bezier(.2, 1.6, .4, 1) both; }
+.nav-bar-link.is-current .nav-fill-sun { fill: var(--color-sun); }
+.nav-bar-link.is-current .nav-fill-blush { fill: var(--color-blush); }
+.nav-bar-link.is-current .nav-fill-clay { fill: var(--color-clay); }
+.nav-bar-link.is-current .nav-fill-surface { fill: var(--color-surface); }
+.nav-bar-link.is-current .nav-stroke-clay { stroke: var(--color-clay); stroke-width: 2.6; }
+/* The profile is who is there: their face, ringed in ink when it is the page. */
+.nav-bar-avatar { opacity: .8; box-shadow: 0 0 0 2px var(--color-surface), 0 0 0 3.5px transparent; transition: box-shadow 200ms, opacity 200ms; }
+.nav-bar-link:hover .nav-bar-avatar { opacity: 1; }
+.nav-bar-link.is-current .nav-bar-avatar { opacity: 1; box-shadow: 0 0 0 2px var(--color-surface), 0 0 0 3.5px var(--color-ink); }
+
+/* "Ajouter": out of the bar, the size of a thumb, ink on terracotta (never white). */
+.nav-bar-add { @apply text-clay-dark hover:text-clay-dark; }
+.nav-bar-add-disc {
+  @apply mb-0.5 flex size-[54px] items-center justify-center rounded-full bg-clay text-ink;
+  margin-top: -27px;
+  box-shadow: inset 0 -3px 0 rgba(46, 30, 20, .14), 0 10px 18px -8px rgba(180, 82, 31, .75);
+  transition: transform 220ms cubic-bezier(.3, 1.6, .5, 1), background-color 150ms;
+}
+.nav-bar-add-disc svg { transition: transform 300ms cubic-bezier(.3, 1.6, .5, 1); }
+.nav-bar-add:hover .nav-bar-add-disc { @apply bg-clay-hover; transform: translateY(-2px); }
+.nav-bar-add:hover .nav-bar-add-disc svg { transform: rotate(90deg); }
+.nav-bar-add:active .nav-bar-add-disc { transform: scale(.92); box-shadow: inset 0 -1px 0 rgba(46, 30, 20, .14), 0 4px 10px -6px rgba(180, 82, 31, .75); }
+@keyframes nav-pop { 0% { transform: scale(.6) translateY(4px); } 60% { transform: scale(1.12) translateY(-2px); } 100% { transform: none; } }
 
 /* "Prendre soin de la Casa": the filters, then the groups of urgency. */
 .segmented { @apply grid grid-cols-3 gap-0.5 rounded-[13px] bg-track/70 p-[3px]; }
@@ -1002,12 +1175,32 @@ details[open] .care-group-fold::after { content: 'Replier'; font-size: 12.5px; }
 .play-card-notes { @apply col-span-full mt-3 flex flex-col gap-1.5; }
 .play-card-actions { @apply col-span-full mt-3 border-t border-[#F0E8DB] pt-[11px]; }
 .play-card-compact .play-card-actions { @apply mt-2.5 pt-2; }
-.play-card-surprise {
-  @apply absolute -top-[7px] right-3.5 z-[3] flex h-[22px] items-center gap-[5px] rounded-[7px] bg-ink pr-[9px] pl-[7px] text-[10px] font-semibold tracking-[.1em] text-[#F1C964] uppercase shadow-[0_6px_12px_-6px_rgba(46,30,20,.6)];
+/*
+ * A surprise: the card is wrapped like a present. A terracotta ribbon across its top right corner
+ * (a 225deg gradient measures from that corner: the band runs 17 to 39px from it, over the tip
+ * of the picture's arch), two stitches along it, and a bow tied on it that wriggles now and then.
+ */
+.play-card-ribbon {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  border-radius: 18px;
+  overflow: hidden;
+  pointer-events: none;
+  backface-visibility: hidden;
+  background: linear-gradient(225deg, transparent 17px, #C8582A 17px 18px, var(--color-clay) 18px 20px, rgba(255, 246, 233, .55) 20px 21px, var(--color-clay) 21px 35px, rgba(255, 246, 233, .55) 35px 36px, var(--color-clay) 36px 38px, #C8582A 38px 39px, transparent 39px);
 }
-.play-card-surprise svg { animation: play-card-glint 2.8s ease-in-out infinite; }
+.play-card-bow {
+  position: absolute;
+  top: 6px;
+  right: -1px;
+  rotate: -45deg;
+  filter: drop-shadow(0 2px 2px rgba(120, 50, 15, .3));
+  transform-origin: 50% 50%;
+  animation: play-card-bow 4s ease-in-out infinite;
+}
 @keyframes play-card-dot { 50% { box-shadow: 0 0 0 4px rgba(224, 108, 85, .18); } }
-@keyframes play-card-glint { 0%, 70%, 100% { transform: scale(1) rotate(0); } 80% { transform: scale(1.35) rotate(45deg); } }
+@keyframes play-card-bow { 0%, 78%, 100% { transform: scale(1) rotate(0); } 83% { transform: scale(1.18) rotate(-10deg); } 89% { transform: scale(1.12) rotate(8deg); } 95% { transform: scale(1) rotate(-3deg); } }
 
 /* Its picture, in an arch; without one, its category. */
 .vignette { position: relative; display: block; width: 60px; height: 78px; overflow: hidden; border-radius: 30px 30px 9px 9px; }

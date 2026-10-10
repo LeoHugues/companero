@@ -5,7 +5,7 @@
     a thin line, and its picture in an arch (TaskVignette). Across the card: the note for this time (or the
     template's precision) and who is counted on; at the bottom, "Je prends" and "C'est fait".
     Its rarity is the finish of its edge — paper, silver, pearl, gold — never written on it; a surprise
-    hidden in it this week makes it one class rarer, with a small "Surprise" tag.
+    hidden in it this week makes it one class rarer, and wraps it with a ribbon tied in a bow.
     Once done, it turns over (done_controller.js): its back says thank you.
     The whole card opens its page, where its settings are; only the buttons sit above that link.
     compact: lists (rooms), without the picture, with a single round "done" button.
@@ -23,8 +23,16 @@
     'data-alert': status.alert
 }) }}>
     {% if view.bounty %}
-        <span class="play-card-surprise" role="img" aria-label="Surprise cachée" title="Une surprise attend la première personne qui la fait cette semaine">
-            <svg width="9" height="9" viewBox="0 0 10 10" aria-hidden="true"><path d="M5 0 L6.2 3.8 L10 5 L6.2 6.2 L5 10 L3.8 6.2 L0 5 L3.8 3.8Z" fill="currentColor"/></svg>Surprise
+        {# Wrapped like a present: a terracotta ribbon across its corner, tied with a bow. #}
+        <span class="play-card-ribbon" role="img" aria-label="Surprise cachée" title="Une surprise attend la première personne qui la fait cette semaine">
+            <svg class="play-card-bow" width="42" height="28" viewBox="0 0 30 20" aria-hidden="true">
+                <g stroke="#9A4318" stroke-width=".8" stroke-linejoin="round">
+                    <path d="M13.8 10.5 L9.6 18.8 L12.3 17.9 L13.9 19.6 L15.2 11 Z M16.2 10.5 L20.4 18.8 L17.7 17.9 L16.1 19.6 L14.8 11 Z" fill="#D2622B"/>
+                    <path d="M15 10 C11 3 3.5 0.5 2.2 4.6 C1 8.6 8 11.5 15 10 Z M15 10 C19 3 26.5 0.5 27.8 4.6 C29 8.6 22 11.5 15 10 Z" fill="#F58A4E"/>
+                </g>
+                <path d="M15 10 C11.5 6.5 6.5 5 5 6.6 C7.5 8.6 11 9.8 15 10 Z M15 10 C18.5 6.5 23.5 5 25 6.6 C22.5 8.6 19 9.8 15 10 Z" fill="#B4521F" opacity=".5"/>
+                <ellipse cx="15" cy="10" rx="2.9" ry="3.1" fill="#D2622B" stroke="#9A4318" stroke-width=".8"/>
+            </svg>
         </span>
     {% endif %}
     <div class="play-card-face">

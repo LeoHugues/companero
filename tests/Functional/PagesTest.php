@@ -61,8 +61,10 @@ final class PagesTest extends AppTestCase
         $this->client->loginUser($leo);
 
         $this->client->request('GET', '/');
-        self::assertSelectorExists('[aria-labelledby=team-title] [role=progressbar]');
-        self::assertSelectorNotExists('[aria-labelledby=team-title] li');
+        // The other face of the card of the house's state, behind its switch.
+        self::assertSelectorExists('[role=tab][aria-controls=state-team]');
+        self::assertSelectorExists('#state-team[hidden] [role=progressbar]');
+        self::assertSelectorNotExists('#state-team li');
         self::assertSelectorTextContains('.team-drawer', 'Rien encore cette semaine');
 
         // The weekly review keeps everyone's share.
@@ -179,8 +181,9 @@ final class PagesTest extends AppTestCase
 
         $this->client->request('GET', '/plan');
         self::assertSelectorExists('svg[aria-label="Plan de la maison"] a[aria-label^="Cuisine"] polygon[points="0,0 20,0 20,15 0,15"]');
-        // The rooms without a shape stay below, as tiles.
-        self::assertSelectorTextContains('[aria-label="Les autres zones"]', 'Salon');
+        // The rooms without a shape stay below, in the list of rooms.
+        self::assertSelectorTextContains('[aria-label="Les pièces"]', 'Salon');
+        self::assertSelectorTextContains('[aria-label="Les pièces"]', 'hors du plan');
     }
 
     public function testAddingAZone(): void

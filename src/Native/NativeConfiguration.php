@@ -22,10 +22,11 @@ final class NativeConfiguration
     public function android(): Configuration
     {
         return new Configuration(rules: [
+            // No native pull to refresh: the page has its own, the Casa coming down (pull_refresh_controller.js).
             new Rule(patterns: ['.*'], properties: [
                 'context' => 'default',
                 'uri' => 'hotwire://fragment/web',
-                'pull_to_refresh_enabled' => true,
+                'pull_to_refresh_enabled' => false,
             ]),
             // The bottom navigation, the login and the steps of the tour switch screens instead of piling them up
             // (including the review's other weeks, and its ± buttons that redirect to a dated week).
@@ -35,7 +36,6 @@ final class NativeConfiguration
             // Task (and completion) forms slide up as modals; their close button recedes to the screen underneath.
             new Rule(patterns: ['^/taches/nouvelle', '^/taches/\d+/modifier', '^/realisations/\d+/modifier'], properties: [
                 'context' => 'modal',
-                'pull_to_refresh_enabled' => false,
             ]),
         ]);
     }

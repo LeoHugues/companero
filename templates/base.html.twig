@@ -27,6 +27,24 @@
     <body class="min-h-dvh">
         {# The Android app's own vibrations (Hotwire Native bridge); nothing in a browser. #}
         <div data-controller="haptics" hidden></div>
+        {# Pull to refresh: a little Casa comes down from the sky (pull_refresh_controller.js). #}
+        <div id="pull-refresh" class="pull-refresh" data-controller="pull-refresh" data-turbo-permanent aria-hidden="true">
+            <svg class="pull-refresh-ring" width="56" height="56" viewBox="0 0 56 56">
+                <circle cx="28" cy="28" r="25" fill="none" stroke="var(--color-track)" stroke-width="3"/>
+                <circle class="pull-refresh-arc" data-pull-refresh-target="arc" cx="28" cy="28" r="25" fill="none" stroke="var(--color-clay)" stroke-width="3" stroke-linecap="round" pathLength="157" stroke-dasharray="157" stroke-dashoffset="157" transform="rotate(-90 28 28)"/>
+            </svg>
+            <svg class="pull-refresh-casa" width="32" height="32" viewBox="0 0 40 40">
+                <rect x="25" y="9.5" width="4" height="7" rx="1" fill="#8C5A3C"/>
+                <path d="M9.5 19 L20 10.5 L30.5 19 V31 a2.5 2.5 0 0 1 -2.5 2.5 H12 a2.5 2.5 0 0 1 -2.5 -2.5 Z" fill="#F6C453"/>
+                <path d="M6.5 20.5 L20 9.2 L33.5 20.5" fill="none" stroke="#E8692C" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="13.4" cy="27.4" r="1.6" fill="#F2A27A" class="pull-refresh-cheek"/>
+                <circle cx="26.6" cy="27.4" r="1.6" fill="#F2A27A" class="pull-refresh-cheek"/>
+                <g class="pull-refresh-eyes" fill="#2E1E14"><circle cx="16.2" cy="23.6" r="1.6"/><circle cx="23.8" cy="23.6" r="1.6"/></g>
+                <path class="pull-refresh-joy" d="M14.6 24.2 q1.6 -2 3.2 0 M22.2 24.2 q1.6 -2 3.2 0" fill="none" stroke="#2E1E14" stroke-width="1.4" stroke-linecap="round"/>
+                <ellipse class="pull-refresh-oh" cx="20" cy="28.4" rx="1.2" ry="1.4" fill="#2E1E14"/>
+                <path class="pull-refresh-smile" d="M17 27.4 q3 2.8 6 0" fill="none" stroke="#2E1E14" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+        </div>
         <main class="mx-auto flex max-w-md flex-col gap-4 px-5 pt-5 {% block main_class %}pb-28{% endblock %}">
             {% for message in app.flashes('success') %}
                 <p class="animate-pop rounded-2xl bg-ink px-4 py-3 text-[15px] font-semibold text-cream" role="status" data-controller="dismiss">{{ message }}</p>

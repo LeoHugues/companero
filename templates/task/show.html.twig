@@ -34,9 +34,9 @@
         {% endif %}
         {% if boost %}<p class="flex items-center gap-1 text-sm font-bold text-muted"><twig:Icon name="bolt" size="15" stroke="2.6"/> dont +{{ boost }} de boost</p>{% endif %}
         {% if view.bounty %}
-            <p class="flex items-center gap-2.5 rounded-2xl bg-ink px-3 py-2.5 text-sm font-semibold text-cream">
-                <span class="bounty-tag shrink-0"><twig:Icon name="gift" size="12" stroke="2.6"/>Surprise</span>
-                <span>Une surprise attend la première personne qui la fait cette semaine.</span>
+            <p class="bounty-note">
+                <span class="bounty-note-icon"><twig:Icon name="gift" size="18" stroke="2"/></span>
+                <span><strong class="font-bold">Une surprise</strong> attend la première personne qui la fait cette semaine.</span>
             </p>
         {% endif %}
         <twig:ReminderNote :view="view" :member="app.user"/>

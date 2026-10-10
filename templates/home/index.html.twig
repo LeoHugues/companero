@@ -46,45 +46,56 @@
             <a href="{{ path('plan_show') }}" class="home-plan" aria-label="Le plan de la maison"><twig:Icon name="plan" size="16" stroke="1.8"/>Plan</a>
         </section>
 
-        <section class="casa-state" aria-label="État de la Casa">
-            <div class="flex items-end justify-between gap-3">
-                <div class="min-w-0">
-                    <p class="eyebrow">Propreté de la Casa</p>
-                    <h2 class="mt-1 text-xl leading-tight font-bold tracking-tight">{{ mood.title }}</h2>
-                </div>
-                <p class="shrink-0 text-[30px] leading-none font-bold tracking-tight"><twig:Count :value="cleanliness" key="casa"/><span class="text-base font-semibold text-muted"> %</span></p>
+        {#
+            The card of the house's state, with two faces and a small switch between them (state_switch_controller.js):
+            the Casa's cleanliness and the task she asks for, by default; the goal of the house and what earned its points.
+        #}
+        <section class="casa-state sheet" aria-label="État de la maison" data-controller="state-switch" data-action="turbo:morph-element->state-switch#restore">
+            <div class="state-switch" role="tablist" aria-label="Afficher">
+                <button type="button" role="tab" id="state-tab-casa" aria-controls="state-casa" aria-selected="true" data-state-switch-target="tab" data-action="state-switch#show" data-state-switch-face-param="casa"><twig:Icon name="home" size="15" stroke="2.1"/>Propreté</button>
+                <button type="button" role="tab" id="state-tab-team" aria-controls="state-team" aria-selected="false" data-state-switch-target="tab" data-action="state-switch#show" data-state-switch-face-param="team"><twig:Icon name="trophy" size="15" stroke="2.1"/>Objectif</button>
             </div>
-            {% set next = mood.next %}
-            <div class="casa-gauge">
-                <twig:ProgressBar :value="cleanliness" :height="8" label="Propreté de la Casa" key="casa"/>
-                {% for step in [55, 80, 92] %}
-                    <span class="casa-gauge-step {{ next and next[0] == step ? 'is-next' }}" style="left: {{ step }}%" aria-hidden="true"></span>
-                {% endfor %}
-            </div>
-            <p class="-mt-1 text-[12.5px] text-muted">
-                {% if next %}<span class="font-semibold text-clay-dark">+{{ next[0] - cleanliness }} %</span> et {{ next[1] }}{% else %}Elle rayonne : bravo la coloc.{% endif %}
-            </p>
-
-            {% for view in quests %}
-                <div class="quest" data-quest-target="quest" data-line="{{ casa_quest_line(view) }}" {{ not loop.first ? 'hidden' }}>
-                    <twig:TaskVignette :task="view.task" class="vignette-small"/>
-                    <div class="min-w-0 flex-1">
-                        <p class="line-clamp-2 text-[14.5px] leading-tight font-semibold"><a href="{{ path('task_show', {id: view.task.id}) }}" class="text-ink no-underline hover:text-ink">{{ view.task.title }}</a></p>
-                        <p class="mt-0.5 text-xs text-muted">+{{ view.task.currentPoints + task_boost(view) }} pts · {{ task_status_label(view.task, view.status)|lower }}</p>
+            {# Both faces share one stage: its height glides from one to the other, and a sideways swipe turns it. #}
+            <div class="state-faces" data-state-switch-target="stage" data-action="touchstart->state-switch#touchStart touchend->state-switch#touchEnd">
+                <div class="state-face" id="state-casa" role="tabpanel" aria-labelledby="state-tab-casa" data-state-switch-target="panel" data-face="casa">
+                    <div class="flex items-end justify-between gap-3">
+                        <h2 class="min-w-0 text-xl leading-tight font-bold tracking-tight"><span class="sr-only">Propreté de la Casa : </span>{{ mood.title }}</h2>
+                        <p class="shrink-0 text-[30px] leading-none font-bold tracking-tight"><twig:Count :value="cleanliness" key="casa"/><span class="text-base font-semibold text-muted"> %</span></p>
                     </div>
-                    <form method="post" action="{{ path('task_reserve', {id: view.task.id}) }}" class="shrink-0">
-                        <input type="hidden" name="_back" value="home">
-                        <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
-                        <button type="submit" class="seat-stacked" aria-label="Je m’en occupe : « {{ view.task.title }} »">
-                            <span class="seat-stacked-disc" aria-hidden="true"><span class="seat-empty"><twig:Icon name="plus" size="12" stroke="2.6"/></span></span>
-                            Je prends
-                        </button>
-                    </form>
-                    {% if quests|length > 1 %}
-                        <button type="button" class="quest-next" data-action="quest#next" data-haptic="tick" aria-label="Une autre quête" title="Une autre"><twig:Icon name="repeat" size="15" stroke="1.8"/></button>
-                    {% endif %}
+                    {% set next = mood.next %}
+                    <div class="casa-gauge">
+                        <twig:ProgressBar :value="cleanliness" :height="8" label="Propreté de la Casa" key="casa"/>
+                        {% for step in [55, 80, 92] %}
+                            <span class="casa-gauge-step {{ next and next[0] == step ? 'is-next' }}" style="left: {{ step }}%" aria-hidden="true"></span>
+                        {% endfor %}
+                    </div>
+                    <p class="-mt-1 text-[12.5px] text-muted">
+                        {% if next %}<span class="font-semibold text-clay-dark">+{{ next[0] - cleanliness }} %</span> et {{ next[1] }}{% else %}Elle rayonne : bravo la coloc.{% endif %}
+                    </p>
+
+                    {% for view in quests %}
+                        <div class="quest" data-quest-target="quest" data-line="{{ casa_quest_line(view) }}" {{ not loop.first ? 'hidden' }}>
+                            <twig:TaskVignette :task="view.task" class="vignette-small"/>
+                            <div class="min-w-0 flex-1">
+                                <p class="line-clamp-2 text-[14.5px] leading-tight font-semibold"><a href="{{ path('task_show', {id: view.task.id}) }}" class="text-ink no-underline hover:text-ink">{{ view.task.title }}</a></p>
+                                <p class="mt-0.5 text-xs text-muted">+{{ view.task.currentPoints + task_boost(view) }} pts · {{ task_status_label(view.task, view.status)|lower }}</p>
+                            </div>
+                            <form method="post" action="{{ path('task_reserve', {id: view.task.id}) }}" class="shrink-0">
+                                <input type="hidden" name="_back" value="home">
+                                <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
+                                <button type="submit" class="seat-stacked" aria-label="Je m’en occupe : « {{ view.task.title }} »">
+                                    <span class="seat-stacked-disc" aria-hidden="true"><span class="seat-empty"><twig:Icon name="plus" size="12" stroke="2.6"/></span></span>
+                                    Je prends
+                                </button>
+                            </form>
+                            {% if quests|length > 1 %}
+                                <button type="button" class="quest-next" data-action="quest#next" data-haptic="tick" aria-label="Une autre quête" title="Une autre"><twig:Icon name="repeat" size="15" stroke="1.8"/></button>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
                 </div>
-            {% endfor %}
+                <twig:TeamBar id="state-team" class="state-face" role="tabpanel" aria-labelledby="state-tab-team" data-state-switch-target="panel" data-face="team" hidden :team="team" :household="app.user.household" :detailed="false" :done="done_this_week"/>
+            </div>
         </section>
     </div>
 
@@ -118,8 +129,6 @@
             <li class="hand-card"><twig:Deck :view="draw"/></li>
         </ul>
     </section>
-
-    <twig:TeamBar :team="team" :household="app.user.household" :detailed="false" :done="done_this_week"/>
 
     {% if quick_count > 0 %}
         <section class="-mx-5 flex flex-col gap-3" aria-labelledby="quick-title">

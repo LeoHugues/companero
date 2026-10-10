@@ -106,8 +106,10 @@ Choisie pour chaque tâche dans son formulaire, **commune** par défaut :
 | Légendaire | Bordure dorée `#E3A21A` où une lumière fait le tour (4,5 s), halo doré, reflet |
 
 Une pastille en capitales (« RARE », « ÉPIQUE »…) avec un petit diamant rappelle la rareté.
-Une carte qui cache une **surprise** cette semaine passe d'une rareté au-dessus et porte une
-pastille encre avec un petit cadeau qui gigote de temps en temps.
+Une carte qui cache une **surprise** cette semaine passe d'une rareté au-dessus et est
+**emballée comme un cadeau** : un ruban terre cuite barre son coin en haut à droite (deux surpiqûres
+crème, au-dessus de la pointe de la vignette), noué d'un petit nœud qui gigote de temps en temps.
+Sur la page de la tâche, la même surprise se dit dans un encart terre cuite pâle, avec un cadeau qui gigote.
 Les animations s'arrêtent si le téléphone demande moins d'animations.
 
 ## La Casa
@@ -173,13 +175,69 @@ miaulent (« Miaou ! », « Prrrr… »). Quand une tâche est faite, ils sauten
 | Carton jaune reçu | Le carton arrive en tournoyant | 900 ms |
 
 | Friandise | Les croquettes tombent dans la gamelle, le chat mâche, des cœurs, le téléphone ronronne | 2,6 s |
+| Tirer pour rafraîchir | Une petite Casa descend du ciel dans sa bulle, curieuse (« oh »), pendant qu'un anneau terre cuite se remplit ; pleine, elle sourit. Lâchée, elle sautille pendant que la page se met à jour sur place, puis ferme les yeux de joie (anneau sauge) et remonte | tant que le doigt tire, puis 750 ms au moins + 650 ms |
+
+Le rafraîchissement du navigateur (et celui de l'appli Android) est remplacé par celui de la Casa :
+on garde la main sur l'animation, et la page se met à jour sur place, comme après « C'est fait ».
+Il ne se déclenche pas si un champ a été modifié, pour ne jamais perdre une saisie.
 
 Après « C'est fait » (ou tout formulaire qui revient sur la même page), la page se met à jour
 sur place, sans recharger : la célébration, les jauges et la Casa jouent tout de suite, y
 compris dans l'appli Android.
 
-L'accueil a un raccourci vers **le plan de la maison** : un petit plan de quatre pièces colorées
-dans une pastille à bord encre, à côté de la propreté.
+L'accueil a un raccourci vers **le plan de la maison** : une pastille « Plan » posée sur le ciel
+de la Casa.
+
+## L'état de la maison
+
+Sous la Casa, **une seule feuille à deux faces**. Pour passer de l'une à l'autre, une pilule
+**incrustée** dans le bord de la feuille, à moitié sur l'herbe, centrée sous la Casa : le sable des
+filtres de l'accueil, cerclé de la surface de la feuille, sans ombre. Un curseur crème glisse sous la
+face ouverte, dont le dessin prend sa couleur : la maison en terre cuite, la coupe en miel.
+
+- **Propreté**, par défaut : l'humeur de la Casa, son pourcentage, la jauge et ses paliers, ce qui
+  manque pour la prochaine humeur, puis la tâche qu'elle demande (« Je prends », « Une autre ? ») ;
+- **Objectif** : les points de la coloc sur l'objectif de la maison, l'échéance (J-1…), la jauge et
+  les jours, les visages de la coloc, la série, et le tiroir de ce qui a rapporté ces points.
+
+Un glissement du doigt sur la feuille la tourne aussi (vers la gauche, l'objectif). Les deux faces se
+croisent : celle qui part glisse et s'efface, celle qui arrive entre du côté où va le curseur, et ses
+jauges et compteurs repartent de zéro (420 ms). La feuille a la hauteur de la plus grande face, tiroir
+replié : la tourner ne déplace rien en dessous ; quand le tiroir est ouvert, sa hauteur glisse. La face
+choisie tient quand la page se met à jour sur place (après « C'est fait »), et la propreté revient à
+chaque nouvelle visite de l'accueil.
+
+## La barre du bas
+
+Fine (58 px), sur la surface, avec un filet et une ombre douce au-dessus. Quatre dessins
+légendés (Accueil, Tâches, Bilan, Profil) et, au milieu, **« Ajouter »** : un bouton rond terre
+cuite de 54 px, plus encre, qui sort de la barre posé sur une **bosse** de la même surface (le seul
+relief de la barre). La page ouverte se remplit des couleurs de la Casa et rebondit :
+
+| Onglet | Dessin | Ouvert |
+|---|---|---|
+| Accueil | une petite maison avec un visage | elle devient la Casa : corps jaune, toit terre cuite |
+| Tâches | deux cartes à jouer en éventail | la carte du fond rosit, celle de devant porte un carreau terre cuite |
+| Bilan | trois barres | jaune, terre cuite, jaune |
+| Profil | le visage du membre (sa couleur, son initiale) | cerclé d'encre |
+
+## Le plan
+
+La maison vue d'en haut, dans le calme de l'accueil, sur une feuille :
+
+- **le jardin** tout autour, vert prairie (celui du paysage de la Casa), quelques touffes d'herbe et
+  des buissons fleuris ; il sèche quand le jardin est négligé ;
+- **des murs clairs** (sable `#D3BFA3`), plus de gros traits noirs, et l'ombre de la maison sur l'herbe ;
+- **les sols** : crème quand tout va bien, miel pâle puis corail pâle selon l'humeur de la pièce
+  (mêmes seuils que la Casa : 55, 80, 92 %), avec leur matière devinée du nom de la pièce — parquet,
+  carrelage là où il y a de l'eau, lames de bois pour une terrasse ;
+- **la poussière** posée dans les pièces qui ont besoin d'un coup de main, **une étincelle** dans celles
+  à 100 % ;
+- le nom, puis une pastille de couleur (sauge, miel, corail) et le pourcentage ; ce qui presse dans
+  une pastille terre cuite qui sautille.
+
+Dessous, **pièce par pièce**, de celle qui a le plus besoin de toi à la plus propre : la petite Casa
+de son humeur, une jauge sauge, miel ou corail, ce qu'il y a à faire.
 
 ### Vibrations
 

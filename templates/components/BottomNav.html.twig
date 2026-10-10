@@ -1,24 +1,64 @@
 {% props active %}
+{#
+    The bottom bar: thin, four words under four drawings, and "Ajouter" in the middle, a round
+    terracotta button standing out of the bar on a bump of its own. Each drawing fills in with
+    the Casa's colours when its page is open: the house turns into the Casa, the cards and the
+    bars take her yellow and terracotta, the profile shows who is there.
+#}
 {% set items = [
-    {key: 'home', route: 'app_home', icon: 'home', label: 'Accueil'},
-    {key: 'tasks', route: 'task_index', icon: 'layers', label: 'Les modèles'},
-    {key: 'new', route: 'task_new', icon: 'plus', label: 'Ajouter'},
-    {key: 'review', route: 'review_show', icon: 'chart', label: 'Bilan de la semaine'},
-    {key: 'profile', route: 'profile_show', icon: 'user', label: 'Profil'},
+    {key: 'home', route: 'app_home', label: 'Accueil'},
+    {key: 'tasks', route: 'task_index', label: 'Tâches', title: 'Les modèles'},
+    {key: 'new', route: 'task_new', label: 'Ajouter'},
+    {key: 'review', route: 'review_show', label: 'Bilan', title: 'Bilan de la semaine'},
+    {key: 'profile', route: 'profile_show', label: 'Profil'},
 ] %}
-<nav {{ attributes.defaults({class: 'fixed inset-x-0 bottom-0 z-20 border-t border-line bg-surface/95 pb-[env(safe-area-inset-bottom)] backdrop-blur'}) }} aria-label="Navigation principale">
-    <ul class="mx-auto flex h-[70px] max-w-md items-center justify-around px-3">
+<nav {{ attributes.defaults({class: 'nav-bar'}) }} aria-label="Navigation principale">
+    <svg class="nav-bar-bump" width="132" height="30" viewBox="0 0 132 30" aria-hidden="true">
+        <path d="M0 25.5 C24 25.5 32 24 40 15.2 C48 6.5 55 2 66 2 C77 2 84 6.5 92 15.2 C100 24 108 25.5 132 25.5 V30 H0 Z" fill="var(--color-surface)"/>
+        <path d="M0 25.5 C24 25.5 32 24 40 15.2 C48 6.5 55 2 66 2 C77 2 84 6.5 92 15.2 C100 24 108 25.5 132 25.5" fill="none" stroke="var(--color-line)" stroke-width="1"/>
+    </svg>
+    <ul class="nav-bar-items">
         {% for item in items %}
+            {% set current = item.key == active %}
             <li>
                 {% if item.key == 'new' %}
-                    <a href="{{ path(item.route) }}" aria-label="{{ item.label }}" class="flex size-[52px] items-center justify-center rounded-2xl bg-clay text-ink no-underline transition hover:bg-clay-hover hover:text-ink active:scale-95">
-                        <twig:Icon name="plus" stroke="2.2"/>
+                    <a href="{{ path(item.route) }}" class="nav-bar-add" data-haptic="press">
+                        <span class="nav-bar-add-disc" aria-hidden="true"><twig:Icon name="plus" size="26" stroke="2.6"/></span>
+                        <span class="nav-bar-label">{{ item.label }}</span>
                     </a>
                 {% else %}
-                    <a href="{{ path(item.route) }}" aria-label="{{ item.label }}"{% if item.key == active %} aria-current="page"{% endif %}
-                       class="flex size-12 flex-col items-center justify-center gap-[3px] no-underline {{ item.key == active ? 'text-ink' : 'text-muted' }} hover:text-ink">
-                        <twig:Icon :name="item.icon" stroke="1.8"/>
-                        {% if item.key == active %}<span class="size-[5px] rounded-full bg-clay"></span>{% endif %}
+                    <a href="{{ path(item.route) }}" class="nav-bar-link{{ current ? ' is-current' }}"{{ current ? ' aria-current="page"' }}{% if item.title is defined %} title="{{ item.title }}"{% endif %}>
+                        <span class="nav-bar-icon" aria-hidden="true">
+                            {% if item.key == 'home' %}
+                                {# A little Casa: her yellow body and terracotta roof when this is the page. #}
+                                <svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                                    <path class="nav-fill-sun" d="M5.5 11.5 V20 a2.2 2.2 0 0 0 2.2 2.2 h10.6 a2.2 2.2 0 0 0 2.2 -2.2 V11.5"/>
+                                    <path class="nav-stroke-clay" d="M3 12.6 L13 4.4 L23 12.6"/>
+                                    <circle cx="10.4" cy="14.6" r="1" fill="currentColor" stroke="none"/>
+                                    <circle cx="15.6" cy="14.6" r="1" fill="currentColor" stroke="none"/>
+                                    <path d="M10.9 17.6 q2.1 1.7 4.2 0" stroke-width="1.6"/>
+                                </svg>
+                            {% elseif item.key == 'tasks' %}
+                                {# Two playing cards, fanned out. #}
+                                <svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round">
+                                    <rect class="nav-fill-blush" x="3.6" y="5.4" width="10.6" height="15" rx="2.4" transform="rotate(-11 8.9 12.9)"/>
+                                    <rect class="nav-fill-surface" x="11" y="5" width="10.6" height="15" rx="2.4" transform="rotate(9 16.3 12.5)"/>
+                                    <path class="nav-fill-clay" d="M16.3 10.2 l2 2.4 l-2 2.4 l-2 -2.4 z" transform="rotate(9 16.3 12.5)" stroke-width="1.3"/>
+                                </svg>
+                            {% elseif item.key == 'review' %}
+                                {# The week in three bars. #}
+                                <svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round">
+                                    <rect class="nav-fill-sun" x="3.8" y="12.5" width="5" height="9.5" rx="1.8"/>
+                                    <rect class="nav-fill-clay" x="10.5" y="4.5" width="5" height="17.5" rx="1.8"/>
+                                    <rect class="nav-fill-sun" x="17.2" y="9" width="5" height="13" rx="1.8"/>
+                                </svg>
+                            {% elseif app.user %}
+                                <twig:Avatar :member="app.user" size="25" class="nav-bar-avatar"/>
+                            {% else %}
+                                <twig:Icon name="user" size="26" stroke="1.9"/>
+                            {% endif %}
+                        </span>
+                        <span class="nav-bar-label">{{ item.label }}</span>
                     </a>
                 {% endif %}
             </li>
