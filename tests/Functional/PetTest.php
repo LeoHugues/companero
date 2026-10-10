@@ -96,7 +96,9 @@ final class PetTest extends AppTestCase
         $this->client->request('GET', '/');
         self::assertSelectorTextContains('[aria-labelledby=mine-title]', 'Léo n’est pas là : on compte sur toi');
 
-        // A test first, on demand; nothing about tasks for whoever turned them off.
+        // A test first, on demand (without the cleaning day's or the review's, which it would count on their day); nothing about tasks for whoever turned them off.
+        $this->client->request('GET', '/profil');
+        $this->client->submitForm('Enregistrer', ['profile[notifyCleaningDay]' => false, 'profile[notifyWeeklyReview]' => false]);
         $this->client->request('GET', '/api/notifications?test=1');
         self::assertStringStartsWith('Les notifications marchent ! 1 rappel', $this->json()[0]['body']);
         $this->client->request('GET', '/profil');
