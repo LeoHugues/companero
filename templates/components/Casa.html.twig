@@ -3,7 +3,9 @@
     a cat on each side. Everything that moves on its own is CSS (app.css, "La Casa");
     what answers a touch is casa_controller.js.
     hero: planted across the whole width in her landscape — sky, sun, hills, a green ground melting into the page —
-    with a small bubble at the top left (the home page). The landscape uses the scene's own coordinates,
+    with a small bubble at the top left (the home page). Its sky is her weather (App\Enum\CasaWeather): sun and birds
+    when she shines, clouds as the dust comes, rain and puddles when neglected, a storm below 30 %; a rainbow when a
+    task is just done. The landscape uses the scene's own coordinates,
     so that the stage sits on its ground whatever the width.
 #}
 {% set face = this.face.value %}
@@ -17,18 +19,76 @@
      data-casa-mood-value="{{ mood.value }}"
      data-casa-asleep-value="{{ asleep ? 'true' : 'false' }}">
     {% if hero %}
-        <svg class="casa-hero-land" viewBox="-20 -110 380 372" preserveAspectRatio="none" aria-hidden="true">
-            <rect x="-20" y="-110" width="380" height="372" fill="{{ asleep ? '#E3D9CC' : '#F2E4CF' }}"/>
+        {% set weather = this.weather.value %}
+        {% set colors = this.skyColors %}
+        {% set neglected = face == 'neglected' %}
+        <svg class="casa-hero-land" viewBox="-20 -110 380 372" preserveAspectRatio="none" aria-hidden="true" data-weather="{{ weather }}">
+            <rect x="-20" y="-110" width="380" height="372" fill="{{ colors.sky }}"/>
+            {# The sun, or the moon and the stars: only when the sky is fair enough; behind a cloud when it is covered. #}
             {% if asleep %}
-                <circle cx="300" cy="26" r="17" fill="#FBF3E3"/><circle cx="292" cy="20" r="15" fill="#E3D9CC"/>
-            {% else %}
-                <circle cx="300" cy="26" r="20" fill="#F5D896"/>
+                {% if not this.weather.raining %}
+                    <circle cx="300" cy="26" r="17" fill="#FBF3E3"/><circle cx="292" cy="20" r="15" fill="{{ colors.sky }}"/>
+                {% endif %}
+                {% if this.weather.clear %}
+                    {% for star in [{x: 236, y: -24, size: 9}, {x: 262, y: 46, size: 7}, {x: 334, y: 74, size: 8}, {x: 196, y: 30, size: 6}, {x: 318, y: -34, size: 7}] %}
+                        <path class="animate-twinkle casa-fx" style="animation-delay: {{ loop.index0 * 530 }}ms" transform="translate({{ star.x }} {{ star.y }}) scale({{ star.size / 22 }})" d="M11 0 l3 8 8 3 -8 3 -3 8 -3 -8 -8 -3 8 -3z" fill="#FBF3E3"/>
+                    {% endfor %}
+                {% endif %}
+            {% elseif not this.weather.raining %}
+                <g class="casa-sun casa-sun-{{ weather }}">
+                    {% if weather == 'sunny' %}
+                        <circle class="casa-sun-glow" cx="300" cy="26" r="31" fill="#F7DA92" fill-opacity=".45"/>
+                    {% endif %}
+                    {% if this.weather.clear %}
+                        {% set rays = weather == 'sunny' ? 12 : 8 %}
+                        <g class="casa-sun-rays" stroke="#F2C462" stroke-width="3.2" stroke-linecap="round">
+                            {# A ray on each side, so that the group turns around the sun's centre (fill-box). #}
+                            {% for i in 0..(rays - 1) %}
+                                <path d="M300 {{ weather == 'sunny' ? -8 : -4 }} V{{ weather == 'sunny' ? -1 : 1 }}" transform="rotate({{ i * 360 / rays }} 300 26)"/>
+                            {% endfor %}
+                        </g>
+                    {% endif %}
+                    <circle cx="300" cy="26" r="20" fill="{{ weather == 'cloudy' ? '#F3E0B4' : '#F5D896' }}"/>
+                </g>
             {% endif %}
-            <g fill="#FAF1E4" class="casa-cloud"><circle cx="232" cy="64" r="8"/><circle cx="243" cy="58" r="11"/><circle cx="256" cy="64" r="7"/><rect x="225" y="62" width="38" height="8" rx="4"/></g>
-            <g fill="#FAF1E4" class="casa-cloud" style="animation-delay: -9s"><circle cx="-2" cy="86" r="7"/><circle cx="8" cy="81" r="9"/><circle cx="19" cy="86" r="6"/><rect x="-8" y="84" width="32" height="7" rx="3.5"/></g>
-            <ellipse cx="10" cy="214" rx="170" ry="42" fill="{{ face == 'neglected' ? '#E3E0C4' : '#DDE6C9' }}"/>
-            <ellipse cx="340" cy="218" rx="150" ry="38" fill="{{ face == 'neglected' ? '#DBD8BA' : '#D3DFBC' }}"/>
-            <rect x="-20" y="192" width="380" height="70" fill="{{ face == 'neglected' ? '#D3D3AE' : '#CCDAAF' }}"/>
+            {% if weather == 'sunny' and not asleep %}
+                {# Two birds gliding by. #}
+                {% for bird in [{x: 262, y: 70}, {x: 281, y: 80}] %}
+                    <g class="casa-bird" style="animation-delay: {{ loop.index0 * -1400 }}ms">
+                        <path class="casa-bird-wings" style="animation-delay: {{ loop.index0 * -180 }}ms" d="M{{ bird.x - 8 }} {{ bird.y }} Q{{ bird.x - 4 }} {{ bird.y - 5 }} {{ bird.x }} {{ bird.y }} Q{{ bird.x + 4 }} {{ bird.y - 5 }} {{ bird.x + 8 }} {{ bird.y }}" fill="none" stroke="#8C7461" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                    </g>
+                {% endfor %}
+            {% endif %}
+            {% for cloud in this.clouds %}
+                <g class="casa-cloud" style="animation-duration: {{ cloud.duration }}s; animation-delay: {{ cloud.delay }}s">
+                    <g transform="translate({{ cloud.x }} {{ cloud.y }}) scale({{ cloud.scale }})">
+                        {# A shade under it, then the cloud: two flat tones, darker as the weather turns. #}
+                        <g fill="{{ colors.shade }}" transform="translate(0 2.5)"><circle cx="-11" cy="6" r="8"/><circle cx="0" cy="0" r="11"/><circle cx="13" cy="6" r="7"/><rect x="-18" y="4" width="38" height="8" rx="4"/></g>
+                        <g fill="{{ colors.cloud }}"><circle cx="-11" cy="6" r="8"/><circle cx="0" cy="0" r="11"/><circle cx="13" cy="6" r="7"/><rect x="-18" y="4" width="38" height="8" rx="4"/></g>
+                    </g>
+                </g>
+            {% endfor %}
+            {% if weather == 'stormy' %}
+                <path class="casa-bolt" d="M258 74 L249 96 L256 96 L246 122 L263 90 L255 90 L263 74 Z" fill="#F6C453" stroke="#E9A53A" stroke-width="1" stroke-linejoin="round"/>
+            {% endif %}
+            <ellipse cx="10" cy="214" rx="170" ry="42" fill="{{ neglected ? '#E3E0C4' : '#DDE6C9' }}"/>
+            <ellipse cx="340" cy="218" rx="150" ry="38" fill="{{ neglected ? '#DBD8BA' : '#D3DFBC' }}"/>
+            <rect x="-20" y="192" width="380" height="70" fill="{{ neglected ? '#D3D3AE' : '#CCDAAF' }}"/>
+            {% if reacting %}
+                {# A task just done: a rainbow over her, whatever the weather. It fades away once she calms down. #}
+                <g class="casa-rainbow" fill="none" stroke-width="6.5" stroke-opacity=".85">
+                    {% for band in [{r: 160, color: '#E06C55'}, {r: 154, color: '#E9A53A'}, {r: 148, color: '#F6C453'}, {r: 142, color: '#6E9A4C'}, {r: 136, color: '#3D7FA8'}] %}
+                        <path d="M{{ 170 - band.r }} 200 A{{ band.r }} {{ band.r }} 0 0 1 {{ 170 + band.r }} 200" stroke="{{ band.color }}" pathLength="1" style="animation-delay: {{ loop.index0 * 60 }}ms"/>
+                    {% endfor %}
+                </g>
+            {% endif %}
+            {% if this.weather.raining %}
+                {# Puddles on the grass, rippling under the drops. #}
+                {% for puddle in [{x: 122, y: 208, rx: 24}, {x: 236, y: 214, rx: 17}, {x: 4, y: 222, rx: 14}] %}
+                    <ellipse cx="{{ puddle.x }}" cy="{{ puddle.y }}" rx="{{ puddle.rx }}" ry="{{ puddle.rx / 6 }}" fill="#B7C6C4" fill-opacity=".8"/>
+                    <ellipse class="casa-ripple" style="animation-delay: {{ loop.index0 * -430 }}ms" cx="{{ puddle.x - 4 }}" cy="{{ puddle.y }}" rx="{{ puddle.rx / 2.4 }}" ry="{{ puddle.rx / 12 }}" fill="none" stroke="#FFFCF6" stroke-width="1"/>
+                {% endfor %}
+            {% endif %}
             {# The ground melts into the page, under the card of the house's state. #}
             <path d="M-20 238 Q170 226 360 238 V262 H-20Z" fill="#FFF6E9"/>
         </svg>
@@ -38,7 +98,7 @@
     {% endif %}
     <div class="casa-stage {{ hero ? '' : 'relative w-full max-w-[340px]' }} select-none" data-casa-target="stage"
          data-action="pointerdown->casa#press pointermove->casa#move pointerup->casa#release pointercancel->casa#cancel pointerleave->casa#cancel">
-        <svg viewBox="0 22 340 196" class="block h-auto w-full overflow-visible" role="img" aria-label="La Casa, propre à {{ cleanliness }} %{{ asleep ? ', elle dort' }}">
+        <svg viewBox="0 22 340 196" class="block h-auto w-full overflow-visible" role="img" aria-label="La Casa, propre à {{ cleanliness }} %{{ asleep ? ', elle dort' }}{{ hero ? ', ' ~ this.weather.label }}">
             {# The ground: her shadow, a few tufts of grass, flowers when she is well. #}
             <ellipse cx="170" cy="189" rx="66" ry="7" fill="{{ shadow }}"/>
             {% for tuft in [{x: 112, y: 190, flip: false}, {x: 229, y: 190, flip: true}] %}
@@ -156,4 +216,22 @@
             {% endfor %}
         </svg>
     </div>
+    {% if hero and this.weather.raining %}
+        {# The rain falls in front of her and the cats too (but never on the bubble); lightning lights the whole sky. #}
+        <svg class="casa-hero-sky" viewBox="-20 -110 380 372" preserveAspectRatio="none" aria-hidden="true">
+            {% if this.weather.value == 'stormy' %}
+                <rect class="casa-flash" x="-20" y="-110" width="380" height="372" fill="#FFFCF6"/>
+            {% endif %}
+            <g class="casa-rain" stroke="#8A9DA6" stroke-width="1.6" stroke-linecap="round">
+                {% for drop in this.raindrops %}
+                    <path class="casa-drop" d="M{{ drop.x }} {{ drop.y }} l-2.5 9" style="animation-duration: {{ drop.duration }}ms; animation-delay: {{ drop.delay }}ms"/>
+                {% endfor %}
+            </g>
+            <g class="casa-rain" fill="none" stroke="#8A9DA6" stroke-width="1.2">
+                {% for splash in [{x: 96, y: 198}, {x: 152, y: 214}, {x: 218, y: 200}, {x: 262, y: 222}, {x: 30, y: 216}, {x: 322, y: 208}] %}
+                    <ellipse class="casa-splash" style="animation-delay: {{ loop.index0 * -317 }}ms" cx="{{ splash.x }}" cy="{{ splash.y }}" rx="5" ry="1.6"/>
+                {% endfor %}
+            </g>
+        </svg>
+    {% endif %}
 </div>

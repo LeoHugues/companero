@@ -5,6 +5,7 @@ namespace App\Twig\Components;
 use App\Entity\Member;
 use App\Entity\Pet;
 use App\Enum\CasaMood;
+use App\Enum\CasaWeather;
 use App\Enum\PetSpecies;
 use App\Pet\CatLook;
 use Psr\Clock\ClockInterface;
@@ -14,7 +15,8 @@ use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
 /**
  * La Casa: the household as a character whose face follows how clean the home is, with the
  * cats of the coloc around her. She blinks, looks around, sleeps at night; tapped, she answers;
- * dusted with a finger, she giggles (see casa_controller.js).
+ * dusted with a finger, she giggles (see casa_controller.js). In her landscape (hero), the sky
+ * follows her too: sun, clouds, rain, storm (CasaWeather).
  */
 #[AsTwigComponent]
 final class Casa
@@ -97,10 +99,71 @@ final class Casa
         );
     }
 
-    /** @return list<string> what she may say when tapped */
+    /** @return list<string> what she may say when tapped — and, under her sky, about the weather */
     public function taps(): array
     {
-        return $this->asleep() ? ['Mmh… encore cinq minutes…', 'Zzz… chut, les chats dorment.', 'Il est tard ! Les tâches attendront demain.'] : $this->mood->taps();
+        if ($this->asleep()) {
+            return ['Mmh… encore cinq minutes…', 'Zzz… chut, les chats dorment.', 'Il est tard ! Les tâches attendront demain.'];
+        }
+
+        return $this->hero ? [...$this->mood->taps(), ...$this->weather()->taps()] : $this->mood->taps();
+    }
+
+    /** The sky of her landscape, from her mood (not her face: a task just done brings a rainbow, not the sun). */
+    public function weather(): CasaWeather
+    {
+        return CasaWeather::of($this->mood, $this->cleanliness);
+    }
+
+    /** @return array{sky: string, cloud: string, shade: string} the colours of her sky: warm creams, greying with the weather */
+    public function skyColors(): array
+    {
+        if ($this->asleep() && !$this->weather()->raining()) {
+            return ['sky' => '#E3D9CC', 'cloud' => '#EFE7DB', 'shade' => '#D9CEBF'];
+        }
+
+        return match ($this->weather()) {
+            CasaWeather::Sunny => ['sky' => '#F5E2C4', 'cloud' => '#FCF5EA', 'shade' => '#F0E2CC'],
+            CasaWeather::Fair => ['sky' => '#F2E4CF', 'cloud' => '#FAF1E4', 'shade' => '#EFE2CF'],
+            CasaWeather::Cloudy => ['sky' => '#E8E0D3', 'cloud' => '#F4EDE2', 'shade' => '#DCD1C1'],
+            CasaWeather::Rainy => ['sky' => '#DAD4CA', 'cloud' => '#C7BDAF', 'shade' => '#B1A694'],
+            CasaWeather::Stormy => ['sky' => '#CBC4BA', 'cloud' => '#A3988A', 'shade' => '#8B8072'],
+        };
+    }
+
+    /** @return list<array{x: int, y: int, scale: float, duration: int, delay: int}> the clouds of her sky, in the landscape's coordinates */
+    public function clouds(): array
+    {
+        $clouds = match ($this->weather()) {
+            CasaWeather::Sunny => [[34, 66, .7]],
+            CasaWeather::Fair => [[243, 58, 1.0], [8, 81, .85]],
+            CasaWeather::Cloudy => [[284, 38, 1.5], [196, 72, 1.05], [18, 64, 1.2], [118, -26, .9]],
+            CasaWeather::Rainy => [[300, -6, 1.7], [176, -40, 1.9], [36, -14, 1.6], [246, 62, 1.15], [70, 70, 1.0]],
+            CasaWeather::Stormy => [[300, -10, 1.9], [176, -44, 2.1], [36, -18, 1.8], [252, 60, 1.35], [72, 66, 1.2], [140, 22, 1.0]],
+        };
+
+        return array_map(
+            static fn (array $cloud, int $i): array => ['x' => $cloud[0], 'y' => $cloud[1], 'scale' => $cloud[2], 'duration' => 34 + 7 * $i, 'delay' => -5 * $i],
+            $clouds,
+            array_keys($clouds),
+        );
+    }
+
+    /** @return list<array{x: int, y: int, duration: int, delay: int}> the raindrops, spread with a fixed stride so that the page does not change on each refresh */
+    public function raindrops(): array
+    {
+        $stormy = CasaWeather::Stormy === $this->weather();
+        $drops = [];
+        for ($i = 0, $count = $stormy ? 46 : 30; $i < $count; ++$i) {
+            $drops[] = [
+                'x' => ($i * 47) % 380 - 14,
+                'y' => ($i * 29) % 70 - 34,
+                'duration' => ($stormy ? 620 : 900) + ($i % 3) * 70,
+                'delay' => -(($i * 173) % 1000),
+            ];
+        }
+
+        return $drops;
     }
 
     /** @return list<array{look: CatLook, x: int, y: int}> the cats of the coloc, around her: the one sitting on the left, the big one lying on the right */

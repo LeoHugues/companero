@@ -125,6 +125,25 @@ quelques touffes d'herbe, et **les chats de la coloc** de part et d'autre.
 | Rayonnante | ≥ 92 % | grand sourire, langue, joues roses | scintillements, fleurs | « Je brille ! » |
 
 - **La nuit** (23 h – 7 h), elle dort : yeux fermés, « Zzz », lucarne allumée, les chats dorment aussi.
+
+### La météo
+
+Sur l'accueil, le ciel du paysage suit l'humeur de la Casa (`App\Enum\CasaWeather`) : plus la maison
+est propre, plus il fait beau. Des tons crème qui grisent, jamais de bleu froid ni de noir.
+
+| Humeur | Météo | Le ciel |
+|---|---|---|
+| Rayonnante | Grand soleil | soleil dont les rayons tournent, halo qui pulse, deux oiseaux qui planent, un seul petit nuage |
+| Ça va | Beau temps | soleil, deux nuages qui dérivent |
+| Poussiéreuse | Ciel couvert | ciel grisé, soleil pâle sans rayons derrière un gros nuage, quatre nuages ombrés |
+| Négligée | Pluie | nuages gris, la pluie tombe devant la Casa et les chats (jamais sur la bulle), éclaboussures, flaques qui ondulent |
+| Négligée, < 30 % | Orage | nuages sombres, pluie plus drue, un éclair jaune et le ciel qui s'illumine toutes les 9 s |
+
+- **La nuit**, la lune remplace le soleil (cachée quand il pleut) ; par beau temps, des étoiles scintillent.
+- **Quand une tâche est faite**, la pluie s'arrête et un arc-en-ciel se dessine au-dessus d'elle (sauge,
+  miel, corail, bleu, jaune : les couleurs de l'appli) ; quand elle se calme, il s'efface et le temps
+  revient à celui de la propreté.
+- Touchée, elle parle aussi du ciel (« Il pleut sur mon toit… Une tâche et ça se lève, promis. »).
 - **La poussière** diminue au fur et à mesure que la propreté monte.
 - **Au repos**, elle respire, cligne des yeux, regarde à droite et à gauche (avec une souris,
   elle suit le pointeur) ; poussiéreuse, elle éternue de temps en temps.
@@ -165,6 +184,11 @@ miaulent (« Miaou ! », « Prrrr… »). Quand une tâche est faite, ils sauten
 | Pression | Boutons (réduction à 0,95) | 120 ms |
 | Clignement, regard | La Casa et les chats | toutes les 5 s environ |
 | Fumée | Cheminée (sauf négligée) | 3,3 s en boucle |
+| Soleil | Rayons qui tournent (beau temps, grand soleil), halo qui pulse | 40 s / 24 s, 3,6 s en boucle |
+| Nuages, oiseaux | Le ciel de l'accueil | 34 à 69 s, 9 s en boucle |
+| Pluie | Gouttes, éclaboussures, ronds dans les flaques (négligée) | 0,6 à 1,3 s en boucle |
+| Éclair | Orage (< 30 %) | toutes les 9 s |
+| Arc-en-ciel | Quand une tâche est faite | 1,1 s, s'efface en 1,6 s |
 | Queue, oreille | Les chats | 3,6 s, 7 s |
 | Plumeau, bouffées de poussière | Doigt qui glisse sur la Casa | tant que le doigt bouge |
 | Montée des jauges | À l'arrivée sur la page : depuis la dernière valeur vue (avec le gain, « +4 % ») ou depuis zéro | 0,9 à 1,3 s |

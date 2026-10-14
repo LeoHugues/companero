@@ -966,6 +966,47 @@ main:has(> p[role="status"]) .home-hero { margin-top: 0; }
 .casa-cloud { animation: casa-cloud 40s ease-in-out infinite alternate; }
 @keyframes casa-cloud { to { transform: translateX(18px); } }
 
+/*
+ * Her weather (App\Enum\CasaWeather): the sun turns its rays and glows when she shines, birds glide by;
+ * the clouds come with the dust; neglected, it rains — in front of her too (.casa-hero-sky), rippling the
+ * puddles — and below 30 % the storm flashes. A task just done stops the rain and draws a rainbow, which
+ * fades away (and the rain comes back) once she calms down: casa_controller.js sets reacting back to false.
+ */
+/* Cut above the ground melting into the page: no drop on the cream. */
+.casa-hero-sky { position: absolute; inset: 0; z-index: 2; width: 100%; height: 100%; display: block; pointer-events: none; clip-path: inset(0 0 10% 0); }
+.casa-sun-rays, .casa-sun-glow, .casa-bird, .casa-bird-wings, .casa-drop, .casa-splash, .casa-ripple, .casa-bolt { transform-box: fill-box; transform-origin: center; }
+.casa-sun-rays { animation: casa-sun-turn 40s linear infinite; }
+.casa-sun-sunny .casa-sun-rays { animation-duration: 24s; }
+.casa-sun-glow { animation: casa-sun-glow 3.6s ease-in-out infinite; }
+.casa-bird { animation: casa-bird 9s ease-in-out infinite alternate; }
+.casa-bird-wings { animation: casa-bird-flap 600ms ease-in-out infinite alternate; }
+.casa-drop { opacity: .7; animation: casa-drop 900ms linear infinite; }
+.casa-splash { opacity: 0; animation: casa-splash 900ms ease-out infinite; }
+.casa-ripple { opacity: 0; animation: casa-ripple 1.3s ease-out infinite; }
+.casa-rain { transition: opacity 1.2s ease; }
+.casa-flash { opacity: 0; animation: casa-flash 9s linear infinite; }
+.casa-bolt { opacity: 0; animation: casa-bolt 9s linear infinite; }
+.casa-rainbow { transition: opacity 1.6s ease; }
+.casa-rainbow path { stroke-dasharray: 1 1; animation: casa-rainbow 1.1s cubic-bezier(.3, .9, .4, 1) both; }
+.casa[data-casa-reacting-value="true"] .casa-rain { opacity: 0; }
+.casa[data-casa-reacting-value="true"] .casa-flash,
+.casa[data-casa-reacting-value="true"] .casa-bolt { animation: none; }
+.casa[data-casa-reacting-value="false"] .casa-rainbow { opacity: 0; }
+@keyframes casa-sun-turn { to { transform: rotate(360deg); } }
+@keyframes casa-sun-glow { 50% { transform: scale(1.12); opacity: .6; } }
+@keyframes casa-bird { to { transform: translate(-22px, 6px); } }
+@keyframes casa-bird-flap { to { transform: scaleY(-.4); } }
+@keyframes casa-drop {
+  0% { transform: translate(0, 0); opacity: 0; }
+  10%, 80% { opacity: .7; }
+  100% { transform: translate(-18px, 250px); opacity: 0; }
+}
+@keyframes casa-splash { 0% { transform: scale(.2); opacity: .9; } 100% { transform: scale(1.6); opacity: 0; } }
+@keyframes casa-ripple { 0% { transform: scale(.3); opacity: .9; } 100% { transform: scale(1.5); opacity: 0; } }
+@keyframes casa-flash { 0%, 84%, 87%, 90%, 100% { opacity: 0; } 85% { opacity: .75; } 88.5% { opacity: .5; } }
+@keyframes casa-bolt { 0%, 84%, 91%, 100% { opacity: 0; } 85%, 90% { opacity: 1; } }
+@keyframes casa-rainbow { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+
 /* The state of the house: her cleanliness, the steps of her moods on the gauge, and a task she asks for. */
 /* -60px: over the last 44px of her ground, the page's gap of 16px aside. */
 .casa-state { @apply sheet relative z-[2] -mt-[60px] flex flex-col gap-3.5 px-4 pt-[26px] pb-3.5; }
