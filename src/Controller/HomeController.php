@@ -51,6 +51,8 @@ final class HomeController extends AbstractController
 
         return $this->render('home/index.html.twig', [
             'mine' => $mine,
+            // The cards of the hand counted on this member whoever takes them: let go, they stay in it.
+            'counted_on' => array_map(static fn (TaskView $view): int => (int) $view->task->getId(), $board->pressingFor($member)),
             'quests' => $board->quests(),
             'draw' => $board->draw(),
             'groups' => $groups,

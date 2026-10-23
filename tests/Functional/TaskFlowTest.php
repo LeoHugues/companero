@@ -351,6 +351,49 @@ final class TaskFlowTest extends AppTestCase
         self::assertSelectorExists('[aria-labelledby=mine-title] .seat-mine');
     }
 
+    public function testTheCasaNamesTheCardSheAsksForInTheColourOfItsRarity(): void
+    {
+        $this->client->loginUser($this->foundHousehold());
+        $this->client->request('GET', '/taches/nouvelle/modele');
+        $this->client->submitForm('Créer le modèle', ['task[title]' => 'Vider <b>le</b> frigo', 'task[kind]' => 'rolling', 'task[rhythmDays]' => '7', 'task[rarity]' => 'epic']);
+
+        $this->client->request('GET', '/');
+        // Like a card linked in a game's chat: its title, marked as an epic card — and never taken for HTML.
+        self::assertSelectorTextContains('[data-casa-target=speech] .card-ref-epic .card-ref-name', 'Vider <b>le</b> frigo');
+        self::assertSelectorTextContains('[data-casa-target=speech] .card-ref-epic', 'carte épique');
+        self::assertSelectorNotExists('[data-casa-target=speech] b');
+        // What she goes back to after answering a tap, and what "Une autre ?" puts in her bubble: the same, as HTML.
+        $crawler = $this->client->getCrawler();
+        foreach ([$crawler->filter('[data-controller~=casa]')->attr('data-casa-rest-speech-value'), $crawler->filter('[data-quest-target=quest]')->attr('data-line')] as $line) {
+            self::assertStringContainsString('<span class="card-ref card-ref-epic" data-controller="card-ref"', (string) $line);
+            self::assertStringContainsString('Vider &lt;b&gt;le&lt;/b&gt; frigo', (string) $line);
+        }
+        // Her own words, for once the last quest is taken.
+        self::assertStringNotContainsString('card-ref', (string) $crawler->filter('[data-controller~=casa]')->attr('data-own-speech'));
+    }
+
+    public function testASeatTappedKnowsWhatItTurnsInto(): void
+    {
+        $leo = $this->foundHousehold();
+        $this->client->loginUser($leo);
+        $this->client->request('GET', '/taches/nouvelle/modele');
+        $this->client->submitForm('Créer le modèle', ['task[title]' => 'Serpillière', 'task[kind]' => 'rolling', 'task[rhythmDays]' => '7']);
+        $task = static::getContainer()->get(TaskRepository::class)->findOneBy(['title' => 'Serpillière']);
+
+        $this->client->request('GET', '/');
+        // "Je prends", and the deck, say what they will do at the tap (card_motion.js).
+        self::assertSelectorExists(\sprintf('form[data-card-motion=take][data-task="%d"] [data-seat-state=free]', $task?->getId()));
+        self::assertSelectorExists(\sprintf('form[data-card-motion=deal][data-task="%d"] .deck', $task?->getId()));
+        self::assertSelectorExists('template#seat-mine');
+        self::assertSelectorExists('template#seat-free');
+
+        $this->submitAction('/taches/'.$task?->getId().'/je-m-en-occupe');
+        $this->client->followRedirect();
+        self::assertSelectorExists(\sprintf('form[data-card-motion=let-go][data-task="%d"] .seat-mine', $task?->getId()));
+        // Taken, not counted on me otherwise: let go, it leaves the hand.
+        self::assertSelectorExists(\sprintf('#hand-%d:not([data-counted-on])', $task?->getId()));
+    }
+
     public function testMembersCannotTouchAnotherHouseholdsTasks(): void
     {
         $leo = $this->foundHousehold();

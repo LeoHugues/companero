@@ -11,6 +11,7 @@ use App\Pet\CatLook;
 use Psr\Clock\ClockInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
+use Twig\Markup;
 
 /**
  * La Casa: the household as a character whose face follows how clean the home is, with the
@@ -27,8 +28,10 @@ final class Casa
 
     public CasaMood $mood = CasaMood::Okay;
     public int $cleanliness = 100;
-    /** Shown instead of the mood's sentence, e.g. right after a task was done. */
-    public ?string $speech = null;
+    /** Shown instead of the mood's sentence, e.g. right after a task was done. HTML when it is Markup. */
+    public string|Markup|null $speech = null;
+    /** What she says at rest instead of her mood's sentence, even at night: the task she asks for on the home page (HTML). */
+    public ?Markup $line = null;
     public bool $reacting = false;
     public bool $showSpeech = true;
     /** Planted across the whole width, in her landscape (the home page); otherwise on her own, a bubble above. */
@@ -40,9 +43,27 @@ final class Casa
     ) {
     }
 
-    public function restSpeech(): string
+    public function restSpeech(): string|Markup
+    {
+        return $this->line ?? $this->ownSpeech();
+    }
+
+    /** Her own words: her mood's sentence, or her sleep's. */
+    public function ownSpeech(): string
     {
         return $this->asleep() ? 'Zzz… Je dors, mais je t’entends. Bonne nuit !' : $this->mood->speech();
+    }
+
+    /** What she says at rest as HTML: what her controller puts back in her bubble once she is done answering. */
+    public function restSpeechHtml(): string
+    {
+        return null !== $this->line ? (string) $this->line : $this->ownSpeechHtml();
+    }
+
+    /** Her own words as HTML, for when the last quest is taken (quest_controller.js). */
+    public function ownSpeechHtml(): string
+    {
+        return htmlspecialchars($this->ownSpeech(), \ENT_QUOTES | \ENT_SUBSTITUTE, 'UTF-8');
     }
 
     /** From 11 pm to 7 am she sleeps — unless someone just did a task. */

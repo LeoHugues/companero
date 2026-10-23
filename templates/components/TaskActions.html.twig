@@ -3,7 +3,9 @@
     "Je prends" (a warm pill with an empty seat, a dotted circle with a plus; then the face and name of who took it) and
     "C'est fait" (a button of the Casa's yellow: a tick, the words, then what the task is worth).
     compact: only the seat taken, and a round button.
+    A tap on the seat changes it at once, and moves the card in or out of the hand, before the page comes back (card_motion.js).
 #}
+{% import 'task/_seat.html.twig' as seat %}
 {% set task = view.task %}
 {% set points = task.currentPoints + boost %}
 {#
@@ -13,30 +15,26 @@
 <div {{ attributes.defaults({class: 'task-actions relative z-[2] flex flex-wrap items-center justify-between gap-x-2 gap-y-2'}) }}>
     {% if view.isReservedBy(member) %}
         {# Taken by me: my face and my name; a tap lets it go, and "Je prends" is back. #}
-        <form method="post" action="{{ path('task_release', {id: task.id}) }}" class="min-w-0">
+        <form method="post" action="{{ path('task_release', {id: task.id}) }}" class="min-w-0" data-card-motion="let-go" data-task="{{ task.id }}">
             <input type="hidden" name="_back" value="{{ back }}">
             <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
             <button type="submit" class="seat seat-taken seat-mine" data-seat="{{ task.id }}" data-seat-state="mine" title="Tu t’en occupes — touche pour la laisser" aria-label="Je ne m’en occupe plus : « {{ task.title }} »">
-                <twig:Avatar :member="member" :size="compact ? 22 : 28"/>
-                <span class="truncate">{{ member.name }}</span>
-                <twig:Icon name="close" size="13" stroke="2.4" class="seat-leave"/>
+                {{ seat.who(member, compact, true) }}
             </button>
         </form>
     {% elseif view.reservedBy %}
         {# Taken by someone else: just a face and a name. #}
         <span class="seat seat-taken" data-seat="{{ task.id }}" data-seat-state="taken" title="{{ view.reservedBy.name ~ ' s’en occupe' }}">
-            <twig:Avatar :member="view.reservedBy" :size="compact ? 22 : 28"/>
-            <span class="truncate">{{ view.reservedBy.name }}</span>
+            {{ seat.who(view.reservedBy, compact) }}
         </span>
     {% elseif compact %}
         <span class="text-sm font-semibold text-clay-dark" data-seat="{{ task.id }}" data-seat-state="free">+{{ points }} pts{% if boost %} <twig:Icon name="bolt" size="12" stroke="2.4"/>{% endif %}</span>
     {% else %}
-        <form method="post" action="{{ path('task_reserve', {id: task.id}) }}">
+        <form method="post" action="{{ path('task_reserve', {id: task.id}) }}" data-card-motion="take" data-task="{{ task.id }}">
             <input type="hidden" name="_back" value="{{ back }}">
             <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
             <button type="submit" class="seat" data-seat="{{ task.id }}" data-seat-state="free" aria-label="Je m’en occupe : « {{ task.title }} »">
-                <span class="seat-empty" aria-hidden="true"><twig:Icon name="plus" size="14" stroke="2.4"/></span>
-                Je prends
+                {{ seat.free() }}
             </button>
         </form>
     {% endif %}

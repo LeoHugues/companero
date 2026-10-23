@@ -12,6 +12,7 @@ use App\Task\TaskStatus;
 use App\Task\TaskView;
 use Psr\Clock\ClockInterface;
 use Twig\Attribute\AsTwigFunction;
+use Twig\Markup;
 
 /** Human, French wording for task statuses and schedules. */
 final readonly class TaskLabels
@@ -93,20 +94,37 @@ final readonly class TaskLabels
         };
     }
 
-    /** What the Casa says in her bubble when she offers a task to the one looking at the home page. */
+    /** What the Casa says in her bubble when she offers a task to the one looking at the home page: HTML, the card named in it. */
     #[AsTwigFunction('casa_quest_line')]
-    public function questLine(TaskView $view): string
+    public function questLine(TaskView $view): Markup
     {
-        $title = "«\u{202F}".$view->task->getTitle()."\u{202F}»";
+        $title = (string) $this->mention($view);
 
-        return match (true) {
+        return new Markup(match (true) {
             null !== $view->bounty => "Psst… {$title} cache une surprise.",
             Urgency::Late === $view->status->urgency => $view->status->overdueDays > 0
                 ? \sprintf("%s traîne depuis %d jour%s. Tu t’en charges\u{202F}?", $title, $view->status->overdueDays, $view->status->overdueDays > 1 ? 's' : '')
                 : "{$title} attend encore. Tu t’en charges\u{202F}?",
             Urgency::Due === $view->status->urgency => "C’est le moment pour {$title}. Un coup de main\u{202F}?",
             default => "{$title} arrive bientôt. Tu prends de l’avance\u{202F}?",
-        };
+        }, 'UTF-8');
+    }
+
+    /**
+     * A card named in a sentence, like a card linked in a game's chat: its title between brackets, in the colour
+     * of its rarity, after a tiny card of its finish; its letters shuffle before they settle (card_ref_controller.js).
+     */
+    #[AsTwigFunction('card_mention')]
+    public function mention(TaskView $view): Markup
+    {
+        $rarity = $view->rarity();
+
+        return new Markup(\sprintf(
+            '<span class="card-ref card-ref-%1$s" data-controller="card-ref" title="Carte %2$s"><span class="card-ref-card" aria-hidden="true"></span><span class="card-ref-name">%3$s</span><span class="sr-only"> (carte %2$s)</span></span>',
+            $rarity->value,
+            mb_strtolower($rarity->label()),
+            htmlspecialchars($view->task->getTitle(), \ENT_QUOTES | \ENT_SUBSTITUTE, 'UTF-8'),
+        ), 'UTF-8');
     }
 
     /** The picture of a task card, guessed from its title (App\Task\TaskArt), null for its category's icon. */

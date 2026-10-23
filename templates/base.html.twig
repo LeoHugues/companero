@@ -52,6 +52,8 @@
             {{ include('_celebration.html.twig', {completion: just_done, gifts: level_gifts, cards: yellow_cards_to_show()}) }}
             {% block body %}{% endblock %}
         </main>
+        {# What a seat turns into the moment it is tapped (card_motion.js). #}
+        {{ include('task/_seat.html.twig') }}
         {% block nav %}{% endblock %}
     </body>
 </html>

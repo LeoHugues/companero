@@ -106,6 +106,14 @@ Choisie pour chaque tâche dans son formulaire, **commune** par défaut :
 | Légendaire | Bordure dorée `#E3A21A` où une lumière fait le tour (4,5 s), halo doré, reflet |
 
 Une pastille en capitales (« RARE », « ÉPIQUE »…) avec un petit diamant rappelle la rareté.
+
+Quand la Casa **nomme une carte** dans sa bulle (la tâche qu'elle demande), son titre se lit comme une
+carte liée dans le chat d'un jeu : entre crochets, en gras, à la couleur de sa rareté (encre pour une
+commune, bleu, violet, or), après une mini-carte de sa finition (papier, argent, nacre, or). À
+l'apparition, la mini-carte est distribuée et les lettres du titre sont battues — des enseignes ♠ ♥ ♦ ♣
+et quelques signes passent dessus — avant de se poser une à une, de gauche à droite, chacune d'un petit
+éclat terre cuite ; puis la lumière passe sur le titre d'une rare, et repasse de temps en temps sur une
+épique ou une légendaire. La bulle ne change jamais de taille pendant ce temps.
 Une carte qui cache une **surprise** cette semaine passe d'une rareté au-dessus et est
 **emballée comme un cadeau** : un ruban terre cuite barre son coin en haut à droite (deux surpiqûres
 crème, au-dessus de la pointe de la vignette), noué d'un petit nœud qui gigote de temps en temps.
@@ -194,6 +202,8 @@ miaulent (« Miaou ! », « Prrrr… »). Quand une tâche est faite, ils sauten
 | Montée des jauges | À l'arrivée sur la page : depuis la dernière valeur vue (avec le gain, « +4 % ») ou depuis zéro | 0,9 à 1,3 s |
 | Compteurs | Points, XP, propreté : les chiffres défilent jusqu'à leur valeur | 0,9 s |
 | « C'est fait » | Le bouton s'écrase, passe au vert, lance des étoiles | 500 ms |
+| Piocher, « Je prends », lâcher sa carte | Au toucher, sans attendre le serveur : le siège change d'un petit rebond, la carte entre dans la main (qui glisse jusqu'à elle et s'écarte pour elle) ou en sort (elle s'efface, ses voisines se resserrent) ; une quête prise laisse place à la suivante, la dernière se replie | 0,4 à 1,2 s |
+| Carte nommée par la Casa | La mini-carte distribuée, les lettres battues qui se posent une à une, la lumière sur le titre | 520 ms, 0,7 s, puis 2,4 à 6 s |
 | Points gagnés | Une pastille encre descend du haut avec les points qui défilent | 3,4 s |
 | Boîte cadeau | Surprise et nouveau niveau : la boîte tremble, s'ouvre au toucher, confettis | 380 ms + 2,2 s |
 | Carton jaune reçu | Le carton arrive en tournoyant | 900 ms |
@@ -208,6 +218,12 @@ Il ne se déclenche pas si un champ a été modifié, pour ne jamais perdre une 
 Après « C'est fait » (ou tout formulaire qui revient sur la même page), la page se met à jour
 sur place, sans recharger : la célébration, les jauges et la Casa jouent tout de suite, y
 compris dans l'appli Android.
+
+Piocher, « Je prends » et lâcher sa carte n'attendent pas le serveur : tout se joue au toucher, et la
+page revenue ne s'applique qu'une fois le mouvement fini, sans rien couper en route. Ce que le serveur
+a décidé autrement (une carte prise par quelqu'un d'autre juste avant) arrive ou s'en va de la même
+façon ; sans réseau, tout revient comme avant. La mise à jour sur place laisse de côté ce qui n'a pas
+changé (la plupart des cartes, les dessins) : elle ne fige plus le téléphone.
 
 L'accueil a un raccourci vers **le plan de la maison** : une pastille « Plan » posée sur le ciel
 de la Casa.

@@ -1,0 +1,23 @@
+{#
+    The seat of a card: "Je prends", or the face and the name of who took it (TaskActions).
+    Included once in the page, it also gives what a seat turns into the moment it is tapped, before the page
+    comes back (card_motion.js): my name, or "Je prends" again. Only a look: the real buttons come with the page.
+#}
+{% import _self as seat %}
+
+{% macro who(member, compact = false, leave = false) %}
+    <twig:Avatar :member="member" :size="compact ? 22 : 28"/>
+    <span class="truncate">{{ member.name }}</span>
+    {% if leave %}<twig:Icon name="close" size="13" stroke="2.4" class="seat-leave"/>{% endif %}
+{% endmacro %}
+
+{% macro free() %}
+    <span class="seat-empty" aria-hidden="true"><twig:Icon name="plus" size="14" stroke="2.4"/></span>
+    Je prends
+{% endmacro %}
+
+{% if app.user %}
+    <template id="seat-mine"><span class="seat seat-taken seat-mine" data-seat-state="mine">{{ seat.who(app.user, false, true) }}</span></template>
+    <template id="seat-mine-compact"><span class="seat seat-taken seat-mine" data-seat-state="mine">{{ seat.who(app.user, true, true) }}</span></template>
+    <template id="seat-free"><span class="seat" data-seat-state="free">{{ seat.free() }}</span></template>
+{% endif %}

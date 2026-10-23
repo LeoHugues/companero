@@ -7,6 +7,7 @@
     when she shines, clouds as the dust comes, rain and puddles when neglected, a storm below 30 %; a rainbow when a
     task is just done. The landscape uses the scene's own coordinates,
     so that the stage sits on its ground whatever the width.
+    Her bubble is HTML when she names a card (TaskLabels::mention); what she goes back to is given as HTML too.
 #}
 {% set face = this.face.value %}
 {% set asleep = this.asleep %}
@@ -14,7 +15,8 @@
 <div {{ attributes.defaults({class: hero ? 'casa casa-hero' : 'casa relative flex flex-col items-center justify-end'}) }}
      data-controller="casa"
      data-casa-reacting-value="{{ reacting ? 'true' : 'false' }}"
-     data-casa-rest-speech-value="{{ this.restSpeech }}"
+     data-casa-rest-speech-value="{{ this.restSpeechHtml }}"
+     data-own-speech="{{ this.ownSpeechHtml }}"
      data-casa-taps-value="{{ this.taps|json_encode }}"
      data-casa-mood-value="{{ mood.value }}"
      data-casa-asleep-value="{{ asleep ? 'true' : 'false' }}">

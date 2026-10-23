@@ -963,6 +963,87 @@ main:has(> p[role="status"]) .home-hero { margin-top: 0; }
   background: var(--color-surface);
   transform: rotate(45deg);
 }
+/*
+ * A card the Casa names (TaskLabels::mention), like a card linked in a game's chat: its title between brackets,
+ * in the colour of its rarity, after a tiny card of its finish — paper, silver, pearl, gold. As it shows, the tiny
+ * card is dealt and the letters shuffle before they settle (card_ref_controller.js); then the light passes over a
+ * rare one once, over an epic or legendary one now and then, like on their cards.
+ */
+/* The tiny card never stays alone at the end of a line: only the title itself wraps. */
+.card-ref { --ref: var(--color-ink); font-weight: 700; color: var(--ref); white-space: nowrap; }
+.card-ref-name { white-space: normal; }
+.card-ref-rare { --ref: var(--color-rare-ink); }
+.card-ref-epic { --ref: var(--color-epic-ink); }
+.card-ref-legendary { --ref: #8A5A0B; }
+.card-ref-card {
+  display: inline-block;
+  width: 10px;
+  height: 13px;
+  margin: 0 4px 0 1px;
+  vertical-align: -1px;
+  border: 2px solid transparent;
+  border-radius: 2.5px;
+  background: linear-gradient(var(--color-cream), var(--color-cream)) padding-box, #C4AE8E border-box;
+  box-shadow: 1px 1.5px 0 rgba(46, 30, 20, .22);
+  rotate: -10deg;
+  animation: card-ref-deal 520ms cubic-bezier(.3, 1.5, .5, 1) both;
+}
+.card-ref-rare .card-ref-card { background: linear-gradient(160deg, var(--color-rare-soft), var(--color-surface)) padding-box, linear-gradient(135deg, #B7CDE0, #6F93B2, #F4F8FB, #6A8CAA) border-box; }
+.card-ref-epic .card-ref-card { background: linear-gradient(160deg, var(--color-epic-soft), var(--color-surface)) padding-box, linear-gradient(135deg, #CDB2EC, #F4CFE2, #BFE6DB, #C2A2E8) border-box; }
+.card-ref-legendary .card-ref-card {
+  background: linear-gradient(155deg, #FFE9B0, #FFFBF0) padding-box, linear-gradient(135deg, #B07D24, #F7E2A0, #C7962F, #FFF4CF) border-box;
+  box-shadow: 1px 1.5px 0 rgba(46, 30, 20, .18), 0 0 6px rgba(227, 162, 26, .55);
+  animation: card-ref-deal 520ms cubic-bezier(.3, 1.5, .5, 1) both, card-ref-glow 2.6s ease-in-out 600ms infinite;
+}
+.card-ref-name::before { content: '['; content: '[' / ''; padding-right: .5px; font-weight: 500; opacity: .6; }
+.card-ref-name::after { content: ']'; content: ']' / ''; padding-left: .5px; font-weight: 500; opacity: .6; }
+/* The shuffle: each letter keeps its place, a glyph flickers over it until it settles with a little flash. */
+.card-ref-letter { position: relative; }
+/* Hidden rather than transparent: the light of a rare title is drawn through its letters, it would show them. */
+.card-ref-letter[data-glyph] { visibility: hidden; }
+.card-ref-letter[data-glyph]::after {
+  content: attr(data-glyph);
+  content: attr(data-glyph) / '';
+  visibility: visible;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  translate: -50% 0;
+  color: var(--ref);
+  font-weight: 600;
+  opacity: .75;
+}
+.card-ref-letter.is-set { animation: card-ref-settle 240ms ease-out both; }
+/* The light over the title of a rare card, the shimmer of an epic or legendary one. */
+.card-ref-rare .card-ref-name,
+.card-ref-epic .card-ref-name,
+.card-ref-legendary .card-ref-name {
+  background: linear-gradient(105deg, var(--ref) 42%, #FFFFFF 50%, var(--ref) 58%) 130% 0 / 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: card-ref-shine 2.4s ease-in-out 800ms both;
+}
+.card-ref-epic .card-ref-name {
+  background-image: linear-gradient(105deg, var(--ref) 30%, #A2477F 40%, #F4CFE2 50%, #2F7A8C 60%, var(--ref) 70%);
+  animation: card-ref-shine 6s ease-in-out 800ms infinite;
+}
+.card-ref-legendary .card-ref-name {
+  background-image: linear-gradient(105deg, var(--ref) 36%, #E3A21A 45%, #FFF4CF 50%, #E3A21A 55%, var(--ref) 64%);
+  animation: card-ref-shine 4.5s ease-in-out 800ms infinite;
+}
+@keyframes card-ref-deal {
+  from { opacity: 0; transform: translate(-7px, -9px) rotate(-60deg) scale(.4); }
+  60% { opacity: 1; transform: rotate(14deg) scale(1.2); }
+}
+@keyframes card-ref-glow { 50% { box-shadow: 1px 1.5px 0 rgba(46, 30, 20, .18), 0 0 1px rgba(227, 162, 26, .2); } }
+@keyframes card-ref-settle { from { color: var(--color-clay); text-shadow: 0 0 6px rgba(232, 105, 44, .55); } }
+/* The band of light crosses the title in the first part of each round, then rests beyond its end. */
+@keyframes card-ref-shine {
+  from { background-position: 130% 0; }
+  30%, to { background-position: -30% 0; }
+}
+
 .casa-cloud { animation: casa-cloud 40s ease-in-out infinite alternate; }
 @keyframes casa-cloud { to { transform: translateX(18px); } }
 

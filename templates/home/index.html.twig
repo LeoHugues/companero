@@ -40,7 +40,8 @@
                 :mood="mood"
                 :cleanliness="cleanliness"
                 :reacting="just_done is not same as(false)"
-                :speech="just_done ? 'Merci ' ~ app.user.name ~ ' ! +' ~ just_done.points ~ ' pts pour toi.' : (quest ? casa_quest_line(quest) : null)"
+                :speech="just_done ? 'Merci ' ~ app.user.name ~ ' ! +' ~ just_done.points ~ ' pts pour toi.' : null"
+                :line="quest ? casa_quest_line(quest) : null"
             />
 
             <a href="{{ path('plan_show') }}" class="home-plan" aria-label="Le plan de la maison"><twig:Icon name="plan" size="16" stroke="1.8"/>Plan</a>
@@ -74,13 +75,14 @@
                     </p>
 
                     {% for view in quests %}
-                        <div class="quest" data-quest-target="quest" data-line="{{ casa_quest_line(view) }}" {{ not loop.first ? 'hidden' }}>
+                        <div class="quest" data-quest-target="quest" data-line="{{ casa_quest_line(view)|e }}" {{ not loop.first ? 'hidden' }}>
                             <twig:TaskVignette :task="view.task" class="vignette-small"/>
                             <div class="min-w-0 flex-1">
                                 <p class="line-clamp-2 text-[14.5px] leading-tight font-semibold"><a href="{{ path('task_show', {id: view.task.id}) }}" class="text-ink no-underline hover:text-ink">{{ view.task.title }}</a></p>
                                 <p class="mt-0.5 text-xs text-muted">+{{ view.task.currentPoints + task_boost(view) }} pts · {{ task_status_label(view.task, view.status)|lower }}</p>
                             </div>
-                            <form method="post" action="{{ path('task_reserve', {id: view.task.id}) }}" class="shrink-0">
+                            {# Taken: it goes to the hand and the next one comes at once, before the page comes back (card_motion.js). #}
+                            <form method="post" action="{{ path('task_reserve', {id: view.task.id}) }}" class="shrink-0" data-card-motion="take" data-task="{{ view.task.id }}" data-action="turbo:submit-start->quest#taken turbo:submit-end->quest#settled">
                                 <input type="hidden" name="_back" value="home">
                                 <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
                                 <button type="submit" class="seat-stacked" aria-label="Je m’en occupe : « {{ view.task.title }} »">
@@ -123,11 +125,12 @@
         </div>
         {#
             Their cards side by side, to slide through; the next one shows at the edge. Last, the deck: a card to draw.
-            Each keeps its id across refreshes: a card dealt slides into the hand, one let go fades out of it (card_motion.js).
+            Each keeps its id across refreshes: a card dealt slides into the hand, one let go fades out of it — at the tap,
+            without waiting for the page (card_motion.js). One counted on me whoever takes it stays when let go.
         #}
         <ul class="hand">
             {% for view in mine %}
-                <li class="hand-card" id="hand-{{ view.task.id }}" data-hand-card><twig:TaskCard :view="view" :member="app.user"/></li>
+                <li class="hand-card" id="hand-{{ view.task.id }}" data-hand-card {{ view.task.id in counted_on ? 'data-counted-on' }}><twig:TaskCard :view="view" :member="app.user"/></li>
             {% endfor %}
             <li class="hand-card" id="hand-deck"><twig:Deck :view="draw"/></li>
         </ul>

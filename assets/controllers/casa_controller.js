@@ -64,7 +64,7 @@ export default class extends Controller {
     }
 
     calmDown() {
-        this.say(this.restSpeechValue, 0);
+        this.rest();
         this.swapBodyAnimation('animate-breathe');
         // Ready for the next one: a page refreshed in place (morphing) sets it back to true.
         this.reactingValue = false;
@@ -253,17 +253,22 @@ export default class extends Controller {
         this.gazeTarget.style.transform = `translate(${dx}px, ${dy}px)`;
     }
 
-    say(text, revert = 3600) {
+    say(text, revert = 3600, html = false) {
         if (!this.hasSpeechTarget) {
             return;
         }
         clearTimeout(this.speechTimer);
-        this.speechTarget.textContent = text;
+        this.speechTarget[html ? 'innerHTML' : 'textContent'] = text;
         this.speechTarget.classList.remove('animate-pop');
         requestAnimationFrame(() => this.speechTarget.classList.add('animate-pop'));
         if (revert) {
-            this.speechTimer = this.later(() => this.say(this.restSpeechValue, 0), revert);
+            this.speechTimer = this.later(() => this.rest(), revert);
         }
+    }
+
+    /** Back to what she says at rest: HTML from the server, where a card she names is marked up (card_ref_controller.js). */
+    rest() {
+        this.say(this.restSpeechValue, 0, true);
     }
 
     animateBody(className, duration) {
