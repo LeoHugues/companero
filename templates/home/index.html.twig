@@ -114,6 +114,8 @@
         </a>
     {% endif %}
 
+    {{ include('shopping/_strip.html.twig', {missing: missing}) }}
+
     {% set late = mine|filter(v => v.status.urgency.value == 'late')|length %}
     <section class="flex flex-col gap-3.5" aria-labelledby="mine-title">
         <div class="flex items-end justify-between gap-3">

@@ -10,6 +10,7 @@ use App\Progress\LevelProvider;
 use App\Progress\TeamProgressBuilder;
 use App\Repository\CompletionRepository;
 use App\Repository\PointEntryRepository;
+use App\Repository\ShoppingItemRepository;
 use App\Task\TaskBoardBuilder;
 use App\Task\TaskView;
 use Psr\Clock\ClockInterface;
@@ -28,6 +29,7 @@ final class HomeController extends AbstractController
         LevelProvider $levels,
         CompletionRepository $completions,
         PointEntryRepository $points,
+        ShoppingItemRepository $shopping,
         ClockInterface $clock,
     ): Response {
         $household = $member->getHousehold();
@@ -65,6 +67,7 @@ final class HomeController extends AbstractController
             'quick' => $board->quickShown(),
             'quick_count' => \count($board->quick()),
             'dormant' => $board->dormant(),
+            'missing' => $shopping->findMissing($household),
             'cleanliness' => $board->cleanliness(),
             'mood' => CasaMood::fromCleanliness($board->cleanliness()),
             'team' => $teamProgress->build($household, $week),

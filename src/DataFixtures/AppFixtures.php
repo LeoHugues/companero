@@ -9,6 +9,7 @@ use App\Entity\Household;
 use App\Entity\Member;
 use App\Entity\Pet;
 use App\Entity\Presence;
+use App\Entity\ShoppingItem;
 use App\Entity\Task;
 use App\Entity\YellowCard;
 use App\Entity\Zone;
@@ -179,7 +180,33 @@ final class AppFixtures extends Fixture
         (new WeekPlanner($manager, $this->taskRepository, new Randomizer(new Mt19937(41))))->plan($household, Week::containing($now));
         $manager->persist(new Gift($leo, GiftKind::YellowCard, 'Niveau 3', $now->modify('-1 day')));
         $manager->persist(new YellowCard($robin, $leo, 'Le vélo en plein milieu de l’entrée', $now->modify('-3 hours')));
+        $this->shopping($household, $members, $now, $manager);
         $manager->flush();
+    }
+
+    /**
+     * What the house is missing: no more toilet paper since this morning, the sponges are done, the corridor's bulb
+     * blew; the washing-up liquid and the kibble were just bought, the bin bags a while ago.
+     *
+     * @param array<string, Member> $members
+     */
+    private function shopping(Household $household, array $members, \DateTimeImmutable $now, ObjectManager $manager): void
+    {
+        $bought = ['Liquide vaisselle' => ['Robin', '-2 days'], 'Croquettes' => ['Léa', '-5 days'], 'Sacs poubelle' => ['Gab', '-12 days'], 'Papier toilette' => ['Léo', '-9 days']];
+        $missing = ['Ampoule du couloir' => ['Léo', '-1 day', false], 'Éponges' => ['Robin', '-2 days', false], 'Papier toilette' => ['Gab', '-3 hours', true]];
+        $items = [];
+        foreach ($bought as $name => [$by, $when]) {
+            $items[$name] = new ShoppingItem($household, $name);
+            $items[$name]->notice($members[$by], $now->modify($when.' -1 day'));
+            $items[$name]->buy($members[$by], $now->modify($when));
+        }
+        foreach ($missing as $name => [$by, $when, $urgent]) {
+            $items[$name] ??= new ShoppingItem($household, $name);
+            $items[$name]->notice($members[$by], $now->modify($when), $urgent);
+        }
+        foreach ($items as $item) {
+            $manager->persist($item);
+        }
     }
 
     private function founding(): Founding

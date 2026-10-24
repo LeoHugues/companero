@@ -65,6 +65,7 @@ Elle est d'abord construite pour une coloc de 4 personnes. Elle pourra ensuite
 | **Profil à réclamer** | Un coloc connu par son prénom seulement, préparé par les autres. Il le réclame avec le lien d'invitation (« Je suis Robin ») et y retrouve tout ce qui lui est attaché. |
 | **Découverte** | La visite guidée par la Casa à l'arrivée : l'esprit, les cartes et le glissement, les points, les deux objectifs, la charte, puis ses propres réglages. Voir [l'onboarding](onboarding.md). |
 | **Charte** | Les règles de bon sens de la coloc (« je fais ma vaisselle quand j'ai fini »), écrites par tout le monde. Chacun y adhère (« Ça me va »), et la relit quand elle change. |
+| **Ce qui manque** | La liste partagée de ce qu'il faut racheter pour la maison (papier toilette, éponges, une ampoule grillée). On y note une chose quand on voit qu'elle manque, on la coche une fois achetée. Voir § 6 ter. |
 
 ## 4. Les tâches
 
@@ -130,9 +131,9 @@ Les pourcentages sont exprimés par rapport au rythme ou à l'échéance. La
 - Le **catalogue** contient les tâches rares ou saisonnières (tailler la haie,
   tondre, gouttières…). Elles ne se planifient pas seules : on les instancie
   quand on voit le besoin.
-- Les **courses** sont une catégorie de tâches ponctuelles (« acheter du
-  papier toilette »). La gestion des stocks et des consommables est hors
-  périmètre.
+- Ce qu'il faut **racheter** (papier toilette, éponges, une ampoule) a sa propre liste,
+  [ce qui manque](#6-ter-ce-qui-manque) : ce ne sont pas des tâches. La gestion des stocks
+  (quantités, inventaire) reste hors périmètre.
 
 ### 4.5 Cycle de vie
 
@@ -196,6 +197,33 @@ zone : la salle de bain privée compte autant que la salle de bain partagée.
   présente est concernée.
 - L'accueil montre « On compte sur toi » ; `GET /api/rappels` donne la même liste
   pour les notifications de l'appli (à brancher).
+
+## 6 ter. Ce qui manque
+
+Il y a souvent des choses à racheter : des éponges, du vinaigre, du papier toilette, l'ampoule qui
+vient de griller. **Ce qui manque** est une liste partagée par toute la coloc, à portée de main
+depuis l'accueil.
+
+- **Le dire** : sur l'accueil, sous la Casa, une bande « Il manque » montre ce qui manque d'un coup
+  d'œil ; son **+** ouvre la liste, le champ prêt (le **+** de la barre du bas le propose aussi). On
+  tape, Entrée : c'est noté, et le champ se vide en gardant le clavier pour la chose suivante.
+  « Urgent » (il n'y en a plus du tout) la met en haut de la liste, en corail.
+- **En un appui** : sous le champ, « Souvent » propose ce qu'on a déjà acheté (le plus récent
+  d'abord), puis ce qui manque dans toutes les maisons (papier toilette, éponges, liquide
+  vaisselle, sacs poubelle…, croquettes et litière s'il y a des animaux).
+- **Jamais deux fois** : une chose déjà sur la liste n'est pas notée de nouveau, quelles que soient
+  ses majuscules, ses accents ou son pluriel (« éponges » est « Éponge »). La redire « urgente » la
+  rend urgente.
+- **L'acheter** : n'importe qui coche la case ronde au bout de la ligne. La chose passe dans
+  « Acheté ces derniers jours » (7 jours), avec qui l'a achetée ; « Remettre » la remet sur la liste
+  (un doigt qui a glissé, ou il en manque déjà).
+- **La corriger** : la ligne s'ouvre pour la renommer (« Ampoule E27 (salle de bain) »), la dire
+  urgente ou la retirer de la liste (pas besoin finalement). Jamais achetée, elle est oubliée ;
+  achetée avant, elle reste parmi les suggestions.
+- **Une ligne par chose**, gardée une fois achetée : c'est elle qui revient quand elle manque de
+  nouveau. Ni points ni XP pour un achat (pour l'instant).
+- *Plus tard* : prévenir ceux qui ne sont pas à la maison (et passent peut-être devant un magasin)
+  de ce qui manque, surtout l'urgent ; « je m'en charge » pour ne pas acheter deux fois.
 
 ## 7. Gamification
 
@@ -307,6 +335,7 @@ Il est généré le dimanche soir et consultable le lundi :
 | Tâches express, animaux, présence « à la maison » | Probabilité d'être à la maison (Wi-Fi, localisation) |
 | Cadeaux de niveau, boosts, séries et gels | Widget et tuile Android de présence |
 | Notifications (rappels) | |
+| Ce qui manque : la liste partagée, l'urgent, les suggestions | Prévenir de ce qui manque quand on est dehors ; « je m'en charge » |
 
 ## 10. Choix techniques (provisoires)
 

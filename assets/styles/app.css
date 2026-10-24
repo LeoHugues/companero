@@ -1180,6 +1180,34 @@ details[open] .care-group-fold::after { content: 'Replier'; font-size: 12.5px; }
 .quick-chip.is-resting { @apply h-auto min-h-11 cursor-default border-dashed bg-transparent py-1.5 text-muted hover:border-line active:scale-100; }
 .quick-chip.is-resting .quick-chip-tick { @apply bg-ok text-surface; }
 
+/*
+ * What the house is missing (docs/direction-artistique.md, « Ce qui manque »). On the home page, a strip under the
+ * state of the house: what is missing at a glance, and "+" in the sand of a sheet to say something else is.
+ */
+.missing-strip { @apply sheet flex items-center gap-2 pr-3 pl-4; }
+.missing-strip-link { @apply flex min-h-[66px] min-w-0 flex-1 items-center gap-3 py-2.5 text-ink no-underline transition hover:text-ink active:scale-[.985]; }
+.missing-strip-names { @apply block truncate text-[15px] leading-snug font-semibold; }
+.missing-strip-add { @apply flex size-11 shrink-0 items-center justify-center rounded-[13px] bg-track/60 text-ink no-underline transition hover:bg-track hover:text-ink active:scale-90; }
+/* Something urgent: a coral dot on the corner of a tile. */
+.tile-dot { @apply absolute -top-1 -right-1 size-3 rounded-full border-2 border-surface bg-danger; }
+/* A suggestion: one tap and it is on the list. */
+.suggestion {
+  @apply inline-flex h-9 cursor-pointer items-center gap-1 rounded-[11px] border border-line bg-surface pr-3 pl-2 text-[13.5px] font-semibold whitespace-nowrap text-ink-soft transition hover:border-[#E2CCAC] hover:text-ink active:scale-95;
+}
+.suggestion svg { @apply text-clay-dark; }
+/* A row of the list, and its round box: ticked, it was bought — at once, before the list comes back (shopping_controller.js). */
+.shopping-row { @apply flex items-center gap-2; }
+.buy-button {
+  @apply flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-full border-2 border-sand text-transparent transition hover:border-ok hover:text-ok active:scale-90;
+}
+.shopping-row.is-bought .buy-button { @apply border-ok bg-ok text-cream; animation: pop 380ms cubic-bezier(.2, 1.5, .4, 1) both; }
+.shopping-row.is-bought .row-title { @apply text-muted line-through decoration-2; }
+.shopping-row.is-bought .tile { @apply opacity-50; }
+.shopping-row.is-bought { transition: opacity 260ms 320ms; opacity: .55; }
+@media (prefers-reduced-motion: reduce) {
+  .shopping-row.is-bought .buy-button { animation: none; }
+}
+
 /* The goal of the house, on the home page: the days under its gauge, the drawer of what earned the points. */
 .goal-days { @apply grid grid-cols-7 text-center text-[10px] font-semibold tracking-wider text-dust; }
 .goal-days .is-today { @apply text-ink; }

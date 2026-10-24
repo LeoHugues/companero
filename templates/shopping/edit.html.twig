@@ -1,0 +1,37 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ item.name }} · Companero{% endblock %}
+
+{% block body %}
+    <header class="page-head items-end">
+        <div class="min-w-0">
+            <p class="eyebrow">Ce qui manque</p>
+            <h1 class="page-title mt-1">{{ item.name }}</h1>
+        </div>
+        <a href="{{ path('shopping_index') }}" aria-label="Retour à la liste" class="head-button"><twig:Icon name="close" size="19" stroke="2"/></a>
+    </header>
+    {% if item.missing and item.noticedBy %}
+        <p class="page-lede -mt-2">{{ item.noticedBy.name }} l’a noté {{ shopping_day(item.missingSince) }}.</p>
+    {% endif %}
+
+    {{ form_start(form, {attr: {class: 'flex flex-col gap-3'}}) }}
+        <div class="form-sheet">
+            {{ form_row(form.name) }}
+            {% if item.missing %}
+                <div class="-mb-2 border-t border-line/70 pt-1.5">{{ form_row(form.urgent) }}</div>
+            {% else %}
+                {% do form.urgent.setRendered %}
+            {% endif %}
+        </div>
+        <button type="submit" class="btn-primary w-full" data-haptic="success">Enregistrer</button>
+    {{ form_end(form) }}
+
+    {% if item.missing %}
+        <form method="post" action="{{ path('shopping_remove', {id: item.id}) }}" class="flex justify-center">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
+            <button type="submit" class="btn-link hover:text-danger-ink"><twig:Icon name="trash" size="17" stroke="1.9"/>Retirer de la liste</button>
+        </form>
+    {% endif %}
+{% endblock %}
+
+{% block nav %}<twig:BottomNav active="home"/>{% endblock %}

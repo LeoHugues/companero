@@ -19,6 +19,7 @@ final class TaskCreationTest extends AppTestCase
         self::assertSelectorExists('a[href="/taches/nouvelle/a-faire"]');
         self::assertSelectorExists('a[href="/taches/nouvelle/deja-fait"]');
         self::assertSelectorExists('a[href="/taches/nouvelle/modele"]');
+        self::assertSelectorExists('a[href="/courses?ajouter=1"]');
         self::assertSelectorTextContains('main', 'Étape 1/2');
     }
 

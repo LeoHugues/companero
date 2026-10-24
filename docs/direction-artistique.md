@@ -268,6 +268,31 @@ relief de la barre). La page ouverte se remplit des couleurs de la Casa et rebon
 | Bilan | trois barres | jaune, terre cuite, jaune |
 | Profil | le visage du membre (sa couleur, son initiale) | cerclé d'encre |
 
+## Ce qui manque
+
+Ce qu'il faut racheter, dans le calme de l'accueil :
+
+- **Sur l'accueil**, sous l'état de la maison : une feuille fine. À gauche, le caddie sur une tuile
+  lilas (la couleur des courses), une pastille corail dans son coin s'il y a de l'urgent ; « IL MANQUE »
+  en petites capitales et le nombre ; dessous, les noms à la suite (« Papier toilette · Éponges ·… »),
+  l'urgent d'abord, en corail, sur une seule ligne. À droite, un **+** dans le sable d'une feuille.
+  Vide : « Rien pour l'instant ».
+- **La page** : en tête, une feuille pour le dire — le champ « Il manque… », la puce « Urgent » (à
+  filet, l'encre une fois choisie) et « Ajouter », le seul bouton terre cuite ; sous un filet,
+  « SOUVENT » et ses puces, chacune un **+** terre cuite foncée et un nom.
+- **La liste** : « URGENT » avec son point corail, puis « À ACHETER ». Une ligne par chose : son
+  dessin sur sa tuile pastel, deviné de son nom (`App\Shopping\ItemArt`) — un rouleau (lilas) pour le
+  papier, une éponge ou un flacon (jaune ménage) pour l'entretien, un sac (sable), une ampoule, une
+  pile ou une clé (bleu bricolage), une tasse (sable) pour le café, un panier (sauge) pour ce qui se
+  mange, une patte (rose) pour les animaux, le caddie sinon ; le nom, qui l'a noté et quand
+  (« Robin · jeudi ») ; au bout, une **case ronde** cerclée de sable.
+- **Cochée**, sans attendre le serveur, la case se remplit de sauge d'un petit rebond et lance
+  quelques étoiles, le nom se barre, la ligne pâlit ; la liste revient sans elle.
+- **Acheté ces derniers jours** : un volet replié ou non, une coche sauge sur sa tuile, qui l'a acheté
+  et quand, « Remettre » dans le sable.
+- **Vide**, la Casa : « Il ne manque rien : mes placards sont pleins ! Le premier qui voit le fond d'un
+  flacon le note ici. »
+
 ## Le plan
 
 La maison vue d'en haut, dans le calme de l'accueil, sur une feuille :

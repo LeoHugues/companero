@@ -10,7 +10,7 @@
             route: 'task_new_one_off', icon: 'check', tile: 'tile-sun',
             title: 'Une tâche à faire',
             text: 'Une chose à faire une fois : une que la maison connaît déjà, ou une nouvelle. Elle arrive sur l’accueil et disparaît une fois faite.',
-            example: 'Appeler le proprio, racheter du PQ, tailler la haie…',
+            example: 'Appeler le proprio, monter l’étagère, tailler la haie…',
         },
         {
             route: 'task_log', icon: 'clock', tile: 'tile-sage',
@@ -24,11 +24,17 @@
             text: 'Une tâche qui revient. La maison crée toute seule les tâches à faire, quand c’est le moment.',
             example: 'La serpillière tous les 7 jours, les poubelles le mardi soir…',
         },
+        {
+            route: 'shopping_index', params: {ajouter: 1}, icon: 'cart', tile: 'tile-lilac',
+            title: 'Il manque quelque chose',
+            text: 'Ce qu’il faut racheter pour la maison. Ça rejoint la liste de ce qui manque, que tout le monde voit sur l’accueil.',
+            example: 'Du papier toilette, des éponges, l’ampoule de l’entrée…',
+        },
     ] %}
     <ul class="flex flex-col gap-3">
         {% for choice in choices %}
             <li class="animate-rise" style="animation-delay: {{ loop.index0 * 70 }}ms">
-                <a href="{{ path(choice.route) }}" class="sheet flex items-start gap-3.5 p-4 text-ink no-underline transition hover:-translate-y-0.5 hover:text-ink active:scale-[.985]">
+                <a href="{{ path(choice.route, choice.params ?? {}) }}" class="sheet flex items-start gap-3.5 p-4 text-ink no-underline transition hover:-translate-y-0.5 hover:text-ink active:scale-[.985]">
                     <span class="tile {{ choice.tile }} size-12 rounded-[14px]" aria-hidden="true"><twig:Icon :name="choice.icon" size="23" stroke="1.9"/></span>
                     <span class="flex min-w-0 flex-1 flex-col gap-1">
                         <span class="text-[17px] leading-tight font-semibold">{{ choice.title }}</span>

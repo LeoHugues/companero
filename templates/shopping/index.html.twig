@@ -1,0 +1,113 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Ce qui manque · Companero{% endblock %}
+
+{#
+    What the house is missing. On top, "Il manque…": Enter adds it, and the field empties and keeps the keyboard for
+    the next one; "Urgent" puts it at the top; a suggestion is added in one tap. Then the list, the urgent things first:
+    the round box at the end of a row ticks it as bought (shopping_controller.js), the row opens it. Last, what was
+    bought lately, to put back on the list.
+#}
+{% block body %}
+    <header class="page-head items-end">
+        <div class="min-w-0">
+            <p class="eyebrow">{{ app.user.household.name }}</p>
+            <h1 class="page-title mt-1">Ce qui manque</h1>
+        </div>
+        <a href="{{ ux_is_native() ? '/recede_historical_location' : path('app_home') }}" aria-label="Retour à l’accueil" class="head-button"><twig:Icon name="arrow-left" size="20" stroke="2"/></a>
+    </header>
+
+    <section id="ajouter" class="sheet flex flex-col gap-3.5 p-4" aria-label="Dire ce qui manque">
+        <form method="post" action="{{ path('shopping_add') }}" class="flex flex-col gap-3">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
+            <input type="hidden" name="_adding" value="{{ adding ? 1 : 0 }}">
+            <label for="shopping-name" class="sr-only">Ce qui manque</label>
+            <input type="text" id="shopping-name" name="name" class="input" placeholder="Il manque…" maxlength="{{ constant('App\\Entity\\ShoppingItem::NAME_MAX_LENGTH') }}" autocomplete="off" enterkeyhint="send" required{{ adding ? ' autofocus' }}>
+            <div class="flex items-center justify-between gap-3">
+                <span class="choice-chips">
+                    <input type="checkbox" id="shopping-urgent" name="urgent" value="1">
+                    <label for="shopping-urgent" title="Il n’y en a plus du tout"><twig:Icon name="alert" size="15" stroke="2.1"/>Urgent</label>
+                </span>
+                <button type="submit" class="btn-primary h-10 px-4" data-haptic="success"><twig:Icon name="plus" size="17" stroke="2.4"/>Ajouter</button>
+            </div>
+        </form>
+        {% if list.suggestions is not empty %}
+            <div class="flex flex-col gap-2.5 border-t border-line/70 pt-3.5">
+                <h2 class="eyebrow">Souvent</h2>
+                <ul class="flex flex-wrap gap-2" aria-label="Suggestions">
+                    {% for name in list.suggestions %}
+                        <li>
+                            <form method="post" action="{{ path('shopping_add') }}">
+                                <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
+                                <input type="hidden" name="_adding" value="{{ adding ? 1 : 0 }}">
+                                <input type="hidden" name="name" value="{{ name }}">
+                                <button type="submit" class="suggestion" aria-label="Il manque : {{ name }}"><twig:Icon name="plus" size="14" stroke="2.4"/>{{ name }}</button>
+                            </form>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+    </section>
+
+    {% set groups = [
+        {key: 'urgent', title: 'Urgent', items: list.urgent},
+        {key: 'missing', title: 'À acheter', items: list.notUrgent},
+    ]|filter(group => group.items is not empty) %}
+    {% for group in groups %}
+        <section class="flex flex-col gap-2" aria-labelledby="shopping-{{ group.key }}-title" data-controller="shopping">
+            <h2 class="{{ group.key == 'urgent' ? 'care-group-title is-late px-1' : 'group-label flex items-center gap-2' }}">
+                {% if group.key == 'urgent' %}<span class="care-group-dot"></span>{% endif %}
+                <span id="shopping-{{ group.key }}-title">{{ group.title }}</span><span class="care-group-count">{{ group.items|length }}</span>
+            </h2>
+            <ul class="list-sheet">
+                {% for item in group.items %}
+                    {% set art = shopping_art(item.name) %}
+                    <li id="missing-{{ item.id }}" class="shopping-row">
+                        <a href="{{ path('shopping_edit', {id: item.id}) }}" class="list-row min-w-0 flex-1">
+                            <span class="tile {{ art.tile }}" aria-hidden="true"><twig:Icon :name="art.icon" size="21" stroke="1.8"/></span>
+                            <span class="flex min-w-0 flex-1 flex-col gap-0.5">
+                                <span class="row-title">{{ item.name }}</span>
+                                <span class="row-meta">{{ item.noticedBy ? item.noticedBy.name ~ ' · ' }}{{ shopping_day(item.missingSince) }}</span>
+                            </span>
+                        </a>
+                        <form method="post" action="{{ path('shopping_buy', {id: item.id}) }}" data-action="submit->shopping#buy">
+                            <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
+                            <input type="hidden" name="_adding" value="{{ adding ? 1 : 0 }}">
+                            <button type="submit" class="buy-button" data-haptic="press" aria-label="C’est acheté : {{ item.name }}" title="C’est acheté"><twig:Icon name="check" size="18" stroke="2.8"/></button>
+                        </form>
+                    </li>
+                {% endfor %}
+            </ul>
+        </section>
+    {% else %}
+        <p class="sheet-empty">Il ne manque rien : mes placards sont pleins ! Le premier qui voit le fond d’un flacon le note ici.</p>
+    {% endfor %}
+
+    {% if list.bought is not empty %}
+        <details class="fold" id="shopping-bought" open data-controller="disclosure" data-action="toggle->disclosure#remember turbo:morph-element->disclosure#restore">
+            <summary class="fold-summary">
+                <span class="flex items-baseline gap-2"><span class="fold-title">Acheté ces derniers jours</span><span class="fold-count">{{ list.bought|length }}</span></span>
+                <twig:Icon name="chevron-down" size="17" stroke="2" class="fold-chevron"/>
+            </summary>
+            <ul class="list-sheet">
+                {% for item in list.bought %}
+                    <li id="bought-{{ item.id }}" class="list-row">
+                        <span class="tile tile-sage" aria-hidden="true"><twig:Icon name="check" size="19" stroke="2.4"/></span>
+                        <span class="flex min-w-0 flex-1 flex-col gap-0.5">
+                            <span class="row-title text-ink-soft">{{ item.name }}</span>
+                            <span class="row-meta">{{ item.boughtBy ? item.boughtBy.name ~ ' · ' }}{{ shopping_day(item.boughtAt) }}</span>
+                        </span>
+                        <form method="post" action="{{ path('shopping_again', {id: item.id}) }}">
+                            <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
+                            <input type="hidden" name="_adding" value="{{ adding ? 1 : 0 }}">
+                            <button type="submit" class="btn-soft h-9 px-3 text-[13px]" aria-label="Il en manque encore : {{ item.name }}" title="Il en manque encore"><twig:Icon name="repeat" size="14" stroke="2"/>Remettre</button>
+                        </form>
+                    </li>
+                {% endfor %}
+            </ul>
+        </details>
+    {% endif %}
+{% endblock %}
+
+{% block nav %}<twig:BottomNav active="home"/>{% endblock %}
