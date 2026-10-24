@@ -2,12 +2,13 @@
 
 namespace App\Task;
 
+use App\Entity\CatalogItem;
 use App\Entity\Task;
 
 /**
  * The little picture in the arch of a task card (templates/components/TaskVignette.html.twig),
- * guessed from the task's title: a vacuum cleaner, the toilet, the bin… Null when nothing fits:
- * the card then shows its category.
+ * guessed from the task's title (or a catalogue item's): a vacuum cleaner, the toilet, the bin… Null when
+ * nothing fits: the card then shows its category.
  */
 final class TaskArt
 {
@@ -36,7 +37,7 @@ final class TaskArt
 
     private const ACCENTS = ['à' => 'a', 'â' => 'a', 'ä' => 'a', 'é' => 'e', 'è' => 'e', 'ê' => 'e', 'ë' => 'e', 'î' => 'i', 'ï' => 'i', 'ô' => 'o', 'ö' => 'o', 'ù' => 'u', 'û' => 'u', 'ü' => 'u', 'ç' => 'c', 'œ' => 'oe', '’' => "'"];
 
-    public static function of(Task $task): ?string
+    public static function of(Task|CatalogItem $task): ?string
     {
         $title = strtr(mb_strtolower($task->getTitle()), self::ACCENTS);
         foreach (self::PICTURES as $picture => $words) {

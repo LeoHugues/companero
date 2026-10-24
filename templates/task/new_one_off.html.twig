@@ -2,19 +2,20 @@
 
 {% block title %}Une tâche à faire · Companero{% endblock %}
 
-{# Room for the save bar, fixed at the bottom of the screen. #}
-{% block main_class %}{{ ux_is_native() ? 'pb-28' : 'pb-48' }}{% endblock %}
+{# The save button floats above the bottom bar; in the app's modal, at the very bottom. #}
+{% block main_class %}{{ ux_is_native() ? 'pb-6' : 'pb-28' }}{% endblock %}
 
 {% block body %}
     {{ include('task/_tunnel.html.twig', {
         step: 2,
         title: template ? template.title : 'Une tâche à faire',
         icon: 'check',
+        tile: 'tile-sun',
         what: template ? 'Depuis le catalogue : ajuste ce qu’il faut, puis ajoute-la. Elle arrive sur l’accueil et disparaît une fois faite.' : 'Une nouvelle tâche, à faire une fois : elle arrive sur l’accueil et disparaît une fois faite. Pour une tâche qui revient, crée plutôt un modèle.'
     }) }}
 
     {% if can_pick and not template %}
-        <a href="{{ path('task_new_one_off') }}" class="btn-link -mt-2 self-start"><twig:Icon name="search" size="16"/>&nbsp;Plutôt une tâche que la maison connaît</a>
+        <a href="{{ path('task_new_one_off') }}" class="btn-link -my-2 self-start"><twig:Icon name="search" size="16" stroke="1.9"/>Plutôt une tâche que la maison connaît</a>
     {% endif %}
 
     {{ include('task/_form.html.twig', {submit_label: 'Ajouter la tâche'}) }}

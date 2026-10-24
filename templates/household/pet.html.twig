@@ -3,17 +3,25 @@
 {% block title %}{{ pet.name }} · Companero{% endblock %}
 
 {% block body %}
-    <header class="flex items-center justify-between">
-        <h1 class="flex items-center gap-2 text-[22px]"><twig:Icon name="paw" size="22"/> {{ pet.name }}</h1>
-        <a href="{{ path('household_edit') }}" aria-label="Retour aux réglages de la coloc" class="flex size-11 items-center justify-center rounded-full text-ink"><twig:Icon name="close" size="22" stroke="2.2"/></a>
+    <header class="page-head items-end">
+        <div class="flex min-w-0 items-center gap-3">
+            {{ include('household/_pet_portrait.html.twig', {pet: pet, class: 'size-14 rounded-[16px]'}) }}
+            <div class="min-w-0">
+                <p class="eyebrow">{{ pet.species.label }}</p>
+                <h1 class="page-title mt-0.5 truncate">{{ pet.name }}</h1>
+            </div>
+        </div>
+        <a href="{{ path('household_edit') }}" aria-label="Retour aux réglages de la coloc" class="head-button"><twig:Icon name="close" size="19" stroke="2"/></a>
     </header>
 
-    {{ form_start(form, {attr: {class: 'flex flex-col gap-5'}}) }}
-        {{ form_row(form.name) }}
-        {{ form_row(form.species) }}
-        {{ form_row(form.description) }}
-        {{ form_row(form.owners) }}
-        <button type="submit" class="btn-primary self-start">Enregistrer</button>
+    {{ form_start(form, {attr: {class: 'flex flex-col gap-3'}}) }}
+        <div class="form-sheet">
+            {{ form_row(form.name) }}
+            {{ form_row(form.species, {attr: {class: 'choice-segmented'}}) }}
+            {{ form_row(form.description) }}
+            {{ form_row(form.owners) }}
+        </div>
+        <button type="submit" class="btn-primary w-full" data-haptic="success">Enregistrer</button>
     {{ form_end(form) }}
 {% endblock %}
 

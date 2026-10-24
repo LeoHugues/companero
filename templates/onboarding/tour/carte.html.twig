@@ -7,22 +7,22 @@
 {% block content %}
     {{ include('onboarding/tour/_demo_card.html.twig') }}
 
-    <ul class="flex flex-col gap-3 px-1">
-        <li class="flex items-start gap-3">
-            <span class="flex size-8 shrink-0 items-center justify-center rounded-full bg-cat-cleaning"><twig:Icon name="broom" size="17"/></span>
-            <p class="text-[15px]"><strong>Le médaillon</strong> : la catégorie, entourée d’un anneau qui se vide avec le temps.</p>
+    <ul class="list-sheet">
+        <li class="flex items-start gap-3 py-3.5">
+            <span class="tile tile-sand text-[15px] font-bold">20</span>
+            <p class="text-[14px] leading-snug text-ink-soft"><strong class="font-semibold text-ink">Le coin</strong>, comme une carte à jouer : ce qu’elle rapporte, et sa catégorie. Plus bas, un fil qui se vide avec le temps.</p>
         </li>
-        <li class="flex items-start gap-3">
-            <span class="flex size-8 shrink-0 items-center justify-center rounded-full border-[1.5px] border-dashed border-dust text-muted"><twig:Icon name="hand" size="16"/></span>
-            <p class="text-[15px]"><strong>Je prends</strong> : les autres voient que tu t’en occupes.</p>
+        <li class="flex items-start gap-3 py-3.5">
+            <span class="tile bg-[#FCE6D6]"><span class="seat-empty size-7"><twig:Icon name="plus" size="12" stroke="2.6"/></span></span>
+            <p class="text-[14px] leading-snug text-ink-soft"><strong class="font-semibold text-ink">Je prends</strong> : les autres voient que tu t’en occupes.</p>
         </li>
-        <li class="flex items-start gap-3">
-            <span class="flex size-8 shrink-0 items-center justify-center rounded-full border-[1.5px] border-ink bg-sun"><twig:Icon name="check" size="16" stroke="2.8"/></span>
-            <p class="text-[15px]"><strong>C’est fait</strong> : un appui, et ses points sont à toi. Oublié sur le moment ? On peut le noter après coup.</p>
+        <li class="flex items-start gap-3 py-3.5">
+            <span class="tile bg-[#F1C75A] shadow-[inset_0_-2px_0_rgba(46,30,20,.14)]"><twig:Icon name="check" size="18" stroke="2.4"/></span>
+            <p class="text-[14px] leading-snug text-ink-soft"><strong class="font-semibold text-ink">C’est fait</strong> : un appui, et ses points sont à toi. Oublié sur le moment ? On peut le noter après coup.</p>
         </li>
-        <li class="flex items-start gap-3">
-            <span class="flex size-8 shrink-0 items-center justify-center rounded-full bg-track"><twig:Icon name="settings" size="16"/></span>
-            <p class="text-[15px]"><strong>Toucher la carte</strong> ouvre sa page : quand elle a été faite, par qui, et ses réglages. Tout le monde peut modifier une tâche.</p>
+        <li class="flex items-start gap-3 py-3.5">
+            <span class="tile tile-sky"><twig:Icon name="settings" size="18" stroke="1.9"/></span>
+            <p class="text-[14px] leading-snug text-ink-soft"><strong class="font-semibold text-ink">Toucher la carte</strong> ouvre sa page : quand elle a été faite, par qui, et ses réglages. Tout le monde peut modifier une tâche.</p>
         </li>
     </ul>
 {% endblock %}

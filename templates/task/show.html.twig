@@ -2,74 +2,71 @@
 
 {% block title %}{{ view.task.title }} · Companero{% endblock %}
 
+{#
+    A task to do, on its own page: its card in large — "Je prends" and "C'est fait" on it —, then this time
+    only (its points, a note), what is known about it, and the last times it was done.
+#}
 {% block body %}
     {% set task = view.task %}
     {% set status = view.status %}
-    {% set rarity = view.rarity %}
     {% set boost = task_boost(view) %}
 
-    <header class="flex items-center justify-between">
-        <a href="{{ ux_is_native() ? '/recede_historical_location' : path('app_home') }}" aria-label="Retour" class="-ml-2 flex size-11 items-center justify-center rounded-full text-ink"><twig:Icon name="arrow-left" size="22" stroke="2.2"/></a>
+    <header class="page-head">
+        <a href="{{ ux_is_native() ? '/recede_historical_location' : path('app_home') }}" aria-label="Retour" class="head-button"><twig:Icon name="arrow-left" size="20" stroke="2"/></a>
         {% if task.kind.isRecurring %}
             {# Its settings are the template's: shared by every time it comes back. #}
-            <a href="{{ path('task_template', {id: task.id}) }}" class="flex h-11 items-center gap-1.5 rounded-full px-3 text-sm font-bold text-ink no-underline hover:bg-track hover:text-ink"><twig:Icon name="repeat" size="18"/> Le modèle</a>
+            <a href="{{ path('task_template', {id: task.id}) }}" class="head-link"><twig:Icon name="repeat" size="16" stroke="1.9"/>Le modèle</a>
         {% else %}
-            <a href="{{ path('task_edit', {id: task.id}) }}" class="flex h-11 items-center gap-1.5 rounded-full px-3 text-sm font-bold text-ink no-underline hover:bg-track hover:text-ink"><twig:Icon name="settings" size="19"/> Modifier</a>
+            <a href="{{ path('task_edit', {id: task.id}) }}" class="head-link"><twig:Icon name="settings" size="16" stroke="1.9"/>Modifier</a>
         {% endif %}
     </header>
 
     {# The card itself, larger. #}
-    <article class="task-card card rarity-{{ rarity.value }} task-card-{{ status.alert }} relative flex flex-col gap-3 p-5" id="task-{{ task.id }}" data-rarity="{{ rarity.value }}" data-alert="{{ status.alert }}">
-        <div class="flex items-center gap-4">
-            <twig:TaskMedallion :view="view" :size="84" class="shrink-0"/>
-            <div class="flex min-w-0 flex-col items-start gap-1.5">
-                <twig:UrgencyPill :view="view"/>
-                <p class="text-sm font-semibold text-muted">{{ task_place(task) }}</p>
-            </div>
-        </div>
-        <h1 class="text-[26px] leading-tight [overflow-wrap:anywhere]">{{ task.title }}</h1>
-        {% if task.shownNote %}
-            <p class="task-note" id="task-note"><twig:Icon :name="task.note ? 'edit' : 'list'" size="15" class="mt-0.5 shrink-0"/><span>{{ task.shownNote }}</span></p>
-            {% if task.note and task.description %}<p class="-mt-1.5 px-1 text-xs text-muted">Pour cette fois. D’habitude : « {{ task.description }} »</p>{% endif %}
-        {% endif %}
-        {% if boost %}<p class="flex items-center gap-1 text-sm font-bold text-muted"><twig:Icon name="bolt" size="15" stroke="2.6"/> dont +{{ boost }} de boost</p>{% endif %}
-        {% if view.bounty %}
-            <p class="bounty-note">
-                <span class="bounty-note-icon"><twig:Icon name="gift" size="18" stroke="2"/></span>
-                <span><strong class="font-bold">Une surprise</strong> attend la première personne qui la fait cette semaine.</span>
-            </p>
-        {% endif %}
-        <twig:ReminderNote :view="view" :member="app.user"/>
-        {% if task.kind.value == 'occasional' and not task.raised %}
-            <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
-                <twig:RaiseButton :task="task" :back="'task-' ~ task.id"/>
-                <twig:TaskActions :view="view" :back="'task-' ~ task.id" :member="app.user" :boost="boost"/>
-            </div>
-        {% else %}
-            <twig:TaskActions :view="view" :back="'task-' ~ task.id" :member="app.user" :boost="boost" class="pt-1"/>
-        {% endif %}
-    </article>
+    <twig:TaskCard :view="view" :member="app.user" :back="'task-' ~ task.id" page class="rarity-{{ view.rarity.value }}"/>
 
-    {# This time only: more or less work than usual. The template keeps its points. #}
+    {% if view.bounty or boost or (task.kind.value == 'occasional' and not task.raised) %}
+        <div class="flex flex-col gap-2.5">
+            {% if view.bounty %}
+                <p class="bounty-note">
+                    <span class="bounty-note-icon"><twig:Icon name="gift" size="18" stroke="2"/></span>
+                    <span><strong class="font-semibold">Une surprise</strong> attend la première personne qui la fait cette semaine.</span>
+                </p>
+            {% endif %}
+            {% if boost %}
+                <p class="flex items-center gap-2.5 rounded-2xl bg-[#FDEBC4] py-2.5 pr-3.5 pl-2.5 text-[14px] leading-snug font-medium text-warn-ink">
+                    <span class="flex size-9 shrink-0 items-center justify-center rounded-full bg-sun text-ink"><twig:Icon name="bolt" size="18" stroke="2"/></span>
+                    <span>Un boost est en cours : <strong class="font-semibold">+{{ boost }} pts</strong> de plus cette fois.</span>
+                </p>
+            {% endif %}
+            {% if task.kind.value == 'occasional' and not task.raised %}
+                <div class="sheet flex items-center gap-3 p-4">
+                    <p class="flex-1 text-[13.5px] leading-snug text-muted">Elle dort. Quand ça arrive, dis-le : sa carte attend sur l’accueil jusqu’à ce que quelqu’un s’en occupe.</p>
+                    <twig:RaiseButton :task="task" :back="'task-' ~ task.id"/>
+                </div>
+            {% endif %}
+        </div>
+    {% endif %}
+
+    {# This time only: more or less work than usual, a word for whoever does it. The template keeps its own. #}
     <section class="flex flex-col gap-2" aria-labelledby="points-title">
-        <h2 id="points-title" class="section-title">Ce qu’elle vaut cette fois</h2>
-        <form method="post" action="{{ path('task_adjust_points', {id: task.id}) }}" class="card flex flex-col gap-2.5 px-3.5 py-3">
+        <h2 id="points-title" class="group-label">Ce qu’elle vaut cette fois</h2>
+        <form method="post" action="{{ path('task_adjust_points', {id: task.id}) }}" class="sheet flex flex-col gap-3 p-4">
             <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
-            <div class="flex items-center justify-between gap-1">
+            <div class="flex items-center justify-between gap-1.5">
                 {% for step in constant('App\\Entity\\Task::POINT_STEPS')|reverse %}
                     <button type="submit" name="ecart" value="-{{ step }}" class="points-step" aria-label="{{ step }} points de moins" data-haptic="tick"{{ task.currentPoints == 0 ? ' disabled' }}>−{{ step }}</button>
                 {% endfor %}
-                <p class="flex min-w-[4.5rem] flex-col items-center leading-none">
-                    <span class="text-2xl font-extrabold text-clay-dark" id="task-points">{{ task.currentPoints }}</span>
-                    <span class="text-xs font-bold text-muted">pts</span>
+                <p class="flex min-w-[4.25rem] flex-col items-center leading-none">
+                    <span class="text-[28px] font-bold tracking-tight text-clay-dark tabular-nums" id="task-points">{{ task.currentPoints }}</span>
+                    <span class="mt-0.5 text-[11px] font-semibold tracking-[.1em] text-muted uppercase">pts</span>
                 </p>
                 {% for step in constant('App\\Entity\\Task::POINT_STEPS') %}
                     <button type="submit" name="ecart" value="{{ step }}" class="points-step" aria-label="{{ step }} points de plus" data-haptic="tick">+{{ step }}</button>
                 {% endfor %}
             </div>
-            <p class="meta text-center">
+            <p class="text-center text-[12.5px] leading-snug text-muted">
                 {%- if task.pointsAdjustment %}
-                    {{ task.pointsAdjustment > 0 ? 'Plus de travail' : 'Moins de travail' }} que d’habitude : {{ task.pointsAdjustment > 0 ? '+' }}{{ task.pointsAdjustment }} pts{{ task.kind.isRecurring ? ' cette fois (le modèle reste à ' ~ task.points ~ ' pts)' }}.
+                    {{ task.pointsAdjustment > 0 ? 'Plus de travail' : 'Moins de travail' }} que d’habitude : <span class="font-semibold text-ink">{{ task.pointsAdjustment > 0 ? '+' }}{{ task.pointsAdjustment }} pts</span>{{ task.kind.isRecurring ? ' cette fois (le modèle reste à ' ~ task.points ~ ' pts)' }}.
                 {%- else %}
                     Plus long ou plus dur que prévu ? Ajuste les points{{ task.kind.isRecurring ? ' de cette fois seulement' }}.
                 {%- endif -%}
@@ -77,74 +74,67 @@
         </form>
     </section>
 
-    {# A word about this time, for whoever does it. #}
     <section class="flex flex-col gap-2" aria-labelledby="note-title">
-        <h2 id="note-title" class="section-title">{{ task.note ? 'La note' : 'Une note pour cette fois' }}</h2>
-        <form method="post" action="{{ path('task_note', {id: task.id}) }}" class="flex flex-col gap-2">
+        <h2 id="note-title" class="group-label">{{ task.note ? 'La note de cette fois' : 'Une note pour cette fois' }}</h2>
+        <form method="post" action="{{ path('task_note', {id: task.id}) }}" class="sheet flex flex-col gap-3 p-4">
             <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
-            <textarea name="note" class="input min-h-[76px] py-2.5" rows="2" maxlength="{{ constant('App\\Entity\\Task::NOTE_MAX_LENGTH') }}" aria-labelledby="note-title" placeholder="Ex. Les sacs sont dans le garage, attention au vase…">{{ task.note }}</textarea>
+            <textarea name="note" class="input-area min-h-[76px]" rows="2" maxlength="{{ constant('App\\Entity\\Task::NOTE_MAX_LENGTH') }}" aria-labelledby="note-title" placeholder="Ex. Les sacs sont dans le garage, attention au vase…">{{ task.note }}</textarea>
             <div class="flex items-center justify-between gap-3">
-                <p class="meta">{{ task.description ? 'Elle remplace la précision de la tâche. ' }}{{ task.kind.isRecurring ? 'Elle s’efface une fois la tâche faite.' : 'Pour qui s’en occupera.' }}</p>
-                <button type="submit" class="btn-primary h-10 shrink-0 px-4 text-sm">{{ task.note ? 'Modifier' : 'Ajouter' }}</button>
+                <p class="text-[12.5px] leading-snug text-muted">
+                    {%- if task.note and task.description %}Pour cette fois. D’habitude : « {{ task.description }} »
+                    {%- else %}{{ task.description ? 'Elle remplace la précision de la tâche. ' }}{{ task.kind.isRecurring ? 'Elle s’efface une fois la tâche faite.' : 'Pour qui s’en occupera.' }}{% endif -%}
+                </p>
+                <button type="submit" class="btn-soft shrink-0">{{ task.note ? 'Modifier' : 'Ajouter' }}</button>
             </div>
         </form>
     </section>
 
     <section class="flex flex-col gap-2" aria-labelledby="about-title">
-        <h2 id="about-title" class="section-title">En bref</h2>
-        <dl class="card grid grid-cols-[auto_1fr] gap-x-4 gap-y-2.5 px-3.5 py-3 text-sm">
+        <h2 id="about-title" class="group-label">En bref</h2>
+        <dl class="list-sheet facts">
             {% if status.urgency.value == 'late' and status.lateAt %}
-                <dt class="font-bold">Quand</dt>
-                <dd class="font-bold text-danger-ink">en retard depuis {{ task_moment(status.lateAt) }}</dd>
+                <div><dt>Quand</dt><dd class="text-danger-ink">en retard depuis {{ task_moment(status.lateAt) }}</dd></div>
             {% elseif status.dueAt %}
-                <dt class="font-bold">Quand</dt>
-                <dd class="text-muted">{{ status.dueAt < now ? 'depuis' : 'pour' }} {{ task_moment(status.dueAt) }}</dd>
+                <div><dt>Quand</dt><dd>{{ status.dueAt < now ? 'depuis' : 'pour' }} {{ task_moment(status.dueAt) }}</dd></div>
             {% endif %}
-            <dt class="font-bold">Revient</dt>
-            <dd class="text-muted">{{ task.kind.isRecurring ? task_rule_label(task) : 'non, à faire une fois' }}</dd>
+            <div><dt>Revient</dt><dd>{{ task.kind.isRecurring ? task_rule_label(task) : 'non, à faire une fois' }}</dd></div>
             {% if status.weeklyCommitment %}
-                <dt class="font-bold">Cette semaine</dt>
-                <dd class="text-muted">{{ status.doneThisWeek }} fois sur {{ status.weeklyCommitment }}</dd>
+                <div><dt>Cette semaine</dt><dd>{{ status.doneThisWeek }} fois sur {{ status.weeklyCommitment }}</dd></div>
             {% endif %}
-            <dt class="font-bold">Dernière fois</dt>
-            <dd class="text-muted">{{ task.lastCompletedAt ? task_moment(task.lastCompletedAt) ~ (task.lastCompletedBy ? ', par ' ~ task.lastCompletedBy.name) : 'jamais encore' }}</dd>
+            <div><dt>Dernière fois</dt><dd>{{ task.lastCompletedAt ? task_moment(task.lastCompletedAt) ~ (task.lastCompletedBy ? ', par ' ~ task.lastCompletedBy.name) : 'jamais encore' }}</dd></div>
             {% if task.assignee %}
-                <dt class="font-bold">S’en charge</dt>
-                <dd class="text-muted">{{ task.assignee.name }}{% if task.backup %} (sinon {{ task.backup.name }}){% endif %}</dd>
+                <div><dt>S’en charge</dt><dd class="flex items-center justify-end gap-1.5"><twig:Avatar :member="task.assignee" size="20"/>{{ task.assignee.name }}{% if task.backup %} <span class="font-normal text-muted">(sinon {{ task.backup.name }})</span>{% endif %}</dd></div>
             {% endif %}
             {% if view.reservedBy %}
-                <dt class="font-bold">Réservée</dt>
-                <dd class="text-muted">{{ view.isReservedBy(app.user) ? 'par toi' : 'par ' ~ view.reservedBy.name }}</dd>
+                <div><dt>Réservée</dt><dd>{{ view.isReservedBy(app.user) ? 'par toi' : 'par ' ~ view.reservedBy.name }}</dd></div>
             {% endif %}
             {% if task.cooldownHours %}
-                <dt class="font-bold">Délai</dt>
-                <dd class="text-muted">pas avant {{ duration_label(task.cooldownHours) }} après l’avoir faite</dd>
+                <div><dt>Délai</dt><dd>pas avant {{ duration_label(task.cooldownHours) }} après l’avoir faite</dd></div>
             {% endif %}
-            <dt class="font-bold">Ajoutée</dt>
-            <dd class="text-muted">par {{ task.createdBy.name }} le {{ task.createdAt|date('d/m/Y') }}</dd>
+            <div><dt>Ajoutée</dt><dd>par {{ task.createdBy.name }} le {{ task.createdAt|date('d/m/Y') }}</dd></div>
         </dl>
     </section>
 
     <section class="flex flex-col gap-2" aria-labelledby="done-title">
-        <h2 id="done-title" class="section-title">Les dernières fois</h2>
+        <h2 id="done-title" class="group-label">Les dernières fois</h2>
         {% if completions is not empty %}
-            <ul class="card divide-y divide-line px-3.5 py-1">
+            <ul class="list-sheet">
                 {% for completion in completions %}
                     <li>
-                        <a href="{{ path('completion_edit', {id: completion.id}) }}" class="flex items-center gap-2.5 py-2 text-ink no-underline hover:text-ink" aria-label="Corriger : {{ completion.member.name }}, {{ completion.completedAt|date('d/m à G\\hi') }}">
-                            <twig:Avatar :member="completion.member" size="26"/>
+                        <a href="{{ path('completion_edit', {id: completion.id}) }}" class="list-row" aria-label="Corriger : {{ completion.member.name }}, {{ completion.completedAt|date('d/m à G\\hi') }}">
+                            <twig:Avatar :member="completion.member" size="32"/>
                             <span class="flex min-w-0 flex-1 flex-col">
-                                <span class="text-sm font-bold">{{ completion.member.name }}</span>
-                                <span class="text-xs text-muted">{{ completion.completedAt|format_date(pattern: 'EEEE d MMMM', locale: 'fr') }} à {{ completion.completedAt|date('G\\hi') }}</span>
+                                <span class="row-title">{{ completion.member.name }}</span>
+                                <span class="row-meta">{{ completion.completedAt|format_date(pattern: 'EEEE d MMMM', locale: 'fr') }} à {{ completion.completedAt|date('G\\hi') }}</span>
                             </span>
-                            <span class="text-sm font-extrabold whitespace-nowrap text-clay-dark">+{{ points[completion.id] ?? 0 }}</span>
-                            <twig:Icon name="edit" size="15" class="shrink-0 text-muted"/>
+                            <span class="row-points">+{{ points[completion.id] ?? 0 }}</span>
+                            <twig:Icon name="edit" size="15" class="row-chevron"/>
                         </a>
                     </li>
                 {% endfor %}
             </ul>
         {% else %}
-            <p class="card p-4 text-sm text-muted">Pas encore faite. À qui l’honneur ?</p>
+            <p class="sheet-empty">Pas encore faite. À qui l’honneur ?</p>
         {% endif %}
     </section>
 {% endblock %}

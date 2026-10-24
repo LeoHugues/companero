@@ -26,6 +26,18 @@ enum TaskKind: string
         };
     }
 
+    /** Its drawing (templates/components/Icon.html.twig): in the list of templates, on the chips of the task form. */
+    public function icon(): string
+    {
+        return match ($this) {
+            self::Rolling => 'repeat',
+            self::Scheduled => 'calendar',
+            self::Quick => 'bolt',
+            self::OneOff => 'check',
+            self::Occasional => 'siren',
+        };
+    }
+
     /** Stays in the list once done. */
     public function isRecurring(): bool
     {

@@ -4,13 +4,13 @@
 {% block main_class %}pb-10{% endblock %}
 
 {% block body %}
-    <twig:Casa :mood="enum('App\\Enum\\CasaMood').Okay" speech="Te revoilà ! Connecte-toi pour retrouver la coloc." class="mt-6"/>
+    {{ include('_casa_hero.html.twig', {mood: enum('App\\Enum\\CasaMood').Okay, speech: 'Te revoilà ! Connecte-toi pour retrouver la coloc.'}) }}
 
-    <form method="post" class="flex flex-col gap-4">
-        <h1 class="text-[26px]">Connexion</h1>
+    <form method="post" class="hero-sheet">
+        <h1 class="home-title">Connexion</h1>
 
         {% if error %}
-            <p class="text-sm font-bold text-clay-dark" role="alert">Pseudo ou mot de passe incorrect.</p>
+            <p class="-mt-2 flex items-center gap-2 rounded-xl bg-danger-soft px-3 py-2 text-[13.5px] font-medium text-danger-ink" role="alert"><twig:Icon name="alarm" size="16" stroke="2" class="shrink-0"/>Pseudo ou mot de passe incorrect.</p>
         {% endif %}
 
         <div class="flex flex-col gap-2">
@@ -23,8 +23,8 @@
         </div>
         <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
 
-        <button type="submit" class="btn-primary h-[52px] w-full text-[17px]">Se connecter</button>
+        <button type="submit" class="btn-primary h-[52px] w-full text-[16px]">Se connecter</button>
     </form>
 
-    <p class="meta text-center">Pas encore de coloc ? <a href="{{ path('onboarding_found') }}">Créer la vôtre</a></p>
+    <p class="text-center text-[13.5px] text-muted">Pas encore de coloc ? <a href="{{ path('onboarding_found') }}" class="font-semibold">Créer la vôtre</a></p>
 {% endblock %}

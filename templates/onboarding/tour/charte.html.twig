@@ -7,11 +7,11 @@
 {% block content %}
     {{ include('charter/_rules.html.twig', {household: household}) }}
     {# An invitation: the charter is everyone's, to be completed, changed, talked over. #}
-    <div class="card flex items-start gap-3 border-sun p-3.5">
-        <span class="flex size-10 shrink-0 items-center justify-center rounded-full bg-sun"><twig:Icon name="edit" size="20"/></span>
+    <div class="sheet flex items-start gap-3 p-4">
+        <span class="tile tile-sun"><twig:Icon name="edit" size="19" stroke="1.9"/></span>
         <div class="flex flex-col gap-1">
-            <p class="text-[15px] font-extrabold">Elle est à vous</p>
-            <p class="text-sm text-ink-soft">Une règle manque ? Une autre te paraît de trop, ou mal dite ? Ajoute-la, réécris-la, ou parles-en avec les autres : la charte se change à tout moment dans <strong class="text-ink">Réglages de la coloc › La charte</strong>, et chacun est invité à la relire.</p>
+            <p class="text-[15px] font-semibold">Elle est à vous</p>
+            <p class="text-[13.5px] leading-snug text-ink-soft">Une règle manque ? Une autre te paraît de trop, ou mal dite ? Ajoute-la, réécris-la, ou parles-en avec les autres : la charte se change à tout moment dans <strong class="font-semibold text-ink">Réglages de la coloc › La charte</strong>, et chacun est invité à la relire.</p>
         </div>
     </div>
 {% endblock %}
@@ -19,6 +19,6 @@
 {% block next %}
     <form method="post" action="{{ path('tour_charter_accept') }}">
         <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
-        <button type="submit" class="btn-primary h-[52px] px-6 text-[17px]" data-haptic="success"><twig:Icon name="check" size="20" stroke="2.6"/> Ça me va</button>
+        <button type="submit" class="btn-primary h-[52px] px-6 text-[16px]" data-haptic="success"><twig:Icon name="check" size="19" stroke="2.4"/>Ça me va</button>
     </form>
 {% endblock %}

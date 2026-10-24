@@ -5,18 +5,18 @@
 {% block heading %}Les points{% endblock %}
 
 {% block content %}
-    <div class="card flex items-center justify-center gap-4 p-5">
-        <span class="flex flex-col items-center"><span class="text-[30px] leading-none font-extrabold">5 min</span><span class="meta">d’effort</span></span>
-        <span class="text-2xl font-extrabold text-muted">≈</span>
-        <span class="flex flex-col items-center"><span class="text-[30px] leading-none font-extrabold text-clay-dark">10 pts</span><span class="meta">environ</span></span>
+    <div class="sheet flex items-center justify-center gap-5 p-5">
+        <span class="flex flex-col items-center gap-1"><span class="stat-value text-[30px]">5 min</span><span class="stat-label">d’effort</span></span>
+        <span class="text-[22px] font-medium text-dust">≈</span>
+        <span class="flex flex-col items-center gap-1"><span class="stat-value text-[30px] text-clay-dark">10 pts</span><span class="stat-label">environ</span></span>
     </div>
 
-    <ul class="flex flex-col gap-3 px-1 text-[15px]">
-        <li class="flex items-start gap-3"><twig:Icon name="flame" size="20" class="mt-0.5 shrink-0 text-clay-dark"/><p>Les points mêlent le temps et la pénibilité : les toilettes valent plus que leurs 5 minutes.</p></li>
+    <ul class="list-sheet text-[14px] leading-snug text-ink-soft">
+        <li class="flex items-start gap-3 py-3.5"><span class="tile tile-blush"><twig:Icon name="flame" size="19" stroke="1.9"/></span><p class="pt-0.5">Les points mêlent le temps et la pénibilité : les toilettes valent plus que leurs 5 minutes.</p></li>
         {% if household.cleaningDayBoost %}
-            <li class="flex items-start gap-3"><twig:Icon name="bolt" size="20" class="mt-0.5 shrink-0 text-clay-dark"/><p>Le jour de ménage ({{ weekday_name(household.cleaningDay) }}), un boost ajoute +1 point tous les 3 points.</p></li>
+            <li class="flex items-start gap-3 py-3.5"><span class="tile tile-sun"><twig:Icon name="bolt" size="19" stroke="1.9"/></span><p class="pt-0.5">Le jour de ménage ({{ weekday_name(household.cleaningDay) }}), un boost ajoute +1 point tous les 3 points.</p></li>
         {% endif %}
-        <li class="flex items-start gap-3"><twig:Icon name="edit" size="20" class="mt-0.5 shrink-0 text-clay-dark"/><p>Les barèmes sont à vous : un point te semble injuste ? Change-le dans la tâche. Plus dur que d’habitude cette fois ? Ajoute 5 points à ce que tu as fait.</p></li>
-        <li class="flex items-start gap-3"><twig:Icon name="trophy" size="20" class="mt-0.5 shrink-0 text-clay-dark"/><p>Tes points te font aussi monter de niveau, et chaque niveau ouvre un cadeau.</p></li>
+        <li class="flex items-start gap-3 py-3.5"><span class="tile tile-sky"><twig:Icon name="edit" size="18" stroke="1.9"/></span><p class="pt-0.5">Les barèmes sont à vous : un point te semble injuste ? Change-le dans la tâche. Plus dur que d’habitude cette fois ? Ajoute 5 points à ce que tu as fait.</p></li>
+        <li class="flex items-start gap-3 py-3.5"><span class="tile tile-lilac"><twig:Icon name="trophy" size="19" stroke="1.9"/></span><p class="pt-0.5">Tes points te font aussi monter de niveau, et chaque niveau ouvre un cadeau.</p></li>
     </ul>
 {% endblock %}

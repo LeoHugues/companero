@@ -41,17 +41,22 @@ les barres collectives.
 
 - **Bricolage Grotesque** (Google Fonts), graisses de 400 à 800, et rien
   d'autre.
-- Titres : 18 à 20 px en 800. Corps : 14 à 17 px en 600 et 700. Méta : 12 à
-  13 px.
+- Titres de page : 26 px en 700, serrés (`tracking-tight`), équilibrés sur leurs lignes ; titres de
+  section : 19 à 21 px en 700. Corps : 14 à 15 px en 500 et 600. Méta : 12,5 à 13 px.
+- Les étiquettes (au-dessus d'un groupe, d'une jauge) en **petites capitales** : 11 px en 600, espacées.
+- Le 800 est réservé aux moments de jeu : le niveau qui pop, les initiales des visages.
 
 ## Formes
 
-- Cartes : rayon de 20 px, bordure de 1,5 px, pas d'ombre au repos. Au survol,
-  elles se soulèvent de 2 px avec une ombre douce.
-- Boutons principaux : **pilules** terre cuite de 44 px de haut, texte encre en 800.
-- Actions secondaires : lien souligné (« Je m'en occupe »).
-- La bulle de la Casa est le seul clin d'œil BD : bordure encre et ombre décalée
-  de 3 px.
+- **Feuilles** : rayon de 22 px, surface, pas de bordure, une ombre douce qui les soulève. Les
+  lignes d'une liste sont séparées par un **filet** (`line` à 70 %), jamais par des cadres.
+- Bouton principal : terre cuite, 48 px de haut (52 px en bas d'un formulaire), rayon de 14 px,
+  texte encre en 700, un léger biseau (comme « Ajouter » dans la barre du bas). Rarement plus d'un par écran.
+- Actions secondaires : une petite feuille (« Plan », « Modifier ») ou du sable dans une feuille
+  (« Copier le lien », « Ajouter la zone ») ; un lien gris pour ce qui s'éloigne (« Se déconnecter »).
+- Choix : des puces à filet, l'encre une fois choisies (comme « Là » sur l'accueil) ; pour un choix
+  parmi peu, le contrôle segmenté de l'accueil (sable, curseur crème).
+- La bulle de la Casa est le seul clin d'œil BD : un trait encre, une queue, une ombre douce.
 - **Couleurs plates uniquement** : ni dégradé, ni brillance, ni néon.
   Seules exceptions : la **rareté des cartes de tâche**, comme dans un jeu de cartes, et
   l'éclat qui passe sur une jauge pendant qu'elle monte.
@@ -62,33 +67,33 @@ les barres collectives.
 
 Une carte à jouer, douce et chaleureuse :
 
-- à gauche, le **médaillon** : l'icône de la catégorie (balai, clé, feuille, caddie, patte…) sur
-  un fond pastel propre à la catégorie, entouré d'un **anneau** qui se vide avec le temps qui reste
-  (il se remplit à l'arrivée sur la page) ;
-- à droite : la pastille d'urgence, les points de l'engagement de la semaine (un par fois attendue,
-  remplis en sauge une fois faits), le petit cadeau d'une surprise, le titre en gras, puis la pièce et
-  le rythme sur **une seule ligne courte** (« Salon +2 · tous les 2 j ») ; la roue crantée, discrète,
-  en haut à droite ;
-- sur toute la largeur, sous l'en-tête : la note de cette fois (dans un cartouche pâle) et qui s'en
-  charge, plutôt qu'empilées à côté du médaillon, ce qui laissait un grand vide sous lui ;
-- en bas : **« Je prends »** — une place vide, cerclée de pointillés, avec une main ; prise, elle
-  montre le visage de qui s'en occupe — et **« C'est fait »**, un jeton jaune Casa à bord encre et
-  ombre décalée (comme la bulle), avec une coche et ce que la tâche rapporte (« +20 ») dans une
-  pastille encre. Au toucher, il s'écrase, passe au vert sauge et lance des étoiles.
+- dans son **coin**, comme l'index d'une carte : ce qu'elle rapporte (« 20 ») et le dessin de sa catégorie
+  (balai, clé, feuille, caddie, patte…) ;
+- à côté : un point de couleur et son état en petites capitales (« AUJOURD'HUI », « EN RETARD DE 2 J »),
+  les points de l'engagement de la semaine (un par fois attendue, remplis en sauge une fois faits), le
+  titre, puis la pièce et le rythme sur **une seule ligne courte** (« Salon +2 · tous les 2 j ») et un
+  **fil** qui se vide avec le temps qui reste ;
+- à droite, **sa vignette** dans une arche : un dessin deviné du titre (aspirateur, toilettes, poubelle,
+  vitres…), sinon le dessin de sa catégorie sur son fond pastel ;
+- sur toute la largeur : la note de cette fois (dans un cartouche pâle) et qui s'en charge ;
+- en bas, sous un filet : **« Je prends »** — une place vide, cerclée de pointillés terre cuite, dans une
+  pastille rosée ; prise, elle montre le visage de qui s'en occupe — et **« C'est fait »**, un jeton jaune
+  Casa avec une coche et ce que la tâche rapporte (« +20 ») après un filet. Au toucher, il s'écrase, passe
+  au vert sauge et lance des étoiles ; la carte se retourne et montre son dos terre cuite, qui dit merci.
 
-Plus de bande colorée sur le bord : c'est le médaillon qui dit l'urgence. Toucher la carte ouvre
-sa page : la carte en grand, quand elle passe au miel et au corail, qui s'en charge, les dernières
-fois qu'elle a été faite. En liste (une pièce), la carte est compacte : un bouton rond jaune.
+Toucher la carte ouvre **sa page** : la même carte en grand (son titre est celui de la page), puis ce
+qu'elle vaut cette fois, une note pour cette fois, ce qu'on en sait, les dernières fois qu'elle a été
+faite. En liste (une pièce), la carte est compacte : sans vignette, un bouton rond jaune.
 
 ### Urgence
 
 Des tons de jardin, jamais de rouge d'alarme : la Casa ne gronde pas.
 
-| État | Couleur | Quand | Médaillon |
+| État | Couleur | Quand | Sur la carte |
 |---|---|---|---|
-| Tout va bien | sauge `#6E9A4C` | avant l'alerte | anneau plein, petite étoile quand c'est tout frais |
-| Attention | miel `#E9A53A` | le moment approche, ou il est venu (dans le délai maximum) | le moment venu, il sautille de temps en temps |
-| En retard | corail `#E06C55` | au-delà du délai maximum | il gigote, avec un petit « ! » ; le bord de la carte rosit |
+| Tout va bien | sauge `#6E9A4C` | avant l'alerte | le point et le fil en sauge, le fil presque plein |
+| Attention | miel `#E9A53A` | le moment approche, ou il est venu (dans le délai maximum) | le point et le fil en miel |
+| En retard | corail `#E06C55` | au-delà du délai maximum | le point corail pulse, le fil est vide |
 
 Les deux délais se règlent pour chaque tâche (« Orange combien de temps avant ? », « Rouge
 combien de temps après ? »). Sans réglage : orange aux 60 % du rythme ou 2 jours avant
@@ -96,16 +101,18 @@ l'échéance, rouge 1 jour après.
 
 ### Rareté
 
-Choisie pour chaque tâche dans son formulaire, **commune** par défaut :
+Choisie pour chaque tâche dans son formulaire, **commune** par défaut. Elle ne s'écrit jamais sur la
+carte : c'est **la finition de son bord**, et plus elle est rare, plus elle brille, sans jamais crier.
 
-| Rareté | Carte |
-|---|---|
-| Commune | Plate, comme les autres cartes |
-| Rare | Bordure bleue `#3D7FA8`, léger voile bleu en haut |
-| Épique | Bordure en dégradé violet `#8E55BF` → rose → bleu, reflet holographique qui balaie la carte toutes les 6 s |
-| Légendaire | Bordure dorée `#E3A21A` où une lumière fait le tour (4,5 s), halo doré, reflet |
+| Rareté | Bord | Lumière |
+|---|---|---|
+| Commune | papier `#E9DFCF` | aucune |
+| Rare | argent bleuté, l'index bleu | un reflet passe toutes les 9 s |
+| Épique | nacre (lilas, rose, menthe, vanille), l'index violet | toutes les 7 s, un halo violet |
+| Légendaire | or, la face dorée et quelques étoiles qui scintillent | toutes les 5 s, un halo doré |
 
-Une pastille en capitales (« RARE », « ÉPIQUE »…) avec un petit diamant rappelle la rareté.
+Dans le formulaire, chaque rareté se choisit avec une mini-carte de sa finition ; dans la liste des
+modèles, elle n'est qu'un petit diamant de sa couleur ; sur la page d'un modèle, une mini-carte.
 
 Quand la Casa **nomme une carte** dans sa bulle (la tâche qu'elle demande), son titre se lit comme une
 carte liée dans le chat d'un jeu : entre crochets, en gras, à la couleur de sa rareté (encre pour une
@@ -303,6 +310,35 @@ Un élément choisit son effet avec `data-haptic="…"` (ou `none`). Rien ne vib
 demande moins d'animations.
 
 Toutes les animations sont coupées avec `prefers-reduced-motion`.
+
+## Les autres pages
+
+Toutes les pages parlent comme l'accueil : le calme des feuilles, des filets et des petites capitales.
+
+- **L'en-tête** : un retour (ou une croix pour un formulaire) dans une petite feuille carrée, et ce qui
+  mène ailleurs dans une petite feuille avec son dessin (« Le modèle », « Réglages », « Plan ») ; au-dessus
+  du titre, en petites capitales, d'où l'on vient (« La coloc », « Semaine 43 · du 19 au 25 octobre »).
+- **Les listes** sont des feuilles, une ligne par chose, un filet entre deux : une vignette, un visage ou
+  un dessin sur une tuile pastel à gauche, le titre en 600 et sa méta, ce que ça rapporte en terre cuite,
+  un chevron sable à droite. Les modèles et le catalogue montrent la vignette de leur carte ; les chats,
+  leur portrait (celui de la Casa).
+- **Ce qu'on sait** d'une tâche (« En bref », « La règle ») : le mot à gauche, sa valeur à droite.
+- **Les formulaires** sont rangés en groupes (« La tâche », « Quand », « Alertes de la carte », « Où, et
+  qui », « Sa carte »), une feuille par groupe sous son étiquette. Les champs sont crème sur la feuille,
+  cerclés de terre cuite au focus. Les colocs se choisissent avec leur visage, les catégories avec leur
+  dessin, la rareté avec une mini-carte de sa finition. Le bouton principal **flotte** au-dessus de la barre
+  du bas (et de la bosse d'« Ajouter ») et la page s'efface en crème derrière lui ; au bout du formulaire,
+  il reprend sa place.
+- **Les curseurs** : une piste sable remplie de terre cuite jusqu'au pouce, terre cuite cerclé de crème.
+- **La page d'une tâche** montre la vraie carte en grand ; **la découverte** fait essayer une vraie carte.
+- **La connexion** et **l'arrivée dans une coloc** reprennent le haut de l'accueil : la Casa en grand dans
+  son paysage, qui parle, le nom de l'appli sur son ciel, et le formulaire dans une feuille posée sur son
+  herbe.
+- **Le bilan** : les barres de la semaine montent à l'arrivée (jaune, terre cuite le jour de ménage) ; les
+  titres de la semaine attendent face cachée, comme la pioche de l'accueil, et se retournent au toucher.
+- **Les célébrations** (surprise, niveau, carton) gardent leur boîte qui tremble et leurs confettis, sur
+  une feuille douce plutôt qu'un cadre encre.
+- **Vide** : un cadre en pointillés fins, une phrase de la Casa.
 
 ## Ton
 

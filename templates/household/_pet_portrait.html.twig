@@ -1,0 +1,11 @@
+{# A pet's portrait on its tile: a cat drawn from its description, as around the Casa (CasaCat); otherwise a paw. #}
+{% set look = cat_look(pet) %}
+<span class="tile tile-blush {{ class|default('') }}" aria-hidden="true">
+    {% if look %}
+        <svg viewBox="-54 -94 108 102" class="pet-portrait">
+            <twig:CasaCat :look="look" :x="0" :y="0" shadow="transparent" portrait/>
+        </svg>
+    {% else %}
+        <twig:Icon name="paw" size="20" stroke="1.9"/>
+    {% endif %}
+</span>

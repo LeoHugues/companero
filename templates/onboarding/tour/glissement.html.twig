@@ -6,22 +6,23 @@
 
 {% block content %}
     <p class="-mt-1 text-[15px] leading-relaxed text-ink-soft">
-        L’aspirateur ou le coup de balai du salon, c’est environ <strong class="text-ink">tous les 2 jours</strong>. Plus le temps
+        L’aspirateur ou le coup de balai du salon, c’est environ <strong class="font-semibold text-ink">tous les 2 jours</strong>. Plus le temps
         passe depuis la dernière fois, plus la carte devient pressante. Fais glisser le temps pour voir :
     </p>
 
     {{ include('onboarding/tour/_demo_card.html.twig', {glide: true, age: 1}) }}
 
-    <ul class="grid grid-cols-2 gap-2 text-[13px] font-bold" aria-label="Les états d’une carte">
-        <li class="flex items-center gap-2 rounded-2xl bg-ok-soft px-3 py-2 text-ok-ink"><twig:Icon name="check" size="15" stroke="2.6"/>Fraîche</li>
-        <li class="flex items-center gap-2 rounded-2xl bg-warn-soft px-3 py-2 text-warn-ink"><twig:Icon name="clock" size="15" stroke="2.6"/>Bientôt</li>
-        <li class="flex items-center gap-2 rounded-2xl bg-warn-soft px-3 py-2 text-warn-ink"><twig:Icon name="clock" size="15" stroke="2.6"/>C’est le moment</li>
-        <li class="flex items-center gap-2 rounded-2xl bg-danger-soft px-3 py-2 text-danger-ink"><twig:Icon name="alarm" size="15" stroke="2.6"/>En retard</li>
+    {# The words of the home page's groups, in their colours. #}
+    <ul class="sheet grid grid-cols-2 gap-x-3 gap-y-3 p-4" aria-label="Les états d’une carte">
+        <li class="care-group-title is-fresh mt-0"><span class="care-group-dot"></span>Fraîche</li>
+        <li class="care-group-title is-soon mt-0"><span class="care-group-dot"></span>Bientôt</li>
+        <li class="care-group-title is-due mt-0"><span class="care-group-dot"></span>C’est le moment</li>
+        <li class="care-group-title is-late mt-0"><span class="care-group-dot"></span>En retard</li>
     </ul>
 
-    <div class="card flex flex-col gap-2 p-3.5 text-[15px]">
-        <p><strong>Pas besoin d’attendre</strong> qu’elle soit due : on la fait quand on veut, et elle repart à zéro.</p>
-        <p><strong>Jamais en double</strong> : c’est toujours la même carte, qui attend son tour, de plus en plus pressante.</p>
-        <p><strong>Pas de punition</strong> : en retard ou pas, elle rapporte les mêmes points.</p>
-    </div>
+    <ul class="list-sheet text-[14px] leading-snug text-ink-soft">
+        <li class="py-3"><strong class="font-semibold text-ink">Pas besoin d’attendre</strong> qu’elle soit due : on la fait quand on veut, et elle repart à zéro.</li>
+        <li class="py-3"><strong class="font-semibold text-ink">Jamais en double</strong> : c’est toujours la même carte, qui attend son tour, de plus en plus pressante.</li>
+        <li class="py-3"><strong class="font-semibold text-ink">Pas de punition</strong> : en retard ou pas, elle rapporte les mêmes points.</li>
+    </ul>
 {% endblock %}

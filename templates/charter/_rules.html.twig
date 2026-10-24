@@ -4,34 +4,34 @@
 #}
 {% set editable = editable|default(false) %}
 {% set count = household.charterRules|length %}
-<ol class="flex flex-col gap-2.5" aria-label="La charte de la coloc">
+<ol class="list-sheet" aria-label="La charte de la coloc">
     {% for rule in household.charterRules %}
-        <li class="card flex items-start gap-3 p-3.5" id="regle-{{ rule.id }}">
-            <span class="flex size-7 shrink-0 items-center justify-center rounded-full bg-sun text-sm font-extrabold" aria-hidden="true">{{ loop.index }}</span>
-            <div class="flex min-w-0 flex-1 flex-col gap-1.5">
-                <p class="text-[15px] leading-snug font-bold [overflow-wrap:anywhere]">{{ rule.text }}</p>
+        <li class="flex items-start gap-3 py-3.5" id="regle-{{ rule.id }}">
+            <span class="flex size-7 shrink-0 items-center justify-center rounded-[9px] bg-[#FDEBC4] text-[13px] font-bold text-warn-ink tabular-nums" aria-hidden="true">{{ loop.index }}</span>
+            <div class="flex min-w-0 flex-1 flex-col gap-1.5 pt-0.5">
+                <p class="text-[15px] leading-snug font-semibold [overflow-wrap:anywhere]">{{ rule.text }}</p>
                 {% if rule.why or editable %}
                     <div class="flex flex-wrap items-center gap-x-4 gap-y-1">
                         {% if rule.why %}
                             <details class="group open:basis-full">
-                                <summary class="flex w-fit cursor-pointer list-none items-center gap-1 text-[13px] font-bold text-clay-dark">Pourquoi ?<twig:Icon name="chevron-down" size="14" stroke="2.6" class="transition group-open:rotate-180"/></summary>
-                                <p class="mt-1.5 text-[13px] leading-relaxed whitespace-pre-line text-ink-soft">{{ rule.why }}</p>
+                                <summary class="flex w-fit cursor-pointer list-none items-center gap-1 text-[13px] font-semibold text-clay-dark">Pourquoi ?<twig:Icon name="chevron-down" size="14" stroke="2.2" class="transition group-open:rotate-180"/></summary>
+                                <p class="mt-1.5 rounded-xl bg-track/45 px-3 py-2 text-[13px] leading-relaxed whitespace-pre-line text-ink-soft">{{ rule.why }}</p>
                             </details>
                         {% endif %}
                         {% if editable %}
-                            <a href="{{ path('charter_rule_edit', {id: rule.id}) }}" class="flex items-center gap-1 text-[13px] font-bold text-muted no-underline hover:text-ink"><twig:Icon name="edit" size="13" stroke="2.4"/> Modifier<span class="sr-only"> la règle {{ loop.index }}</span></a>
+                            <a href="{{ path('charter_rule_edit', {id: rule.id}) }}" class="flex items-center gap-1 text-[13px] font-semibold text-muted no-underline hover:text-ink"><twig:Icon name="edit" size="13" stroke="2"/> Modifier<span class="sr-only"> la règle {{ loop.index }}</span></a>
                         {% endif %}
                     </div>
                 {% endif %}
             </div>
             {% if editable and count > 1 %}
                 {# Up and down a rank, right here: the words do not change. #}
-                <div class="-my-1 -mr-1 flex shrink-0 flex-col gap-1">
+                <div class="-my-1 -mr-1.5 flex shrink-0 flex-col">
                     {% for move in [{sens: 'haut', icon: 'arrow-up', label: 'Monter', disabled: loop.first}, {sens: 'bas', icon: 'arrow-down', label: 'Descendre', disabled: loop.last}] %}
                         <form method="post" action="{{ path('charter_rule_move', {id: rule.id}) }}">
                             <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
-                            <button type="submit" name="sens" value="{{ move.sens }}" class="rank-button" aria-label="{{ move.label }} la règle {{ loop.parent.loop.index }}" title="{{ move.label }}" data-haptic="tick"{{ move.disabled ? ' disabled' }}>
-                                <twig:Icon :name="move.icon" size="16" stroke="2.4"/>
+                            <button type="submit" name="sens" value="{{ move.sens }}" class="row-button" aria-label="{{ move.label }} la règle {{ loop.parent.loop.index }}" title="{{ move.label }}" data-haptic="tick"{{ move.disabled ? ' disabled' }}>
+                                <twig:Icon :name="move.icon" size="16" stroke="2"/>
                             </button>
                         </form>
                     {% endfor %}
@@ -39,6 +39,6 @@
             {% endif %}
         </li>
     {% else %}
-        <li class="card p-4 text-sm text-muted">Pas encore de règle : la charte s’écrit à plusieurs.</li>
+        <li class="py-4 text-[14px] text-muted">Pas encore de règle : la charte s’écrit à plusieurs.</li>
     {% endfor %}
 </ol>

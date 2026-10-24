@@ -3,21 +3,26 @@
 {% block title %}Une règle de la charte · Companero{% endblock %}
 
 {% block body %}
-    <header class="flex items-center justify-between">
-        <h1 class="text-[22px]">Modifier la règle n° {{ rule.position + 1 }}</h1>
-        <a href="{{ path('charter_show') }}" aria-label="Retour à la charte" class="flex size-11 items-center justify-center rounded-full text-ink"><twig:Icon name="close" size="22" stroke="2.2"/></a>
+    <header class="page-head items-end">
+        <div class="min-w-0">
+            <p class="eyebrow">La charte · règle n° {{ rule.position + 1 }}</p>
+            <h1 class="page-title mt-1">Modifier la règle</h1>
+        </div>
+        <a href="{{ path('charter_show') }}" aria-label="Retour à la charte" class="head-button"><twig:Icon name="close" size="19" stroke="2"/></a>
     </header>
 
-    {{ form_start(form, {attr: {class: 'flex flex-col gap-5'}}) }}
-        {{ form_row(form.text) }}
-        {{ form_row(form.why) }}
-        <p class="meta">Chacun sera invité à relire la charte.</p>
-        <button type="submit" class="btn-primary self-start">Enregistrer</button>
+    {{ form_start(form, {attr: {class: 'flex flex-col gap-3'}}) }}
+        <div class="form-sheet">
+            {{ form_row(form.text) }}
+            {{ form_row(form.why) }}
+        </div>
+        <p class="px-1 text-[12.5px] leading-snug text-muted">Chacun sera invité à relire la charte.</p>
+        <button type="submit" class="btn-primary w-full" data-haptic="success">Enregistrer</button>
     {{ form_end(form) }}
 
-    <form method="post" action="{{ path('charter_rule_delete', {id: rule.id}) }}" class="flex justify-center border-t-[1.5px] border-line pt-3" data-turbo-confirm="Retirer cette règle de la charte ?">
+    <form method="post" action="{{ path('charter_rule_delete', {id: rule.id}) }}" class="flex justify-center" data-turbo-confirm="Retirer cette règle de la charte ?">
         <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
-        <button type="submit" class="btn-link gap-1.5 text-muted"><twig:Icon name="trash" size="17"/> Retirer la règle</button>
+        <button type="submit" class="btn-link hover:text-danger-ink"><twig:Icon name="trash" size="17" stroke="1.9"/>Retirer la règle</button>
     </form>
 {% endblock %}
 

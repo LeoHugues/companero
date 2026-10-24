@@ -1,10 +1,11 @@
-{% props task %}
+{% props task = null, art = null %}
 {#
     The little picture in the arch of a task card: a vacuum cleaner, the toilet, the bin… guessed from
     the title (App\Task\TaskArt); otherwise the task's category, its icon on its colour.
     Flat shapes in the palette of the Casa, the ink only for small details.
+    art: a picture chosen without a task (the cards of the tour).
 #}
-{% set art = task_art(task) %}
+{% set art = art ?? task_art(task) %}
 <span {{ attributes.defaults({class: 'vignette'}) }} aria-hidden="true">
     {% if art %}
         <svg viewBox="0 0 64 84" width="60" height="78">

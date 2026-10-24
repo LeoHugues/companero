@@ -4,22 +4,25 @@
 {% block main_class %}pb-10{% endblock %}
 
 {% block body %}
-    <twig:Casa :mood="enum('App\\Enum\\CasaMood').Radiant" speech="Bienvenue ! On t’attendait. Tu es… ?" class="mt-4"/>
+    {{ include('_casa_hero.html.twig', {mood: enum('App\\Enum\\CasaMood').Radiant, speech: 'Bienvenue ! On t’attendait. Tu es… ?'}) }}
 
-    <h1 class="text-[26px]">Rejoindre {{ household.name }}</h1>
-    <p class="meta -mt-2">Ton profil est peut-être déjà prêt : choisis-le, tu retrouveras tout ce qui t’attend.</p>
-
-    <ul class="flex flex-col gap-2.5" aria-label="Les profils à réclamer">
-        {% for member in unclaimed %}
-            <li>
-                <a href="{{ path('onboarding_claim', {token: household.inviteToken, member: member.id}) }}" class="card card-hover flex items-center gap-3 p-3.5 text-ink no-underline hover:text-ink">
-                    <twig:Avatar :member="member" size="44"/>
-                    <span class="flex-1 text-[17px] font-extrabold">Je suis {{ member.name }}</span>
-                    <twig:Icon name="chevron-right" size="20" class="text-muted"/>
-                </a>
-            </li>
-        {% endfor %}
-    </ul>
+    <section class="hero-sheet gap-4">
+        <div>
+            <h1 class="home-title">Rejoindre {{ household.name }}</h1>
+            <p class="mt-1 text-[13.5px] leading-snug text-muted">Ton profil est peut-être déjà prêt : choisis-le, tu retrouveras tout ce qui t’attend.</p>
+        </div>
+        <ul class="-mx-4 flex flex-col border-t border-line/70 px-4" aria-label="Les profils à réclamer">
+            {% for member in unclaimed %}
+                <li class="[&+li]:border-t [&+li]:border-line/70">
+                    <a href="{{ path('onboarding_claim', {token: household.inviteToken, member: member.id}) }}" class="list-row py-3">
+                        <twig:Avatar :member="member" size="40"/>
+                        <span class="row-title flex-1 text-[16px]">Je suis {{ member.name }}</span>
+                        <twig:Icon name="chevron-right" size="17" class="row-chevron"/>
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    </section>
 
     <a href="{{ path('onboarding_join', {token: household.inviteToken, nouveau: 1}) }}" class="btn-link self-center">Je suis quelqu’un d’autre</a>
 {% endblock %}

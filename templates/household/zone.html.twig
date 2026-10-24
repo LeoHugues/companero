@@ -3,33 +3,42 @@
 {% block title %}{{ zone.name }} · Companero{% endblock %}
 
 {% block body %}
-    <header class="flex items-center justify-between">
-        <h1 class="text-[22px]">Réglages de la zone</h1>
-        <a href="{{ path('household_edit') }}" aria-label="Retour aux réglages de la coloc" class="flex size-11 items-center justify-center rounded-full text-ink"><twig:Icon name="close" size="22" stroke="2.2"/></a>
+    <header class="page-head items-end">
+        <div class="min-w-0">
+            <p class="eyebrow">Réglages de la zone</p>
+            <h1 class="page-title mt-1">{{ zone.name }}</h1>
+        </div>
+        <a href="{{ path('household_edit') }}" aria-label="Retour aux réglages de la coloc" class="head-button"><twig:Icon name="close" size="19" stroke="2"/></a>
     </header>
 
-    {{ form_start(form, {attr: {class: 'flex flex-col gap-5'}}) }}
-        {{ form_row(form.name) }}
-        <div class="card px-3.5 py-1">{{ form_row(form.private) }}</div>
-        {{ form_row(form.planShape) }}
-        <button type="submit" class="btn-primary self-start">Enregistrer</button>
+    {{ form_start(form, {attr: {class: 'flex flex-col gap-3'}}) }}
+        <div class="form-sheet">
+            {{ form_row(form.name) }}
+            <div class="-my-2 border-y border-line/70">{{ form_row(form.private) }}</div>
+            {{ form_row(form.planShape) }}
+        </div>
+        <button type="submit" class="btn-primary w-full" data-haptic="success">Enregistrer</button>
     {{ form_end(form) }}
 
-    <a href="{{ path('plan_zone', {id: zone.id}) }}" class="btn-link self-center">Voir la pièce et ses tâches</a>
+    <a href="{{ path('plan_zone', {id: zone.id}) }}" class="sheet list-row px-4">
+        <twig:CasaMini :size="38" class="shrink-0"/>
+        <span class="row-title flex-1">Voir la pièce et ses tâches</span>
+        <twig:Icon name="chevron-right" size="17" class="row-chevron"/>
+    </a>
 
     {% set others = zone.household.zones|filter(other => other != zone) %}
     {% if others is not empty %}
         {# Part of another room after all: its tasks move there, and it is gone. #}
-        <form method="post" action="{{ path('zone_merge', {id: zone.id}) }}" class="card flex flex-col gap-2.5 p-3.5" data-turbo-confirm="Rattacher « {{ zone.name }} » à une autre pièce ? Elle disparaît, ses tâches y passent.">
+        <form method="post" action="{{ path('zone_merge', {id: zone.id}) }}" class="sheet flex flex-col gap-3 p-4" data-turbo-confirm="Rattacher « {{ zone.name }} » à une autre pièce ? Elle disparaît, ses tâches y passent.">
             <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
             <label for="merge-into" class="field-label">Elle fait partie d’une autre pièce ?</label>
             <div class="flex items-center gap-2">
                 <select id="merge-into" name="dans" class="input flex-1" required>
                     {% for other in others %}<option value="{{ other.id }}">{{ other.name }}</option>{% endfor %}
                 </select>
-                <button type="submit" class="btn-primary">Rattacher</button>
+                <button type="submit" class="btn-soft h-12">Rattacher</button>
             </div>
-            <p class="meta">La zone disparaît ; ses tâches et celles du catalogue passent dans la pièce choisie.</p>
+            <p class="text-[12.5px] leading-snug text-muted">La zone disparaît ; ses tâches et celles du catalogue passent dans la pièce choisie.</p>
         </form>
     {% endif %}
 {% endblock %}

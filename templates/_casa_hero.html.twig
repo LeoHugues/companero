@@ -1,0 +1,9 @@
+{#
+    The Casa in her landscape at the top of a page outside the home (signing in, the coloc's first steps), the app's
+    name on her sky; the page's sheet comes and straddles her ground (.hero-sheet), like on the home page.
+    Variables: mood (a CasaMood), speech.
+#}
+<section class="home-hero" aria-label="La Casa">
+    <p class="home-hero-top"><span class="flex items-center gap-2 text-[15px] font-semibold"><img src="/icon.svg" width="28" height="28" alt="" class="rounded-[8px] shadow-[0_4px_10px_-6px_rgba(46,30,20,.5)]">Companero</span></p>
+    <twig:Casa hero :mood="mood" :speech="speech"/>
+</section>

@@ -68,9 +68,9 @@ La Casa passe de poussiéreuse à rayonnante pendant que la bulle s'affiche.
 
 > « Chaque chose à faire est une carte. Elle dit ce qu'il faut faire, où, et ce que ça rapporte. »
 
-Une **fausse carte** qu'on peut toucher, présentée avec trois repères :
+Une **fausse carte**, la même que les vraies, qu'on peut toucher, présentée avec ses repères :
 
-- **le médaillon** : la catégorie, et un anneau qui se vide avec le temps ;
+- **le coin**, comme une carte à jouer : ce qu'elle rapporte et sa catégorie ; dessous, un fil qui se vide avec le temps ;
 - **« Je prends »** : je dis aux autres que je m'en occupe ;
 - **« C'est fait »** : les étoiles, les points, et la Casa réagit.
 
@@ -85,7 +85,7 @@ Un **curseur « depuis la dernière fois »** (de 0 à 4 jours, par demi-journé
 
 | Depuis | État de la carte |
 |---|---|
-| 0 à 1 jour | fraîche (sauge), anneau plein |
+| 0 à 1 jour | fraîche (sauge), le fil plein |
 | 1 jour et demi | bientôt (miel) |
 | 2 jours | due |
 | 3 jours et plus | en retard (corail) |

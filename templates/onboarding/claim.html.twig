@@ -4,21 +4,20 @@
 {% block main_class %}pb-10{% endblock %}
 
 {% block body %}
-    <twig:Casa :mood="enum('App\\Enum\\CasaMood').Radiant" :speech="'Salut ' ~ member.name ~ ' ! Ta place était gardée.'" class="mt-4"/>
+    {{ include('_casa_hero.html.twig', {mood: enum('App\\Enum\\CasaMood').Radiant, speech: 'Salut ' ~ member.name ~ ' ! Ta place était gardée.'}) }}
 
-    <header class="flex items-center gap-3">
-        <twig:Avatar :member="member" size="48"/>
-        <div class="flex flex-col">
-            <h1 class="text-[26px] leading-tight">Je suis {{ member.name }}</h1>
-            <p class="meta">dans {{ household.name }}</p>
-        </div>
-    </header>
-    <p class="meta -mt-1">Choisis ton pseudo et ton mot de passe : ce sont eux qui te connecteront.</p>
-
-    {{ form_start(form, {attr: {class: 'flex flex-col gap-5'}}) }}
+    {{ form_start(form, {attr: {class: 'hero-sheet'}}) }}
+        <header class="flex items-center gap-3">
+            <twig:Avatar :member="member" size="46"/>
+            <div class="flex min-w-0 flex-col">
+                <h1 class="home-title truncate">Je suis {{ member.name }}</h1>
+                <p class="text-[13.5px] text-muted">dans {{ household.name }}</p>
+            </div>
+        </header>
+        <p class="-mt-1 text-[13.5px] leading-snug text-muted">Choisis ton pseudo et ton mot de passe : ce sont eux qui te connecteront.</p>
         {{ form_row(form.username) }}
         {{ form_row(form.plainPassword) }}
-        <button type="submit" class="btn-primary h-[52px] w-full text-[17px]">C’est moi</button>
+        <button type="submit" class="btn-primary h-[52px] w-full text-[16px]">C’est moi</button>
     {{ form_end(form) }}
 
     <a href="{{ path('onboarding_join', {token: household.inviteToken}) }}" class="btn-link self-center">Ce n’est pas moi</a>

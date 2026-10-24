@@ -2,43 +2,52 @@
 
 {% block title %}{{ completion.task.title }} · Companero{% endblock %}
 
-{# Room for the save bar, fixed at the bottom of the screen. #}
-{% block main_class %}{{ ux_is_native() ? 'pb-28' : 'pb-48' }}{% endblock %}
+{# The save button floats above the bottom bar; in the app's modal, at the very bottom. #}
+{% block main_class %}{{ ux_is_native() ? 'pb-6' : 'pb-28' }}{% endblock %}
 
 {% block body %}
-    <header class="flex items-center justify-between">
-        <h1 class="text-[22px]">Corriger ce qui a été fait</h1>
-        <a href="{{ ux_is_native() ? '/recede_historical_location' : (retour == 'bilan' ? path('review_show') : path('history')) }}" aria-label="Fermer" class="flex size-11 items-center justify-center rounded-full text-ink"><twig:Icon name="close" size="22" stroke="2.2"/></a>
+    <header class="page-head items-start">
+        <div class="min-w-0">
+            <p class="eyebrow">Ce qui a été fait</p>
+            <h1 class="page-title mt-1">Corriger</h1>
+        </div>
+        <a href="{{ ux_is_native() ? '/recede_historical_location' : (retour == 'bilan' ? path('review_show') : path('history')) }}" aria-label="Fermer" class="head-button"><twig:Icon name="close" size="19" stroke="2"/></a>
     </header>
 
-    <div class="card flex flex-col gap-0.5 px-3.5 py-3">
-        <p class="text-[15px] font-extrabold">{{ completion.task.title }}</p>
-        <p class="meta">Fait par {{ completion.member.name }} le {{ completion.completedAt|format_date(pattern: 'EEEE d MMMM', locale: 'fr') }} à {{ completion.completedAt|date('G\\hi') }} · {{ total }} pts au total</p>
+    <div class="sheet flex items-center gap-3.5 p-3.5">
+        <twig:TaskVignette :task="completion.task" class="vignette-small"/>
+        <div class="flex min-w-0 flex-1 flex-col gap-0.5">
+            <p class="row-title">{{ completion.task.title }}</p>
+            <p class="row-meta">Fait par {{ completion.member.name }} le {{ completion.completedAt|format_date(pattern: 'EEEE d MMMM', locale: 'fr') }} à {{ completion.completedAt|date('G\\hi') }}</p>
+        </div>
+        <p class="flex shrink-0 flex-col items-end leading-none"><span class="text-[20px] font-bold tracking-tight text-clay-dark tabular-nums">{{ total }}</span><span class="mt-1 text-[11px] font-semibold tracking-[.1em] text-muted uppercase">pts</span></p>
     </div>
 
-    {{ form_start(form, {attr: {class: 'flex flex-col gap-5'}}) }}
-        {{ form_row(form.completedAt, {help: 'Les points comptent pour la semaine de cette date, et la tâche repart de là.'}) }}
-        {{ form_row(form.member) }}
-
-        <div class="card flex items-center justify-between gap-3 px-3.5 py-3" data-controller="stepper">
-            <div class="flex flex-col gap-0.5">
-                {{ form_label(form.points) }}
-                <span class="text-xs text-muted" data-stepper-target="hint">5 min d’effort ≈ 10 pts</span>
-            </div>
-            <div class="flex items-center gap-1.5">
-                <button type="button" class="flex size-11 cursor-pointer items-center justify-center rounded-full border-[1.5px] border-line bg-cream transition hover:bg-track active:scale-90" data-action="stepper#decrement" aria-label="5 points de moins"><twig:Icon name="minus"/></button>
-                {{ form_widget(form.points, {attr: {class: 'w-[4.5rem] border-0 bg-transparent px-0 text-center text-2xl font-extrabold text-clay-dark [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none', 'data-stepper-target': 'input', 'data-action': 'input->stepper#describe'}}) }}
-                <button type="button" class="flex size-11 cursor-pointer items-center justify-center rounded-full border-[1.5px] border-line bg-cream transition hover:bg-track active:scale-90" data-action="stepper#increment" aria-label="5 points de plus"><twig:Icon name="plus"/></button>
-            </div>
+    {{ form_start(form, {attr: {class: 'flex flex-col gap-6'}}) }}
+        <div class="form-sheet">
+            {{ form_row(form.completedAt, {help: 'Les points comptent pour la semaine de cette date, et la tâche repart de là.'}) }}
+            {{ form_row(form.member) }}
         </div>
-        {{ form_errors(form.points) }}
-        <p class="meta -mt-3">Les points de la tâche, sans les boosts : ceux-ci sont recalculés pour la date choisie (jour de ménage, boost activé…).</p>
 
-        {# Always at hand at the bottom of the screen: above the bottom navigation, or at the very bottom in the app's modal. #}
-        <div class="fixed inset-x-0 z-10 border-t-[1.5px] border-line bg-cream {{ ux_is_native() ? 'bottom-0 pb-[env(safe-area-inset-bottom)]' : 'bottom-[calc(72px+env(safe-area-inset-bottom))]' }}">
-            <div class="mx-auto max-w-md px-5 py-3">
-                <button type="submit" class="btn-primary h-[52px] w-full text-[17px]">Enregistrer</button>
+        <div class="form-group">
+            <div class="sheet flex items-center justify-between gap-3 p-4" data-controller="stepper">
+                <div class="flex flex-col gap-0.5">
+                    {{ form_label(form.points) }}
+                    <span class="text-[12.5px] text-muted" data-stepper-target="hint">5 min d’effort ≈ 10 pts</span>
+                </div>
+                <div class="flex items-center gap-1">
+                    <button type="button" class="row-button is-framed size-10" data-action="stepper#decrement" data-haptic="tick" aria-label="5 points de moins"><twig:Icon name="minus" size="18" stroke="2.2"/></button>
+                    {{ form_widget(form.points, {attr: {class: 'h-10 w-[4.25rem] border-0 bg-transparent px-0 text-center text-[24px] font-bold tracking-tight text-clay-dark shadow-none focus:ring-0 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none', 'data-stepper-target': 'input', 'data-action': 'input->stepper#describe'}}) }}
+                    <button type="button" class="row-button is-framed size-10" data-action="stepper#increment" data-haptic="tick" aria-label="5 points de plus"><twig:Icon name="plus" size="18" stroke="2.2"/></button>
+                </div>
             </div>
+            {{ form_errors(form.points) }}
+            <p class="px-1 text-[12.5px] leading-snug text-muted">Les points de la tâche, sans les boosts : ceux-ci sont recalculés pour la date choisie (jour de ménage, boost activé…).</p>
+        </div>
+
+        {# Always at hand: floating above the bottom navigation, or at the very bottom in the app's modal. #}
+        <div class="save-bar {{ ux_is_native() ? 'is-native' }}">
+            <div class="save-bar-in"><button type="submit" class="btn-primary" data-haptic="success">Enregistrer</button></div>
         </div>
     {{ form_end(form) }}
 {% endblock %}

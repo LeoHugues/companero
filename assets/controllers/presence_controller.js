@@ -10,6 +10,7 @@ export default class extends Controller {
 
     describe() {
         const days = parseInt(this.sliderTarget.value, 10) || 0;
+        this.sliderTarget.style.setProperty('--fill', `${(days / (parseInt(this.sliderTarget.max, 10) || 7)) * 100}%`);
         const goalInput = this.element.querySelector('input[name$="[weeklyGoal]"]:checked, input[name$="[goal]"]:checked');
         const goal = goalInput ? parseInt(goalInput.value, 10) : 0;
 

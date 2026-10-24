@@ -2,31 +2,37 @@
 
 {% block title %}Bilan de la semaine {{ review.week.number }} · Companero{% endblock %}
 
+{#
+    The week's review: the Casa's word and the week day by day, the goal of the house and everyone's share,
+    the commitments, each one's week, the titles to turn over, and what was done (to adjust).
+#}
 {% block body %}
     {% set week = review.week %}
     {% set team = review.team %}
 
-    <header class="flex items-center justify-between">
-        {% if has_previous %}
-            <a href="{{ path('review_show', {week: week.previous.start|date('Y-m-d')}) }}" aria-label="Semaine précédente" class="flex size-11 items-center justify-center rounded-full text-ink hover:bg-track"><twig:Icon name="chevron-left" size="22" stroke="2.4"/></a>
-        {% else %}
-            <span class="size-11"></span>
-        {% endif %}
-        <div class="flex flex-col items-center">
-            <h1 class="text-[22px]">Bilan de la semaine</h1>
-            <p class="meta font-semibold">Semaine {{ week.number }} · du {{ week.start|format_date(pattern: 'd', locale: 'fr') }} au {{ week.day(7)|format_date(pattern: 'd MMMM', locale: 'fr') }}</p>
+    <header class="page-head items-end">
+        <div class="min-w-0">
+            <p class="eyebrow">Semaine {{ week.number }} · du {{ week.start|format_date(pattern: 'd', locale: 'fr') }} au {{ week.day(7)|format_date(pattern: 'd MMMM', locale: 'fr') }}</p>
+            <h1 class="page-title mt-1">Bilan de la semaine</h1>
         </div>
-        {% if has_next %}
-            <a href="{{ path('review_show', {week: week.next.start|date('Y-m-d')}) }}" aria-label="Semaine suivante" class="flex size-11 items-center justify-center rounded-full text-ink hover:bg-track"><twig:Icon name="chevron-right" size="22" stroke="2.4"/></a>
-        {% else %}
-            <span class="size-11"></span>
-        {% endif %}
+        <nav class="flex shrink-0 gap-1.5" aria-label="Changer de semaine">
+            {% if has_previous %}
+                <a href="{{ path('review_show', {week: week.previous.start|date('Y-m-d')}) }}" aria-label="Semaine précédente" class="head-button"><twig:Icon name="chevron-left" size="20" stroke="2"/></a>
+            {% else %}
+                <span class="head-button pointer-events-none opacity-40" aria-hidden="true"><twig:Icon name="chevron-left" size="20" stroke="2"/></span>
+            {% endif %}
+            {% if has_next %}
+                <a href="{{ path('review_show', {week: week.next.start|date('Y-m-d')}) }}" aria-label="Semaine suivante" class="head-button"><twig:Icon name="chevron-right" size="20" stroke="2"/></a>
+            {% else %}
+                <span class="head-button pointer-events-none opacity-40" aria-hidden="true"><twig:Icon name="chevron-right" size="20" stroke="2"/></span>
+            {% endif %}
+        </nav>
     </header>
 
-    <section class="card flex flex-col gap-3 p-4" aria-label="Résumé">
+    <section class="sheet flex flex-col gap-4 p-4" aria-label="Résumé">
         <div class="flex items-end gap-3">
-            <twig:CasaMini :size="88" :happy="team.reached" class="shrink-0"/>
-            <p class="bubble mb-6 flex-1 text-sm">
+            <twig:CasaMini :size="72" :happy="team.reached" class="shrink-0"/>
+            <p class="bubble mb-6 flex-1 text-[14px]">
                 {%- if team.reached -%}
                     {{ review.current ? 'Objectif collectif atteint ! Encore un peu et je brille.' : 'Belle semaine : objectif collectif atteint, bravo à tous !' }}
                 {%- elseif review.current -%}
@@ -36,19 +42,21 @@
                 {%- endif -%}
             </p>
         </div>
-        <div class="flex flex-col gap-1.5">
-            <p class="text-[13px] font-bold">Tâches faites chaque jour</p>
-            <ol class="grid h-28 grid-cols-7 items-end gap-2">
+        <div class="flex flex-col gap-2.5 border-t border-line/70 pt-3.5">
+            <div class="flex items-baseline justify-between gap-2">
+                <p class="eyebrow">Tâches faites chaque jour</p>
+                <p class="flex items-center gap-1.5 text-[11.5px] text-muted"><span class="size-[7px] rounded-full bg-clay"></span>jour de ménage</p>
+            </div>
+            <ol class="grid h-[118px] grid-cols-7 items-end gap-2">
                 {% for day in review.activity %}
-                    <li class="flex h-full flex-col items-center justify-end gap-1">
-                        <span class="text-[11px] font-bold text-muted">{{ day.count ?: '' }}</span>
-                        <span class="w-full rounded-t-lg {{ day.cleaningDay ? 'bg-clay' : 'bg-sun' }}" style="height: {{ max(4, (72 * day.count / review.busiestDayCount)|round) }}px"
+                    <li class="flex h-full flex-col items-center justify-end gap-1.5">
+                        <span class="text-[11px] font-semibold text-muted tabular-nums">{{ day.count ?: '' }}</span>
+                        <span class="week-bar {{ day.cleaningDay ? 'is-cleaning' }} {{ day.count ? '' : 'is-empty' }}" style="height: {{ max(5, (74 * day.count / review.busiestDayCount)|round) }}px; animation-delay: {{ loop.index0 * 45 }}ms"
                               aria-label="{{ weekday_name(day.day|date('N')) }} : {{ day.count }} tâche{{ day.count > 1 ? 's' }}"></span>
-                        <span class="text-[11px] {{ day.cleaningDay ? 'font-extrabold text-ink' : 'font-semibold text-muted' }}">{{ weekday_name(day.day|date('N'))|first|upper }}</span>
+                        <span class="text-[11px] {{ day.cleaningDay ? 'font-bold text-ink' : 'font-semibold text-dust' }}">{{ weekday_name(day.day|date('N'))|first|upper }}</span>
                     </li>
                 {% endfor %}
             </ol>
-            <p class="text-xs text-muted"><span class="mr-1 inline-block size-2.5 rounded-sm bg-clay align-middle"></span>jour de ménage</p>
         </div>
     </section>
 
@@ -56,18 +64,18 @@
 
     {% if review.commitments is not empty %}
         <section class="flex flex-col gap-2" aria-labelledby="commitments-title">
-            <div class="flex items-baseline justify-between">
-                <h2 id="commitments-title" class="section-title">Engagements</h2>
-                <p class="meta font-bold">{{ review.keptCommitments }} tenu{{ review.keptCommitments > 1 ? 's' }} sur {{ review.commitments|length }}</p>
+            <div class="section-head px-1">
+                <h2 id="commitments-title" class="eyebrow">Engagements</h2>
+                <p class="text-[12.5px] text-muted">{{ review.keptCommitments }} tenu{{ review.keptCommitments > 1 ? 's' }} sur {{ review.commitments|length }}</p>
             </div>
-            <ul class="card divide-y divide-line px-3.5 py-1">
+            <ul class="list-sheet">
                 {% for commitment in review.commitments %}
-                    <li class="flex items-center gap-2.5 py-2.5">
-                        <span class="flex size-6 shrink-0 items-center justify-center rounded-full {{ commitment.kept ? 'bg-sun' : 'bg-track' }}">
-                            <twig:Icon :name="commitment.kept ? 'check' : (review.current ? 'minus' : 'close')" size="14" stroke="3"/>
+                    <li class="flex min-h-12 items-center gap-3 py-2.5">
+                        <span class="flex size-7 shrink-0 items-center justify-center rounded-full {{ commitment.kept ? 'bg-ok text-surface' : (review.current ? 'bg-track/70 text-muted' : 'bg-danger-soft text-danger-ink') }}">
+                            <twig:Icon :name="commitment.kept ? 'check' : (review.current ? 'minus' : 'close')" size="14" stroke="2.6"/>
                         </span>
-                        <span class="flex-1 text-[15px] font-semibold">{{ commitment.task.title }}</span>
-                        <span class="text-sm font-extrabold {{ commitment.kept ? '' : 'text-clay-dark' }}">{{ commitment.done }}/{{ commitment.expected }}</span>
+                        <span class="row-title flex-1">{{ commitment.task.title }}</span>
+                        <span class="shrink-0 text-[14px] font-semibold tabular-nums {{ commitment.kept ? 'text-ok-ink' : 'text-muted' }}">{{ commitment.done }}/{{ commitment.expected }}</span>
                     </li>
                 {% endfor %}
             </ul>
@@ -75,13 +83,15 @@
     {% endif %}
 
     <section class="flex flex-col gap-2" aria-labelledby="members-title">
-        <h2 id="members-title" class="section-title">Chacun sa semaine</h2>
-        <ul class="grid grid-cols-2 gap-2.5">
+        <h2 id="members-title" class="group-label">Chacun sa semaine</h2>
+        <ul class="grid grid-cols-2 gap-3">
             {% for progress in team.members %}
-                <li class="card flex flex-col gap-1.5 p-3">
-                    <p class="flex items-center gap-2 text-[15px] font-extrabold"><twig:Avatar :member="progress.member"/> {{ progress.member.name }}</p>
-                    <p class="text-[22px] leading-none font-extrabold">{{ progress.points }} <span class="text-[13px] font-semibold text-muted">/ {{ progress.goal }} pts</span></p>
-                    <p class="text-xs font-bold {{ progress.reached ? 'text-clay-dark' : 'text-muted' }}">
+                <li class="sheet flex flex-col gap-2.5 p-3.5">
+                    <p class="flex items-center gap-2 text-[15px] font-semibold"><twig:Avatar :member="progress.member" size="28"/><span class="truncate">{{ progress.member.name }}</span></p>
+                    <p class="flex items-baseline gap-1"><span class="text-[24px] leading-none font-bold tracking-tight tabular-nums">{{ progress.points }}</span><span class="text-[12.5px] text-muted">/ {{ progress.goal }} pts</span></p>
+                    {% set reached = progress.wasPresent and progress.reached %}
+                    <span class="track block h-1.5" aria-hidden="true"><span class="block h-full rounded-full {{ reached ? 'bg-ok' : 'bg-sun' }}" style="width: {{ progress.wasPresent ? progress.percent : 0 }}%"></span></span>
+                    <p class="text-[12px] leading-tight font-medium {{ reached ? 'text-ok-ink' : 'text-muted' }}">
                         {%- if not progress.wasPresent -%}Pas là cette semaine
                         {%- elseif progress.reached -%}Objectif atteint{{ progress.partTime ? ' · là ' ~ progress.presentDays ~ ' j/7' }}
                         {%- else -%}{{ review.current ? 'En route !' : 'Presque !' }}{{ progress.partTime ? ' · là ' ~ progress.presentDays ~ ' j/7' }}
@@ -93,29 +103,30 @@
     </section>
 
     <section class="flex flex-col gap-2" aria-labelledby="titles-title">
-        <div class="flex items-baseline justify-between">
-            <h2 id="titles-title" class="section-title">Titres de la semaine</h2>
-            {% if review.titles is not empty %}<p class="meta font-semibold">touche pour révéler</p>{% endif %}
+        <div class="section-head px-1">
+            <h2 id="titles-title" class="eyebrow">Titres de la semaine</h2>
+            {% if review.titles is not empty %}<p class="text-[12.5px] text-muted">touche pour retourner</p>{% endif %}
         </div>
         {% if review.titles is not empty %}
-            <ul class="grid grid-cols-2 gap-2.5">
+            <ul class="grid grid-cols-2 gap-3">
                 {% for title in review.titles %}
                     <li data-controller="reveal">
-                        <button type="button" data-reveal-target="cover" data-action="reveal#show"
-                                class="flex h-24 w-full cursor-pointer flex-col items-center justify-center gap-1 rounded-[18px] border-[1.5px] border-dashed border-sand bg-track text-ink transition hover:bg-sun active:scale-95">
-                            <twig:Spark/>
-                            <span class="text-sm font-extrabold">{{ title.member.name }}</span>
+                        {# Face down, like a card of the deck: a tap turns it over. #}
+                        <button type="button" data-reveal-target="cover" data-action="reveal#show" data-haptic="reward" class="title-cover">
+                            <twig:Avatar :member="title.member" size="30" class="ring-2 ring-cream/70"/>
+                            <span class="text-[14px] font-semibold">{{ title.member.name }}</span>
+                            <span class="text-[11px] font-medium opacity-80">Retourner</span>
                         </button>
-                        <div data-reveal-target="card" hidden class="animate-flip flex h-24 flex-col justify-between rounded-[18px] bg-ink p-3 text-cream">
-                            <span class="text-xs font-bold text-sun">{{ title.member.name }}</span>
-                            <span class="text-[15px] leading-tight font-extrabold">{{ title.name }}</span>
-                            <span class="text-[11px] text-[#D9C8B0]">{{ title.reason }}</span>
+                        <div data-reveal-target="card" hidden class="title-card animate-flip">
+                            <span class="flex items-center justify-between gap-2 text-[11.5px] font-semibold text-sun"><span class="truncate">{{ title.member.name }}</span><twig:Spark size="14" color="#F6C453"/></span>
+                            <span class="text-[15px] leading-tight font-bold">{{ title.name }}</span>
+                            <span class="text-[11px] leading-snug text-[#D9C8B0]">{{ title.reason }}</span>
                         </div>
                     </li>
                 {% endfor %}
             </ul>
         {% else %}
-            <p class="card p-4 text-sm text-muted">
+            <p class="sheet-empty">
                 {{ review.current ? 'Les titres seront révélés lundi, une fois la semaine terminée.' : 'Les titres de cette semaine n’ont pas été distribués.' }}
             </p>
         {% endif %}
@@ -123,26 +134,27 @@
 
     {% if review.completions is not empty %}
         <section class="flex flex-col gap-2" aria-labelledby="journal-title">
-            <h2 id="journal-title" class="section-title">Fait cette semaine</h2>
-            <p class="meta -mt-1">C’était plus long ou plus court que prévu ? Ajuste les points. Une date à corriger ? Touche la tâche.</p>
-            <ul class="card divide-y divide-line px-3.5 py-1">
+            <h2 id="journal-title" class="group-label">Fait cette semaine</h2>
+            <p class="-mt-0.5 px-1 text-[12.5px] leading-snug text-muted">Plus long ou plus court que prévu ? Ajuste les points. Une date à corriger ? Touche la tâche.</p>
+            <ul class="list-sheet">
                 {% for completion in review.completions %}
-                    <li class="flex items-center gap-2.5 py-2">
-                        <twig:Avatar :member="completion.member" size="26"/>
+                    <li class="list-row gap-2.5">
+                        <twig:Avatar :member="completion.member" size="30"/>
                         <a href="{{ path('completion_edit', {id: completion.id, retour: 'bilan'}) }}" class="flex min-w-0 flex-1 flex-col text-ink no-underline hover:text-ink" aria-label="Corriger : {{ completion.task.title }}">
-                            <span class="truncate text-sm font-bold">{{ completion.task.title }}</span>
-                            <span class="text-xs text-muted">{{ weekday_name(completion.completedAt|date('N')) }} {{ completion.completedAt|date('G\\hi') }} · <span class="underline">corriger</span></span>
+                            <span class="row-title truncate">{{ completion.task.title }}</span>
+                            <span class="row-meta">{{ weekday_name(completion.completedAt|date('N'))|capitalize }} {{ completion.completedAt|date('G\\hi') }} · <span class="underline decoration-dust underline-offset-2">corriger</span></span>
                         </a>
-                        {% for direction in ['moins', 'plus'] %}
-                            <form method="post" action="{{ path('completion_adjust', {id: completion.id}) }}">
-                                <input type="hidden" name="sens" value="{{ direction }}">
-                                <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
-                                <button type="submit" aria-label="{{ direction == 'plus' ? '5 points de plus' : '5 points de moins' }} pour {{ completion.member.name }}"
-                                        class="flex size-9 cursor-pointer items-center justify-center rounded-full border-[1.5px] border-line text-ink transition hover:bg-track active:scale-90">
-                                    <twig:Icon :name="direction == 'plus' ? 'plus' : 'minus'" size="16" stroke="2.4"/>
-                                </button>
-                            </form>
-                        {% endfor %}
+                        <span class="-mr-1 flex shrink-0 gap-1">
+                            {% for direction in ['moins', 'plus'] %}
+                                <form method="post" action="{{ path('completion_adjust', {id: completion.id}) }}">
+                                    <input type="hidden" name="sens" value="{{ direction }}">
+                                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
+                                    <button type="submit" aria-label="{{ direction == 'plus' ? '5 points de plus' : '5 points de moins' }} pour {{ completion.member.name }}" class="row-button is-framed" data-haptic="tick">
+                                        <twig:Icon :name="direction == 'plus' ? 'plus' : 'minus'" size="16" stroke="2.2"/>
+                                    </button>
+                                </form>
+                            {% endfor %}
+                        </span>
                     </li>
                 {% endfor %}
             </ul>

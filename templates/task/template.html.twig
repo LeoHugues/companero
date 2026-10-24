@@ -10,101 +10,104 @@
     {% set task = view.task %}
     {% set status = view.status %}
 
-    <header class="flex items-center justify-between">
-        <a href="{{ ux_is_native() ? '/recede_historical_location' : path('task_index') }}" aria-label="Retour aux modèles" class="-ml-2 flex size-11 items-center justify-center rounded-full text-ink"><twig:Icon name="arrow-left" size="22" stroke="2.2"/></a>
-        <a href="{{ path('task_edit', {id: task.id}) }}" class="btn-primary h-10 px-4 text-sm"><twig:Icon name="edit" size="17"/> Modifier le modèle</a>
+    <header class="page-head">
+        <a href="{{ ux_is_native() ? '/recede_historical_location' : path('task_index') }}" aria-label="Retour aux modèles" class="head-button"><twig:Icon name="arrow-left" size="20" stroke="2"/></a>
+        <a href="{{ path('task_edit', {id: task.id}) }}" class="head-link"><twig:Icon name="edit" size="16" stroke="1.9"/>Modifier le modèle</a>
     </header>
 
-    <section class="flex flex-col gap-3" id="template-{{ task.id }}" data-rarity="{{ task.rarity.value }}">
-        <p class="flex items-center gap-2 text-xs font-extrabold tracking-wide text-muted uppercase">
-            <span class="flex size-7 items-center justify-center rounded-lg bg-track text-ink-soft"><twig:Icon :name="task_kind_icon(task)" size="16"/></span>
-            Modèle · {{ task.kind.label }}
-        </p>
-        <h1 class="text-[26px] leading-tight [overflow-wrap:anywhere]">{{ task.title }}</h1>
-        <p class="text-[15px] font-semibold text-ink-soft">
-            {{ task_place(task) }} · {{ task_rule_label(task) }}
-        </p>
-        {% if task.description %}
-            <p class="task-note"><twig:Icon name="list" size="15" class="mt-0.5 shrink-0"/><span>{{ task.description }}</span></p>
-        {% endif %}
+    <section class="flex items-start gap-4" id="template-{{ task.id }}" data-rarity="{{ task.rarity.value }}">
+        <div class="flex min-w-0 flex-1 flex-col gap-1.5">
+            <p class="eyebrow flex items-center gap-1.5"><twig:Icon :name="task_kind_icon(task)" size="13" stroke="2.2"/>Modèle · {{ task.kind.label }}</p>
+            <h1 class="page-title">{{ task.title }}</h1>
+            <p class="text-[14px] text-muted">{{ task_place(task) }} · {{ task_rule_label(task) }}</p>
+        </div>
+        <twig:TaskVignette :task="task" class="mt-1 shrink-0"/>
+    </section>
+    {% if task.description %}
+        <p class="task-note"><twig:Icon name="list" size="15" class="mt-0.5 shrink-0"/><span>{{ task.description }}</span></p>
+    {% endif %}
+
+    <section class="flex flex-col gap-2" aria-labelledby="rule-title">
+        <h2 id="rule-title" class="group-label">La règle</h2>
+        <dl class="list-sheet facts">
+            <div><dt>Vaut</dt><dd class="font-semibold text-clay-dark">{{ task.points }} pts</dd></div>
+            <div>
+                <dt>Carte</dt>
+                {# A tiny card in its finish: the rarity is seen, not written on the cards. #}
+                <dd class="flex items-center justify-end gap-2"><span class="rarity-swatch rarity-swatch-{{ task.rarity.value }}" aria-hidden="true"></span>{{ task.rarity.label|lower }}</dd>
+            </div>
+            <div><dt>Catégorie</dt><dd class="flex items-center justify-end gap-1.5"><twig:Icon :name="task.category.icon" size="15" stroke="1.9" class="text-muted"/>{{ task.category.label }}</dd></div>
+            {% if task.kind.isPlanned or task.kind.value == 'occasional' %}
+                <div>
+                    <dt>Alertes</dt>
+                    <dd class="flex flex-col items-end gap-1">
+                        {% if task.kind.isPlanned %}<span class="flex items-center gap-1.5"><span class="size-2 rounded-full bg-warn" aria-hidden="true"></span>orange {{ task.warningHours ? duration_label(task.warningHours) ~ ' avant' : (task.kind.value == 'rolling' ? 'aux 60 % du rythme' : '2 jours avant') }}</span>{% endif %}
+                        <span class="flex items-center gap-1.5"><span class="size-2 rounded-full bg-danger" aria-hidden="true"></span>rouge {{ duration_label(task.marginHours) }} après{{ task.kind.value == 'occasional' ? ' avoir été signalée' }}</span>
+                    </dd>
+                </div>
+            {% endif %}
+            {% if task.cooldownHours %}
+                <div><dt>Délai</dt><dd>pas avant {{ duration_label(task.cooldownHours) }} après l’avoir faite</dd></div>
+            {% endif %}
+            <div>
+                <dt>S’en charge</dt>
+                <dd class="flex items-center justify-end gap-1.5">
+                    {% if task.assignee %}<twig:Avatar :member="task.assignee" size="20"/>{{ task.assignee.name }}{% if task.backup %} <span class="font-normal text-muted">(sinon {{ task.backup.name }})</span>{% endif %}{% else %}qui est là{% endif %}
+                </dd>
+            </div>
+            <div><dt>Créé</dt><dd>par {{ task.createdBy.name }} le {{ task.createdAt|date('d/m/Y') }}</dd></div>
+        </dl>
     </section>
 
-    <dl class="card grid grid-cols-[auto_1fr] gap-x-4 gap-y-3 px-3.5 py-3.5 text-sm" aria-label="La règle">
-        <dt class="font-bold">Vaut</dt>
-        <dd class="font-extrabold text-clay-dark">{{ task.points }} pts</dd>
-        <dt class="font-bold">Carte</dt>
-        <dd class="flex items-center gap-2 text-muted">
-            {# A tiny card in its skin: the rarity is seen, not written on the cards. #}
-            <span class="rarity-{{ task.rarity.value }} inline-block h-6 w-10 shrink-0 rounded-md border-[1.5px] border-line bg-surface" aria-hidden="true"></span>
-            {{ task.rarity.label|lower }}
-        </dd>
-        <dt class="font-bold">Catégorie</dt>
-        <dd class="text-muted">{{ task.category.label }}</dd>
-        {% if task.kind.isPlanned or task.kind.value == 'occasional' %}
-            <dt class="font-bold">Alertes</dt>
-            <dd class="flex flex-col gap-1 text-muted">
-                {% if task.kind.isPlanned %}<span class="flex items-center gap-1.5"><span class="size-2.5 rounded-full bg-warn" aria-hidden="true"></span>orange {{ task.warningHours ? duration_label(task.warningHours) ~ ' avant' : (task.kind.value == 'rolling' ? 'aux 60 % du rythme' : '2 jours avant') }}</span>{% endif %}
-                <span class="flex items-center gap-1.5"><span class="size-2.5 rounded-full bg-danger" aria-hidden="true"></span>rouge {{ duration_label(task.marginHours) }} après{{ task.kind.value == 'occasional' ? ' avoir été signalée' }}</span>
-            </dd>
-        {% endif %}
-        {% if task.cooldownHours %}
-            <dt class="font-bold">Délai</dt>
-            <dd class="text-muted">pas avant {{ duration_label(task.cooldownHours) }} après l’avoir faite</dd>
-        {% endif %}
-        <dt class="font-bold">S’en charge</dt>
-        <dd class="text-muted">{{ task.assignee ? task.assignee.name ~ (task.backup ? ' (sinon ' ~ task.backup.name ~ ')') : 'qui est là' }}</dd>
-        <dt class="font-bold">Créé</dt>
-        <dd class="text-muted">par {{ task.createdBy.name }} le {{ task.createdAt|date('d/m/Y') }}</dd>
-    </dl>
-
     <section class="flex flex-col gap-2" aria-labelledby="now-title">
-        <h2 id="now-title" class="section-title">En ce moment</h2>
+        <h2 id="now-title" class="group-label">En ce moment</h2>
         {% if task.kind.isPlanned %}
-            <a href="{{ path('task_show', {id: task.id}) }}" class="card card-hover flex items-center gap-3 px-3.5 py-3 text-ink no-underline hover:text-ink">
+            <a href="{{ path('task_show', {id: task.id}) }}" class="sheet list-row px-4">
                 <twig:UrgencyPill :view="view"/>
-                <span class="flex-1 text-sm font-bold">Voir la tâche à faire</span>
-                <twig:Icon name="chevron-right" size="18" class="shrink-0 text-muted"/>
+                <span class="row-title flex-1">Voir la tâche à faire</span>
+                <twig:Icon name="chevron-right" size="17" class="row-chevron"/>
             </a>
         {% elseif task.kind.value == 'occasional' %}
             {% if task.raised %}
-                <a href="{{ path('task_show', {id: task.id}) }}" class="card card-hover flex items-center gap-3 px-3.5 py-3 text-ink no-underline hover:text-ink">
+                <a href="{{ path('task_show', {id: task.id}) }}" class="sheet list-row px-4">
                     <twig:UrgencyPill :view="view"/>
-                    <span class="flex-1 text-sm font-bold">Sa carte attend sur l’accueil</span>
-                    <twig:Icon name="chevron-right" size="18" class="shrink-0 text-muted"/>
+                    <span class="row-title flex-1">Sa carte attend sur l’accueil</span>
+                    <twig:Icon name="chevron-right" size="17" class="row-chevron"/>
                 </a>
             {% else %}
-                <div class="card flex items-center gap-3 px-3.5 py-3">
-                    <p class="flex-1 text-sm text-muted">Elle dort. Quand ça arrive, dis-le : sa carte apparaît sur l’accueil jusqu’à ce que quelqu’un s’en occupe.</p>
+                <div class="sheet flex items-center gap-3 p-4">
+                    <p class="flex-1 text-[13.5px] leading-snug text-muted">Elle dort. Quand ça arrive, dis-le : sa carte apparaît sur l’accueil jusqu’à ce que quelqu’un s’en occupe.</p>
                     <twig:RaiseButton :task="task" :back="'template-' ~ task.id"/>
                 </div>
             {% endif %}
         {% else %}
-            <p class="card px-3.5 py-3 text-sm text-muted">Une tâche express se fait d’un appui, depuis l’accueil (« En un geste »).</p>
+            <p class="sheet flex items-center gap-3 p-4 text-[13.5px] leading-snug text-muted"><span class="tile tile-sun"><twig:Icon name="bolt" size="19" stroke="1.9"/></span>Une tâche express se fait d’un appui, depuis l’accueil (« En un geste »).</p>
         {% endif %}
     </section>
 
     <section class="flex flex-col gap-2" aria-labelledby="history-title">
-        <div class="flex items-baseline justify-between">
-            <h2 id="history-title" class="section-title">Déjà fait</h2>
-            <p class="meta font-bold">{{ done_last_30_days }} fois en 30 jours</p>
+        <div class="section-head px-1">
+            <h2 id="history-title" class="eyebrow">Déjà fait</h2>
+            <p class="text-[12.5px] text-muted">{{ done_last_30_days }} fois en 30 jours</p>
         </div>
         {% if completions is not empty %}
-            <ul class="card divide-y divide-line px-3.5 py-1">
+            <ul class="list-sheet">
                 {% for completion in completions %}
                     <li>
-                        <a href="{{ path('completion_edit', {id: completion.id}) }}" class="flex items-center gap-2.5 py-2 text-ink no-underline hover:text-ink">
-                            <twig:Avatar :member="completion.member" size="26"/>
+                        <a href="{{ path('completion_edit', {id: completion.id}) }}" class="list-row">
+                            <twig:Avatar :member="completion.member" size="32"/>
                             <span class="flex min-w-0 flex-1 flex-col">
-                                <span class="text-sm font-bold">{{ completion.member.name }}</span>
-                                <span class="text-xs text-muted">{{ completion.completedAt|format_date(pattern: 'EEEE d MMMM', locale: 'fr') }} à {{ completion.completedAt|date('G\\hi') }}</span>
+                                <span class="row-title">{{ completion.member.name }}</span>
+                                <span class="row-meta">{{ completion.completedAt|format_date(pattern: 'EEEE d MMMM', locale: 'fr') }} à {{ completion.completedAt|date('G\\hi') }}</span>
                             </span>
-                            <span class="text-sm font-extrabold whitespace-nowrap text-clay-dark">+{{ points[completion.id] ?? 0 }}</span>
+                            <span class="row-points">+{{ points[completion.id] ?? 0 }}</span>
+                            <twig:Icon name="chevron-right" size="17" class="row-chevron"/>
                         </a>
                     </li>
                 {% endfor %}
             </ul>
         {% else %}
-            <p class="card p-4 text-sm text-muted">Jamais encore.</p>
+            <p class="sheet-empty">Jamais encore.</p>
         {% endif %}
     </section>
 {% endblock %}

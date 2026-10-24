@@ -2,249 +2,281 @@
 
 {% block title %}Profil · Companero{% endblock %}
 
+{#
+    The profile: who I am (level, XP, my week), my numbers, my gifts to use, my week's settings and reminders,
+    my titles, and the ways to the household's settings, the tour and my account.
+#}
 {% block body %}
-    <header class="flex items-center gap-4">
+    <header class="flex items-center gap-4 pt-1">
         <twig:LevelRing :member="member" :level="level"/>
-        <div class="flex min-w-0 flex-1 flex-col gap-0.5">
-            <h1 class="truncate text-[26px] leading-tight">{{ member.name }}</h1>
-            <p class="text-sm font-bold text-clay-dark">Niveau {{ level.number }} · {{ level.rank }}</p>
+        <div class="flex min-w-0 flex-1 flex-col gap-1">
+            <h1 class="page-title truncate">{{ member.name }}</h1>
+            <p class="text-[14px] font-semibold text-clay-dark">Niveau {{ level.number }} · {{ level.rank }}</p>
             {% if member.streak > 0 %}
-                <p class="flex items-center gap-1 text-[13px] font-bold"><twig:Icon name="flame" size="15" stroke="2.4" class="text-clay-dark"/>{{ member.streak }} semaine{{ member.streak > 1 ? 's' }} de série</p>
+                <p class="flex w-fit items-center gap-1 rounded-full bg-[#FCE6D6] py-0.5 pr-2.5 pl-2 text-[12.5px] font-semibold text-[#8E3F17]"><twig:Icon name="flame" size="14" stroke="2"/>{{ member.streak }} semaine{{ member.streak > 1 ? 's' }} de série</p>
             {% endif %}
         </div>
     </header>
 
-    <section class="card flex flex-col gap-2 p-3.5" aria-label="Expérience">
-        <div class="flex justify-between text-sm font-bold">
-            <span>Expérience</span>
-            <span><twig:Count :value="level.xp" key="xp"/> / {{ level.ceiling }} XP</span>
+    <section class="sheet flex flex-col gap-3.5 p-4" aria-label="Expérience">
+        <div class="flex flex-col gap-2">
+            <div class="flex items-baseline justify-between gap-2">
+                <span class="eyebrow">Expérience</span>
+                <span class="text-[13px] text-muted"><span class="text-[15px] font-semibold text-ink"><twig:Count :value="level.xp" key="xp"/></span> / {{ level.ceiling }} XP</span>
+            </div>
+            <twig:ProgressBar :value="level.progress" :height="8" label="Progression vers le niveau suivant" key="xp-level"/>
+            <p class="text-[12.5px] leading-snug text-muted">Encore {{ level.xpToNext }} XP pour devenir <strong class="font-semibold text-ink">{{ level.nextRank }}</strong> et ouvrir un cadeau.</p>
         </div>
-        <twig:ProgressBar :value="level.progress" label="Progression vers le niveau suivant" key="xp-level"/>
-        <p class="meta">Encore {{ level.xpToNext }} XP pour devenir <strong class="text-ink">{{ level.nextRank }}</strong> et ouvrir un cadeau.</p>
         {% if week %}
-            <div class="flex flex-col gap-1.5 border-t-[1.5px] border-line pt-2">
-                <div class="flex justify-between text-sm font-bold">
-                    <span>Mon objectif de la semaine</span>
-                    <span><twig:Count :value="week.points" key="week-points"/> / {{ week.goal }} pts</span>
+            <div class="flex flex-col gap-2 border-t border-line/70 pt-3.5">
+                <div class="flex items-baseline justify-between gap-2">
+                    <span class="eyebrow">Mon objectif de la semaine</span>
+                    <span class="text-[13px] text-muted"><span class="text-[15px] font-semibold text-ink"><twig:Count :value="week.points" key="week-points"/></span> / {{ week.goal }} pts</span>
                 </div>
-                <twig:ProgressBar :value="week.percent" height="8" color="var(--color-sun)" label="Mon objectif de la semaine" key="week"/>
+                <twig:ProgressBar :value="week.percent" :height="8" color="#E3A92E" label="Mon objectif de la semaine" key="week"/>
             </div>
         {% endif %}
-        <p class="flex items-center gap-1.5 border-t-[1.5px] border-line pt-2 text-sm font-bold">
-            <twig:Icon name="flame" size="18" class="text-clay-dark"/>
-            {% if member.streak > 0 %}Série de {{ member.streak }} semaine{{ member.streak > 1 ? 's' }} avec l’objectif atteint{% else %}Atteins ton objectif pour lancer une série{% endif %}
-            {% if member.bestStreak > member.streak %}<span class="ml-auto text-xs font-semibold text-muted">record : {{ member.bestStreak }}</span>{% endif %}
+        <p class="flex items-center gap-2 border-t border-line/70 pt-3.5 text-[13px] leading-snug">
+            <twig:Icon name="flame" size="17" stroke="1.9" class="shrink-0 text-clay-dark"/>
+            <span class="flex-1">{% if member.streak > 0 %}Série de {{ member.streak }} semaine{{ member.streak > 1 ? 's' }} avec l’objectif atteint{% else %}Atteins ton objectif pour lancer une série{% endif %}</span>
+            {% if member.bestStreak > member.streak %}<span class="shrink-0 text-[12px] text-muted">record : {{ member.bestStreak }}</span>{% endif %}
         </p>
     </section>
 
-    <ul class="grid grid-cols-3 gap-2" aria-label="Mes chiffres">
+    <ul class="grid grid-cols-3 gap-2.5" aria-label="Mes chiffres">
         {% for stat in [
-            {value: stats.done, label: 'tâches faites', icon: 'check'},
-            {value: stats.surprises, label: 'surprise' ~ (stats.surprises > 1 ? 's') ~ ' trouvée' ~ (stats.surprises > 1 ? 's'), icon: 'gem'},
-            {value: titles|length, label: 'titre' ~ (titles|length > 1 ? 's'), icon: 'trophy'},
+            {value: stats.done, label: 'tâches faites', icon: 'check', tile: 'tile-sage'},
+            {value: stats.surprises, label: 'surprise' ~ (stats.surprises > 1 ? 's') ~ ' trouvée' ~ (stats.surprises > 1 ? 's'), icon: 'gift', tile: 'tile-blush'},
+            {value: titles|length, label: 'titre' ~ (titles|length > 1 ? 's'), icon: 'trophy', tile: 'tile-sun'},
         ] %}
             <li class="stat-tile" style="animation-delay: {{ loop.index0 * 90 }}ms">
-                <twig:Icon :name="stat.icon" size="18" class="text-clay-dark"/>
-                <span class="text-[22px] leading-tight font-extrabold"><twig:Count :value="stat.value" :delay="loop.index0 * 120"/></span>
-                <span class="text-[11px] leading-tight font-bold text-muted">{{ stat.label }}</span>
+                <span class="tile {{ stat.tile }} mb-1 size-8 rounded-[10px]"><twig:Icon :name="stat.icon" size="16" stroke="2"/></span>
+                <span class="stat-value text-[24px]"><twig:Count :value="stat.value" :delay="loop.index0 * 120"/></span>
+                <span class="stat-label">{{ stat.label }}</span>
             </li>
         {% endfor %}
     </ul>
 
-    <a href="{{ path('rewards_show') }}" class="card card-hover flex items-center gap-3 p-3.5 text-ink no-underline hover:text-ink">
-        <span class="flex size-10 shrink-0 items-center justify-center rounded-full bg-sun"><twig:Icon name="trophy" size="22"/></span>
-        <span class="flex flex-1 flex-col">
-            <span class="text-[15px] font-extrabold">Mes récompenses</span>
-            <span class="text-xs text-muted">Le chemin des niveaux, mes trouvailles, mes titres{{ stats.cards ? ', mes cartons' }}</span>
-        </span>
-        <twig:Icon name="chevron-right" size="20" class="text-muted"/>
-    </a>
-
-    <a href="{{ path('history') }}" class="card card-hover flex items-center gap-3 p-3.5 text-ink no-underline hover:text-ink">
-        <span class="flex size-10 shrink-0 items-center justify-center rounded-full bg-track"><twig:Icon name="check" size="22" stroke="2.4"/></span>
-        <span class="flex flex-1 flex-col">
-            <span class="text-[15px] font-extrabold">Ce que j’ai fait</span>
-            <span class="text-xs text-muted">Mes tâches des 7 ou 30 derniers jours</span>
-        </span>
-        <twig:Icon name="chevron-right" size="20" class="text-muted"/>
-    </a>
+    <ul class="list-sheet" aria-label="Mes pages">
+        <li>
+            <a href="{{ path('rewards_show') }}" class="list-row">
+                <span class="tile tile-sun"><twig:Icon name="trophy" size="20" stroke="1.9"/></span>
+                <span class="flex min-w-0 flex-1 flex-col gap-0.5">
+                    <span class="row-title">Mes récompenses</span>
+                    <span class="row-meta">Le chemin des niveaux, mes trouvailles, mes titres{{ stats.cards ? ', mes cartons' }}</span>
+                </span>
+                <twig:Icon name="chevron-right" size="17" class="row-chevron"/>
+            </a>
+        </li>
+        <li>
+            <a href="{{ path('history') }}" class="list-row">
+                <span class="tile tile-sage"><twig:Icon name="check" size="20" stroke="2.2"/></span>
+                <span class="flex min-w-0 flex-1 flex-col gap-0.5">
+                    <span class="row-title">Ce que j’ai fait</span>
+                    <span class="row-meta">Mes tâches des 7 ou 30 derniers jours</span>
+                </span>
+                <twig:Icon name="chevron-right" size="17" class="row-chevron"/>
+            </a>
+        </li>
+    </ul>
 
     <section class="flex flex-col gap-2" aria-labelledby="gifts-title">
-        <h2 id="gifts-title" class="section-title">Mes cadeaux</h2>
+        <h2 id="gifts-title" class="group-label">Mes cadeaux</h2>
         {% for group in gifts %}
             {% set gift = group.gifts|first %}
-            <article class="card flex flex-col gap-2.5 p-3.5 {{ group.kind.value == 'yellow_card' ? 'gift-card-yellow' }}" style="animation-delay: {{ loop.index0 * 80 }}ms">
+            {% set kind = group.kind.value %}
+            <article class="sheet flex flex-col gap-3.5 p-4">
                 <div class="flex items-start gap-3">
-                    <span class="flex size-10 shrink-0 items-center justify-center rounded-full {{ group.kind.value == 'yellow_card' ? 'bg-legend-soft' : 'bg-sun' }}">
-                        {%- if group.kind.value == 'yellow_card' %}<span class="yellow-card yellow-card-mini" aria-hidden="true"></span>{% else %}<twig:Icon :name="group.kind.icon" size="22"/>{% endif -%}
+                    <span class="tile {{ kind == 'yellow_card' ? 'bg-legend-soft' : 'tile-sun' }}">
+                        {%- if kind == 'yellow_card' %}<span class="yellow-card yellow-card-mini" aria-hidden="true"></span>{% else %}<twig:Icon :name="group.kind.icon" size="20" stroke="1.9"/>{% endif -%}
                     </span>
-                    <div class="flex flex-1 flex-col gap-0.5">
-                        <h3 class="text-[15px]">{{ group.kind.label }}{% if group.gifts|length > 1 %} <span class="text-muted">×{{ group.gifts|length }}</span>{% endif %}</h3>
-                        <p class="text-xs text-muted">{{ group.kind.description }} · {{ gift.offeredBy ? 'offert par ' ~ gift.offeredBy.name : gift.reason|lower }}</p>
+                    <div class="flex min-w-0 flex-1 flex-col gap-0.5">
+                        <h3 class="text-[15px] leading-snug font-semibold">{{ group.kind.label }}{% if group.gifts|length > 1 %} <span class="ml-0.5 rounded-full bg-track/70 px-1.5 py-px text-[12px] font-semibold text-ink-soft">×{{ group.gifts|length }}</span>{% endif %}</h3>
+                        <p class="text-[12.5px] leading-snug text-muted">{{ group.kind.description }} · {{ gift.offeredBy ? 'offert par ' ~ gift.offeredBy.name : gift.reason|lower }}</p>
                     </div>
                 </div>
-                {% set kind = group.kind.value %}
                 {% if kind in ['team_boost', 'xp_boost'] %}
                     <form method="post" action="{{ path('gift_activate', {id: gift.id}) }}">
                         <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
-                        <button type="submit" class="btn-primary" data-haptic="success"><twig:Icon name="bolt" size="18"/> Activer</button>
+                        <button type="submit" class="btn-primary h-11 w-full" data-haptic="success"><twig:Icon name="bolt" size="18" stroke="2.2"/>Activer</button>
                     </form>
                 {% elseif kind == 'friend_boost' and friends is not empty %}
-                    <form method="post" action="{{ path('gift_activate', {id: gift.id}) }}" class="flex flex-wrap items-center gap-2">
+                    <form method="post" action="{{ path('gift_activate', {id: gift.id}) }}" class="flex flex-col gap-2">
                         <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
-                        <span class="text-sm font-bold">Pour</span>
-                        {% for friend in friends %}
-                            <button type="submit" name="pour" value="{{ friend.id }}" class="chip gap-1.5"><twig:Avatar :member="friend" size="20"/>{{ friend.name }}</button>
-                        {% endfor %}
+                        <span class="eyebrow">Pour qui ?</span>
+                        <span class="flex flex-wrap gap-2">
+                            {% for friend in friends %}
+                                <button type="submit" name="pour" value="{{ friend.id }}" class="chip gap-2 pl-2" data-haptic="success"><twig:Avatar :member="friend" size="22"/>{{ friend.name }}</button>
+                            {% endfor %}
+                        </span>
                     </form>
                 {% elseif kind == 'streak_freeze' %}
-                    <p class="text-xs font-semibold">Il se déclenche tout seul une semaine où ton objectif n’est pas atteint.</p>
+                    <p class="rounded-xl bg-track/45 px-3 py-2 text-[12.5px] leading-snug text-ink-soft">Il se déclenche tout seul une semaine où ton objectif n’est pas atteint.</p>
                     {% if friends is not empty %}
-                        <form method="post" action="{{ path('gift_offer', {id: gift.id}) }}" class="flex flex-wrap items-center gap-2">
+                        <form method="post" action="{{ path('gift_offer', {id: gift.id}) }}" class="flex flex-col gap-2">
                             <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
-                            <span class="text-sm font-bold">Ou l’offrir à</span>
-                            {% for friend in friends %}
-                                <button type="submit" name="pour" value="{{ friend.id }}" class="chip gap-1.5"><twig:Avatar :member="friend" size="20"/>{{ friend.name }}</button>
-                            {% endfor %}
+                            <span class="eyebrow">Ou l’offrir à</span>
+                            <span class="flex flex-wrap gap-2">
+                                {% for friend in friends %}
+                                    <button type="submit" name="pour" value="{{ friend.id }}" class="chip gap-2 pl-2" data-haptic="success"><twig:Avatar :member="friend" size="22"/>{{ friend.name }}</button>
+                                {% endfor %}
+                            </span>
                         </form>
                     {% endif %}
                 {% elseif kind == 'yellow_card' and friends is not empty %}
                     {# Those who do things may hand out cards: to one coloc or several at once, about something in particular. #}
-                    <form method="post" action="{{ path('gift_card', {id: gift.id}) }}" class="flex flex-col gap-2.5">
+                    <form method="post" action="{{ path('gift_card', {id: gift.id}) }}" class="flex flex-col gap-3.5">
                         <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
-                        <fieldset class="flex flex-wrap items-center gap-2">
-                            <legend class="sr-only">Pour qui ? Un ou plusieurs</legend>
-                            <span class="text-sm font-bold">Pour</span>
+                        <fieldset class="flex flex-col gap-2">
+                            <legend class="eyebrow mb-2">Pour qui ? Un ou plusieurs</legend>
                             <span class="choice-chips">
                                 {% for friend in friends %}
                                     <input type="checkbox" name="pour[]" value="{{ friend.id }}" id="card-{{ gift.id }}-{{ friend.id }}"{{ loop.first ? ' checked' }}>
-                                    <label for="card-{{ gift.id }}-{{ friend.id }}" class="gap-1.5"><twig:Avatar :member="friend" size="20"/>{{ friend.name }}</label>
+                                    <label for="card-{{ gift.id }}-{{ friend.id }}" class="gap-2 pl-2"><twig:Avatar :member="friend" size="22"/>{{ friend.name }}</label>
                                 {% endfor %}
                             </span>
                         </fieldset>
                         {# Why: a word of justification, required; a few usual ones to start from. #}
-                        <div class="flex flex-col gap-1.5" data-controller="fill">
-                            <label for="card-reason-{{ gift.id }}" class="text-sm font-bold">Pourquoi ce carton ?</label>
-                            <textarea id="card-reason-{{ gift.id }}" name="motif" class="input min-h-[84px] py-2.5" rows="3" required data-fill-target="field"
+                        <div class="flex flex-col gap-2" data-controller="fill">
+                            <label for="card-reason-{{ gift.id }}" class="eyebrow">Pourquoi ce carton ?</label>
+                            <textarea id="card-reason-{{ gift.id }}" name="motif" class="input-area min-h-[84px]" rows="3" required data-fill-target="field"
                                       maxlength="{{ constant('App\\Entity\\YellowCard::REASON_MAX_LENGTH') }}" placeholder="La vaisselle qui traîne depuis mardi, alors que c’était ton tour…"></textarea>
                             <span class="flex flex-wrap gap-1.5">
                                 {% for reason in ['La vaisselle qui traîne', 'Le linge oublié dans la machine', 'La lumière restée allumée', 'Le dernier rouleau de PQ non remplacé', 'Les miettes sur le plan de travail'] %}
-                                    <button type="button" class="chip h-7 px-2.5 text-xs" data-action="fill#use" data-fill-text-param="{{ reason }}">{{ reason }}</button>
+                                    <button type="button" class="btn-soft h-8 rounded-[10px] px-2.5 text-[12.5px] font-medium" data-action="fill#use" data-fill-text-param="{{ reason }}">{{ reason }}</button>
                                 {% endfor %}
                             </span>
-                            <span class="meta">Il le lira avec le carton : dis-lui ce qui ne va pas, gentiment.</span>
+                            <span class="text-[12.5px] leading-snug text-muted">Il le lira avec le carton : dis-lui ce qui ne va pas, gentiment.</span>
                         </div>
-                        <button type="submit" class="btn-primary self-start" data-haptic="card"><span class="yellow-card yellow-card-mini" aria-hidden="true"></span> Siffler le carton</button>
+                        <button type="submit" class="btn-primary h-11 w-full" data-haptic="card"><span class="yellow-card yellow-card-mini" aria-hidden="true"></span>Siffler le carton</button>
                     </form>
                 {% elseif kind == 'treat' and member.household.pets is not empty %}
-                    <form method="post" action="{{ path('gift_treat', {id: gift.id}) }}" class="flex flex-wrap items-center gap-2">
+                    <form method="post" action="{{ path('gift_treat', {id: gift.id}) }}" class="flex flex-col gap-2">
                         <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
-                        <span class="text-sm font-bold">Pour</span>
-                        {% for pet in member.household.pets %}
-                            <button type="submit" name="animal" value="{{ pet.id }}" class="chip" data-haptic="purr">{{ pet.name }}</button>
-                        {% endfor %}
-                        {% if member.household.pets|length > 1 %}<button type="submit" name="animal" value="" class="chip" data-haptic="purr">Tout le monde</button>{% endif %}
+                        <span class="eyebrow">Pour qui ?</span>
+                        <span class="flex flex-wrap gap-2">
+                            {% for pet in member.household.pets %}
+                                <button type="submit" name="animal" value="{{ pet.id }}" class="chip" data-haptic="purr"><twig:Icon name="paw" size="16" stroke="1.9"/>{{ pet.name }}</button>
+                            {% endfor %}
+                            {% if member.household.pets|length > 1 %}<button type="submit" name="animal" value="" class="chip" data-haptic="purr">Tout le monde</button>{% endif %}
+                        </span>
                     </form>
                 {% endif %}
             </article>
         {% else %}
-            <p class="card p-4 text-sm text-muted">Chaque niveau gagné t’apporte un cadeau : boosts, gels de série, cartons jaunes{{ member.household.pets is not empty ? ', friandises' }}… Et des surprises se cachent dans certaines cartes chaque semaine.</p>
+            <p class="sheet-empty">Chaque niveau gagné t’apporte un cadeau : boosts, gels de série, cartons jaunes{{ member.household.pets is not empty ? ', friandises' }}… Et des surprises se cachent dans certaines cartes chaque semaine.</p>
         {% endfor %}
     </section>
 
-    <section class="card flex items-center gap-3 p-3.5" aria-labelledby="home-title">
-        <twig:Icon :name="member.atHome ? 'home' : 'door'" class="shrink-0 text-clay-dark"/>
-        <div class="flex flex-1 flex-col">
-            <h2 id="home-title" class="text-[15px]">{{ member.atHome ? 'Je suis à la maison' : 'Je ne suis pas là' }}</h2>
-            <p class="text-xs text-muted">{{ member.atHome ? 'Tu reçois les rappels de la coloc.' : 'Les rappels vont aux colocs présents.' }}</p>
+    <section class="flex flex-col gap-2" aria-labelledby="home-title">
+        <h2 class="group-label" aria-hidden="true">Ma semaine</h2>
+        <div class="sheet flex items-center gap-3 px-4 py-3">
+            <span class="tile {{ member.atHome ? 'tile-clay' : 'tile-sand' }}"><twig:Icon :name="member.atHome ? 'home' : 'door'" size="20" stroke="1.9"/></span>
+            <div class="flex min-w-0 flex-1 flex-col gap-0.5">
+                <h3 id="home-title" class="text-[15px] leading-snug font-semibold">{{ member.atHome ? 'Je suis à la maison' : 'Je ne suis pas là' }}</h3>
+                <p class="text-[12.5px] leading-snug text-muted">{{ member.atHome ? 'Tu reçois les rappels de la coloc.' : 'Les rappels vont aux colocs présents.' }}</p>
+            </div>
+            <twig:PresenceToggle :member="member" back="profile"/>
         </div>
-        <twig:PresenceToggle :member="member" back="profile"/>
     </section>
 
     {{ form_start(profile_form, {attr: {class: 'flex flex-col gap-5', 'data-controller': 'presence'}}) }}
-        <section class="flex flex-col gap-2">
-            {{ form_row(profile_form.weeklyGoal, {label_attr: {class: 'section-title'}, attr: {'data-action': 'change->presence#describe'}}) }}
-        </section>
-        <section class="card flex flex-col gap-2 p-3.5" aria-labelledby="presence-title">
-            <div class="flex items-baseline justify-between gap-2">
-                <h2 id="presence-title" class="text-[15px]"><label for="{{ profile_form.presenceDays.vars.id }}">Ma présence cette semaine</label></h2>
-                <output for="{{ profile_form.presenceDays.vars.id }}" class="shrink-0 text-[15px] font-extrabold whitespace-nowrap text-clay-dark" data-presence-target="days"></output>
-            </div>
-            {{ form_widget(profile_form.presenceDays, {attr: {class: 'h-8 w-full cursor-pointer accent-clay', 'data-presence-target': 'slider', 'data-action': 'input->presence#describe', 'aria-describedby': 'presence-help'}}) }}
-            <ol class="-mt-1 flex justify-between px-1 text-[11px] font-bold text-muted" aria-hidden="true">
-                {% for day in 0..7 %}<li class="w-3 text-center">{{ day }}</li>{% endfor %}
-            </ol>
-            <p id="presence-help" class="meta" data-presence-target="help">Ton objectif suit tes jours de présence, et reste ainsi les semaines suivantes.</p>
-        </section>
-        <section class="flex flex-col gap-2" aria-labelledby="reminders-title">
-            <h2 id="reminders-title" class="section-title">Rappels</h2>
-            {# The phone's notifications: only through the Android app (see notifications_controller.js). #}
-            <div class="card flex flex-col gap-2.5 p-3.5" data-controller="notifications" id="notifications">
-                <p class="flex items-center gap-2 text-[15px] font-extrabold"><twig:Icon name="bell" size="18"/> Notifications</p>
-                <p class="text-sm text-ink-soft" data-notifications-target="state">Elles arrivent sur ton téléphone avec l’appli Android de Companero, à jour : ouvre cette page dans l’appli pour les autoriser et les tester.</p>
-                <div class="flex flex-wrap items-center gap-2" data-notifications-target="actions" hidden>
-                    <button type="button" class="btn-primary h-10 px-4 text-sm" data-notifications-target="allow" data-action="notifications#allow" hidden>Autoriser</button>
-                    <button type="button" class="chip gap-1.5" data-notifications-target="test" data-action="notifications#test" data-haptic="tick"><twig:Icon name="bell" size="16"/> M’envoyer une notification de test</button>
+        <div class="form-sheet">
+            {{ form_row(profile_form.weeklyGoal, {attr: {class: 'choice-segmented is-wrapping', 'data-action': 'change->presence#describe'}}) }}
+            <div class="flex flex-col gap-2 border-t border-line/70 pt-4" aria-labelledby="presence-title">
+                <div class="flex items-baseline justify-between gap-2">
+                    <h3 id="presence-title" class="field-label"><label for="{{ profile_form.presenceDays.vars.id }}">Ma présence cette semaine</label></h3>
+                    <output for="{{ profile_form.presenceDays.vars.id }}" class="shrink-0 text-[14px] font-semibold whitespace-nowrap text-clay-dark" data-presence-target="days"></output>
                 </div>
-                <p class="meta">Ce qui t’arrive : les tâches dont tu as la charge (ou que tu remplaces), celles des animaux dont tu es le maître, celles qu’on vient de signaler, et les cartons jaunes reçus.</p>
+                {{ form_widget(profile_form.presenceDays, {attr: {class: 'h-8 w-full cursor-pointer', 'data-presence-target': 'slider', 'data-action': 'input->presence#describe', 'aria-describedby': 'presence-help'}}) }}
+                <ol class="-mt-1.5 flex justify-between px-1 text-[11px] font-semibold text-dust tabular-nums" aria-hidden="true">
+                    {% for day in 0..7 %}<li class="w-3 text-center">{{ day }}</li>{% endfor %}
+                </ol>
+                <p id="presence-help" class="text-[12.5px] leading-snug text-muted" data-presence-target="help">Ton objectif suit tes jours de présence, et reste ainsi les semaines suivantes.</p>
             </div>
-            <div class="card flex flex-col divide-y divide-line px-3.5 py-1">
+        </div>
+
+        <section class="flex flex-col gap-2" aria-labelledby="reminders-title">
+            <h2 id="reminders-title" class="group-label">Rappels</h2>
+            {# The phone's notifications: only through the Android app (see notifications_controller.js). #}
+            <div class="sheet flex flex-col gap-3 p-4" data-controller="notifications" id="notifications">
+                <p class="flex items-center gap-3">
+                    <span class="tile tile-sky"><twig:Icon name="bell" size="19" stroke="1.9"/></span>
+                    <span class="text-[15px] font-semibold">Notifications</span>
+                </p>
+                <p class="text-[13.5px] leading-snug text-ink-soft" data-notifications-target="state">Elles arrivent sur ton téléphone avec l’appli Android de Companero, à jour : ouvre cette page dans l’appli pour les autoriser et les tester.</p>
+                <div class="flex flex-wrap items-center gap-2" data-notifications-target="actions" hidden>
+                    <button type="button" class="btn-primary h-10 px-4 text-[14px]" data-notifications-target="allow" data-action="notifications#allow" hidden>Autoriser</button>
+                    <button type="button" class="btn-soft" data-notifications-target="test" data-action="notifications#test" data-haptic="tick"><twig:Icon name="bell" size="16" stroke="1.9"/>M’envoyer une notification de test</button>
+                </div>
+                <p class="text-[12.5px] leading-snug text-muted">Ce qui t’arrive : les tâches dont tu as la charge (ou que tu remplaces), celles des animaux dont tu es le maître, celles qu’on vient de signaler, et les cartons jaunes reçus.</p>
+            </div>
+            <div class="form-sheet is-rows">
                 {{ form_row(profile_form.notifyCleaningDay) }}
                 {{ form_row(profile_form.notifyOverdue) }}
                 {{ form_row(profile_form.notifyWeeklyReview) }}
             </div>
         </section>
-        <button type="submit" class="btn-primary self-start">Enregistrer</button>
+        <button type="submit" class="btn-primary w-full" data-haptic="success">Enregistrer</button>
     {{ form_end(profile_form) }}
 
     <section class="flex flex-col gap-2" aria-labelledby="titles-title">
-        <div class="flex items-baseline justify-between">
-            <h2 id="titles-title" class="section-title">Mes titres</h2>
-            <p class="meta font-semibold">{{ titles|length }} gagné{{ titles|length > 1 ? 's' }}</p>
+        <div class="section-head px-1">
+            <h2 id="titles-title" class="eyebrow">Mes titres</h2>
+            <p class="text-[12.5px] text-muted">{{ titles|length }} gagné{{ titles|length > 1 ? 's' }}</p>
         </div>
         {% if titles is not empty %}
-            <ul class="grid grid-cols-3 gap-2">
+            <ul class="grid grid-cols-3 gap-2.5">
                 {% for title in titles %}
-                    <li class="flex min-h-[92px] flex-col justify-between gap-1.5 rounded-2xl bg-ink p-2.5 text-cream transition hover:-translate-y-0.5 hover:-rotate-1">
-                        <twig:Spark size="18" color="#F6C453"/>
-                        <span class="text-[13px] leading-tight font-extrabold">{{ title.name }}</span>
+                    <li class="trophy-card">
+                        <twig:Spark size="16" color="#F6C453"/>
+                        <span class="text-[13px] leading-tight font-semibold">{{ title.name }}</span>
                         <span class="text-[11px] leading-tight text-[#D9C8B0]">sem. {{ title.weekStart|date('W') }}</span>
                     </li>
                 {% endfor %}
             </ul>
         {% else %}
-            <p class="card p-4 text-sm text-muted">Ton premier titre t’attend au bilan de lundi.</p>
+            <p class="sheet-empty">Ton premier titre t’attend au bilan de lundi.</p>
         {% endif %}
     </section>
 
-    <a href="{{ path('household_edit') }}" class="card card-hover flex items-center gap-3 p-3.5 text-ink no-underline hover:text-ink">
-        <span class="flex size-10 shrink-0 items-center justify-center rounded-full bg-sun"><twig:Icon name="home" size="22"/></span>
-        <span class="flex flex-1 flex-col">
-            <span class="text-[15px] font-extrabold">Réglages de la coloc</span>
-            <span class="text-xs text-muted">Objectif de la maison, jour de ménage, charte, colocs, zones, animaux</span>
-        </span>
-        <twig:Icon name="chevron-right" size="20" class="text-muted"/>
-    </a>
+    <section class="flex flex-col gap-2" aria-labelledby="more-title">
+        <h2 id="more-title" class="group-label">La coloc et moi</h2>
+        <ul class="list-sheet">
+            <li>
+                <a href="{{ path('household_edit') }}" class="list-row">
+                    <span class="tile tile-clay"><twig:Icon name="home" size="20" stroke="1.9"/></span>
+                    <span class="flex min-w-0 flex-1 flex-col gap-0.5">
+                        <span class="row-title">Réglages de la coloc</span>
+                        <span class="row-meta">Objectif de la maison, jour de ménage, charte, colocs, zones, animaux</span>
+                    </span>
+                    <twig:Icon name="chevron-right" size="17" class="row-chevron"/>
+                </a>
+            </li>
+            <li>
+                <a href="{{ path('tour_start') }}" class="list-row">
+                    <span class="tile tile-lilac"><twig:Icon name="star" size="20" stroke="1.9"/></span>
+                    <span class="flex min-w-0 flex-1 flex-col gap-0.5">
+                        <span class="row-title">Comment ça marche</span>
+                        <span class="row-meta">La Casa réexplique les cartes, les points et les objectifs</span>
+                    </span>
+                    <twig:Icon name="chevron-right" size="17" class="row-chevron"/>
+                </a>
+            </li>
+            <li>
+                <a href="{{ path('profile_account') }}" class="list-row">
+                    <span class="tile tile-sand"><twig:Icon name="lock" size="20" stroke="1.9"/></span>
+                    <span class="flex min-w-0 flex-1 flex-col gap-0.5">
+                        <span class="row-title">Mon compte</span>
+                        <span class="row-meta">Pseudo « {{ member.username }} », mot de passe</span>
+                    </span>
+                    <twig:Icon name="chevron-right" size="17" class="row-chevron"/>
+                </a>
+            </li>
+        </ul>
+    </section>
 
-    <a href="{{ path('tour_start') }}" class="card card-hover flex items-center gap-3 p-3.5 text-ink no-underline hover:text-ink">
-        <span class="flex size-10 shrink-0 items-center justify-center rounded-full bg-track"><twig:Icon name="star" size="22"/></span>
-        <span class="flex flex-1 flex-col">
-            <span class="text-[15px] font-extrabold">Comment ça marche</span>
-            <span class="text-xs text-muted">La Casa réexplique les cartes, les points et les objectifs</span>
-        </span>
-        <twig:Icon name="chevron-right" size="20" class="text-muted"/>
-    </a>
-
-    <a href="{{ path('profile_account') }}" class="card card-hover flex items-center gap-3 p-3.5 text-ink no-underline hover:text-ink">
-        <span class="flex size-10 shrink-0 items-center justify-center rounded-full bg-track"><twig:Icon name="lock" size="22"/></span>
-        <span class="flex flex-1 flex-col">
-            <span class="text-[15px] font-extrabold">Mon compte</span>
-            <span class="text-xs text-muted">Pseudo « {{ member.username }} », mot de passe</span>
-        </span>
-        <twig:Icon name="chevron-right" size="20" class="text-muted"/>
-    </a>
-
-    <a href="{{ path('app_logout') }}" class="btn-link self-center text-muted" data-turbo="false"><twig:Icon name="logout" size="18"/>&nbsp;Se déconnecter</a>
+    <a href="{{ path('app_logout') }}" class="btn-link self-center" data-turbo="false"><twig:Icon name="logout" size="17" stroke="1.9"/>Se déconnecter</a>
 {% endblock %}
 
 {% block nav %}<twig:BottomNav active="profile"/>{% endblock %}

@@ -23,7 +23,7 @@ enum TaskCategory: string
         };
     }
 
-    /** The icon of its medallion, on the task cards. */
+    /** Its drawing: in the corner of its task cards, like the suit of a playing card. */
     public function icon(): string
     {
         return match ($this) {

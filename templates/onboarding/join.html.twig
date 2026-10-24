@@ -4,16 +4,20 @@
 {% block main_class %}pb-10{% endblock %}
 
 {% block body %}
-    <twig:Casa :mood="enum('App\\Enum\\CasaMood').Radiant" speech="Bienvenue ! On t’attendait." class="mt-4"/>
+    {{ include('_casa_hero.html.twig', {mood: enum('App\\Enum\\CasaMood').Radiant, speech: 'Bienvenue ! On t’attendait.'}) }}
 
-    <h1 class="text-[26px]">Rejoindre {{ household.name }}</h1>
-    <p class="meta -mt-2">{{ household.members|map(m => m.name)|join(', ', ' et ') }} {{ household.members|length > 1 ? 'sont' : 'est' }} déjà là.</p>
-
-    {{ form_start(form, {attr: {class: 'flex flex-col gap-5'}}) }}
+    {{ form_start(form, {attr: {class: 'hero-sheet'}}) }}
+        <div>
+            <h1 class="home-title">Rejoindre {{ household.name }}</h1>
+            <p class="mt-1 text-[13.5px] text-muted">{{ household.members|map(m => m.name)|join(', ', ' et ') }} {{ household.members|length > 1 ? 'sont' : 'est' }} déjà là.</p>
+            <p class="mt-2.5 flex">
+                {% for member in household.members|slice(0, 6) %}<twig:Avatar :member="member" size="28" class="-mr-1.5 ring-2 ring-surface"/>{% endfor %}
+            </p>
+        </div>
         {{ form_row(form.name) }}
         {{ form_row(form.username) }}
         {{ form_row(form.plainPassword) }}
-        <button type="submit" class="btn-primary h-[52px] w-full text-[17px]">Je rejoins la coloc</button>
+        <button type="submit" class="btn-primary h-[52px] w-full text-[16px]">Je rejoins la coloc</button>
     {{ form_end(form) }}
 
     {% if can_choose %}

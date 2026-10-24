@@ -2,6 +2,7 @@
 
 namespace App\Twig;
 
+use App\Entity\CatalogItem;
 use App\Entity\Task;
 use App\Entity\Zone;
 use App\Enum\TaskCategory;
@@ -127,9 +128,9 @@ final readonly class TaskLabels
         ), 'UTF-8');
     }
 
-    /** The picture of a task card, guessed from its title (App\Task\TaskArt), null for its category's icon. */
+    /** The picture of a task card (or of a catalogue item), guessed from its title (App\Task\TaskArt), null for its category's icon. */
     #[AsTwigFunction('task_art')]
-    public function art(Task $task): ?string
+    public function art(Task|CatalogItem $task): ?string
     {
         return TaskArt::of($task);
     }
@@ -167,13 +168,7 @@ final readonly class TaskLabels
     #[AsTwigFunction('task_kind_icon')]
     public function kindIcon(Task $task): string
     {
-        return match ($task->getKind()) {
-            TaskKind::Rolling => 'repeat',
-            TaskKind::Scheduled => 'calendar',
-            TaskKind::Quick => 'bolt',
-            TaskKind::OneOff => 'check',
-            TaskKind::Occasional => 'siren',
-        };
+        return $task->getKind()->icon();
     }
 
     #[AsTwigFunction('weekday_name')]

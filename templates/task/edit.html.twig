@@ -2,25 +2,28 @@
 
 {% block title %}{{ task.title }} · Companero{% endblock %}
 
-{# Room for the save bar, fixed at the bottom of the screen. #}
-{% block main_class %}{{ ux_is_native() ? 'pb-28' : 'pb-48' }}{% endblock %}
+{# The save button floats above the bottom bar; in the app's modal, at the very bottom. #}
+{% block main_class %}{{ ux_is_native() ? 'pb-6' : 'pb-28' }}{% endblock %}
 
 {% block body %}
-    <header class="flex items-center justify-between">
-        <h1 class="text-[22px]">{{ task.kind.isRecurring ? 'Modifier le modèle' : 'Modifier la tâche' }}</h1>
-        <a href="{{ ux_is_native() ? '/recede_historical_location' : path(task.kind.isRecurring ? 'task_template' : 'task_show', {id: task.id}) }}" aria-label="Fermer" class="flex size-11 items-center justify-center rounded-full text-ink"><twig:Icon name="close" size="22" stroke="2.2"/></a>
+    <header class="page-head items-start">
+        <div class="min-w-0">
+            <p class="eyebrow">{{ task.kind.isRecurring ? 'Le modèle' : 'La tâche' }}</p>
+            <h1 class="page-title mt-1">{{ task.kind.isRecurring ? 'Modifier le modèle' : 'Modifier la tâche' }}</h1>
+        </div>
+        <a href="{{ ux_is_native() ? '/recede_historical_location' : path(task.kind.isRecurring ? 'task_template' : 'task_show', {id: task.id}) }}" aria-label="Fermer" class="head-button"><twig:Icon name="close" size="19" stroke="2"/></a>
     </header>
 
-    {% if task.kind.isRecurring %}
-        <p class="meta -mt-2">Ce qui change ici vaut pour toutes les fois où elle revient.</p>
-    {% endif %}
-    <p class="meta -mt-2">Ajoutée par {{ task.createdBy.name }} le {{ task.createdAt|date('d/m/Y') }}{% if task.lastCompletedAt %} · faite pour la dernière fois le {{ task.lastCompletedAt|date('d/m à H\\hi') }}{% endif %}.</p>
+    <p class="page-lede -mt-2">
+        {%- if task.kind.isRecurring %}Ce qui change ici vaut pour toutes les fois où elle revient. {% endif -%}
+        Ajoutée par {{ task.createdBy.name }} le {{ task.createdAt|date('d/m/Y') }}{% if task.lastCompletedAt %} · faite pour la dernière fois le {{ task.lastCompletedAt|date('d/m à H\\hi') }}{% endif %}.
+    </p>
 
     {{ include('task/_form.html.twig', {submit_label: 'Enregistrer'}) }}
 
     <form method="post" action="{{ path('task_delete', {id: task.id}) }}" data-turbo-confirm="Retirer « {{ task.title }} » de la liste ?" class="self-center">
         <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
-        <button type="submit" class="btn-link text-clay-dark"><twig:Icon name="trash" size="18"/>&nbsp;Retirer cette tâche</button>
+        <button type="submit" class="btn-link hover:text-danger-ink"><twig:Icon name="trash" size="17" stroke="1.9"/>Retirer cette tâche</button>
     </form>
 {% endblock %}
 

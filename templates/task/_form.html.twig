@@ -1,92 +1,121 @@
-{{ form_start(form, {attr: {class: 'flex flex-col gap-5', 'data-controller': 'task-form'}}) }}
-    {{ form_row(form.title) }}
-    {{ form_row(form.description) }}
-    {% if form.kind is defined %}
-        {{ form_row(form.kind, {attr: {'data-action': 'change->task-form#toggle'}}) }}
-    {% endif %}
+{#
+    The task form, in groups, each in its sheet: the task, when it comes back, the alerts of its card, where and who,
+    its card. The main button floats above the bottom bar (or at the bottom of the app's modal).
+#}
+{{ form_start(form, {attr: {class: 'flex flex-col gap-6', 'data-controller': 'task-form'}}) }}
+    <section class="form-group" aria-labelledby="task-what-title">
+        <h2 id="task-what-title" class="group-label">La tâche</h2>
+        <div class="form-sheet">
+            {{ form_row(form.title) }}
+            {{ form_row(form.description) }}
+        </div>
+    </section>
 
-    <fieldset class="flex flex-col gap-5" data-task-form-target="section" data-kind="rolling">
-        {{ form_row(form.rhythmDays) }}
-        {{ form_row(form.weeklyCommitment) }}
-    </fieldset>
-    <fieldset class="grid grid-cols-2 gap-3" data-task-form-target="section" data-kind="scheduled">
-        {{ form_row(form.scheduledWeekday) }}
-        {{ form_row(form.scheduledTime) }}
-    </fieldset>
-    <fieldset class="flex flex-col gap-5" data-task-form-target="section" data-kind="one_off">
-        {{ form_row(form.dueAt) }}
-    </fieldset>
-    {# The card's colour: green while all is well, orange when the moment approaches, red once late. #}
-    <fieldset class="card flex flex-col gap-4 px-3.5 py-3" data-task-form-target="section" data-kind="rolling scheduled one_off occasional">
-        <legend class="sr-only">Alertes</legend>
-        <p class="flex items-center gap-2 text-[15px] font-extrabold">
-            <span class="flex gap-1" aria-hidden="true"><span class="size-2.5 rounded-full bg-ok"></span><span class="size-2.5 rounded-full bg-warn"></span><span class="size-2.5 rounded-full bg-danger"></span></span>
-            Alertes de la carte
-        </p>
-        {% for field in [form.warningHours, form.marginHours] %}
-            {# An occasional task has no "before": the moment comes when it is raised. #}
-            <div class="flex flex-col gap-2"{% if field is same as(form.warningHours) %} data-task-form-target="section" data-kind="rolling scheduled one_off"{% endif %}>
-                {{ form_label(field) }}
+    <section class="form-group" aria-labelledby="task-when-title">
+        <h2 id="task-when-title" class="group-label">Quand</h2>
+        <div class="form-sheet">
+            {% if form.kind is defined %}
+                {{ form_row(form.kind, {attr: {class: 'choice-segmented is-wrapping', 'data-action': 'change->task-form#toggle'}}) }}
+            {% endif %}
+            <fieldset class="flex flex-col gap-5" data-task-form-target="section" data-kind="rolling">
+                {{ form_row(form.rhythmDays) }}
+                {{ form_row(form.weeklyCommitment) }}
+            </fieldset>
+            <fieldset class="grid grid-cols-2 gap-3" data-task-form-target="section" data-kind="scheduled">
+                {{ form_row(form.scheduledWeekday) }}
+                {{ form_row(form.scheduledTime) }}
+            </fieldset>
+            <fieldset class="flex flex-col gap-5" data-task-form-target="section" data-kind="one_off">
+                {{ form_row(form.dueAt) }}
+            </fieldset>
+            <fieldset class="flex flex-col gap-2" data-task-form-target="section" data-kind="quick">
+                {{ form_label(form.cooldownHours) }}
                 <div class="flex items-center gap-3">
-                    {{ form_widget(field.amount, {attr: {class: 'w-24', placeholder: '—'}}) }}
-                    {{ form_widget(field.unit) }}
+                    {{ form_widget(form.cooldownHours.amount, {attr: {class: 'w-24', placeholder: '—'}}) }}
+                    {{ form_widget(form.cooldownHours.unit, {attr: {class: 'choice-segmented flex-1'}}) }}
                 </div>
-                {{ form_help(field) }}
-                {{ form_errors(field) }}
-            </div>
-        {% endfor %}
-    </fieldset>
-    <fieldset class="flex flex-col gap-2" data-task-form-target="section" data-kind="quick">
-        {{ form_label(form.cooldownHours) }}
-        <div class="flex items-center gap-3">
-            {{ form_widget(form.cooldownHours.amount, {attr: {class: 'w-24', placeholder: '—'}}) }}
-            {{ form_widget(form.cooldownHours.unit) }}
+                {{ form_help(form.cooldownHours) }}
+                {{ form_errors(form.cooldownHours) }}
+            </fieldset>
         </div>
-        {{ form_help(form.cooldownHours) }}
-        {{ form_errors(form.cooldownHours) }}
-    </fieldset>
+    </section>
 
-    {{ form_row(form.category, {attr: {'data-action': 'change->task-form#toggle'}}) }}
-    <fieldset class="flex flex-col gap-5" data-task-form-target="category" data-category="pets">
-        {% if form.pet is defined %}{{ form_row(form.pet) }}{% endif %}
-        {{ form_row(form.assignee) }}
-        {{ form_row(form.backup) }}
-    </fieldset>
-    {{ form_row(form.zones) }}
-    {{ form_row(form.rarity, {row_attr: {class: 'rarity-choice'}, help: 'Pour le plaisir : une tâche rare, épique ou légendaire a une carte qui brille plus.'}) }}
-
-    <div class="card flex items-center justify-between gap-3 px-3.5 py-3" data-controller="stepper">
-        <div class="flex flex-col gap-0.5">
-            {{ form_label(form.points) }}
-            <span class="text-xs text-muted" data-stepper-target="hint">5 min d’effort ≈ 10 pts</span>
-        </div>
-        <div class="flex items-center gap-1.5">
-            <button type="button" class="flex size-11 cursor-pointer items-center justify-center rounded-full border-[1.5px] border-line bg-cream transition hover:bg-track active:scale-90" data-action="stepper#decrement" aria-label="5 points de moins"><twig:Icon name="minus"/></button>
-            {{ form_widget(form.points, {attr: {class: 'w-[4.5rem] border-0 bg-transparent px-0 text-center text-2xl font-extrabold text-clay-dark [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none', 'data-stepper-target': 'input', 'data-action': 'input->stepper#describe'}}) }}
-            <button type="button" class="flex size-11 cursor-pointer items-center justify-center rounded-full border-[1.5px] border-line bg-cream transition hover:bg-track active:scale-90" data-action="stepper#increment" aria-label="5 points de plus"><twig:Icon name="plus"/></button>
-        </div>
-    </div>
-    {{ form_errors(form.points) }}
-
-    {% if form.catalog is defined %}
-        <div class="card px-3.5 py-1">{{ form_row(form.catalog) }}</div>
-    {% endif %}
-
-    {% if form.done is defined %}
-        {{ form_row(form.done, {attr: {'data-action': 'change->task-form#toggle', 'data-task-form-target': 'done'}}) }}
-        <fieldset class="flex flex-col gap-5" data-task-form-target="doneSection">
-            {{ form_row(form.doneAt) }}
+    {# The card's colour: green while all is well, orange when the moment approaches, red once late. #}
+    <section class="form-group" aria-labelledby="task-alerts-title" data-task-form-target="section" data-kind="rolling scheduled one_off occasional">
+        <h2 id="task-alerts-title" class="group-label flex items-center gap-2">
+            Alertes de la carte
+            <span class="flex gap-1" aria-hidden="true"><span class="size-[7px] rounded-full bg-ok"></span><span class="size-[7px] rounded-full bg-warn"></span><span class="size-[7px] rounded-full bg-danger"></span></span>
+        </h2>
+        <fieldset class="form-sheet">
+            <legend class="sr-only">Alertes</legend>
+            {% for field in [form.warningHours, form.marginHours] %}
+                {# An occasional task has no "before": the moment comes when it is raised. #}
+                <div class="flex flex-col gap-2"{% if field is same as(form.warningHours) %} data-task-form-target="section" data-kind="rolling scheduled one_off"{% endif %}>
+                    {{ form_label(field) }}
+                    <div class="flex items-center gap-3">
+                        {{ form_widget(field.amount, {attr: {class: 'w-24', placeholder: '—'}}) }}
+                        {{ form_widget(field.unit, {attr: {class: 'choice-segmented flex-1'}}) }}
+                    </div>
+                    {{ form_help(field) }}
+                    {{ form_errors(field) }}
+                </div>
+            {% endfor %}
         </fieldset>
-    {% endif %}
+    </section>
 
-    {% if form.reserve is defined %}
-        <div data-task-form-target="notDoneSection">{{ form_row(form.reserve) }}</div>
-    {% endif %}
-
-    {# Always at hand at the bottom of the screen: above the bottom navigation, or at the very bottom in the app's modal. #}
-    <div class="fixed inset-x-0 z-10 border-t-[1.5px] border-line bg-cream {{ ux_is_native() ? 'bottom-0 pb-[env(safe-area-inset-bottom)]' : 'bottom-[calc(72px+env(safe-area-inset-bottom))]' }}">
-        <div class="mx-auto max-w-md px-5 py-3">
-            <button type="submit" class="btn-primary h-[52px] w-full text-[17px]">{{ submit_label }}</button>
+    <section class="form-group" aria-labelledby="task-where-title">
+        <h2 id="task-where-title" class="group-label">Où, et qui</h2>
+        <div class="form-sheet">
+            {{ form_row(form.category, {attr: {'data-action': 'change->task-form#toggle'}}) }}
+            <fieldset class="flex flex-col gap-5" data-task-form-target="category" data-category="pets">
+                {% if form.pet is defined %}{{ form_row(form.pet) }}{% endif %}
+                {{ form_row(form.assignee) }}
+                {{ form_row(form.backup) }}
+            </fieldset>
+            {{ form_row(form.zones) }}
         </div>
+    </section>
+
+    <section class="form-group" aria-labelledby="task-card-title">
+        <h2 id="task-card-title" class="group-label">Sa carte</h2>
+        <div class="form-sheet">
+            {{ form_row(form.rarity, {row_attr: {class: 'rarity-choice'}, help: 'Pour le plaisir : une tâche rare, épique ou légendaire a une carte qui brille plus.'}) }}
+            <div class="flex items-center justify-between gap-3 border-t border-line/70 pt-4" data-controller="stepper">
+                <div class="flex flex-col gap-0.5">
+                    {{ form_label(form.points) }}
+                    <span class="text-[12.5px] text-muted" data-stepper-target="hint">5 min d’effort ≈ 10 pts</span>
+                </div>
+                <div class="flex items-center gap-1">
+                    <button type="button" class="row-button is-framed size-10" data-action="stepper#decrement" data-haptic="tick" aria-label="5 points de moins"><twig:Icon name="minus" size="18" stroke="2.2"/></button>
+                    {{ form_widget(form.points, {attr: {class: 'h-10 w-[4.25rem] border-0 bg-transparent px-0 text-center text-[24px] font-bold tracking-tight text-clay-dark shadow-none focus:ring-0 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none', 'data-stepper-target': 'input', 'data-action': 'input->stepper#describe'}}) }}
+                    <button type="button" class="row-button is-framed size-10" data-action="stepper#increment" data-haptic="tick" aria-label="5 points de plus"><twig:Icon name="plus" size="18" stroke="2.2"/></button>
+                </div>
+            </div>
+            {{ form_errors(form.points) }}
+        </div>
+    </section>
+
+    {% if form.catalog is defined or form.done is defined or form.reserve is defined %}
+        <div class="form-sheet is-rows">
+            {% if form.catalog is defined %}
+                {{ form_row(form.catalog) }}
+            {% endif %}
+            {% if form.done is defined %}
+                <div>
+                    {{ form_row(form.done, {attr: {'data-action': 'change->task-form#toggle', 'data-task-form-target': 'done'}}) }}
+                    <fieldset class="flex flex-col gap-5 pb-3.5" data-task-form-target="doneSection">
+                        {{ form_row(form.doneAt) }}
+                    </fieldset>
+                </div>
+            {% endif %}
+            {% if form.reserve is defined %}
+                <div data-task-form-target="notDoneSection">{{ form_row(form.reserve) }}</div>
+            {% endif %}
+        </div>
+    {% endif %}
+
+    {# Always at hand: floating above the bottom navigation, or at the very bottom in the app's modal. #}
+    <div class="save-bar {{ ux_is_native() ? 'is-native' }}">
+        <div class="save-bar-in"><button type="submit" class="btn-primary" data-haptic="success">{{ submit_label }}</button></div>
     </div>
 {{ form_end(form) }}

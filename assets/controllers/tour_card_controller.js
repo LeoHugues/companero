@@ -5,13 +5,12 @@ import { burst, buzz } from '../lib/fx.js';
  * The cards of the tour (templates/onboarding/tour/_demo_card.html.twig): not real tasks, only to
  * try them out. "Je prends" puts your face on it, "C'est fait" throws stars and starts it again;
  * on the gliding card, a slider ages it half a day at a time, as a real one ages between two times it is done
- * (fresh, soon, due on the day, late after it — see Urgency and TaskLabels).
+ * (fresh, soon, due on the day, late after it — see Urgency and TaskLabels): its dot and its thread of time change colour.
  */
-const RING = 157.1;
 const ALERTS = { fresh: 'ok', soon: 'warning', due: 'warning', late: 'danger' };
 
 export default class extends Controller {
-    static targets = ['card', 'medallion', 'ring', 'badge', 'pill', 'pillIcon', 'pillLabel', 'seat', 'taken', 'done', 'slider', 'days', 'message'];
+    static targets = ['card', 'label', 'time', 'seat', 'taken', 'done', 'slider', 'days', 'message'];
     static values = { rhythm: { type: Number, default: 2 }, age: { type: Number, default: 2 } };
 
     connect() {
@@ -62,17 +61,16 @@ export default class extends Controller {
         const alert = ALERTS[state];
         const left = state === 'due' ? 8 : Math.max(0, Math.min(100, 100 - (days / rhythm) * 100));
 
-        this.cardTarget.classList.remove('task-card-ok', 'task-card-warning', 'task-card-danger');
-        this.cardTarget.classList.add(`task-card-${alert}`);
-        this.medallionTarget.className = `medallion medallion-${alert} medallion-${state}`;
-        this.ringTarget.style.strokeDashoffset = (RING * (1 - left / 100)).toFixed(1);
-        this.badgeTarget.hidden = state !== 'late';
-        this.pillTarget.className = `urgency-pill urgency-pill-${alert}`;
-        this.pillIconTargets.forEach((icon) => { icon.hidden = icon.dataset.alert !== alert; });
-        this.pillLabelTarget.textContent = this.label(state, days, rhythm);
+        this.cardTarget.classList.remove('play-card-ok', 'play-card-warning', 'play-card-danger');
+        this.cardTarget.classList.add(`play-card-${alert}`);
+        this.timeTarget.style.width = `${left}%`;
+        this.labelTarget.textContent = this.label(state, days, rhythm);
 
         if (this.hasDaysTarget) {
             this.daysTarget.textContent = this.since(days);
+        }
+        if (this.hasSliderTarget) {
+            this.sliderTarget.style.setProperty('--fill', `${(days / parseFloat(this.sliderTarget.max)) * 100}%`);
         }
     }
 

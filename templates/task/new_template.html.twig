@@ -2,14 +2,15 @@
 
 {% block title %}Un nouveau modèle · Companero{% endblock %}
 
-{# Room for the save bar, fixed at the bottom of the screen. #}
-{% block main_class %}{{ ux_is_native() ? 'pb-28' : 'pb-48' }}{% endblock %}
+{# The save button floats above the bottom bar; in the app's modal, at the very bottom. #}
+{% block main_class %}{{ ux_is_native() ? 'pb-6' : 'pb-28' }}{% endblock %}
 
 {% block body %}
     {{ include('task/_tunnel.html.twig', {
         step: 2,
         title: 'Un nouveau modèle',
         icon: 'repeat',
+        tile: 'tile-sky',
         what: 'La règle d’une tâche qui revient. Ses tâches à faire arriveront toutes seules sur l’accueil, quand ce sera le moment.'
     }) }}
 

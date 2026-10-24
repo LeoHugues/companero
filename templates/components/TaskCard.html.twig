@@ -1,4 +1,4 @@
-{% props view, member, back = 'home', compact = false %}
+{% props view, member, back = 'home', compact = false, page = false %}
 {#
     A task as a playing card. In its corner, like a card's index: what it is worth and the suit of its
     category. Then how pressing it is (a dot and a word), its title, where and how often, the time left as
@@ -9,6 +9,7 @@
     Once done, it turns over (done_controller.js): its back says thank you.
     The whole card opens its page, where its settings are; only the buttons sit above that link.
     compact: lists (rooms), without the picture, with a single round "done" button.
+    page: the card on its own page, larger; its title is the page's, and opens nothing.
 #}
 {% set task = view.task %}
 {% set status = view.status %}
@@ -17,7 +18,7 @@
 {# The time left: an occasional task asleep is full, a fresh one never looks almost empty. #}
 {% set left = task.kind.value == 'occasional' and not task.raised ? 100 : (status.urgency.value == 'fresh' ? max(status.freshness, 70) : status.freshness) %}
 <article {{ attributes.defaults({
-    class: 'play-card play-card-' ~ rarity.value ~ ' play-card-' ~ status.alert ~ (compact ? ' play-card-compact'),
+    class: 'play-card play-card-' ~ rarity.value ~ ' play-card-' ~ status.alert ~ (compact ? ' play-card-compact') ~ (page ? ' play-card-page'),
     id: 'task-' ~ task.id,
     'data-rarity': rarity.value,
     'data-alert': status.alert
@@ -51,10 +52,14 @@
                     </span>
                 {% endif %}
             </p>
-            <h3 class="play-card-title">
-                {# Stretched over the whole card: a tap anywhere opens the card's page. #}
-                <a href="{{ path('task_show', {id: task.id}) }}" class="text-ink no-underline after:absolute after:inset-0 after:z-[1] after:rounded-[inherit] after:content-[''] hover:text-ink">{{ task.title }}</a>
-            </h3>
+            {% if page %}
+                <h1 class="play-card-title">{{ task.title }}</h1>
+            {% else %}
+                <h3 class="play-card-title">
+                    {# Stretched over the whole card: a tap anywhere opens the card's page. #}
+                    <a href="{{ path('task_show', {id: task.id}) }}" class="text-ink no-underline after:absolute after:inset-0 after:z-[1] after:rounded-[inherit] after:content-[''] hover:text-ink">{{ task.title }}</a>
+                </h3>
+            {% endif %}
             <p class="play-card-meta" title="{{ task_place(task) }} · {{ task_rule_label(task) }}">{{ task_place(task, true) }} · {{ task_rule_label(task, false) }}</p>
             <div class="play-card-time" aria-hidden="true"><span style="width: {{ left }}%"></span></div>
         </div>
@@ -65,7 +70,7 @@
         {# The note for this time if there is one, otherwise the template's own precision. #}
         {% if task.shownNote or reminder_note|trim is not empty %}
             <div class="play-card-notes">
-                {% if task.shownNote %}<p class="task-card-note" title="{{ task.note ? 'Pour cette fois' : 'La précision de la tâche' }}"><twig:Icon :name="task.note ? 'edit' : 'list'" size="13" stroke="2" class="mt-0.5 shrink-0"/><span class="line-clamp-2">{{ task.shownNote }}</span></p>{% endif %}
+                {% if task.shownNote %}<p class="task-card-note"{% if page %} id="task-note"{% endif %} title="{{ task.note ? 'Pour cette fois' : 'La précision de la tâche' }}"><twig:Icon :name="task.note ? 'edit' : 'list'" size="13" stroke="2" class="mt-0.5 shrink-0"/><span class="{{ page ? 'whitespace-pre-line' : 'line-clamp-2' }}">{{ task.shownNote }}</span></p>{% endif %}
                 {{ reminder_note }}
             </div>
         {% endif %}
