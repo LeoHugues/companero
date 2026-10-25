@@ -6,6 +6,7 @@ use App\Calendar\Week;
 use App\Entity\Member;
 use App\Enum\CasaMood;
 use App\Enum\Urgency;
+use App\Ledger\LedgerBook;
 use App\Progress\LevelProvider;
 use App\Progress\TeamProgressBuilder;
 use App\Repository\CompletionRepository;
@@ -30,6 +31,7 @@ final class HomeController extends AbstractController
         CompletionRepository $completions,
         PointEntryRepository $points,
         ShoppingItemRepository $shopping,
+        LedgerBook $ledgers,
         ClockInterface $clock,
     ): Response {
         $household = $member->getHousehold();
@@ -51,6 +53,9 @@ final class HomeController extends AbstractController
             array_values(array_filter($care, static fn (TaskView $view): bool => \in_array($view, $mine, true) || $view->task->getAssignee() === $member)),
         );
 
+        // Where I stand in the accounts I am in.
+        $myLedgers = $ledgers->forMember($member);
+
         return $this->render('home/index.html.twig', [
             'mine' => $mine,
             // The cards of the hand counted on this member whoever takes them: let go, they stay in it.
@@ -68,6 +73,8 @@ final class HomeController extends AbstractController
             'quick_count' => \count($board->quick()),
             'dormant' => $board->dormant(),
             'missing' => $shopping->findMissing($household),
+            'ledgers' => $myLedgers,
+            'standing' => $ledgers->standing($member, $myLedgers),
             'cleanliness' => $board->cleanliness(),
             'mood' => CasaMood::fromCleanliness($board->cleanliness()),
             'team' => $teamProgress->build($household, $week),

@@ -66,6 +66,7 @@ Elle est d'abord construite pour une coloc de 4 personnes. Elle pourra ensuite
 | **Découverte** | La visite guidée par la Casa à l'arrivée : l'esprit, les cartes et le glissement, les points, les deux objectifs, la charte, puis ses propres réglages. Voir [l'onboarding](onboarding.md). |
 | **Charte** | Les règles de bon sens de la coloc (« je fais ma vaisselle quand j'ai fini »), écrites par tout le monde. Chacun y adhère (« Ça me va »), et la relit quand elle change. |
 | **Ce qui manque** | La liste partagée de ce qu'il faut racheter pour la maison (papier toilette, éponges, une ampoule grillée). On y note une chose quand on voit qu'elle manque, on la coche une fois achetée. Voir § 6 ter. |
+| **Compte** | Des dépenses tenues ensemble, comme un Tricount : celles de la coloc, ou un week-end avec un ami. On y note qui a payé quoi et pour qui ; les **équilibres** disent qui doit combien et qui rembourse qui. Voir § 6 quater. |
 
 ## 4. Les tâches
 
@@ -133,7 +134,8 @@ Les pourcentages sont exprimés par rapport au rythme ou à l'échéance. La
   quand on voit le besoin.
 - Ce qu'il faut **racheter** (papier toilette, éponges, une ampoule) a sa propre liste,
   [ce qui manque](#6-ter-ce-qui-manque) : ce ne sont pas des tâches. La gestion des stocks
-  (quantités, inventaire) reste hors périmètre.
+  (quantités, inventaire) reste hors périmètre. Ce que ça coûte se partage dans
+  [les comptes](#6-quater-les-comptes).
 
 ### 4.5 Cycle de vie
 
@@ -225,8 +227,49 @@ depuis l'accueil.
 - *Plus tard* : prévenir ceux qui ne sont pas à la maison (et passent peut-être devant un magasin)
   de ce qui manque, surtout l'urgent ; « je m'en charge » pour ne pas acheter deux fois.
 
-## 7. Gamification
+## 6 quater. Les comptes
 
+En colocation, quelqu'un avance toujours l'argent : les courses, la facture d'électricité, la box, les
+pizzas du vendredi. **Les comptes** font ce que fait Tricount, sans banque ni carte : on note qui a payé
+quoi et pour qui, l'appli dit qui doit combien, et propose les remboursements pour que tout le monde
+soit quitte.
+
+- **Un compte**, ou plusieurs : celui de la coloc (« Dépenses communes », ouvert en un appui, avec
+  toute la coloc : ceux qui arrivent y entrent d'eux-mêmes), et d'autres pour un week-end ou une
+  soirée, avec seulement quelques colocs et des **invités** connus par leur prénom (un ami, une sœur
+  de passage). Chacun a son nom, un mot dessus et sa **devise** (l'euro par défaut), qui ne change plus
+  une fois des dépenses notées.
+- **Une dépense** : un titre, un montant, qui a payé (celui qui la note, par défaut), le jour, et pour
+  qui (tout le monde, par défaut), réparti **à parts égales**, **par parts** (deux parts pour celui qui
+  est venu avec un ami) ou **par montants** (qui doivent tomber juste : « il reste 3,20 € à
+  répartir »). Chaque part se calcule pendant la saisie. Aucun centime ne se perd : 10 € entre trois,
+  c'est 3,34 + 3,33 + 3,33 (le centime en trop va au premier).
+- **Un revenu** : de l'argent reçu pour tout le monde (la caution rendue, le canapé vendu), que celui
+  qui l'a reçu doit aux autres. **Un transfert** : de l'argent donné à quelqu'un, un remboursement.
+- **Une autre devise** : une dépense payée en francs suisses ou en dollars, au taux saisi (« 1 CHF =
+  1,06 € ») ; les équilibres se comptent dans la devise du compte, et chaque part tombe juste.
+- **La catégorie** (courses, logement, énergie, internet, maison, sorties, transport, loisirs, santé,
+  animaux, cadeaux) se choisit avec son dessin, ou se **devine du titre** (« Courses Lidl », « Facture
+  EDF », « Pizzas »).
+- **Les dépenses** : jour par jour, la plus récente d'abord, qui a payé et **ma part** ; une recherche
+  (un titre, un prénom) ; en tête, **mon solde**, **mes dépenses** (ma part de tout) et le **total**.
+  Toucher une ligne l'ouvre : qui a payé, en quelle devise, la part de chacun ; n'importe qui la
+  corrige ou la retire (confiance par défaut).
+- **Les équilibres** : le solde de chacun (on lui doit, ou il doit), ce qu'il a payé et sa part ;
+  puis **pour être quittes**, le moins de remboursements possible (celui qui doit le plus rembourse
+  celui à qui l'on doit le plus, et ainsi de suite : jamais plus d'un de moins qu'il n'y a de monde).
+  **« Régler »** note le remboursement d'un appui, fait aujourd'hui ; la ligne l'ouvre pour un autre
+  montant (un remboursement en deux fois). Déjà réglé entre-temps, rien n'est noté deux fois.
+- **Sur l'accueil**, une bande « Les comptes » dit où l'on en est (« On te doit 11,57 € », compte par
+  compte s'il y en a plusieurs) ; son **+**, comme celui de la barre du bas, note une dépense.
+- **Prévenir** : quand un coloc note une dépense qui me concerne, ou me rembourse, le téléphone le dit
+  (réglable dans *Profil › Rappels*).
+- **Exporter** : toutes les lignes dans un tableur (CSV), avec ce que chacune change pour chacun.
+- Ni points ni XP pour une dépense : l'argent n'est pas un jeu.
+- *Plus tard* : la photo du ticket, le taux de change trouvé tout seul, des dépenses qui reviennent
+  (le loyer, la box), relancer qui doit depuis longtemps.
+
+## 7. Gamification
 - **XP et niveaux** : les points cumulés font monter de niveau.
 - **Titres** humoristiques, attribués au bilan (« Seigneur de la serpillière »,
   « Le retour du Jedi » pour une tâche très en retard rattrapée…).
@@ -336,6 +379,7 @@ Il est généré le dimanche soir et consultable le lundi :
 | Cadeaux de niveau, boosts, séries et gels | Widget et tuile Android de présence |
 | Notifications (rappels) | |
 | Ce qui manque : la liste partagée, l'urgent, les suggestions | Prévenir de ce qui manque quand on est dehors ; « je m'en charge » |
+| Les comptes : dépenses, revenus, transferts, parts, devises, équilibres et remboursements, export | Photo du ticket, taux de change automatique, dépenses qui reviennent |
 
 ## 10. Choix techniques (provisoires)
 

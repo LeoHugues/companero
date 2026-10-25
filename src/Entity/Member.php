@@ -63,6 +63,10 @@ class Member implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private bool $notifyWeeklyReview = true;
 
+    /** A shared expense that concerns them, noted by someone else, or a reimbursement. */
+    #[ORM\Column(options: ['default' => true])]
+    private bool $notifyExpenses = true;
+
     #[ORM\Column]
     private \DateTimeImmutable $joinedAt;
 
@@ -230,6 +234,16 @@ class Member implements UserInterface, PasswordAuthenticatedUserInterface
     public function setNotifyWeeklyReview(bool $notify): void
     {
         $this->notifyWeeklyReview = $notify;
+    }
+
+    public function isNotifyExpenses(): bool
+    {
+        return $this->notifyExpenses;
+    }
+
+    public function setNotifyExpenses(bool $notify): void
+    {
+        $this->notifyExpenses = $notify;
     }
 
     public function getJoinedAt(): \DateTimeImmutable

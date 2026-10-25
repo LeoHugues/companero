@@ -1,0 +1,42 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Un nouveau compte · Companero{% endblock %}
+
+{% block main_class %}{{ ux_is_native() ? 'pb-6' : 'pb-28' }}{% endblock %}
+
+{# A new account: its name and currency, then who is in it — colocs by their faces, guests by their names. #}
+{% block body %}
+    <header class="page-head items-start">
+        <div class="min-w-0">
+            <p class="eyebrow">Les comptes</p>
+            <h1 class="page-title mt-1">Un nouveau compte</h1>
+        </div>
+        <a href="{{ ux_is_native() ? '/recede_historical_location' : path('ledger_index') }}" aria-label="Fermer" class="head-button"><twig:Icon name="close" size="19" stroke="2"/></a>
+    </header>
+
+    {{ form_start(form, {attr: {class: 'flex flex-col gap-6'}}) }}
+        <section class="form-group" aria-labelledby="ledger-what-title">
+            <h2 id="ledger-what-title" class="group-label">Le compte</h2>
+            <div class="form-sheet">
+                {{ form_row(form.name) }}
+                {{ form_row(form.description) }}
+                {{ form_row(form.currency) }}
+            </div>
+        </section>
+
+        <section class="form-group" aria-labelledby="ledger-who-title">
+            <h2 id="ledger-who-title" class="group-label">Qui est dedans</h2>
+            <div class="form-sheet">
+                {{ form_row(form.members) }}
+                {{ form_row(form.guests) }}
+                <div class="-mb-2 border-t border-line/70 pt-1.5">{{ form_row(form.everyone) }}</div>
+            </div>
+        </section>
+
+        <div class="save-bar {{ ux_is_native() ? 'is-native' }}">
+            <div class="save-bar-in"><button type="submit" class="btn-primary" data-haptic="success">Ouvrir le compte</button></div>
+        </div>
+    {{ form_end(form) }}
+{% endblock %}
+
+{% block nav %}{% if not ux_is_native() %}<twig:BottomNav active="home"/>{% endif %}{% endblock %}

@@ -1,0 +1,171 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ ledger.name }} · Companero{% endblock %}
+
+{#
+    An account, like a tricount: where I stand, what was spent in all and for me, then two tabs that switch at once
+    (ledger_tabs_controller.js, ?vue=equilibres without it). Its expenses, day by day, with a search; its balances,
+    everyone's bar from the middle (sage when owed, terracotta when owing), and the fewest reimbursements for
+    everyone to be even: "Régler" notes one in one tap (settle_controller.js), the row opens it to change the amount.
+    "Ajouter une dépense" floats above the bottom bar.
+#}
+{% block body %}
+    {% set currency = ledger.currency %}
+    <header class="flex flex-col gap-3">
+        <div class="page-head">
+            <a href="{{ ux_is_native() ? '/recede_historical_location' : path('ledger_index') }}" aria-label="Retour aux comptes" class="head-button"><twig:Icon name="arrow-left" size="20" stroke="2"/></a>
+            <a href="{{ path('ledger_settings', {id: ledger.id}) }}" class="head-link"><twig:Icon name="settings" size="16" stroke="1.9"/>Réglages</a>
+        </div>
+        <div class="min-w-0">
+            <p class="eyebrow">Les comptes</p>
+            <h1 class="page-title mt-1">{{ ledger.name }}</h1>
+            {% if ledger.description %}<p class="page-lede mt-1">{{ ledger.description }}</p>{% endif %}
+        </div>
+    </header>
+
+    <section class="ledger-summary sheet" aria-label="Où j’en suis">
+        {% if me %}
+            {% set balance = sheet.of(me) %}
+            <div class="flex items-end justify-between gap-3">
+                <div class="flex min-w-0 flex-col gap-1">
+                    <p class="eyebrow">Mon solde</p>
+                    <p class="ledger-summary-line">{{ balance > 0 ? 'On te doit' : (balance < 0 ? 'Tu dois' : 'Tu es quitte') }}</p>
+                </div>
+                <p class="ledger-summary-balance {{ balance > 0 ? 'is-owed' : (balance < 0 ? 'is-owing') }}">{{ balance|money(currency, true) }}</p>
+            </div>
+        {% endif %}
+        <dl class="ledger-totals {{ me ? 'border-t border-line/70 pt-3' }}">
+            {% if me %}
+                <div><dt>Mes dépenses</dt><dd>{{ my_total|money(currency) }}</dd></div>
+            {% endif %}
+            <div><dt>Total des dépenses</dt><dd>{{ total|money(currency) }}</dd></div>
+        </dl>
+    </section>
+
+    <div class="contents" data-controller="ledger-tabs">
+        <nav class="segmented" aria-label="Le compte">
+            <a href="{{ path('ledger_show', {id: ledger.id}) }}" data-ledger-tabs-target="tab" data-tab="expenses" data-action="ledger-tabs#show" data-haptic="tick" {{ tab == 'expenses' ? 'aria-current="page"' }}><twig:Icon name="list" size="16" stroke="2"/>Dépenses <span class="font-medium text-dust">{{ count }}</span></a>
+            <a href="{{ path('ledger_show', {id: ledger.id, vue: 'equilibres'}) }}" data-ledger-tabs-target="tab" data-tab="balances" data-action="ledger-tabs#show" data-haptic="tick" {{ tab == 'balances' ? 'aria-current="page"' }}><twig:Icon name="scale" size="16" stroke="1.9"/>Équilibres</a>
+        </nav>
+
+        {# The expenses, day by day. #}
+        <div id="ledger-expenses" class="flex flex-col gap-4" data-ledger-tabs-target="panel" data-tab="expenses" {{ tab != 'expenses' ? 'hidden' }}>
+            {% if count > 0 %}
+                <div class="flex flex-col gap-4" data-controller="filter">
+                    <label class="ledger-search">
+                        <twig:Icon name="search" size="18" stroke="2" class="shrink-0 text-muted"/>
+                        <span class="sr-only">Chercher une dépense</span>
+                        <input type="search" placeholder="Chercher : un titre, un prénom…" autocomplete="off" enterkeyhint="search" data-filter-target="input" data-action="input->filter#filter">
+                    </label>
+                    {% for day, expenses in days %}
+                        <section class="flex flex-col gap-2" data-filter-target="group" aria-labelledby="day-{{ day }}">
+                            <h2 id="day-{{ day }}" class="group-label">{{ ledger_day((expenses|first).spentOn) }}</h2>
+                            <ul class="list-sheet">
+                                {% for expense in expenses %}
+                                    {% set art = expense_art(expense) %}
+                                    {% set share = me ? expense.shareOf(me) : null %}
+                                    {% set who = expense.transfer ? expense.paidBy.name ~ ' → ' ~ expense.recipient.name : (expense.kind.value == 'income' ? 'Reçu par ' : 'Payé par ') ~ expense.paidBy.name %}
+                                    <li id="expense-{{ expense.id }}" data-filter-target="item" data-filter-text="{{ expense.title }} {{ who }} {{ expense.category ? expense.category.label }} {{ expense.convertedAmount|money(currency) }}">
+                                        <a href="{{ path('expense_show', {id: ledger.id, expense: expense.id}) }}" class="list-row">
+                                            <span class="tile {{ art.tile }}" aria-hidden="true"><twig:Icon :name="art.icon" size="20" stroke="1.8"/></span>
+                                            <span class="flex min-w-0 flex-1 flex-col gap-0.5">
+                                                <span class="row-title">{{ expense.title }}</span>
+                                                <span class="row-meta">{{ who }}</span>
+                                            </span>
+                                            <span class="flex shrink-0 flex-col items-end gap-0.5">
+                                                <span class="expense-amount {{ expense.kind.value == 'income' ? 'is-income' : (expense.transfer ? 'is-transfer') }}">{{ expense.kind.value == 'income' ? '+' }}{{ expense.convertedAmount|money(currency) }}</span>
+                                                {% if expense.foreign %}
+                                                    <span class="row-meta">{{ expense.amount|money(expense.currency) }}</span>
+                                                {% elseif share and not expense.transfer %}
+                                                    <span class="row-meta">ta part {{ share.convertedAmount|money(currency) }}</span>
+                                                {% endif %}
+                                            </span>
+                                        </a>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </section>
+                    {% endfor %}
+                    <p class="sheet-empty" data-filter-target="empty" hidden>Aucune dépense ne correspond.</p>
+                </div>
+            {% else %}
+                <div class="flex items-end gap-2.5">
+                    <twig:CasaMini :size="58" class="shrink-0"/>
+                    <p class="bubble mb-7 text-[13.5px]">Rien encore ! Le premier qui paie pour les autres le note ici : les courses, une facture, les pizzas. Je fais les comptes.</p>
+                </div>
+            {% endif %}
+        </div>
+
+        {# Where everyone stands, and who reimburses whom. #}
+        <div id="ledger-balances" class="flex flex-col gap-4" data-ledger-tabs-target="panel" data-tab="balances" {{ tab != 'balances' ? 'hidden' }}>
+            {% set largest = sheet.largest %}
+            <section class="flex flex-col gap-2" aria-labelledby="balances-title">
+                <h2 id="balances-title" class="group-label">Les soldes</h2>
+                <ul class="list-sheet">
+                    {% for participant in ledger.participants %}
+                        {% set balance = sheet.of(participant) %}
+                        <li class="list-row balance-row" id="balance-{{ participant.id }}">
+                            <twig:Avatar :member="participant" size="36"/>
+                            <span class="flex min-w-0 flex-1 flex-col gap-1.5">
+                                <span class="flex items-baseline justify-between gap-2">
+                                    <span class="row-title">{{ participant.name }}{% if participant is same as(me) %} <span class="font-medium text-muted">(toi)</span>{% endif %}</span>
+                                    <span class="ledger-balance {{ balance > 0 ? 'is-owed' : (balance < 0 ? 'is-owing') }}">{{ balance ? balance|money(currency, true) : 'Quitte' }}</span>
+                                </span>
+                                <span class="balance-gauge" aria-hidden="true">
+                                    {% if balance %}<span class="{{ balance > 0 ? 'is-owed' : 'is-owing' }}" style="width: {{ (balance|abs / largest * 50)|round(1) }}%"></span>{% endif %}
+                                </span>
+                                <span class="row-meta">A payé {{ (paid[participant.id] ?? 0)|money(currency) }} · sa part {{ (spent[participant.id] ?? 0)|money(currency) }}</span>
+                            </span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </section>
+
+            {% set settlements = sheet.settlements %}
+            <section class="flex flex-col gap-2" aria-labelledby="settle-title" data-controller="settle">
+                <h2 id="settle-title" class="group-label">Pour être quittes</h2>
+                {% if settlements is empty %}
+                    <div class="flex items-end gap-2.5">
+                        <twig:CasaMini :size="58" class="shrink-0"/>
+                        <p class="bubble mb-7 text-[13.5px]">{{ count ? 'Tout le monde est quitte : pas un centime ne traîne !' : 'Rien à équilibrer pour l’instant.' }}</p>
+                    </div>
+                {% else %}
+                    <ul class="list-sheet">
+                        {% for settlement in settlements %}
+                            {% set amount = settlement.amount|money(currency) %}
+                            {% set sentence = settlement.from is same as(me) ? 'Tu dois ' ~ amount ~ ' à ' ~ settlement.to.name : (settlement.to is same as(me) ? settlement.from.name ~ ' te doit ' ~ amount : settlement.from.name ~ ' doit ' ~ amount ~ ' à ' ~ settlement.to.name) %}
+                            <li class="settle-row {{ settlement.from is same as(me) ? 'is-mine' }}" id="settle-{{ settlement.from.id }}-{{ settlement.to.id }}">
+                                <a href="{{ path('expense_new', {id: ledger.id, type: 'transfert', de: settlement.from.id, a: settlement.to.id, montant: settlement.amount}) }}" class="list-row min-w-0 flex-1" aria-label="{{ sentence }} : noter un autre montant">
+                                    <span class="settle-faces" aria-hidden="true">
+                                        <twig:Avatar :member="settlement.from" size="30"/>
+                                        <twig:Icon name="arrow-right" size="15" stroke="2.4" class="text-dust"/>
+                                        <twig:Avatar :member="settlement.to" size="30"/>
+                                    </span>
+                                    <span class="flex min-w-0 flex-col gap-0.5">
+                                        <span class="row-title">{{ sentence }}</span>
+                                        <span class="row-meta">Un autre montant ?</span>
+                                    </span>
+                                </a>
+                                <form method="post" action="{{ path('ledger_settle', {id: ledger.id}) }}" data-action="submit->settle#settle">
+                                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
+                                    <input type="hidden" name="from" value="{{ settlement.from.id }}">
+                                    <input type="hidden" name="to" value="{{ settlement.to.id }}">
+                                    <input type="hidden" name="amount" value="{{ settlement.amount }}">
+                                    <button type="submit" class="settle-button" data-haptic="press" aria-label="Régler : {{ settlement.from.name }} rembourse {{ amount }} à {{ settlement.to.name }}"><twig:Icon name="check" size="16" stroke="2.6"/>Régler</button>
+                                </form>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                    <p class="px-1 text-[12.5px] leading-snug text-muted">« Régler » note le remboursement, fait aujourd’hui : il rejoint les dépenses, d’où il se corrige ou se retire.</p>
+                {% endif %}
+            </section>
+        </div>
+    </div>
+
+    {# Always at hand, floating above the bottom navigation (at the very bottom in the app). #}
+    <div class="save-bar {{ ux_is_native() ? 'is-native' }}">
+        <div class="save-bar-in"><a href="{{ path('expense_new', {id: ledger.id}) }}" class="btn-primary" data-haptic="press"><twig:Icon name="plus" size="19" stroke="2.4"/>Ajouter une dépense</a></div>
+    </div>
+{% endblock %}
+
+{% block nav %}<twig:BottomNav active="home"/>{% endblock %}

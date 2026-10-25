@@ -1,0 +1,126 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ expense ? 'Corriger' : 'Une dépense' }} · {{ ledger.name }} · Companero{% endblock %}
+
+{% block main_class %}{{ ux_is_native() ? 'pb-6' : 'pb-28' }}{% endblock %}
+
+{#
+    A dépense, a revenu or a transfert, in groups: what and how much (paid in another currency, at a rate), who paid,
+    who it was for and how it is split — equally, by parts, by amounts — each one's part worked out as it is typed
+    (split_controller.js); for a transfer, who got the money. The save button floats above the bottom bar.
+#}
+{% block body %}
+    {% set kind = draft.kind.value %}
+    <header class="page-head items-start">
+        <div class="min-w-0">
+            <p class="eyebrow">{{ ledger.name }}</p>
+            <h1 class="page-title mt-1">{{ expense ? 'Corriger' : (kind == 'transfer' ? 'Un remboursement' : 'Une dépense') }}</h1>
+        </div>
+        <a href="{{ ux_is_native() ? '/recede_historical_location' : back }}" aria-label="Fermer" class="head-button"><twig:Icon name="close" size="19" stroke="2"/></a>
+    </header>
+
+    {{ form_start(form, {attr: {
+        class: 'flex flex-col gap-6',
+        'data-controller': 'split',
+        'data-split-ledger-currency-value': ledger.currency,
+        'data-split-symbols-value': symbols|json_encode,
+        'data-split-kind-value': kind,
+        'data-split-mode-value': draft.splitMode.value,
+    }}) }}
+        <fieldset>
+            <legend class="sr-only">C’est…</legend>
+            {{ form_widget(form.kind, {attr: {class: 'choice-segmented', 'data-action': 'change->split#update'}}) }}
+        </fieldset>
+
+        <section class="form-group" aria-labelledby="expense-what-title">
+            <h2 id="expense-what-title" class="group-label" data-split-target="kindText" data-expense="La dépense" data-income="Le revenu" data-transfer="Le remboursement">{{ {expense: 'La dépense', income: 'Le revenu', transfer: 'Le remboursement'}[kind] }}</h2>
+            <div class="form-sheet">
+                {{ form_row(form.title, {attr: {'data-split-target': 'title', 'data-expense': 'Courses, loyer, pizzas…', 'data-income': 'Caution rendue, vente du canapé…', 'data-transfer': 'Remboursement'}}) }}
+                <div class="flex flex-col gap-2">
+                    {{ form_label(form.amount) }}
+                    <div class="flex gap-2">
+                        {{ form_widget(form.amount, {attr: {class: 'expense-amount-input min-w-0 flex-1', 'data-split-target': 'amount', 'data-action': 'input->split#update'}}) }}
+                        {{ form_widget(form.currency, {attr: {class: 'w-[7.5rem] shrink-0', 'aria-label': 'Devise', 'data-split-target': 'currency', 'data-action': 'change->split#update'}}) }}
+                    </div>
+                    {{ form_errors(form.amount) }}
+                </div>
+                <div class="flex flex-col gap-2" data-split-target="rate" {{ not draft.foreign ? 'hidden' }}>
+                    {{ form_label(form.exchangeRate) }}
+                    <div class="flex items-center gap-2 text-[15px] font-semibold">
+                        <span class="shrink-0">1 <span data-split-target="rateFrom">{{ currency_symbol(draft.currency) }}</span> =</span>
+                        {{ form_widget(form.exchangeRate, {attr: {class: 'w-28', 'data-split-target': 'rateInput', 'data-action': 'input->split#update'}}) }}
+                        <span class="shrink-0">{{ currency_symbol(ledger.currency) }}</span>
+                    </div>
+                    <p class="text-[12.5px] leading-snug text-muted" data-split-target="converted">Les équilibres se comptent en {{ currency_symbol(ledger.currency) }}, au taux du jour de la dépense.</p>
+                    {{ form_errors(form.exchangeRate) }}
+                </div>
+            </div>
+        </section>
+
+        <section class="form-group" aria-labelledby="expense-payer-title">
+            <h2 id="expense-payer-title" class="group-label" data-split-target="kindText" data-expense="Payé par" data-income="Reçu par" data-transfer="De">{{ {expense: 'Payé par', income: 'Reçu par', transfer: 'De'}[kind] }}</h2>
+            <div class="form-sheet">
+                {{ form_widget(form.paidBy) }}
+                {{ form_errors(form.paidBy) }}
+            </div>
+        </section>
+
+        <section class="form-group" aria-labelledby="expense-recipient-title" data-split-target="section" data-kind="transfer" {{ kind != 'transfer' ? 'hidden' }}>
+            <h2 id="expense-recipient-title" class="group-label">À</h2>
+            <div class="form-sheet">
+                {{ form_widget(form.recipient) }}
+                {{ form_errors(form.recipient) }}
+            </div>
+        </section>
+
+        {# "Pour qui": ticked or not, then by parts (− and +) or by amounts; each one's part on the right. #}
+        <section class="form-group" aria-labelledby="expense-split-title" data-split-target="section" data-kind="expense income" {{ kind == 'transfer' ? 'hidden' }}>
+            <div class="flex items-baseline justify-between gap-3 px-1">
+                <h2 id="expense-split-title" class="eyebrow">Pour qui</h2>
+                <button type="button" class="text-[12.5px] font-semibold text-muted hover:text-ink" data-action="split#all" data-split-target="all" data-haptic="tick">Tout le monde</button>
+            </div>
+            <div class="form-sheet gap-3">
+                {{ form_widget(form.splitMode, {attr: {class: 'choice-segmented', 'data-action': 'change->split#update'}}) }}
+                <ul class="split-list" data-split-target="list" data-mode="{{ draft.splitMode.value }}">
+                    {% for field in form.split %}
+                        {% set participant = participants[field.vars.name] %}
+                        {% set share = shares[participant.id] ?? null %}
+                        <li class="split-row {{ field.included.vars.checked ? '' : 'is-out' }}" data-split-target="row" data-participant="{{ participant.id }}">
+                            {{ form_widget(field.included, {attr: {class: 'split-check', 'data-split-target': 'check', 'data-action': 'change->split#update'}}) }}
+                            <label for="{{ field.included.vars.id }}" class="split-who">
+                                <twig:Avatar :member="participant" size="30"/>
+                                <span class="min-w-0 truncate text-[15px] font-semibold">{{ participant.name }}{% if participant is same as(me) %} <span class="font-medium text-muted">(toi)</span>{% endif %}</span>
+                            </label>
+                            <span class="split-weight" data-only="shares">
+                                <button type="button" class="row-button is-framed size-8" data-action="split#less" data-haptic="tick" aria-label="Une part de moins pour {{ participant.name }}"><twig:Icon name="minus" size="15" stroke="2.4"/></button>
+                                {{ form_widget(field.weight, {attr: {class: 'split-input w-10 text-center', 'aria-label': 'Parts de ' ~ participant.name, 'data-split-target': 'weight', 'data-action': 'input->split#update'}}) }}
+                                <button type="button" class="row-button is-framed size-8" data-action="split#more" data-haptic="tick" aria-label="Une part de plus pour {{ participant.name }}"><twig:Icon name="plus" size="15" stroke="2.4"/></button>
+                            </span>
+                            <span class="split-amount" data-only="amounts">
+                                {{ form_widget(field.amount, {attr: {class: 'split-input w-24 text-right', 'aria-label': 'Montant pour ' ~ participant.name, 'data-split-target': 'part', 'data-action': 'input->split#update'}}) }}
+                            </span>
+                            <output class="split-share" data-split-target="share" for="{{ field.included.vars.id }}">{{ share ? share.amount|money(draft.currency) : '' }}</output>
+                        </li>
+                    {% endfor %}
+                </ul>
+                {# What is left to split, worked out as it is typed; what was wrong, once sent. #}
+                <p class="split-remainder {{ form.split.vars.errors is not empty ? 'is-off' }}" data-split-target="remainder" aria-live="polite">{{ form.split.vars.errors|map(error => error.message)|join(' ') }}</p>
+            </div>
+        </section>
+
+        <section class="form-group" aria-labelledby="expense-when-title">
+            <h2 id="expense-when-title" class="group-label">Quand, et pour quoi</h2>
+            <div class="form-sheet">
+                {{ form_row(form.spentOn) }}
+                <div data-split-target="section" data-kind="expense income" {{ kind == 'transfer' ? 'hidden' }}>{{ form_row(form.category) }}</div>
+            </div>
+        </section>
+
+        <div class="save-bar {{ ux_is_native() ? 'is-native' }}">
+            <div class="save-bar-in"><button type="submit" class="btn-primary" data-haptic="success">{{ expense ? 'Enregistrer' : 'Noter' }}</button></div>
+        </div>
+    {{ form_end(form) }}
+{% endblock %}
+
+{# In the Android app this form is a modal (see App\Native\NativeConfiguration): no bottom navigation. #}
+{% block nav %}{% if not ux_is_native() %}<twig:BottomNav active="home"/>{% endif %}{% endblock %}

@@ -1208,6 +1208,82 @@ details[open] .care-group-fold::after { content: 'Replier'; font-size: 12.5px; }
   .shopping-row.is-bought .buy-button { animation: none; }
 }
 
+/*
+ * The accounts (docs/direction-artistique.md, « Les comptes »): sage when owed, terracotta when owing — never a red
+ * of alarm. On the home page, a strip like "Il manque" (.missing-strip).
+ */
+.ledger-summary { @apply flex flex-col gap-3 p-4; }
+.ledger-summary-line { @apply text-[17px] leading-tight font-semibold; }
+.ledger-summary-balance { @apply shrink-0 text-[30px] leading-none font-bold tracking-tight whitespace-nowrap tabular-nums; }
+.ledger-totals { @apply grid grid-cols-2 gap-3; }
+.ledger-totals > div { @apply flex flex-col gap-0.5; }
+.ledger-totals dt { @apply text-[12.5px] leading-tight text-muted; }
+.ledger-totals dd { @apply text-[17px] leading-tight font-bold tracking-tight tabular-nums; }
+.ledger-balance { @apply shrink-0 text-[14px] font-semibold whitespace-nowrap text-muted tabular-nums; }
+.ledger-balance.is-owed, .ledger-summary-balance.is-owed { @apply text-ok-ink; }
+.ledger-balance.is-owing, .ledger-summary-balance.is-owing { @apply text-clay-dark; }
+/* A few faces side by side, overlapping a little, ringed with the sheet. */
+.faces { @apply flex shrink-0; }
+.faces > * { box-shadow: 0 0 0 2px var(--color-surface); }
+.faces > * + * { @apply -ml-1.5; }
+/* The search over the expenses: a field with its magnifier inside. */
+.ledger-search { @apply flex h-11 items-center gap-2.5 rounded-[13px] bg-surface px-3.5 shadow-[0_1px_0_rgba(46,30,20,.04),0_6px_16px_-10px_rgba(46,30,20,.35)] focus-within:ring-[3px] focus-within:ring-clay/15; }
+.ledger-search input { @apply h-full min-w-0 flex-1 bg-transparent text-[15px] font-medium text-ink outline-none placeholder:font-normal placeholder:text-[#A8927E]; }
+.expense-amount { @apply text-[15px] font-semibold whitespace-nowrap text-ink tabular-nums; }
+.expense-amount.is-income { @apply text-ok-ink; }
+.expense-amount.is-transfer { @apply text-muted; }
+.expense-hero-amount { @apply mt-2 text-[34px] leading-none font-bold tracking-tight tabular-nums; }
+.expense-hero-amount.is-income { @apply text-ok-ink; }
+
+/* Everyone's bar, from the middle: to the right in sage when owed, to the left in terracotta when owing. */
+.balance-gauge { @apply relative block h-[6px] rounded-full bg-track/70; }
+.balance-gauge::after { content: ''; @apply absolute -top-[3px] left-1/2 h-3 w-[2px] -translate-x-1/2 rounded-full bg-sand; }
+.balance-gauge > span { @apply absolute inset-y-0 rounded-full; animation: balance-grow 700ms cubic-bezier(.2, 1.1, .4, 1) both; }
+.balance-gauge > .is-owed { @apply left-1/2 bg-ok; transform-origin: 0 50%; }
+.balance-gauge > .is-owing { @apply right-1/2 bg-clay; transform-origin: 100% 50%; }
+@keyframes balance-grow { from { transform: scaleX(0); } }
+
+/* Who reimburses whom: the two faces and an arrow, the sentence, "Régler" in the sand of the sheet. */
+.settle-row { @apply flex items-center gap-2; }
+.settle-row.is-mine .row-title { @apply text-clay-dark; }
+.settle-faces { @apply flex shrink-0 items-center gap-1; }
+.settle-button {
+  @apply inline-flex h-9 shrink-0 cursor-pointer items-center gap-1.5 rounded-[11px] bg-track/60 px-3 text-[13px] font-semibold text-ink transition hover:bg-ok-soft hover:text-ok-ink active:scale-95;
+}
+.settle-row.is-settled .settle-button { @apply bg-ok text-cream; animation: pop 380ms cubic-bezier(.2, 1.5, .4, 1) both; }
+.settle-row.is-settled { transition: opacity 260ms 320ms; opacity: .5; }
+
+/* "Pour qui": a round box, the face and the name, then the parts (− and +) or an amount, and each one's part. */
+.split-list { @apply -mx-1 flex flex-col; }
+.split-list > li + li { @apply border-t border-line/70; }
+.split-row { @apply flex min-h-14 items-center gap-2.5 px-1 py-2; }
+.split-check {
+  @apply relative size-7 shrink-0 cursor-pointer appearance-none rounded-full border-2 border-sand bg-surface transition checked:border-ok checked:bg-ok focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23FFF6E9' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12l5 5 9-10'/%3E%3C/svg%3E");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 0;
+}
+.split-check:checked { background-size: 16px; }
+.split-who { @apply flex min-w-0 flex-1 cursor-pointer items-center gap-2.5; }
+.split-row.is-out .split-who { @apply opacity-55; }
+.split-weight, .split-amount { @apply hidden shrink-0 items-center gap-1; }
+.split-list[data-mode="shares"] .split-weight, .split-list[data-mode="amounts"] .split-amount { @apply flex; }
+.split-row.is-out .split-weight, .split-row.is-out .split-amount { @apply opacity-40; }
+.split-row .split-input { @apply h-9 rounded-[10px] px-2 text-[15px] font-semibold tabular-nums; }
+.split-share { @apply w-[4.75rem] shrink-0 text-right text-[14px] font-semibold whitespace-nowrap text-clay-dark tabular-nums; }
+.split-list[data-mode="amounts"] .split-share { @apply hidden; }
+.split-remainder { @apply px-1 text-[12.5px] leading-snug font-medium text-muted empty:hidden; }
+.split-remainder.is-off { @apply font-semibold text-clay-dark; }
+.split-remainder.is-even { @apply font-semibold text-ok-ink; }
+/* The amount of an expense, typed large. */
+.expense-amount-input { @apply text-[22px] font-bold tracking-tight tabular-nums; }
+/* A guest's name in the settings: a field that looks like the row's title until it is touched. */
+.participant-name { @apply -ml-2 h-9 min-w-0 flex-1 rounded-[10px] border border-transparent bg-transparent px-2 text-[15px] font-semibold text-ink transition hover:border-line focus:border-clay focus:bg-[#FFF9F1] focus:outline-none; }
+@media (prefers-reduced-motion: reduce) {
+  .settle-row.is-settled .settle-button, .balance-gauge > span { animation: none; }
+}
+
 /* The goal of the house, on the home page: the days under its gauge, the drawer of what earned the points. */
 .goal-days { @apply grid grid-cols-7 text-center text-[10px] font-semibold tracking-wider text-dust; }
 .goal-days .is-today { @apply text-ink; }

@@ -293,8 +293,41 @@ Ce qu'il faut racheter, dans le calme de l'accueil :
 - **Vide**, la Casa : « Il ne manque rien : mes placards sont pleins ! Le premier qui voit le fond d'un
   flacon le note ici. »
 
-## Le plan
+## Les comptes
 
+L'argent, sans alarme : **sauge** quand on vous doit, **terre cuite** quand vous devez, jamais de rouge.
+
+- **Sur l'accueil**, sous « Il manque », la même feuille fine : des pièces sur une tuile sauge, « LES
+  COMPTES » en petites capitales, dessous où l'on en est (« On te doit 11,57 € » en sauge, « Tu dois… »
+  en terre cuite, compte par compte s'il y en a plusieurs ; « Partager une dépense » sans compte), un
+  **+** dans le sable.
+- **La liste des comptes** : une ligne par compte, la maison sur une tuile sauge pour celui de la
+  coloc, des pièces sur une tuile lilas pour les autres ; les visages de ceux qui sont dedans, un peu
+  chevauchés ; ce qui a été dépensé ; mon solde à droite. Sans compte, la Casa explique, et une feuille
+  propose « Ouvrir les comptes de la coloc », le seul bouton terre cuite.
+- **Un compte** : en tête, une feuille « MON SOLDE » (« On te doit », le montant en grand, sauge ou
+  terre cuite), puis « Mes dépenses » et « Total des dépenses » ; sous elle, le contrôle segmenté de
+  l'accueil, **Dépenses** et **Équilibres**, qui basculent sur place. « Ajouter une dépense » **flotte**
+  au-dessus de la barre du bas.
+- **Les dépenses** : une recherche dans une petite feuille ; les jours en petites capitales
+  (« AUJOURD'HUI », « JEUDI 22 OCTOBRE ») ; une ligne par dépense : le dessin de sa catégorie sur sa
+  tuile pastel (un panier sauge pour les courses, une clé sable pour le logement, un éclair jaune pour
+  l'énergie, le wifi bleu, une éponge jaune pour la maison, une fourchette rose pour les sorties, une
+  voiture bleue, un ticket lilas, un cœur rose, une patte, un cadeau ; deux flèches sauge pour un
+  remboursement), le titre, « Payé par Léo » (ou « Gab → Léo »), le montant et « ta part » dessous.
+- **Les équilibres** : chaque visage, son solde, et une **barre qui part du milieu** — vers la droite en
+  sauge quand on lui doit, vers la gauche en terre cuite quand il doit — ; « A payé… · sa part… ».
+  Puis « POUR ÊTRE QUITTES » : les deux visages et une flèche, la phrase (« Léa doit 32,88 € à Robin »,
+  « Tu dois… » en terre cuite), et **« Régler »** dans le sable : touché, sans attendre le serveur, il
+  se remplit de sauge d'un petit rebond et lance quelques étoiles, la ligne pâlit. Tout le monde quitte,
+  la Casa : « pas un centime ne traîne ! »
+- **Le formulaire** : Dépense, Revenu, Transfert dans le contrôle segmenté ; le montant en grand, la
+  devise à côté (et son taux quand ce n'est pas celle du compte) ; « PAYÉ PAR » avec les visages ;
+  « POUR QUI » : une case ronde qui se remplit de sauge, le visage et le nom, les parts (− et +) ou un
+  montant, la part de chacun en terre cuite foncée ; dessous, ce qu'il reste à répartir (terre cuite)
+  ou « Le compte est bon » (sauge). Les catégories avec leur dessin.
+
+## Le plan
 La maison vue d'en haut, dans le calme de l'accueil, sur une feuille :
 
 - **le jardin** tout autour, vert prairie (celui du paysage de la Casa), quelques touffes d'herbe et

@@ -31,7 +31,8 @@ class ProfileType extends AbstractType
             ])
             ->add('notifyCleaningDay', CheckboxType::class, ['label' => 'Matin du jour de ménage', 'help' => 'La liste du jour, à 9 h', 'required' => false])
             ->add('notifyOverdue', CheckboxType::class, ['label' => 'Quand une tâche compte sur moi', 'help' => 'Une tâche à faire dont j’ai la charge, ou qu’on vient de signaler : au plus un rappel par jour pour chacune', 'required' => false])
-            ->add('notifyWeeklyReview', CheckboxType::class, ['label' => 'Bilan du dimanche soir', 'help' => 'Le résumé de la semaine, à 20 h', 'required' => false]);
+            ->add('notifyWeeklyReview', CheckboxType::class, ['label' => 'Bilan du dimanche soir', 'help' => 'Le résumé de la semaine, à 20 h', 'required' => false])
+            ->add('notifyExpenses', CheckboxType::class, ['label' => 'Les dépenses partagées', 'help' => 'Quand un coloc note une dépense qui me concerne, ou un remboursement', 'required' => false]);
     }
 
     /** @return array<string, int> 70 points a week ≈ 5 minutes a day */

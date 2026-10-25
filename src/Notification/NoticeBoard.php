@@ -3,10 +3,14 @@
 namespace App\Notification;
 
 use App\Calendar\Week;
+use App\Entity\Expense;
 use App\Entity\Member;
+use App\Enum\ExpenseKind;
 use App\Enum\TaskCategory;
 use App\Enum\TaskKind;
+use App\Ledger\Currency;
 use App\Progress\TeamProgressBuilder;
+use App\Repository\ExpenseRepository;
 use App\Repository\YellowCardRepository;
 use App\Task\TaskBoardBuilder;
 use App\Task\TaskView;
@@ -16,7 +20,8 @@ use Psr\Clock\ClockInterface;
 /**
  * What the phone should tell a member right now, according to their settings (Profil › Rappels):
  * the tasks someone counts on them for, the occasional ones just raised, the cleaning day in the
- * morning, the week's review on Sunday evening — and a yellow card received, always.
+ * morning, the week's review on Sunday evening, the shared expenses others noted for them — and a
+ * yellow card received, always.
  * The app asks every quarter of an hour (android/…/Notifier.kt) and shows each one once.
  */
 final readonly class NoticeBoard
@@ -25,12 +30,15 @@ final readonly class NoticeBoard
     public const CLEANING_DAY_HOUR = 9;
     /** The week's review, on Sunday from 8 p.m. */
     public const REVIEW_HOUR = 20;
+    /** An expense noted by someone else is told for three days. */
+    public const EXPENSE_DAYS = 3;
 
     public function __construct(
         private TaskBoardBuilder $boards,
         private TaskLabels $labels,
         private YellowCardRepository $cards,
         private TeamProgressBuilder $teamProgress,
+        private ExpenseRepository $expenses,
         private ClockInterface $clock,
     ) {
     }
@@ -72,6 +80,12 @@ final readonly class NoticeBoard
                 : \sprintf('%d pts sur %d cette semaine. Qui a gagné les titres ?', $team->points(), $team->goal()), '/bilan');
         }
 
+        if ($member->isNotifyExpenses()) {
+            foreach ($this->expenses->findNotedForSince($member, $now->modify(\sprintf('-%d days', self::EXPENSE_DAYS))) as $expense) {
+                $notices[] = $this->expenseNotice($expense, $member);
+            }
+        }
+
         return $notices;
     }
 
@@ -83,6 +97,33 @@ final readonly class NoticeBoard
         return new Notice('test-'.$this->clock->now()->format('YmdHis'), 'Companero', 0 === $count
             ? 'Les notifications marchent ! Rien à te rappeler pour l’instant.'
             : \sprintf('Les notifications marchent ! %d rappel%s pour toi en ce moment.', $count, $count > 1 ? 's' : ''), '/profil');
+    }
+
+    /** "Léo a payé 42,30 € · ta part 10,58 €", "Robin t'a remboursé 23,40 €": once, when someone else notes it. */
+    private function expenseNotice(Expense $expense, Member $member): Notice
+    {
+        $ledger = $expense->getLedger();
+        $me = $ledger->participantFor($member);
+        $currency = $ledger->getCurrency();
+        $amount = Currency::format($expense->getConvertedAmount(), $currency);
+        $share = null === $me ? null : $expense->shareOf($me)?->getConvertedAmount();
+        $mine = null === $share ? '' : ' · ta part '.Currency::format($share, $currency);
+        $payer = $expense->getPaidBy();
+        $path = \sprintf('/comptes/%d/depenses/%d', $ledger->getId(), $expense->getId());
+        $key = 'depense-'.$expense->getId();
+
+        if ($expense->isTransfer()) {
+            $to = $expense->getRecipient();
+
+            return $payer === $me
+                ? new Notice($key, 'Remboursement noté', \sprintf('Tu as remboursé %s à %s.', $amount, $to?->getName()), $path)
+                : new Notice($key, $payer->getName().' t’a remboursé', \sprintf('%s, dans « %s ».', $amount, $ledger->getName()), $path);
+        }
+        if ($payer === $me) {
+            return new Notice($key, $expense->getTitle(), \sprintf('%s a noté que tu as %s %s%s.', $expense->getCreatedBy()?->getName() ?? 'Quelqu’un', ExpenseKind::Income === $expense->getKind() ? 'reçu' : 'payé', $amount, $mine), $path);
+        }
+
+        return new Notice($key, (ExpenseKind::Income === $expense->getKind() ? 'Un revenu : ' : 'Une dépense : ').$expense->getTitle(), \sprintf('%s a %s %s%s.', $payer->getName(), ExpenseKind::Income === $expense->getKind() ? 'reçu' : 'payé', $amount, $mine), $path);
     }
 
     /** A pressing task: someone counts on this member, or it was just raised and they are home. */

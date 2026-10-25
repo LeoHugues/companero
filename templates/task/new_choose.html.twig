@@ -30,6 +30,12 @@
             text: 'Ce qu’il faut racheter pour la maison. Ça rejoint la liste de ce qui manque, que tout le monde voit sur l’accueil.',
             example: 'Du papier toilette, des éponges, l’ampoule de l’entrée…',
         },
+        {
+            route: 'ledger_expense_any', icon: 'coins', tile: 'tile-sage',
+            title: 'Une dépense partagée',
+            text: 'Ce que quelqu’un a payé pour plusieurs. Les comptes disent qui doit combien à qui, et qui rembourse qui.',
+            example: 'Les courses du marché, la facture d’électricité, les pizzas…',
+        },
     ] %}
     <ul class="flex flex-col gap-3">
         {% for choice in choices %}

@@ -209,12 +209,13 @@
                     <button type="button" class="btn-primary h-10 px-4 text-[14px]" data-notifications-target="allow" data-action="notifications#allow" hidden>Autoriser</button>
                     <button type="button" class="btn-soft" data-notifications-target="test" data-action="notifications#test" data-haptic="tick"><twig:Icon name="bell" size="16" stroke="1.9"/>M’envoyer une notification de test</button>
                 </div>
-                <p class="text-[12.5px] leading-snug text-muted">Ce qui t’arrive : les tâches dont tu as la charge (ou que tu remplaces), celles des animaux dont tu es le maître, celles qu’on vient de signaler, et les cartons jaunes reçus.</p>
+                <p class="text-[12.5px] leading-snug text-muted">Ce qui t’arrive : les tâches dont tu as la charge (ou que tu remplaces), celles des animaux dont tu es le maître, celles qu’on vient de signaler, les dépenses partagées qu’un coloc note pour toi, et les cartons jaunes reçus.</p>
             </div>
             <div class="form-sheet is-rows">
                 {{ form_row(profile_form.notifyCleaningDay) }}
                 {{ form_row(profile_form.notifyOverdue) }}
                 {{ form_row(profile_form.notifyWeeklyReview) }}
+                {{ form_row(profile_form.notifyExpenses) }}
             </div>
         </section>
         <button type="submit" class="btn-primary w-full" data-haptic="success">Enregistrer</button>

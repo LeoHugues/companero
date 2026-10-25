@@ -1,0 +1,83 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ expense.title }} · {{ ledger.name }} · Companero{% endblock %}
+
+{#
+    A line of an account: how much, on what day, who paid (or received, or handed the money), in another currency at
+    what rate; then who it was for and each one's part. Anyone can correct it or take it off.
+#}
+{% block body %}
+    {% set currency = ledger.currency %}
+    {% set art = expense_art(expense) %}
+    {% set kind = expense.kind.value %}
+    <header class="page-head">
+        <a href="{{ ux_is_native() ? '/recede_historical_location' : path('ledger_show', {id: ledger.id} + (expense.transfer ? {vue: 'equilibres'} : {})) }}" aria-label="Retour au compte" class="head-button"><twig:Icon name="arrow-left" size="20" stroke="2"/></a>
+        <a href="{{ path('expense_edit', {id: ledger.id, expense: expense.id}) }}" class="head-link"><twig:Icon name="edit" size="16" stroke="1.9"/>Corriger</a>
+    </header>
+
+    <section class="sheet flex flex-col gap-1 p-4" aria-labelledby="expense-title">
+        <div class="flex items-center gap-3.5">
+            <span class="tile {{ art.tile }} size-12 rounded-[14px]" aria-hidden="true"><twig:Icon :name="art.icon" size="23" stroke="1.8"/></span>
+            <div class="flex min-w-0 flex-1 flex-col gap-0.5">
+                <p class="eyebrow">{{ ledger.name }} · {{ expense.kind.label }}</p>
+                <h1 id="expense-title" class="text-[22px] leading-tight font-bold tracking-tight [overflow-wrap:anywhere]">{{ expense.title }}</h1>
+            </div>
+        </div>
+        <p class="expense-hero-amount {{ kind == 'income' ? 'is-income' }}">{{ kind == 'income' ? '+' }}{{ expense.convertedAmount|money(currency) }}</p>
+        <dl class="facts">
+            <div>
+                <dt>{{ {expense: 'Payé par', income: 'Reçu par', transfer: 'De'}[kind] }}</dt>
+                <dd class="flex items-center justify-end gap-2"><twig:Avatar :member="expense.paidBy" size="22"/>{{ expense.paidBy.name }}</dd>
+            </div>
+            {% if expense.transfer %}
+                <div>
+                    <dt>À</dt>
+                    <dd class="flex items-center justify-end gap-2"><twig:Avatar :member="expense.recipient" size="22"/>{{ expense.recipient.name }}</dd>
+                </div>
+            {% endif %}
+            <div><dt>Quand</dt><dd>{{ ledger_day(expense.spentOn) }}</dd></div>
+            {% if expense.foreign %}
+                <div><dt>Payé en</dt><dd>{{ expense.amount|money(expense.currency) }}, à 1 {{ currency_symbol(expense.currency) }} = {{ expense.exchangeRate|rate }} {{ currency_symbol(currency) }}</dd></div>
+            {% endif %}
+            {% if expense.category %}
+                <div><dt>Catégorie</dt><dd>{{ expense.category.label }}</dd></div>
+            {% endif %}
+        </dl>
+    </section>
+
+    {% if not expense.transfer %}
+        <section class="flex flex-col gap-2" aria-labelledby="shares-title">
+            <div class="section-head px-1">
+                <h2 id="shares-title" class="eyebrow">Pour qui</h2>
+                <p class="text-[12.5px] text-muted">{{ expense.splitMode.label }}</p>
+            </div>
+            <ul class="list-sheet">
+                {% for share in expense.shares %}
+                    <li class="list-row">
+                        <twig:Avatar :member="share.participant" size="32"/>
+                        <span class="flex min-w-0 flex-1 flex-col gap-0.5">
+                            <span class="row-title">{{ share.participant.name }}{% if share.participant is same as(me) %} <span class="font-medium text-muted">(toi)</span>{% endif %}</span>
+                            {% if expense.splitMode.value == 'shares' %}<span class="row-meta">{{ share.weight }} part{{ share.weight > 1 ? 's' }}</span>{% endif %}
+                        </span>
+                        <span class="flex shrink-0 flex-col items-end gap-0.5">
+                            <span class="expense-amount">{{ share.convertedAmount|money(currency) }}</span>
+                            {% if expense.foreign %}<span class="row-meta">{{ share.amount|money(expense.currency) }}</span>{% endif %}
+                        </span>
+                    </li>
+                {% endfor %}
+            </ul>
+        </section>
+    {% endif %}
+
+    <p class="px-1 text-[12.5px] leading-snug text-muted">
+        Noté{{ expense.createdBy ? ' par ' ~ expense.createdBy.name }} le {{ expense.createdAt|format_date(pattern: 'd MMMM', locale: 'fr') }} à {{ expense.createdAt|date('G\\hi') }}
+        {%- if expense.updatedAt %}, corrigé{{ expense.updatedBy ? ' par ' ~ expense.updatedBy.name }} le {{ expense.updatedAt|format_date(pattern: 'd MMMM', locale: 'fr') }} à {{ expense.updatedAt|date('G\\hi') }}{% endif %}.
+    </p>
+
+    <form method="post" action="{{ path('expense_delete', {id: ledger.id, expense: expense.id}) }}" class="flex justify-center" data-turbo-confirm="Retirer « {{ expense.title }} » du compte ? Les équilibres seront recalculés.">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
+        <button type="submit" class="btn-link hover:text-danger-ink"><twig:Icon name="trash" size="17" stroke="1.9"/>Retirer du compte</button>
+    </form>
+{% endblock %}
+
+{% block nav %}<twig:BottomNav active="home"/>{% endblock %}

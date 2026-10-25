@@ -6,7 +6,9 @@ use App\Bounty\WeekPlanner;
 use App\Calendar\Week;
 use App\Entity\Gift;
 use App\Entity\Household;
+use App\Entity\Ledger;
 use App\Entity\Member;
+use App\Entity\Participant;
 use App\Entity\Pet;
 use App\Entity\Presence;
 use App\Entity\ShoppingItem;
@@ -15,6 +17,7 @@ use App\Entity\YellowCard;
 use App\Entity\Zone;
 use App\Enum\GiftKind;
 use App\Enum\PetSpecies;
+use App\Enum\SplitMode;
 use App\Enum\TaskCategory;
 use App\Enum\TaskKind;
 use App\Household\Blueprint;
@@ -22,12 +25,16 @@ use App\Household\Founding;
 use App\Household\HouseholdFounder;
 use App\Household\MemberRegistrar;
 use App\Household\Registration;
+use App\Ledger\ExpenseDraft;
+use App\Ledger\ExpenseRecorder;
+use App\Ledger\LedgerBook;
 use App\Repository\CompletionRepository;
 use App\Repository\TaskRepository;
 use App\Review\WeekCloser;
 use App\Task\TaskCompleter;
 use App\Task\TaskStatusResolver;
 use Doctrine\Bundle\FixturesBundle\Fixture;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ObjectManager;
 use Psr\Clock\ClockInterface;
 use Random\Engine\Mt19937;
@@ -182,6 +189,79 @@ final class AppFixtures extends Fixture
         $manager->persist(new YellowCard($robin, $leo, 'Le vélo en plein milieu de l’entrée', $now->modify('-3 hours')));
         $this->shopping($household, $members, $now, $manager);
         $manager->flush();
+        \assert($manager instanceof EntityManagerInterface);
+        $this->accounts($household, $members, $now, $manager);
+    }
+
+    /**
+     * The accounts: the coloc's common expenses these last two weeks (the electricity, the internet box, the groceries,
+     * Friday's pizzas without Gab, the house-warming drinks where Robin brought a friend, Gab paying Léo back), and last
+     * month's weekend in Annecy with Camille, a friend, who paid the fondue in Geneva in Swiss francs.
+     *
+     * @param array<string, Member> $members
+     */
+    private function accounts(Household $household, array $members, \DateTimeImmutable $now, EntityManagerInterface $manager): void
+    {
+        $common = new Ledger($household, LedgerBook::COMMON_NAME, $now->modify('-15 days'));
+        $common->setEveryone(true);
+        $common->welcome($household->getMembers());
+        $annecy = new Ledger($household, 'Week-end à Annecy', $now->modify('-32 days'));
+        $annecy->setDescription('Le chalet au bord du lac, avec Camille');
+        foreach (['Léo', 'Léa', 'Robin'] as $name) {
+            $annecy->addParticipant($name, $members[$name]);
+        }
+        $annecy->addParticipant('Camille');
+        $manager->persist($common);
+        $manager->persist($annecy);
+        $manager->flush();
+
+        // [title, cents, who paid, for whom (by parts: name => parts), when], noted by who paid.
+        $everyone = ['Léo', 'Léa', 'Robin', 'Gab'];
+        foreach ([
+            ['Électricité EDF', 8420, 'Léo', $everyone, '-12 days 19:10'],
+            ['Internet Free', 2999, 'Gab', $everyone, '-9 days 08:30'],
+            ['Courses Lidl', 4230, 'Robin', $everyone, '-6 days 18:45'],
+            ['Pizzas du vendredi', 3600, 'Léa', ['Léo', 'Léa', 'Robin'], '-4 days 21:15'],
+            ['Produits ménagers', 1860, 'Léo', $everyone, '-3 days 11:00'],
+            ['Apéro de la crémaillère', 4800, 'Robin', ['Léo' => 1, 'Léa' => 1, 'Robin' => 2, 'Gab' => 1], '-2 days 22:30'],
+            ['Courses du marché', 2340, 'Robin', $everyone, '-1 hour'],
+        ] as [$title, $amount, $payer, $for, $when]) {
+            $this->spend($common, $title, $amount, $payer, $for, $members[$payer], $now->modify($when), $manager);
+        }
+        $back = ExpenseDraft::transfer($common, self::participant($common, 'Gab'), self::participant($common, 'Léo'), 2000, $now->modify('-1 day'));
+        (new ExpenseRecorder($manager, new MockClock($now->modify('-1 day 09:00'))))->record($back, $members['Gab']);
+
+        $weekend = ['Léo', 'Léa', 'Robin', 'Camille'];
+        $this->spend($annecy, 'Location du chalet', 36000, 'Léa', $weekend, $members['Léa'], $now->modify('-30 days 20:00'), $manager);
+        $this->spend($annecy, 'Courses du week-end', 6480, 'Léo', $weekend, $members['Léo'], $now->modify('-29 days 10:30'), $manager);
+        $this->spend($annecy, 'Fondue à Genève', 9600, 'Camille', $weekend, $members['Léo'], $now->modify('-29 days 21:00'), $manager, ['CHF', '1.06']);
+        $this->spend($annecy, 'Essence', 5200, 'Robin', ['Léo', 'Léa', 'Robin'], $members['Robin'], $now->modify('-28 days 18:00'), $manager);
+    }
+
+    /**
+     * @param list<string>|array<string, int> $for         names, or names => parts
+     * @param array{string, string}|null      $foreignRate paid in another currency, at a rate
+     */
+    private function spend(Ledger $ledger, string $title, int $amount, string $payer, array $for, Member $by, \DateTimeImmutable $at, EntityManagerInterface $manager, ?array $foreignRate = null): void
+    {
+        $draft = ExpenseDraft::new($ledger, self::participant($ledger, $payer), $at);
+        $draft->title = $title;
+        $draft->amount = $amount;
+        if (null !== $foreignRate) {
+            [$draft->currency, $draft->exchangeRate] = $foreignRate;
+        }
+        $parts = array_is_list($for) ? array_fill_keys($for, 1) : $for;
+        $draft->splitMode = array_is_list($for) ? SplitMode::Equal : SplitMode::Shares;
+        foreach ($ledger->getParticipants() as $participant) {
+            $draft->split[(int) $participant->getId()]->included = isset($parts[$participant->getName()]);
+            $draft->split[(int) $participant->getId()]->weight = $parts[$participant->getName()] ?? 1;
+        }
+        (new ExpenseRecorder($manager, new MockClock($at)))->record($draft, $by);
+    }
+
+    private static function participant(Ledger $ledger, string $name): Participant
+    {
+        return $ledger->getParticipants()->findFirst(static fn (int $key, Participant $participant): bool => $participant->getName() === $name) ?? throw new \LogicException($name.' is not in '.$ledger->getName().'.');
     }
 
     /**

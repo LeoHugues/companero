@@ -37,6 +37,10 @@ final class NativeConfiguration
             new Rule(patterns: ['^/taches/nouvelle', '^/taches/\d+/modifier', '^/realisations/\d+/modifier'], properties: [
                 'context' => 'modal',
             ]),
+            // So do the forms of the accounts: a new one, an expense noted ("+ Une dépense" leads to it) or corrected.
+            new Rule(patterns: ['^/comptes/nouveau', '^/comptes/depense', '^/comptes/\d+/depenses/nouvelle', '^/comptes/\d+/depenses/\d+/modifier'], properties: [
+                'context' => 'modal',
+            ]),
         ]);
     }
 }

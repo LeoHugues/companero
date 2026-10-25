@@ -1,7 +1,7 @@
 # Companero
 
 Application d'organisation de l'intendance en colocation : tâches récurrentes et
-ponctuelles, ce qui manque à la maison, objectifs hebdomadaires, points et une touche de gamification, autour
+ponctuelles, ce qui manque à la maison, les comptes partagés (comme un Tricount), objectifs hebdomadaires, points et une touche de gamification, autour
 de **la Casa**, la maison-personnage dont l'humeur suit la propreté du foyer.
 
 - [Vision produit](docs/vision.md)
@@ -135,12 +135,13 @@ passe les tests est mis en production automatiquement (voir
 
 | Dossier | Rôle |
 |---|---|
-| `src/Entity`, `src/Repository` | Modèle : foyer, membres, zones, animaux, tâches, réalisations, journal de points, présence, titres, cadeaux, boosts, surprises, cartons jaunes, ce qui manque |
+| `src/Entity`, `src/Repository` | Modèle : foyer, membres, zones, animaux, tâches, réalisations, journal de points, présence, titres, cadeaux, boosts, surprises, cartons jaunes, ce qui manque, comptes (participants, dépenses, parts) |
 | `src/Task` | Statut d'une tâche (urgence, fraîcheur), tableau des tâches et des pièces, réalisation et correction |
 | `src/Presence`, `src/Reminder` | Qui est là (jours par semaine, « à la maison ») et qui prévenir d'une tâche |
 | `src/Reward` | Cadeaux de niveau, boosts (dont celui du jour de ménage), cartons jaunes |
 | `src/Bounty` | Surprises de la semaine : tirage au hasard dans les cartes, découverte par le premier qui fait la tâche |
 | `src/Shopping` | Ce qui manque : la liste, les suggestions, le dessin deviné du nom |
+| `src/Ledger` | Les comptes : enregistrer une dépense (devise, parts au centime près), équilibres et remboursements, catégorie devinée du titre, export CSV |
 | `src/Pet` | Portrait des chats autour de la Casa, d'après leur description |
 | `assets/controllers`, `assets/lib/fx.js` | Animations : la Casa et ses chats, jauges qui montent, compteurs, célébrations, confettis |
 | `src/Calendar` | La semaine (lundi → dimanche) |

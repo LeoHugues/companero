@@ -115,6 +115,7 @@
     {% endif %}
 
     {{ include('shopping/_strip.html.twig', {missing: missing}) }}
+    {{ include('ledger/_strip.html.twig', {ledgers: ledgers, standing: standing}) }}
 
     {% set late = mine|filter(v => v.status.urgency.value == 'late')|length %}
     <section class="flex flex-col gap-3.5" aria-labelledby="mine-title">

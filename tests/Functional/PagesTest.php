@@ -24,6 +24,8 @@ final class PagesTest extends AppTestCase
         yield ['/coloc', 'Réglages de la coloc'];
         yield ['/plan', 'Le plan'];
         yield ['/courses', 'Ce qui manque'];
+        yield ['/comptes', 'Les comptes'];
+        yield ['/comptes/nouveau', 'Un nouveau compte'];
     }
 
     #[DataProvider('pages')]

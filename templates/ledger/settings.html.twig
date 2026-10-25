@@ -1,0 +1,106 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Réglages · {{ ledger.name }} · Companero{% endblock %}
+
+{#
+    An account's settings: its name and currency (fixed once something is noted), who is in it — a coloc who was
+    not, a guest by their name, a guest's name put right, someone with nothing in it taken off —, its export, and
+    closing it for good.
+#}
+{% block body %}
+    <header class="page-head items-start">
+        <div class="min-w-0">
+            <p class="eyebrow">{{ ledger.name }}</p>
+            <h1 class="page-title mt-1">Réglages du compte</h1>
+        </div>
+        <a href="{{ path('ledger_show', {id: ledger.id}) }}" aria-label="Retour au compte" class="head-button"><twig:Icon name="close" size="19" stroke="2"/></a>
+    </header>
+
+    {{ form_start(form, {attr: {class: 'flex flex-col gap-3'}}) }}
+        <div class="form-sheet">
+            {{ form_row(form.name) }}
+            {{ form_row(form.description) }}
+            {{ form_row(form.currency) }}
+            <div class="-mb-2 border-t border-line/70 pt-1.5">{{ form_row(form.everyone) }}</div>
+        </div>
+        <button type="submit" class="btn-primary w-full" data-haptic="success">Enregistrer</button>
+    {{ form_end(form) }}
+
+    <section class="flex flex-col gap-2" aria-labelledby="participants-title">
+        <div class="section-head px-1">
+            <h2 id="participants-title" class="eyebrow">Qui est dedans</h2>
+            <p class="text-[12.5px] text-muted">{{ ledger.participants|length }} personne{{ ledger.participants|length > 1 ? 's' }}</p>
+        </div>
+        <ul class="list-sheet">
+            {% for participant in ledger.participants %}
+                <li class="list-row" id="participant-{{ participant.id }}">
+                    <twig:Avatar :member="participant" size="34"/>
+                    {% if participant.guest %}
+                        <form method="post" action="{{ path('ledger_participant_rename', {id: ledger.id, participant: participant.id}) }}" class="flex min-w-0 flex-1 items-center gap-2">
+                            <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
+                            <label for="participant-name-{{ participant.id }}" class="sr-only">Le prénom de {{ participant.name }}</label>
+                            <input type="text" id="participant-name-{{ participant.id }}" name="name" value="{{ participant.name }}" maxlength="{{ constant('App\\Entity\\Participant::NAME_MAX_LENGTH') }}" class="participant-name" autocomplete="off" required>
+                            <span class="shrink-0 text-[12px] font-semibold text-dust">Invité</span>
+                            <button type="submit" class="row-button" aria-label="Renommer {{ participant.name }}" title="Renommer"><twig:Icon name="check" size="17" stroke="2.4"/></button>
+                        </form>
+                    {% else %}
+                        <span class="flex min-w-0 flex-1 flex-col gap-0.5">
+                            <span class="row-title">{{ participant.name }}</span>
+                            <span class="row-meta">Coloc{{ ledger.everyone ? ' · toute la coloc est dedans' }}</span>
+                        </span>
+                    {% endif %}
+                    {% if not involved[participant.id] and (participant.guest or not ledger.everyone) %}
+                        <form method="post" action="{{ path('ledger_participant_remove', {id: ledger.id, participant: participant.id}) }}" data-turbo-confirm="Retirer {{ participant.name }} du compte ?">
+                            <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
+                            <button type="submit" class="row-button hover:text-danger-ink" aria-label="Retirer {{ participant.name }} du compte" title="Retirer"><twig:Icon name="trash" size="17" stroke="1.9"/></button>
+                        </form>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+        <p class="px-1 text-[12.5px] leading-snug text-muted">Quelqu’un qui a payé ou eu une part de quelque chose reste dans le compte.</p>
+
+        <div class="sheet flex flex-col gap-3 p-4">
+            {% if outside is not empty %}
+                <ul class="flex flex-wrap gap-2" aria-label="Ajouter un coloc">
+                    {% for coloc in outside %}
+                        <li>
+                            <form method="post" action="{{ path('ledger_participant_add', {id: ledger.id}) }}">
+                                <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
+                                <input type="hidden" name="member" value="{{ coloc.id }}">
+                                <button type="submit" class="suggestion" aria-label="Ajouter {{ coloc.name }} au compte"><twig:Icon name="plus" size="14" stroke="2.4"/><twig:Avatar :member="coloc" size="20"/>{{ coloc.name }}</button>
+                            </form>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+            <form method="post" action="{{ path('ledger_participant_add', {id: ledger.id}) }}" class="flex items-center gap-2">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
+                <label for="guest-name" class="sr-only">Le prénom d’un invité</label>
+                <input type="text" id="guest-name" name="name" class="input" placeholder="Quelqu’un d’autre : son prénom" maxlength="{{ constant('App\\Entity\\Participant::NAME_MAX_LENGTH') }}" autocomplete="off" enterkeyhint="send" required>
+                <button type="submit" class="btn-soft h-12 px-4" data-haptic="success"><twig:Icon name="plus" size="17" stroke="2.4"/>Ajouter</button>
+            </form>
+        </div>
+    </section>
+
+    <section class="flex flex-col gap-2" aria-labelledby="export-title">
+        <h2 id="export-title" class="group-label">Les dépenses</h2>
+        <div class="list-sheet">
+            <a href="{{ path('ledger_export', {id: ledger.id}) }}" class="list-row" data-turbo="false" download>
+                <span class="tile tile-sky" aria-hidden="true"><twig:Icon name="download" size="19" stroke="2"/></span>
+                <span class="flex min-w-0 flex-1 flex-col gap-0.5">
+                    <span class="row-title">Exporter</span>
+                    <span class="row-meta">{{ count }} ligne{{ count > 1 ? 's' }}, dans un tableur (CSV)</span>
+                </span>
+                <twig:Icon name="chevron-right" size="18" class="row-chevron"/>
+            </a>
+        </div>
+    </section>
+
+    <form method="post" action="{{ path('ledger_delete', {id: ledger.id}) }}" class="flex justify-center" data-turbo-confirm="Fermer « {{ ledger.name }} » pour de bon ? Ses {{ count }} ligne{{ count > 1 ? 's' }} disparaissent avec lui.">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
+        <button type="submit" class="btn-link hover:text-danger-ink"><twig:Icon name="trash" size="17" stroke="1.9"/>Fermer ce compte</button>
+    </form>
+{% endblock %}
+
+{% block nav %}<twig:BottomNav active="home"/>{% endblock %}
