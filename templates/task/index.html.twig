@@ -3,19 +3,13 @@
 {% block title %}Les modèles · Companero{% endblock %}
 
 {#
-    The templates: what comes back in the house (regular, on a fixed day, express, occasional) and the
-    catalogue of one-off tasks launched by hand. What there is to do right now is on the home page.
-    A search box, and folds by room, by kind of work or by how they come back.
+    The templates, the other face of the "Tâches" tab: what comes back in the house (regular, on a fixed day, express,
+    occasional) and the catalogue of one-off tasks launched by hand. A search box, and folds by room, by kind of work
+    or by how they come back.
 #}
 {% block body %}
-    <header class="page-head items-end">
-        <div class="min-w-0">
-            <p class="eyebrow">Les règles de la maison</p>
-            <h1 class="page-title mt-1">Les modèles</h1>
-        </div>
-        <a href="{{ path('plan_show') }}" class="head-link"><twig:Icon name="plan" size="16" stroke="1.9"/>Plan</a>
-    </header>
-    <p class="page-lede -mt-2">Ce qui revient tout seul dans la maison. Ce qu’il y a à faire maintenant est sur <a href="{{ path('app_home') }}">l’accueil</a>.</p>
+    {{ include('task/_tabs.html.twig', {tab: 'templates', todo: null, templates: count}) }}
+    <p class="page-lede -mt-1 px-1">Les règles de la maison : ce qui revient tout seul, quand c’est le moment.</p>
 
     <div class="flex flex-col gap-5" data-controller="filter">
         <div class="flex flex-col gap-3">
@@ -25,9 +19,10 @@
                 <input type="search" class="input bg-surface pl-10 shadow-[0_6px_16px_-12px_rgba(46,30,20,.35)]" placeholder="Chercher parmi les {{ count }} modèles…" autocomplete="off"
                        data-filter-target="input" data-action="input->filter#filter">
             </label>
-            <nav class="segmented" aria-label="Ranger par">
+            <nav class="flex flex-wrap items-center gap-1.5 px-1" aria-label="Ranger par">
+                <span class="mr-1 text-[12.5px] font-medium text-muted">Ranger par</span>
                 {% for key, label in groupings %}
-                    <a href="{{ path('task_index', {par: key}) }}"{% if grouping == key %} aria-current="page"{% endif %} data-haptic="tick">{{ label }}</a>
+                    <a href="{{ path('task_index', {par: key}) }}" class="sort-chip"{% if grouping == key %} aria-current="page"{% endif %} data-haptic="tick">{{ label }}</a>
                 {% endfor %}
             </nav>
         </div>

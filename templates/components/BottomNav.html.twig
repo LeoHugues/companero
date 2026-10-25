@@ -1,18 +1,21 @@
 {% props active %}
 {#
-    The bottom bar: thin, four words under four drawings, and "Ajouter" in the middle, a round
-    terracotta button standing out of the bar on a bump of its own. Each drawing fills in with
-    the Casa's colours when its page is open: the house turns into the Casa, the cards and the
-    bars take her yellow and terracotta, the profile shows who is there.
+    The bottom bar: thin, four words under four drawings, and "Ajouter" in the middle, a round terracotta button
+    standing out of the bar on a bump of its own. What is used every day is a tab: the Casa and my hand (Accueil),
+    everything there is to do (Tâches), what the house is missing (Courses), the accounts (Comptes). Each drawing
+    fills in with the Casa's colours when its page is open. The profile is the face at the top of the home page.
+
+    "Ajouter" opens a sheet from the bottom (add_sheet_controller.js), its content loaded when it first opens; without
+    scripts, it is a page.
 #}
 {% set items = [
-    {key: 'home', route: 'app_home', label: 'Accueil'},
-    {key: 'tasks', route: 'task_index', label: 'Tâches', title: 'Les modèles'},
-    {key: 'new', route: 'task_new', label: 'Ajouter'},
-    {key: 'review', route: 'review_show', label: 'Bilan', title: 'Bilan de la semaine'},
-    {key: 'profile', route: 'profile_show', label: 'Profil'},
+    {key: 'home', href: path('app_home'), label: 'Accueil'},
+    {key: 'tasks', href: path('task_board'), label: 'Tâches', title: 'Tout ce qu’il y a à faire'},
+    {key: 'new', href: path('task_new'), label: 'Ajouter'},
+    {key: 'shopping', href: path('shopping_index'), label: 'Courses', title: 'Ce qui manque'},
+    {key: 'ledger', href: ledger_tab_path(), label: 'Comptes', title: 'Les dépenses partagées'},
 ] %}
-<nav {{ attributes.defaults({class: 'nav-bar'}) }} aria-label="Navigation principale">
+<nav {{ attributes.defaults({class: 'nav-bar'}) }} aria-label="Navigation principale" data-controller="add-sheet">
     <svg class="nav-bar-bump" width="132" height="30" viewBox="0 0 132 30" aria-hidden="true">
         <path d="M0 25.5 C24 25.5 32 24 40 15.2 C48 6.5 55 2 66 2 C77 2 84 6.5 92 15.2 C100 24 108 25.5 132 25.5 V30 H0 Z" fill="var(--color-surface)"/>
         <path d="M0 25.5 C24 25.5 32 24 40 15.2 C48 6.5 55 2 66 2 C77 2 84 6.5 92 15.2 C100 24 108 25.5 132 25.5" fill="none" stroke="var(--color-line)" stroke-width="1"/>
@@ -22,12 +25,12 @@
             {% set current = item.key == active %}
             <li>
                 {% if item.key == 'new' %}
-                    <a href="{{ path(item.route) }}" class="nav-bar-add" data-haptic="press">
+                    <a href="{{ item.href }}" class="nav-bar-add" data-haptic="press" data-action="add-sheet#open" aria-haspopup="dialog">
                         <span class="nav-bar-add-disc" aria-hidden="true"><twig:Icon name="plus" size="26" stroke="2.6"/></span>
                         <span class="nav-bar-label">{{ item.label }}</span>
                     </a>
                 {% else %}
-                    <a href="{{ path(item.route) }}" class="nav-bar-link{{ current ? ' is-current' }}"{{ current ? ' aria-current="page"' }}{% if item.title is defined %} title="{{ item.title }}"{% endif %}>
+                    <a href="{{ item.href }}" class="nav-bar-link{{ current ? ' is-current' }}"{{ current ? ' aria-current="page"' }}{% if item.title is defined %} title="{{ item.title }}"{% endif %}>
                         <span class="nav-bar-icon" aria-hidden="true">
                             {% if item.key == 'home' %}
                                 {# A little Casa: her yellow body and terracotta roof when this is the page. #}
@@ -45,17 +48,20 @@
                                     <rect class="nav-fill-surface" x="11" y="5" width="10.6" height="15" rx="2.4" transform="rotate(9 16.3 12.5)"/>
                                     <path class="nav-fill-clay" d="M16.3 10.2 l2 2.4 l-2 2.4 l-2 -2.4 z" transform="rotate(9 16.3 12.5)" stroke-width="1.3"/>
                                 </svg>
-                            {% elseif item.key == 'review' %}
-                                {# The week in three bars. #}
-                                <svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round">
-                                    <rect class="nav-fill-sun" x="3.8" y="12.5" width="5" height="9.5" rx="1.8"/>
-                                    <rect class="nav-fill-clay" x="10.5" y="4.5" width="5" height="17.5" rx="1.8"/>
-                                    <rect class="nav-fill-sun" x="17.2" y="9" width="5" height="13" rx="1.8"/>
+                            {% elseif item.key == 'shopping' %}
+                                {# A basket: the lilac of the shopping list, its handle terracotta. #}
+                                <svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                                    <path class="nav-stroke-clay" d="M8.6 10.6 L12 4.6 M17.4 10.6 L14.4 5.6"/>
+                                    <path class="nav-fill-lilac" d="M3.4 10.6 H22.6 L20.7 20.4 a2 2 0 0 1 -2 1.6 H7.3 a2 2 0 0 1 -2 -1.6 Z"/>
+                                    <path d="M9.6 14.4 V18.2 M13 14.4 V18.2 M16.4 14.4 V18.2" stroke-width="1.6"/>
                                 </svg>
-                            {% elseif app.user %}
-                                <twig:Avatar :member="app.user" size="25" class="nav-bar-avatar"/>
                             {% else %}
-                                <twig:Icon name="user" size="26" stroke="1.9"/>
+                                {# Two coins: the Casa's yellow behind, terracotta in front. #}
+                                <svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle class="nav-fill-sun" cx="10" cy="10" r="6.2"/>
+                                    <circle class="nav-fill-clay" cx="16" cy="16" r="6.2"/>
+                                    <path d="M17.6 13.6 a2.6 2.6 0 1 0 0 4.8 M13.4 15.2 h3.4 M13.4 16.9 h3.4" stroke-width="1.5"/>
+                                </svg>
                             {% endif %}
                         </span>
                         <span class="nav-bar-label">{{ item.label }}</span>
@@ -64,4 +70,18 @@
             </li>
         {% endfor %}
     </ul>
+
+    {#
+        What can be added, rising from the bottom: its content (task/new_choose.html.twig) is loaded the first time it
+        opens. A tap outside, the cross or "back" closes it.
+    #}
+    <dialog class="add-sheet" aria-labelledby="add-sheet-title" data-add-sheet-target="dialog" data-action="click->add-sheet#backdrop close->add-sheet#closed">
+        {# Focused when it opens, so that no button of it is lit up before a tap. #}
+        <div class="add-sheet-panel" tabindex="-1" autofocus>
+            <span class="add-sheet-grip" aria-hidden="true"></span>
+            <turbo-frame id="add-sheet" src="{{ path('task_new') }}" loading="lazy" target="_top">
+                <div class="add-sheet-loading" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+            </turbo-frame>
+        </div>
+    </dialog>
 </nav>

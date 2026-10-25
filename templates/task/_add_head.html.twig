@@ -1,0 +1,12 @@
+{#
+    The head of a form opened from "Ajouter": what is being added, and a cross (it closes the app's modal, or goes back
+    home). Variables: title, and lede (a line on what it does), optional.
+#}
+<header class="page-head items-start">
+    <div class="min-w-0">
+        <p class="eyebrow">Ajouter</p>
+        <h1 class="page-title mt-1">{{ title }}</h1>
+        {% if lede is defined and lede %}<p class="page-lede mt-1">{{ lede }}</p>{% endif %}
+    </div>
+    <a href="{{ ux_is_native() ? '/recede_historical_location' : path('app_home') }}" aria-label="Fermer" class="head-button"><twig:Icon name="close" size="19" stroke="2"/></a>
+</header>

@@ -5,20 +5,134 @@
 {# The save button floats above the bottom bar; in the app's modal, at the very bottom. #}
 {% block main_class %}{{ ux_is_native() ? 'pb-6' : 'pb-28' }}{% endblock %}
 
+{#
+    Something to do once, in a few words: what — and, as it is typed, what the house already knows (the catalogue,
+    launched as it is; the occasional tasks asleep, raised in one tap) —, when (chips, due_controller.js), whether I take
+    it or it is already done. Everything else (a precision, the room, who is in charge, its points, its card, its alerts)
+    is folded under "Plus d'options".
+#}
 {% block body %}
-    {{ include('task/_tunnel.html.twig', {
-        step: 2,
+    {{ include('task/_add_head.html.twig', {
         title: template ? template.title : 'Une tâche à faire',
-        icon: 'check',
-        tile: 'tile-sun',
-        what: template ? 'Depuis le catalogue : ajuste ce qu’il faut, puis ajoute-la. Elle arrive sur l’accueil et disparaît une fois faite.' : 'Une nouvelle tâche, à faire une fois : elle arrive sur l’accueil et disparaît une fois faite. Pour une tâche qui revient, crée plutôt un modèle.'
+        lede: template ? 'Depuis le catalogue : ajuste ce qu’il faut, puis ajoute-la.' : null,
     }) }}
 
-    {% if can_pick and not template %}
-        <a href="{{ path('task_new_one_off') }}" class="btn-link -my-2 self-start"><twig:Icon name="search" size="16" stroke="1.9"/>Plutôt une tâche que la maison connaît</a>
-    {% endif %}
+    {{ form_start(form, {attr: {class: 'flex flex-col gap-4', 'data-controller': 'task-form'}}) }}
+        <div class="form-sheet gap-3" data-controller="filter" data-filter-until-typed-value="true">
+            {{ form_row(form.title, {attr: {autofocus: not template, autocomplete: 'off', enterkeyhint: 'done', 'data-filter-target': 'input', 'data-action': 'input->filter#filter'}}) }}
+            {% if catalog is not empty or dormant is not empty %}
+                <div class="flex flex-col gap-2" data-filter-target="group" hidden>
+                    <p class="text-[12.5px] font-semibold text-muted">La maison la connaît déjà ?</p>
+                    <ul class="flex flex-wrap gap-2">
+                        {# Their buttons belong to forms of their own, after this one: forms cannot hold one another. #}
+                        {% for view in dormant %}
+                            <li data-filter-target="item" data-filter-text="{{ view.task.title }} {{ task_place(view.task) }}">
+                                <button type="submit" form="raise-{{ view.task.id }}" class="raise-chip" data-haptic="alert" aria-label="Ça arrive : « {{ view.task.title }} »">
+                                    <span class="raise-chip-icon"><twig:Icon name="siren" size="15" stroke="2.4"/></span>
+                                    {{ view.task.title }}
+                                </button>
+                            </li>
+                        {% endfor %}
+                        {% for item in catalog %}
+                            <li data-filter-target="item" data-filter-text="{{ item.title }} {{ item.category.label }} {{ item.zone.name ?? '' }}">
+                                <a href="{{ path('task_new_one_off', {modele: item.id}) }}" class="suggestion" data-haptic="tick"><twig:Icon :name="item.category.icon" size="14" stroke="2"/>{{ item.title }} <span class="font-semibold text-clay-dark">+{{ item.points }}</span></a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+        </div>
 
-    {{ include('task/_form.html.twig', {submit_label: 'Ajouter la tâche'}) }}
+        <div class="form-sheet gap-3" data-controller="due">
+            {{ form_label(form.dueAt, 'Pour quand ?') }}
+            <div class="choice-chips" role="group" aria-label="Pour quand ?">
+                {% for when, label in {none: 'Pas pressé', today: 'Aujourd’hui', tomorrow: 'Demain', weekend: 'Ce week-end', date: 'Une date…'} %}
+                    <button type="button" class="chip" data-due-target="chip" data-action="due#choose" data-due-when-param="{{ when }}" data-haptic="tick" aria-pressed="false">{{ label }}</button>
+                {% endfor %}
+            </div>
+            <div data-due-target="field">{{ form_widget(form.dueAt, {attr: {'data-due-target': 'input'}}) }}</div>
+            {{ form_errors(form.dueAt) }}
+        </div>
+
+        <div class="form-sheet is-rows">
+            <div data-task-form-target="notDoneSection">{{ form_row(form.reserve) }}</div>
+            <div>
+                {{ form_row(form.done, {attr: {'data-action': 'change->task-form#toggle', 'data-task-form-target': 'done'}}) }}
+                <fieldset class="flex flex-col gap-5 pb-3.5" data-task-form-target="doneSection">
+                    {{ form_row(form.doneAt) }}
+                </fieldset>
+            </div>
+        </div>
+
+        <details class="fold" id="task-more" data-controller="disclosure" data-action="toggle->disclosure#remember turbo:morph-element->disclosure#restore" {{ form.vars.submitted and not form.vars.valid ? 'open' }}>
+            <summary class="fold-summary">
+                <span class="min-w-0">
+                    <span class="fold-title">Plus d’options</span>
+                    <span class="fold-hint">Une précision, la pièce, qui s’en charge, les points, la carte</span>
+                </span>
+                <twig:Icon name="chevron-down" size="17" stroke="2" class="fold-chevron"/>
+            </summary>
+            <div class="flex flex-col gap-4">
+                <div class="form-sheet">
+                    {{ form_row(form.description) }}
+                    {{ form_row(form.category, {attr: {'data-action': 'change->task-form#toggle'}}) }}
+                    {{ form_row(form.zones) }}
+                    {{ form_row(form.assignee) }}
+                    <fieldset class="flex flex-col gap-5" data-task-form-target="category" data-category="pets">
+                        {% if form.pet is defined %}{{ form_row(form.pet) }}{% endif %}
+                        {{ form_row(form.backup) }}
+                    </fieldset>
+                </div>
+                <div class="form-sheet">
+                    <div class="flex items-center justify-between gap-3" data-controller="stepper">
+                        <div class="flex flex-col gap-0.5">
+                            {{ form_label(form.points) }}
+                            <span class="text-[12.5px] text-muted" data-stepper-target="hint">5 min d’effort ≈ 10 pts</span>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <button type="button" class="row-button is-framed size-10" data-action="stepper#decrement" data-haptic="tick" aria-label="5 points de moins"><twig:Icon name="minus" size="18" stroke="2.2"/></button>
+                            {{ form_widget(form.points, {attr: {class: 'h-10 w-[4.25rem] border-0 bg-transparent px-0 text-center text-[24px] font-bold tracking-tight text-clay-dark shadow-none focus:ring-0 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none', 'data-stepper-target': 'input', 'data-action': 'input->stepper#describe'}}) }}
+                            <button type="button" class="row-button is-framed size-10" data-action="stepper#increment" data-haptic="tick" aria-label="5 points de plus"><twig:Icon name="plus" size="18" stroke="2.2"/></button>
+                        </div>
+                    </div>
+                    {{ form_errors(form.points) }}
+                    {{ form_row(form.rarity, {row_attr: {class: 'rarity-choice border-t border-line/70 pt-4'}, help: 'Pour le plaisir : une tâche rare, épique ou légendaire a une carte qui brille plus.'}) }}
+                </div>
+                <fieldset class="form-sheet">
+                    <legend class="sr-only">Alertes de la carte</legend>
+                    {% for field in [form.warningHours, form.marginHours] %}
+                        <div class="flex flex-col gap-2">
+                            {{ form_label(field) }}
+                            <div class="flex items-center gap-3">
+                                {{ form_widget(field.amount, {attr: {class: 'w-24', placeholder: '—'}}) }}
+                                {{ form_widget(field.unit, {attr: {class: 'choice-segmented flex-1'}}) }}
+                            </div>
+                            {{ form_help(field) }}
+                            {{ form_errors(field) }}
+                        </div>
+                    {% endfor %}
+                </fieldset>
+                {% if form.catalog is defined %}
+                    <div class="form-sheet is-rows">{{ form_row(form.catalog) }}</div>
+                {% endif %}
+            </div>
+        </details>
+
+        {# What comes back is a template's business, not this task's. #}
+        {% for field in [form.rhythmDays, form.weeklyCommitment, form.scheduledWeekday, form.scheduledTime, form.cooldownHours] %}{% do field.setRendered %}{% endfor %}
+
+        <div class="save-bar {{ ux_is_native() ? 'is-native' }}">
+            <div class="save-bar-in"><button type="submit" class="btn-primary" data-haptic="success">Ajouter la tâche</button></div>
+        </div>
+    {{ form_end(form) }}
+
+    {% for view in dormant %}
+        <form method="post" action="{{ path('task_raise', {id: view.task.id}) }}" id="raise-{{ view.task.id }}" hidden>
+            <input type="hidden" name="_back" value="board">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
+        </form>
+    {% endfor %}
 {% endblock %}
 
+{# In the Android app this form is a modal (see App\Native\NativeConfiguration): no bottom navigation. #}
 {% block nav %}{% if not ux_is_native() %}<twig:BottomNav active="new"/>{% endif %}{% endblock %}

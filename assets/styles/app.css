@@ -1128,6 +1128,7 @@ main:has(> p[role="status"]) .home-hero { margin-top: 0; }
 .nav-bar-link.is-current .nav-bar-icon { animation: nav-pop 520ms cubic-bezier(.2, 1.6, .4, 1) both; }
 .nav-bar-link.is-current .nav-fill-sun { fill: var(--color-sun); }
 .nav-bar-link.is-current .nav-fill-blush { fill: var(--color-blush); }
+.nav-bar-link.is-current .nav-fill-lilac { fill: #DCC4F2; }
 .nav-bar-link.is-current .nav-fill-clay { fill: var(--color-clay); }
 .nav-bar-link.is-current .nav-fill-surface { fill: var(--color-surface); }
 .nav-bar-link.is-current .nav-stroke-clay { stroke: var(--color-clay); stroke-width: 2.6; }
@@ -1171,6 +1172,10 @@ details[open] .care-group-fold::after { content: 'Replier'; font-size: 12.5px; }
 .care-group-title.is-fresh { color: var(--color-ok-ink); }
 .care-group-title.is-fresh .care-group-dot { background: var(--color-ok); }
 .sheet-empty { @apply rounded-[18px] border border-dashed border-line p-4 text-sm text-muted; }
+/* A small way of sorting a list (the templates by room, kind of work, frequency): ink once chosen. */
+.sort-chip { @apply inline-flex h-8 items-center rounded-full border border-line bg-surface px-3 text-[13px] font-semibold text-ink-soft no-underline transition hover:text-ink active:scale-95; }
+.sort-chip { @apply cursor-pointer; }
+.sort-chip[aria-current="page"], .sort-chip[aria-pressed="true"] { @apply border-ink bg-ink text-cream hover:text-cream; }
 
 /* "En un geste": quiet chips, ticked in one tap. */
 .quick-chip {
@@ -1181,13 +1186,14 @@ details[open] .care-group-fold::after { content: 'Replier'; font-size: 12.5px; }
 .quick-chip.is-resting .quick-chip-tick { @apply bg-ok text-surface; }
 
 /*
- * What the house is missing (docs/direction-artistique.md, « Ce qui manque »). On the home page, a strip under the
- * state of the house: what is missing at a glance, and "+" in the sand of a sheet to say something else is.
+ * "Chez nous", at the bottom of the home page (docs/direction-artistique.md, « L'accueil »): what is missing, the
+ * accounts, the week's review, a row each; "+" in the sand of the sheet to add to the first two.
  */
-.missing-strip { @apply sheet flex items-center gap-2 pr-3 pl-4; }
-.missing-strip-link { @apply flex min-h-[66px] min-w-0 flex-1 items-center gap-3 py-2.5 text-ink no-underline transition hover:text-ink active:scale-[.985]; }
-.missing-strip-names { @apply block truncate text-[15px] leading-snug font-semibold; }
-.missing-strip-add { @apply flex size-11 shrink-0 items-center justify-center rounded-[13px] bg-track/60 text-ink no-underline transition hover:bg-track hover:text-ink active:scale-90; }
+.home-summary > li { @apply flex items-center gap-2; }
+.summary-add { @apply flex size-10 shrink-0 items-center justify-center rounded-[12px] bg-track/60 text-ink no-underline transition hover:bg-track hover:text-ink active:scale-90; }
+.summary-badge { @apply shrink-0 rounded-full bg-sun px-2 py-0.5 text-[11px] font-bold text-ink; }
+/* Under my hand: the way to everything there is to do, in the "Tâches" tab. */
+.home-more { @apply sheet flex min-h-12 items-center gap-2 px-4 text-[14.5px] font-semibold text-ink no-underline transition hover:text-ink active:scale-[.985]; }
 /* Something urgent: a coral dot on the corner of a tile. */
 .tile-dot { @apply absolute -top-1 -right-1 size-3 rounded-full border-2 border-surface bg-danger; }
 /* A suggestion: one tap and it is on the list. */
@@ -1210,7 +1216,7 @@ details[open] .care-group-fold::after { content: 'Replier'; font-size: 12.5px; }
 
 /*
  * The accounts (docs/direction-artistique.md, « Les comptes »): sage when owed, terracotta when owing — never a red
- * of alarm. On the home page, a strip like "Il manque" (.missing-strip).
+ * of alarm.
  */
 .ledger-summary { @apply flex flex-col gap-3 p-4; }
 .ledger-summary-line { @apply text-[17px] leading-tight font-semibold; }
@@ -1253,6 +1259,15 @@ details[open] .care-group-fold::after { content: 'Replier'; font-size: 12.5px; }
 .settle-row.is-settled .settle-button { @apply bg-ok text-cream; animation: pop 380ms cubic-bezier(.2, 1.5, .4, 1) both; }
 .settle-row.is-settled { transition: opacity 260ms 320ms; opacity: .5; }
 
+/* "Pour qui", folded on everyone equally: a line that says it, and "Modifier" in the sand of the sheet. */
+.split-fold { @apply block; }
+.split-fold[open] > div { @apply mt-4; }
+.split-summary { @apply flex cursor-pointer list-none items-center gap-3 select-none; }
+.split-summary::-webkit-details-marker { display: none; }
+.split-summary-edit { @apply shrink-0 rounded-[10px] bg-track/60 px-2.5 py-1.5 text-[12.5px] font-semibold text-ink; }
+.split-fold:not([open]) .split-summary-edit::after { content: 'Modifier'; }
+.split-fold[open] .split-summary-edit::after { content: 'Replier'; }
+.split-fold[open] .split-summary .row-meta { @apply hidden; }
 /* "Pour qui": a round box, the face and the name, then the parts (− and +) or an amount, and each one's part. */
 .split-list { @apply -mx-1 flex flex-col; }
 .split-list > li + li { @apply border-t border-line/70; }
@@ -1607,4 +1622,41 @@ a.list-row, .list-row > a { @apply transition hover:text-ink active:scale-[.985]
   padding-bottom: env(safe-area-inset-bottom);
   background: var(--color-surface);
   box-shadow: 0 -1px 0 var(--color-line), 0 -14px 30px -22px rgba(46, 30, 20, .35);
+}
+
+/*
+ * "Ajouter": a sheet that rises from the bottom over the dimmed page (add_sheet_controller.js), its grip on top, what
+ * can be added in big tiles, then "Il manque…" typed right there. On a large screen, a card in the middle.
+ */
+.add-sheet { @apply m-0 mt-auto w-full max-w-none bg-transparent p-0 text-ink; max-height: 92dvh; overflow: visible; }
+.add-sheet::backdrop { background: rgba(46, 30, 20, .32); animation: sheet-fade 220ms ease-out both; }
+.add-sheet[open] { animation: sheet-rise 380ms cubic-bezier(.2, 1, .3, 1) both; }
+.add-sheet-panel {
+  @apply mx-auto flex max-h-[92dvh] max-w-md flex-col gap-4 overflow-y-auto rounded-t-[26px] bg-cream px-5 pt-2.5;
+  padding-bottom: calc(20px + env(safe-area-inset-bottom));
+  box-shadow: 0 -18px 40px -24px rgba(46, 30, 20, .55);
+}
+.add-sheet-panel:focus { outline: none; }
+.add-sheet-grip { @apply mx-auto block h-1.5 w-10 shrink-0 rounded-full bg-track; }
+.add-sheet-loading { @apply grid grid-cols-2 gap-3 py-12; }
+.add-sheet-loading > span { @apply block h-[92px] rounded-[20px] bg-track/50; animation: sheet-pulse 1.2s ease-in-out infinite alternate; }
+html.has-sheet { overflow: hidden; }
+@keyframes sheet-rise { from { transform: translateY(100%); } }
+@keyframes sheet-fade { from { opacity: 0; } }
+@keyframes sheet-pulse { to { opacity: .45; } }
+@media (min-width: 640px) {
+  .add-sheet { margin: auto; }
+  .add-sheet-panel { @apply rounded-[26px] pt-5 pb-5; }
+  .add-sheet-grip { @apply hidden; }
+}
+/* A choice of the sheet: a big tile, its drawing, a word, an example. */
+.add-choices { @apply grid grid-cols-2 gap-3; }
+.add-choice {
+  @apply sheet flex h-full min-h-[104px] flex-col items-start justify-between gap-2 p-3.5 text-ink no-underline transition hover:-translate-y-0.5 hover:text-ink active:scale-[.97];
+}
+.add-choice-title { @apply text-[15.5px] leading-tight font-semibold; }
+.add-choice-hint { @apply text-[12px] leading-snug text-muted; }
+.add-choice.is-minor { @apply min-h-0 flex-row items-center justify-start gap-3 py-3 shadow-none ring-1 ring-line; }
+@media (prefers-reduced-motion: reduce) {
+  .add-sheet[open], .add-sheet::backdrop, .add-sheet-loading > span { animation: none; }
 }

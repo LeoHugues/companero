@@ -13,7 +13,6 @@
             <p class="eyebrow">{{ app.user.household.name }}</p>
             <h1 class="page-title mt-1">{{ adding and ledgers is not empty ? 'Dans quel compte ?' : 'Les comptes' }}</h1>
         </div>
-        <a href="{{ ux_is_native() ? '/recede_historical_location' : path('app_home') }}" aria-label="Retour à l’accueil" class="head-button"><twig:Icon name="arrow-left" size="20" stroke="2"/></a>
     </header>
 
     {% if ledgers is empty %}
@@ -66,4 +65,4 @@
     {% endif %}
 {% endblock %}
 
-{% block nav %}<twig:BottomNav active="home"/>{% endblock %}
+{% block nav %}<twig:BottomNav active="ledger"/>{% endblock %}

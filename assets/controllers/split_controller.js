@@ -41,7 +41,7 @@ const split = (total, weights) => {
 };
 
 export default class extends Controller {
-    static targets = ['amount', 'currency', 'rate', 'rateFrom', 'rateInput', 'converted', 'kindText', 'title', 'section', 'list', 'row', 'check', 'weight', 'part', 'share', 'remainder', 'all'];
+    static targets = ['amount', 'currency', 'rate', 'rateFrom', 'rateInput', 'converted', 'kindText', 'title', 'section', 'list', 'row', 'check', 'weight', 'part', 'share', 'remainder', 'all', 'summary', 'each'];
     static values = { ledgerCurrency: String, symbols: Object, kind: String, mode: String };
 
     connect() {
@@ -138,6 +138,14 @@ export default class extends Controller {
         });
         this.remainderTarget.textContent = remainder;
         this.remainderTarget.className = `split-remainder ${state}`;
+
+        // Folded, "Pour qui" says it in a line: who, how, and what it comes to.
+        if (this.hasSummaryTarget) {
+            const names = this.rowTargets.filter((_, i) => included[i]).map((row) => row.dataset.name);
+            const who = count === this.rowTargets.length ? 'Tout le monde' : (count === 0 ? 'Personne' : names.join(', '));
+            this.summaryTarget.textContent = `${who} · ${{ equal: 'à parts égales', shares: 'par parts', amounts: 'par montants' }[mode]}`;
+            this.eachTarget.textContent = remainder;
+        }
     }
 
     /** "Tout le monde", or "Personne" when everyone is ticked. */

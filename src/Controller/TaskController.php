@@ -8,6 +8,7 @@ use App\Entity\Task;
 use App\Entity\Zone;
 use App\Enum\TaskCategory;
 use App\Enum\TaskKind;
+use App\Enum\Urgency;
 use App\Form\TaskType;
 use App\Repository\CatalogItemRepository;
 use App\Repository\CompletionRepository;
@@ -36,7 +37,7 @@ final class TaskController extends AbstractController
     use CelebratesCompletions;
 
     /** Where the action buttons may send the member back to. */
-    private const BACK_ROUTES = ['home' => 'app_home', 'tasks' => 'task_index'];
+    private const BACK_ROUTES = ['home' => 'app_home', 'board' => 'task_board', 'tasks' => 'task_index'];
 
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
@@ -47,7 +48,41 @@ final class TaskController extends AbstractController
     /** How the list of templates can be sorted: by room, by kind of work, by how they come back. */
     private const GROUPINGS = ['piece' => 'Pièce', 'categorie' => 'Catégorie', 'frequence' => 'Fréquence'];
 
-    #[Route('', name: 'task_index', methods: ['GET'])]
+    /**
+     * "Tâches", the tab: everything there is to do, by urgency — the fresh ones folded under "Plus tard" —, filtered
+     * "Pour moi" (what I took, what I am in charge of or counted on for), "Libres" or "Tout"; and the occasional ones
+     * asleep, raised in one tap ("Ça arrive ?"). The templates are its other tab.
+     */
+    #[Route('', name: 'task_board', methods: ['GET'])]
+    public function board(#[CurrentUser] Member $member, TaskBoardBuilder $boards): Response
+    {
+        $board = $boards->build($member->getHousehold());
+        $mine = $board->inHandOf($member);
+        $care = $board->toCareFor();
+        $groups = [];
+        foreach ([Urgency::Late, Urgency::Due, Urgency::Soon, Urgency::Fresh] as $urgency) {
+            $groups[$urgency->value] = array_values(array_filter($care, static fn (TaskView $view): bool => $urgency === $view->status->urgency));
+        }
+        $forMe = array_map(
+            static fn (TaskView $view): int => (int) $view->task->getId(),
+            array_values(array_filter($care, static fn (TaskView $view): bool => \in_array($view, $mine, true) || $view->task->getAssignee() === $member)),
+        );
+
+        return $this->render('task/board.html.twig', [
+            'groups' => $groups,
+            'for_me' => $forMe,
+            'counts' => [
+                'mine' => \count($forMe),
+                'free' => \count(array_filter($care, static fn (TaskView $view): bool => $view->isFree())),
+                'all' => \count($care),
+            ],
+            'dormant' => $board->dormant(),
+            'templates' => \count(array_filter($board->items, static fn (TaskView $view): bool => $view->task->getKind()->isRecurring())),
+        ]);
+    }
+
+    /** "Modèles", the other tab: what comes back on its own, and the catalogue of what is launched by hand. */
+    #[Route('/modeles', name: 'task_index', methods: ['GET'])]
     public function index(
         #[CurrentUser] Member $member,
         TaskBoardBuilder $boards,
@@ -56,7 +91,7 @@ final class TaskController extends AbstractController
     ): Response {
         $household = $member->getHousehold();
         $par = \array_key_exists($par, self::GROUPINGS) ? $par : 'piece';
-        // The templates only: the tasks to do, one-off ones included, are on the home page.
+        // The templates only: the tasks to do, one-off ones included, are in the other tab.
         $templates = array_values(array_filter(
             array_map(static fn (TaskView $view): Task => $view->task, $boards->build($household)->items),
             static fn (Task $task): bool => $task->getKind()->isRecurring(),

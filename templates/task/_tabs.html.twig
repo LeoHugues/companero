@@ -1,0 +1,17 @@
+{#
+    The head of the "Tâches" tab, on both its faces: what there is to do now, and the templates that bring it back.
+    Variables: tab ('board' or 'templates'), todo and templates (how many of each).
+#}
+<header class="flex flex-col gap-3.5">
+    <div class="page-head items-end">
+        <div class="min-w-0">
+            <p class="eyebrow">{{ app.user.household.name }}</p>
+            <h1 class="page-title mt-1">Tâches</h1>
+        </div>
+        <a href="{{ path('plan_show') }}" class="head-link"><twig:Icon name="plan" size="16" stroke="1.9"/>Plan</a>
+    </div>
+    <nav class="segmented" aria-label="Les tâches">
+        <a href="{{ path('task_board') }}" data-haptic="tick" {{ tab == 'board' ? 'aria-current="page"' }}><twig:Icon name="check" size="16" stroke="2.2"/>À faire{% if todo is not null %} <span class="font-medium text-dust">{{ todo }}</span>{% endif %}</a>
+        <a href="{{ path('task_index') }}" data-haptic="tick" {{ tab == 'templates' ? 'aria-current="page"' }}><twig:Icon name="repeat" size="16" stroke="2"/>Modèles{% if templates is not null %} <span class="font-medium text-dust">{{ templates }}</span>{% endif %}</a>
+    </nav>
+</header>

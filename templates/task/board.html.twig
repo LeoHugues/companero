@@ -1,0 +1,63 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Tâches · Companero{% endblock %}
+
+{#
+    "Tâches", the tab: everything there is to do to take care of the Casa, by urgency — the fresh ones folded under
+    "Plus tard" —, filtered by care_controller.js ("Pour moi", "Libres", "Tout"); first, the occasional ones asleep,
+    raised in one tap. My hand and the deck stay on the home page.
+#}
+{% block body %}
+    {{ include('task/_tabs.html.twig', {tab: 'board', todo: counts.all, templates: templates}) }}
+
+    {% if dormant is not empty %}
+        <section class="flex flex-col gap-2.5" aria-labelledby="raise-title">
+            <div class="px-1">
+                <h2 id="raise-title" class="eyebrow">Ça arrive ?</h2>
+                <p class="mt-1 text-[12.5px] leading-snug text-muted">Un appui, et sa carte attend juste en dessous.</p>
+            </div>
+            <ul class="flex flex-wrap gap-2">
+                {% for view in dormant %}
+                    <li><twig:RaiseButton :task="view.task" back="board" compact/></li>
+                {% endfor %}
+            </ul>
+        </section>
+    {% endif %}
+
+    <section class="flex flex-col gap-3.5" aria-labelledby="todo-title" data-controller="care" data-action="turbo:morph@window->care#apply">
+        <h2 id="todo-title" class="sr-only">Prendre soin de la Casa</h2>
+        <div class="flex flex-wrap items-center gap-1.5 px-1" role="group" aria-label="Afficher">
+            <span class="mr-1 text-[12.5px] font-medium text-muted">Afficher</span>
+            {% for filter, label in {mine: 'Pour moi', free: 'Libres', all: 'Tout'} %}
+                <button type="button" class="sort-chip" aria-pressed="{{ filter == 'all' ? 'true' : 'false' }}" data-care-target="button" data-action="care#show" data-care-filter-param="{{ filter }}" data-haptic="tick">
+                    {{ label }}&nbsp;<span class="font-medium opacity-60">{{ counts[filter] }}</span>
+                </button>
+            {% endfor %}
+        </div>
+
+        {% set titles = {late: 'En retard', due: 'C’est le moment', soon: 'Bientôt', fresh: 'Plus tard'} %}
+        {% for urgency, views in groups|filter(views => views is not empty) %}
+            {% set cards %}
+                <ul class="flex flex-col gap-3">
+                    {% for view in views %}
+                        <li data-care-target="item" data-mine="{{ view.task.id in for_me ? 1 : 0 }}" data-free="{{ view.isFree ? 1 : 0 }}"><twig:TaskCard :view="view" :member="app.user" back="board"/></li>
+                    {% endfor %}
+                </ul>
+            {% endset %}
+            {% if urgency == 'fresh' %}
+                <details class="care-group" id="care-later" data-care-target="group" aria-labelledby="later-title" data-controller="disclosure" data-action="toggle->disclosure#remember turbo:morph-element->disclosure#restore">
+                    <summary class="care-group-title is-{{ urgency }}"><span class="care-group-dot"></span><span id="later-title">{{ titles[urgency] }}</span><span class="care-group-count" data-care-count>{{ views|length }}</span><span class="care-group-fold">Afficher</span></summary>
+                    {{ cards }}
+                </details>
+            {% else %}
+                <div class="care-group" data-care-target="group" aria-labelledby="{{ urgency }}-title">
+                    <h3 class="care-group-title is-{{ urgency }}"><span class="care-group-dot"></span><span id="{{ urgency }}-title">{{ titles[urgency] }}</span><span class="care-group-count" data-care-count>{{ views|length }}</span></h3>
+                    {{ cards }}
+                </div>
+            {% endif %}
+        {% endfor %}
+        <p class="sheet-empty" data-care-target="empty" {{ counts.all ? 'hidden' }}>Rien ici : la Casa est contente. Profites-en !</p>
+    </section>
+{% endblock %}
+
+{% block nav %}<twig:BottomNav active="tasks"/>{% endblock %}

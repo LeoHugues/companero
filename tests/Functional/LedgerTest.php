@@ -289,7 +289,7 @@ final class LedgerTest extends AppTestCase
         $this->client->loginUser($leo);
 
         $this->client->request('GET', '/');
-        self::assertSelectorTextContains('#ledger-strip-title + .missing-strip-names', 'Partager une dépense');
+        self::assertSelectorTextContains('#summary-ledger', 'Qui a payé quoi, et qui rembourse qui');
         // "+ Une dépense" without an account: the coloc's opens first, then the form.
         $this->client->request('GET', '/comptes/depense');
         self::assertResponseRedirects('/comptes?depense=1');
@@ -301,10 +301,12 @@ final class LedgerTest extends AppTestCase
         $this->client->submitForm('Noter', ['expense[title]' => 'Électricité', 'expense[amount]' => '84,20']);
 
         $this->client->request('GET', '/');
-        self::assertSelectorTextContains('.missing-strip a[href="/comptes/'.$ledger->getId().'"]', 'On te doit '.self::euros('42,10'));
+        self::assertSelectorTextContains('#summary-ledger a[href="/comptes/'.$ledger->getId().'"]', 'On te doit '.self::euros('42,10'));
+        // The tab "Comptes" leads straight to the only account.
+        self::assertSelectorExists('.nav-bar a[href="/comptes/'.$ledger->getId().'"]');
         $this->client->loginUser($this->reload($robin));
         $this->client->request('GET', '/');
-        self::assertSelectorTextContains('.missing-strip a[href="/comptes/'.$ledger->getId().'"]', 'Tu dois '.self::euros('42,10'));
+        self::assertSelectorTextContains('#summary-ledger a[href="/comptes/'.$ledger->getId().'"]', 'Tu dois '.self::euros('42,10'));
         $this->client->request('GET', '/comptes/depense');
         self::assertResponseRedirects('/comptes/'.$ledger->getId().'/depenses/nouvelle');
         $this->client->request('GET', '/taches/nouvelle');

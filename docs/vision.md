@@ -206,9 +206,10 @@ Il y a souvent des choses à racheter : des éponges, du vinaigre, du papier toi
 vient de griller. **Ce qui manque** est une liste partagée par toute la coloc, à portée de main
 depuis l'accueil.
 
-- **Le dire** : sur l'accueil, sous la Casa, une bande « Il manque » montre ce qui manque d'un coup
-  d'œil ; son **+** ouvre la liste, le champ prêt (le **+** de la barre du bas le propose aussi). On
-  tape, Entrée : c'est noté, et le champ se vide en gardant le clavier pour la chose suivante.
+- **Le dire** : la liste a son onglet, « Courses » ; sur l'accueil, « Chez nous » montre ce qui manque
+  d'un coup d'œil, et son **+** ouvre la liste, le champ prêt. Le **+** de la barre du bas le prend
+  aussi, sur place, sans quitter la page. On tape, Entrée : c'est noté, et le champ se vide en gardant
+  le clavier pour la chose suivante.
   « Urgent » (il n'y en a plus du tout) la met en haut de la liste, en corail.
 - **En un appui** : sous le champ, « Souvent » propose ce qu'on a déjà acheté (le plus récent
   d'abord), puis ce qui manque dans toutes les maisons (papier toilette, éponges, liquide
@@ -260,14 +261,33 @@ soit quitte.
   celui à qui l'on doit le plus, et ainsi de suite : jamais plus d'un de moins qu'il n'y a de monde).
   **« Régler »** note le remboursement d'un appui, fait aujourd'hui ; la ligne l'ouvre pour un autre
   montant (un remboursement en deux fois). Déjà réglé entre-temps, rien n'est noté deux fois.
-- **Sur l'accueil**, une bande « Les comptes » dit où l'on en est (« On te doit 11,57 € », compte par
-  compte s'il y en a plusieurs) ; son **+**, comme celui de la barre du bas, note une dépense.
+- **Un onglet**, « Comptes », qui mène droit au compte quand on n'est que dans un seul ; sur l'accueil,
+  « Chez nous » dit où l'on en est (« On te doit 11,57 € », compte par compte s'il y en a plusieurs) ;
+  son **+**, comme celui de la barre du bas, note une dépense.
 - **Prévenir** : quand un coloc note une dépense qui me concerne, ou me rembourse, le téléphone le dit
   (réglable dans *Profil › Rappels*).
 - **Exporter** : toutes les lignes dans un tableur (CSV), avec ce que chacune change pour chacun.
 - Ni points ni XP pour une dépense : l'argent n'est pas un jeu.
 - *Plus tard* : la photo du ticket, le taux de change trouvé tout seul, des dépenses qui reviennent
   (le loyer, la box), relancer qui doit depuis longtemps.
+
+## 6 quinquies. Se repérer
+
+Ce qui sert tous les jours est à un appui : la barre du bas a quatre onglets et un bouton.
+
+- **Accueil** : la Casa et l'état de la maison, ma main et la pioche, « Tout ce qu'il y a à faire »,
+  « En un geste », et « Chez nous » (ce qui manque, où j'en suis dans les comptes, le bilan de la
+  semaine). Le visage en haut mène au profil, et de là aux réglages de la coloc.
+- **Tâches** : tout ce qu'il y a à faire, par urgence, avec « Ça arrive ? » ; et les modèles, sa
+  seconde face.
+- **Ajouter**, au milieu : une feuille monte du bas, sans quitter la page — une tâche à faire, ce
+  qu'on a déjà fait, une dépense, un modèle, et ce qui manque, tapé sur place. Chaque formulaire ne
+  demande que l'essentiel ; le reste est replié (« Plus d'options »).
+- **Courses** : ce qui manque.
+- **Comptes** : les dépenses et les équilibres (le seul compte directement).
+
+Le bilan de la semaine s'ouvre depuis l'accueil, et le dit quand il est prêt (le dimanche soir et le
+lundi).
 
 ## 7. Gamification
 - **XP et niveaux** : les points cumulés font monter de niveau.

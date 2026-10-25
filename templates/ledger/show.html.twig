@@ -13,7 +13,7 @@
     {% set currency = ledger.currency %}
     <header class="flex flex-col gap-3">
         <div class="page-head">
-            <a href="{{ ux_is_native() ? '/recede_historical_location' : path('ledger_index') }}" aria-label="Retour aux comptes" class="head-button"><twig:Icon name="arrow-left" size="20" stroke="2"/></a>
+            <a href="{{ path('ledger_index') }}" class="head-link"><twig:Icon name="coins" size="16" stroke="1.9"/>Tous les comptes</a>
             <a href="{{ path('ledger_settings', {id: ledger.id}) }}" class="head-link"><twig:Icon name="settings" size="16" stroke="1.9"/>Réglages</a>
         </div>
         <div class="min-w-0">
@@ -168,4 +168,4 @@
     </div>
 {% endblock %}
 
-{% block nav %}<twig:BottomNav active="home"/>{% endblock %}
+{% block nav %}<twig:BottomNav active="ledger"/>{% endblock %}

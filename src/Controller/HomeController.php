@@ -5,8 +5,8 @@ namespace App\Controller;
 use App\Calendar\Week;
 use App\Entity\Member;
 use App\Enum\CasaMood;
-use App\Enum\Urgency;
 use App\Ledger\LedgerBook;
+use App\Notification\NoticeBoard;
 use App\Progress\LevelProvider;
 use App\Progress\TeamProgressBuilder;
 use App\Repository\CompletionRepository;
@@ -41,20 +41,10 @@ final class HomeController extends AbstractController
         // What earned the household's points this week, for the "Objectif de la maison" to unfold.
         $week = Week::containing($now);
         $doneThisWeek = $completions->findForHousehold($household, $week->start, $week->end());
-        // "Prendre soin de la Casa": everything there is to do, by urgency; the fresh ones fold away under "Plus tard".
-        $care = $board->toCareFor();
-        $groups = [];
-        foreach ([Urgency::Late, Urgency::Due, Urgency::Soon, Urgency::Fresh] as $urgency) {
-            $groups[$urgency->value] = array_values(array_filter($care, static fn (TaskView $view): bool => $urgency === $view->status->urgency));
-        }
-        // Its filters: "Pour moi" (what I took, what I am in charge of or counted on for), "Libres", "Tout".
-        $forMe = array_map(
-            static fn (TaskView $view): int => (int) $view->task->getId(),
-            array_values(array_filter($care, static fn (TaskView $view): bool => \in_array($view, $mine, true) || $view->task->getAssignee() === $member)),
-        );
-
         // Where I stand in the accounts I am in.
         $myLedgers = $ledgers->forMember($member);
+        // The week's review is ready on Sunday evening, and still on Monday for the week just closed.
+        $reviewReady = '7' === $now->format('N') && (int) $now->format('G') >= NoticeBoard::REVIEW_HOUR || '1' === $now->format('N');
 
         return $this->render('home/index.html.twig', [
             'mine' => $mine,
@@ -62,22 +52,17 @@ final class HomeController extends AbstractController
             'counted_on' => array_map(static fn (TaskView $view): int => (int) $view->task->getId(), $board->pressingFor($member)),
             'quests' => $board->quests(),
             'draw' => $board->draw(),
-            'groups' => $groups,
-            'for_me' => $forMe,
-            'care_counts' => [
-                'mine' => \count($forMe),
-                'free' => \count(array_filter($care, static fn (TaskView $view): bool => $view->isFree())),
-                'all' => \count($care),
-            ],
+            // Everything there is to do is in the "Tâches" tab: here, how much.
+            'todo_count' => \count($board->toCareFor()),
             'quick' => $board->quickShown(),
             'quick_count' => \count($board->quick()),
-            'dormant' => $board->dormant(),
             'missing' => $shopping->findMissing($household),
             'ledgers' => $myLedgers,
             'standing' => $ledgers->standing($member, $myLedgers),
             'cleanliness' => $board->cleanliness(),
             'mood' => CasaMood::fromCleanliness($board->cleanliness()),
             'team' => $teamProgress->build($household, $week),
+            'review' => ['week' => '1' === $now->format('N') ? $week->previous() : $week, 'ready' => $reviewReady],
             'done_this_week' => ['completions' => $doneThisWeek, 'points' => $points->sumByCompletion($doneThisWeek)],
             'level' => $levels->levelOf($member),
             'is_cleaning_day' => $household->isCleaningDay($now),

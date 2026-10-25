@@ -256,27 +256,65 @@ chaque nouvelle visite de l'accueil.
 
 ## La barre du bas
 
-Fine (58 px), sur la surface, avec un filet et une ombre douce au-dessus. Quatre dessins
-légendés (Accueil, Tâches, Bilan, Profil) et, au milieu, **« Ajouter »** : un bouton rond terre
-cuite de 54 px, plus encre, qui sort de la barre posé sur une **bosse** de la même surface (le seul
-relief de la barre). La page ouverte se remplit des couleurs de la Casa et rebondit :
+Fine (58 px), sur la surface, avec un filet et une ombre douce au-dessus. Ce qui sert tous les jours
+a son onglet : quatre dessins légendés (Accueil, Tâches, Courses, Comptes) et, au milieu,
+**« Ajouter »** : un bouton rond terre cuite de 54 px, plus encre, qui sort de la barre posé sur une
+**bosse** de la même surface (le seul relief de la barre). La page ouverte se remplit des couleurs de
+la Casa et rebondit :
 
 | Onglet | Dessin | Ouvert |
 |---|---|---|
 | Accueil | une petite maison avec un visage | elle devient la Casa : corps jaune, toit terre cuite |
 | Tâches | deux cartes à jouer en éventail | la carte du fond rosit, celle de devant porte un carreau terre cuite |
-| Bilan | trois barres | jaune, terre cuite, jaune |
-| Profil | le visage du membre (sa couleur, son initiale) | cerclé d'encre |
+| Courses | un panier | le panier se remplit de lilas, son anse terre cuite |
+| Comptes | deux pièces | la pièce du fond jaune, celle de devant terre cuite |
+
+Le profil, c'est le visage en haut de l'accueil (et, de là, les réglages de la coloc) ; le bilan de la
+semaine s'ouvre depuis l'accueil (« Chez nous »). « Comptes » mène droit au compte quand on n'est que
+dans un seul.
+
+### La feuille « Ajouter »
+
+Un appui sur **« Ajouter »** fait monter une feuille du bas, sur la page assombrie, sans la quitter :
+sa poignée, « Ajouter » et une croix ; **quatre grandes tuiles** (une tâche à faire, j'ai fait quelque
+chose, une dépense, un modèle qui revient), chacune son dessin sur sa tuile pastel, un mot et un
+exemple ; puis **« Il manque quelque chose »**, le champ et ses puces de ce qu'on achète souvent, qui
+ramènent à la page d'où l'on vient. Tout se voit sans faire défiler. Elle se ferme par la croix, un
+appui à côté ou dès qu'un choix est suivi. Dans l'appli (et sans scripts), c'est une page.
+
+Les formulaires qu'elle ouvre ne demandent que l'essentiel, le reste replié :
+
+- **Une tâche à faire** : « Quoi ? » — pendant la frappe, ce que la maison connaît déjà apparaît
+  dessous (le catalogue, et les occasionnelles qui dorment, « Ça arrive » d'un appui) —, « Pour
+  quand ? » en puces (pas pressé, aujourd'hui, demain, ce week-end, une date…), « Je m'en occupe »,
+  « C'est déjà fait ». Sous **« Plus d'options »** : la précision, le type, la pièce, qui s'en charge,
+  les points, la rareté de la carte, ses alertes.
+- **Une dépense** : « Pour qui » est replié sur ce qu'il est presque toujours (« Tout le monde · à
+  parts égales — 4 personnes : 9,00 € chacune », « Modifier ») ; la catégorie aussi, devinée du titre.
+
+## L'accueil
+
+La Casa et l'état de la maison, ma main et la pioche, puis **« Tout ce qu'il y a à faire »** (le
+nombre, vers l'onglet Tâches), « En un geste », et **« Chez nous »** : une feuille, une ligne par
+chose, un **+** dans le sable pour les deux premières — ce qui manque (la pastille corail si c'est
+urgent), où j'en suis dans les comptes, le bilan de la semaine (« prêt », sur une pastille jaune, le
+dimanche soir et le lundi ; sinon les points de la maison).
+
+## L'onglet Tâches
+
+Deux faces sous le contrôle segmenté : **À faire** — « Ça arrive ? » et ses puces, puis tout, par
+urgence, « Plus tard » replié ; « Afficher » en petites puces (pour moi, libres, tout) — et
+**Modèles**, rangés par pièce, type ou fréquence (« Ranger par » en petites puces). Le plan est à un
+appui, en haut.
 
 ## Ce qui manque
 
 Ce qu'il faut racheter, dans le calme de l'accueil :
 
-- **Sur l'accueil**, sous l'état de la maison : une feuille fine. À gauche, le caddie sur une tuile
-  lilas (la couleur des courses), une pastille corail dans son coin s'il y a de l'urgent ; « IL MANQUE »
-  en petites capitales et le nombre ; dessous, les noms à la suite (« Papier toilette · Éponges ·… »),
-  l'urgent d'abord, en corail, sur une seule ligne. À droite, un **+** dans le sable d'une feuille.
-  Vide : « Rien pour l'instant ».
+- **Un onglet**, « Courses », et une ligne de « Chez nous » sur l'accueil : le caddie sur une tuile
+  lilas (la couleur des courses), une pastille corail dans son coin s'il y a de l'urgent ; « Il manque
+  3 choses » ; dessous, les noms à la suite (« Papier toilette · Éponges ·… »), l'urgent en corail. À
+  droite, un **+** dans le sable. Vide : « Il ne manque rien ».
 - **La page** : en tête, une feuille pour le dire — le champ « Il manque… », la puce « Urgent » (à
   filet, l'encre une fois choisie) et « Ajouter », le seul bouton terre cuite ; sous un filet,
   « SOUVENT » et ses puces, chacune un **+** terre cuite foncée et un nom.
@@ -297,9 +335,9 @@ Ce qu'il faut racheter, dans le calme de l'accueil :
 
 L'argent, sans alarme : **sauge** quand on vous doit, **terre cuite** quand vous devez, jamais de rouge.
 
-- **Sur l'accueil**, sous « Il manque », la même feuille fine : des pièces sur une tuile sauge, « LES
-  COMPTES » en petites capitales, dessous où l'on en est (« On te doit 11,57 € » en sauge, « Tu dois… »
-  en terre cuite, compte par compte s'il y en a plusieurs ; « Partager une dépense » sans compte), un
+- **Un onglet**, « Comptes » (le seul compte directement, « Tous les comptes » en haut à gauche), et
+  une ligne de « Chez nous » sur l'accueil : des pièces sur une tuile sauge, où l'on en est (« On te
+  doit 11,57 € » en sauge, « Tu dois… » en terre cuite, compte par compte s'il y en a plusieurs), un
   **+** dans le sable.
 - **La liste des comptes** : une ligne par compte, la maison sur une tuile sauge pour celui de la
   coloc, des pièces sur une tuile lilas pour les autres ; les visages de ceux qui sont dedans, un peu

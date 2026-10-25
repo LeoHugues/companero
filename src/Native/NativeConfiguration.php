@@ -28,10 +28,14 @@ final class NativeConfiguration
                 'uri' => 'hotwire://fragment/web',
                 'pull_to_refresh_enabled' => false,
             ]),
-            // The bottom navigation, the login and the steps of the tour switch screens instead of piling them up
-            // (including the review's other weeks, and its ± buttons that redirect to a dated week).
-            new Rule(patterns: ['^/?$', '^/taches/?(\?.*)?$', '^/plan$', '^/bilan', '^/profil$', '^/connexion', '^/deconnexion', '^/decouverte'], properties: [
+            // The tabs of the bottom bar (Accueil, Tâches and its templates, Courses, Comptes or the only account), the
+            // login and the steps of the tour switch screens instead of piling them up.
+            new Rule(patterns: ['^/?$', '^/taches(/modeles)?/?(\?.*)?$', '^/courses/?(\?.*)?$', '^/comptes(/\d+)?/?(\?.*)?$', '^/connexion', '^/deconnexion', '^/decouverte'], properties: [
                 'presentation' => 'replace_root',
+            ]),
+            // The review's other weeks (and its ± buttons that redirect to a dated week) take the place of the one shown.
+            new Rule(patterns: ['^/bilan/\d'], properties: [
+                'presentation' => 'replace',
             ]),
             // Task (and completion) forms slide up as modals; their close button recedes to the screen underneath.
             new Rule(patterns: ['^/taches/nouvelle', '^/taches/\d+/modifier', '^/realisations/\d+/modifier'], properties: [

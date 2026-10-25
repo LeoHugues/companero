@@ -22,7 +22,7 @@ final class TaskDescriptionTest extends AppTestCase
         $page = '/taches/'.$task->getId();
 
         // Always on the card.
-        $this->client->request('GET', '/');
+        $this->client->request('GET', '/taches');
         self::assertSelectorTextContains('#task-'.$task->getId().' .task-card-note', 'Aspirateur ou balai, tapis compris');
         $this->client->request('GET', $page.'/modele');
         self::assertSelectorTextContains('main', 'Aspirateur ou balai, tapis compris');
@@ -33,7 +33,7 @@ final class TaskDescriptionTest extends AppTestCase
         $this->client->request('GET', $page);
         self::assertSelectorTextContains('#task-note', 'Le tapis est au pressing');
         self::assertSelectorTextContains('main', 'D’habitude : « Aspirateur ou balai, tapis compris »');
-        $this->client->request('GET', '/');
+        $this->client->request('GET', '/taches');
         self::assertSelectorTextContains('#task-'.$task->getId().' .task-card-note', 'Le tapis est au pressing');
 
         // Done: the note goes, the precision comes back.

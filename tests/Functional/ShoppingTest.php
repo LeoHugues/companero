@@ -17,8 +17,8 @@ final class ShoppingTest extends AppTestCase
         $this->client->loginUser($leo);
 
         $this->client->request('GET', '/');
-        self::assertSelectorTextContains('.missing-strip', 'Rien pour l’instant');
-        self::assertSelectorExists('.missing-strip a[href="/courses?ajouter=1"]');
+        self::assertSelectorTextContains('#summary-missing', 'Il ne manque rien');
+        self::assertSelectorExists('#summary-missing a[href="/courses?ajouter=1"]');
 
         // From the "+" of the strip, the field is ready, and comes back ready for the next one.
         $this->client->request('GET', '/courses?ajouter=1');
@@ -40,8 +40,9 @@ final class ShoppingTest extends AppTestCase
 
         // The home page shows it all at a glance, the urgent first, with a coral dot.
         $this->client->request('GET', '/');
-        self::assertSelectorTextContains('.missing-strip', 'Papier toilette · Éponge');
-        self::assertSelectorExists('.missing-strip .tile-dot');
+        self::assertSelectorTextContains('#summary-missing', 'Il manque 2 choses');
+        self::assertSelectorTextContains('#summary-missing', 'Papier toilette · Éponge');
+        self::assertSelectorExists('#summary-missing .tile-dot');
 
         // Anyone ticks it once bought; it goes under the list, where it can be put back.
         $paper = $this->missing($leo)[0];

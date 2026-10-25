@@ -10,6 +10,7 @@ use App\Ledger\Currency;
 use App\Ledger\ExpenseDraft;
 use App\Ledger\ExpenseRecorder;
 use App\Ledger\LedgerBook;
+use App\Ledger\ShareInput;
 use App\Security\HouseholdVoter;
 use Psr\Clock\ClockInterface;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
@@ -128,6 +129,8 @@ final class ExpenseController extends AbstractController
             'expense' => $expense,
             'draft' => $draft,
             'shares' => $draft->shares() ?? [],
+            // Everyone ticked: "Pour qui" stays folded on it when it is split equally too.
+            'everyone' => [] === array_filter($draft->split, static fn (ShareInput $input): bool => !$input->included),
             'participants' => $ledger->participantsById(),
             'me' => $ledger->participantFor($member),
             'symbols' => Currency::symbols(),

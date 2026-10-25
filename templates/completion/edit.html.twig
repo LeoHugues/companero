@@ -53,4 +53,4 @@
 {% endblock %}
 
 {# In the Android app this form is a modal (see App\Native\NativeConfiguration): no bottom navigation. #}
-{% block nav %}{% if not ux_is_native() %}<twig:BottomNav :active="retour == 'bilan' ? 'review' : 'profile'"/>{% endif %}{% endblock %}
+{% block nav %}{% if not ux_is_native() %}<twig:BottomNav active="home"/>{% endif %}{% endblock %}

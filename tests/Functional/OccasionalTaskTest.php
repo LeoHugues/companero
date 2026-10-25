@@ -18,13 +18,13 @@ final class OccasionalTaskTest extends AppTestCase
         $task = $this->occasional($leo, 'Nettoyer le vomi de Gizmo');
 
         $this->client->loginUser($leo);
-        $this->client->request('GET', '/');
+        $this->client->request('GET', '/taches');
         // Asleep: no card, a chip to say it happens.
         self::assertSelectorNotExists('#task-'.$task->getId());
         self::assertSelectorTextContains('[aria-labelledby=raise-title]', 'Nettoyer le vomi de Gizmo');
 
         $this->submitAction('/taches/'.$task->getId().'/ca-arrive');
-        self::assertResponseRedirects('/');
+        self::assertResponseRedirects('/taches');
         $this->client->followRedirect();
         self::assertSelectorTextContains('[aria-labelledby=todo-title] #task-'.$task->getId(), 'Ça vient d’arriver');
         self::assertSelectorNotExists('[aria-labelledby=raise-title]');
@@ -50,7 +50,7 @@ final class OccasionalTaskTest extends AppTestCase
         $task = static::getContainer()->get(TaskRepository::class)->findOneBy(['title' => 'Réparer la chasse d’eau']);
         self::assertSame(TaskKind::Occasional, $task?->getKind());
 
-        $this->client->request('GET', '/taches?par=frequence');
+        $this->client->request('GET', '/taches/modeles?par=frequence');
         self::assertSelectorTextContains('#fold-frequence-occasional', 'Réparer la chasse d’eau');
         self::assertSelectorExists(\sprintf('#template-%d form[action="/taches/%d/ca-arrive"]', $task?->getId(), $task?->getId()));
         $this->client->request('GET', '/taches/'.$task->getId().'/modele');
@@ -71,7 +71,7 @@ final class OccasionalTaskTest extends AppTestCase
         self::assertResponseStatusCodeSame(404);
     }
 
-    public function testDoneFromTheHomePageTheAppRefreshesItInPlace(): void
+    public function testDoneFromTheListTheAppRefreshesItInPlace(): void
     {
         $leo = $this->foundHousehold();
         $task = $this->occasional($leo, 'Nettoyer le vomi de Gizmo');
@@ -79,20 +79,20 @@ final class OccasionalTaskTest extends AppTestCase
         static::getContainer()->get(EntityManagerInterface::class)->flush();
 
         $this->client->loginUser($leo);
-        $this->client->request('GET', '/');
+        $this->client->request('GET', '/taches');
         $form = $this->client->getCrawler()->filter('form[action="/taches/'.$task->getId().'/fait"]')->form();
-        // Turbo asks for a stream: the new home page comes back to be morphed in, celebration included.
-        $this->client->request('POST', $form->getUri(), $form->getPhpValues(), [], ['HTTP_ACCEPT' => 'text/vnd.turbo-stream.html, text/html', 'HTTP_REFERER' => 'http://localhost/']);
+        // Turbo asks for a stream: the new list comes back to be morphed in, celebration included.
+        $this->client->request('POST', $form->getUri(), $form->getPhpValues(), [], ['HTTP_ACCEPT' => 'text/vnd.turbo-stream.html, text/html', 'HTTP_REFERER' => 'http://localhost/taches']);
         self::assertResponseIsSuccessful();
         self::assertResponseHeaderSame('Content-Type', 'text/vnd.turbo-stream.html; charset=UTF-8');
         $stream = (string) $this->client->getResponse()->getContent();
         self::assertStringContainsString('<turbo-stream action="update" method="morph" targets="body > main">', $stream);
         self::assertStringContainsString('reward-toast', $stream);
-        self::assertStringContainsString('Merci Léo ! +15 pts', $stream);
+        self::assertStringContainsString('data-count-up-to-value="15"', $stream);
 
         // Sent back to another page, it stays a redirect.
-        $this->client->request('POST', '/taches/'.$task->getId().'/ca-arrive', ['_csrf_token' => 'csrf-token', '_back' => 'tasks'], [], ['HTTP_ACCEPT' => 'text/vnd.turbo-stream.html, text/html', 'HTTP_REFERER' => 'http://localhost/']);
-        self::assertResponseRedirects('/taches');
+        $this->client->request('POST', '/taches/'.$task->getId().'/ca-arrive', ['_csrf_token' => 'csrf-token', '_back' => 'tasks'], [], ['HTTP_ACCEPT' => 'text/vnd.turbo-stream.html, text/html', 'HTTP_REFERER' => 'http://localhost/taches']);
+        self::assertResponseRedirects('/taches/modeles');
     }
 
     private function occasional(Member $author, string $title): Task

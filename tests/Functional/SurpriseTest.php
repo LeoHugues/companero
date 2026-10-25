@@ -50,7 +50,7 @@ final class SurpriseTest extends AppTestCase
         $this->bounty($task, BountyKind::Points, 15);
 
         $this->client->loginUser($leo);
-        $this->client->request('GET', '/');
+        $this->client->request('GET', '/taches');
         // A common card hiding a surprise looks rare until someone finds it.
         self::assertSelectorExists('#task-'.$task->getId().'[data-rarity=rare]');
         self::assertSelectorExists('#task-'.$task->getId().' [aria-label="Surprise cachée"]');
@@ -59,7 +59,7 @@ final class SurpriseTest extends AppTestCase
         $this->client->followRedirect();
         self::assertSelectorTextContains('#bounty-title', 'Une surprise était cachée dans « Serpillière »');
         self::assertSelectorTextContains('dialog', '+15 pts');
-        self::assertSelectorTextContains('[data-casa-target=speech]', 'Merci Léo ! +35 pts');
+        self::assertSelectorTextContains('.reward-toast', '+35 pts');
         $this->client->request('GET', '/taches/'.$task->getId());
         self::assertSelectorExists('#task-'.$task->getId().'.rarity-common');
         self::assertSelectorNotExists('.bounty-tag');
@@ -89,7 +89,7 @@ final class SurpriseTest extends AppTestCase
         $this->bounty($xp, BountyKind::Xp, 30);
 
         $this->client->loginUser($leo);
-        $this->client->request('GET', '/');
+        $this->client->request('GET', '/taches');
         $this->submitAction('/taches/'.$card->getId().'/fait');
         $this->client->followRedirect();
         self::assertSelectorTextContains('dialog', 'Un carton jaune !');
@@ -110,7 +110,7 @@ final class SurpriseTest extends AppTestCase
         $this->bounty($task, BountyKind::Points, 10);
 
         $this->client->loginUser($leo);
-        $this->client->request('GET', '/');
+        $this->client->request('GET', '/taches');
         $this->submitAction('/taches/'.$task->getId().'/fait');
 
         self::assertTrue(static::getContainer()->get(BountyRepository::class)->findOneBy([])?->isClaimed());

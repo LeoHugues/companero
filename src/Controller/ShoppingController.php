@@ -126,9 +126,17 @@ final class ShoppingController extends AbstractController
         return $this->redirectToRoute('shopping_index', status: Response::HTTP_SEE_OTHER);
     }
 
-    /** Back where the form was: the list, with the field ready for the next one if it was opened to add. */
+    /**
+     * Back where the form was: the list, with the field ready for the next one if it was opened to add; or the page
+     * the sheet "Ajouter" was opened on (_retour, a path of this site).
+     */
     private function backToList(Request $request): RedirectResponse
     {
+        $back = $request->request->getString('_retour');
+        if (str_starts_with($back, '/') && !str_starts_with($back, '//') && !str_contains($back, '\\')) {
+            return $this->redirect($back, Response::HTTP_SEE_OTHER);
+        }
+
         return $this->redirectToRoute('shopping_index', $request->request->getBoolean('_adding') ? ['ajouter' => 1] : [], Response::HTTP_SEE_OTHER);
     }
 

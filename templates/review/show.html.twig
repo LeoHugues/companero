@@ -10,6 +10,7 @@
     {% set week = review.week %}
     {% set team = review.team %}
 
+    <a href="{{ ux_is_native() ? '/recede_historical_location' : path('app_home') }}" aria-label="Retour à l’accueil" class="head-button"><twig:Icon name="arrow-left" size="20" stroke="2"/></a>
     <header class="page-head items-end">
         <div class="min-w-0">
             <p class="eyebrow">Semaine {{ week.number }} · du {{ week.start|format_date(pattern: 'd', locale: 'fr') }} au {{ week.day(7)|format_date(pattern: 'd MMMM', locale: 'fr') }}</p>
@@ -162,4 +163,4 @@
     {% endif %}
 {% endblock %}
 
-{% block nav %}<twig:BottomNav active="review"/>{% endblock %}
+{% block nav %}<twig:BottomNav active="home"/>{% endblock %}

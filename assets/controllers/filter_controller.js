@@ -4,11 +4,14 @@ import { Controller } from '@hotwired/stimulus';
  * A search box over a list: only the items whose words match what is typed stay visible,
  * accents and case aside. A group (a room, a category) disappears when none of its items is
  * left, and opens when something is typed. The "create" link carries what was typed, as a title.
+ * With data-filter-until-typed-value, nothing shows until something is typed (what the house already knows, under
+ * the title of a new task).
  */
 const normalize = (text) => text.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
 
 export default class extends Controller {
     static targets = ['input', 'item', 'group', 'empty', 'create'];
+    static values = { untilTyped: Boolean };
 
     connect() {
         this.filter();
@@ -26,9 +29,10 @@ export default class extends Controller {
             shown += match ? 1 : 0;
         });
 
+        const waiting = this.untilTypedValue && words.length === 0;
         this.groupTargets.forEach((group) => {
             const items = this.itemTargets.filter((item) => group.contains(item));
-            group.hidden = items.length > 0 && items.every((item) => item.hidden);
+            group.hidden = waiting || (items.length > 0 && items.every((item) => item.hidden));
             if (words.length > 0 && 'open' in group) {
                 group.open = true;
             }

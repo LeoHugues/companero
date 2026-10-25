@@ -73,19 +73,30 @@
             </div>
         </section>
 
-        {# "Pour qui": ticked or not, then by parts (− and +) or by amounts; each one's part on the right. #}
+        {#
+            "Pour qui": folded on what it is most of the time — everyone, equally —, unfolded to tick or untick people,
+            split by parts (− and +) or by amounts; each one's part on the right.
+        #}
+        {% set plain = draft.splitMode.value == 'equal' and everyone and form.split.vars.errors is empty %}
         <section class="form-group" aria-labelledby="expense-split-title" data-split-target="section" data-kind="expense income" {{ kind == 'transfer' ? 'hidden' }}>
-            <div class="flex items-baseline justify-between gap-3 px-1">
-                <h2 id="expense-split-title" class="eyebrow">Pour qui</h2>
-                <button type="button" class="text-[12.5px] font-semibold text-muted hover:text-ink" data-action="split#all" data-split-target="all" data-haptic="tick">Tout le monde</button>
-            </div>
-            <div class="form-sheet gap-3">
+            <h2 id="expense-split-title" class="group-label">Pour qui</h2>
+            <details class="form-sheet split-fold" {{ plain ? '' : 'open' }}>
+                <summary class="split-summary">
+                    <span class="tile tile-sand" aria-hidden="true"><twig:Icon name="users" size="19" stroke="1.9"/></span>
+                    <span class="flex min-w-0 flex-1 flex-col gap-0.5">
+                        <span class="text-[15px] font-semibold" data-split-target="summary">{{ everyone ? 'Tout le monde' : 'Quelques-uns' }} · {{ draft.splitMode.label|lower }}</span>
+                        <span class="row-meta" data-split-target="each"></span>
+                    </span>
+                    <span class="split-summary-edit" aria-hidden="true"></span>
+                </summary>
+                <div class="flex flex-col gap-3 pt-1">
                 {{ form_widget(form.splitMode, {attr: {class: 'choice-segmented', 'data-action': 'change->split#update'}}) }}
+                <button type="button" class="self-end text-[12.5px] font-semibold text-muted hover:text-ink" data-action="split#all" data-split-target="all" data-haptic="tick">Tout le monde</button>
                 <ul class="split-list" data-split-target="list" data-mode="{{ draft.splitMode.value }}">
                     {% for field in form.split %}
                         {% set participant = participants[field.vars.name] %}
                         {% set share = shares[participant.id] ?? null %}
-                        <li class="split-row {{ field.included.vars.checked ? '' : 'is-out' }}" data-split-target="row" data-participant="{{ participant.id }}">
+                        <li class="split-row {{ field.included.vars.checked ? '' : 'is-out' }}" data-split-target="row" data-participant="{{ participant.id }}" data-name="{{ participant.name }}">
                             {{ form_widget(field.included, {attr: {class: 'split-check', 'data-split-target': 'check', 'data-action': 'change->split#update'}}) }}
                             <label for="{{ field.included.vars.id }}" class="split-who">
                                 <twig:Avatar :member="participant" size="30"/>
@@ -105,14 +116,28 @@
                 </ul>
                 {# What is left to split, worked out as it is typed; what was wrong, once sent. #}
                 <p class="split-remainder {{ form.split.vars.errors is not empty ? 'is-off' }}" data-split-target="remainder" aria-live="polite">{{ form.split.vars.errors|map(error => error.message)|join(' ') }}</p>
-            </div>
+                </div>
+            </details>
         </section>
 
         <section class="form-group" aria-labelledby="expense-when-title">
             <h2 id="expense-when-title" class="group-label">Quand, et pour quoi</h2>
             <div class="form-sheet">
                 {{ form_row(form.spentOn) }}
-                <div data-split-target="section" data-kind="expense income" {{ kind == 'transfer' ? 'hidden' }}>{{ form_row(form.category) }}</div>
+                {# The category, guessed from the title unless one is chosen: folded until then. #}
+                <details class="fold category-fold border-t border-line/70 pt-3" data-split-target="section" data-kind="expense income" {{ kind == 'transfer' ? 'hidden' }} {{ draft.category or form.category.vars.errors is not empty ? 'open' }}>
+                    <summary class="fold-summary px-0 pb-0">
+                        <span class="min-w-0">
+                            <span class="field-label">Catégorie</span>
+                            <span class="fold-hint">{{ draft.category ? draft.category.label : 'Devinée d’après le titre, ou à choisir' }}</span>
+                        </span>
+                        <twig:Icon name="chevron-down" size="17" stroke="2" class="fold-chevron"/>
+                    </summary>
+                    <div class="flex flex-col gap-2 pt-3">
+                        {{ form_widget(form.category) }}
+                        {{ form_errors(form.category) }}
+                    </div>
+                </details>
             </div>
         </section>
 
@@ -123,4 +148,4 @@
 {% endblock %}
 
 {# In the Android app this form is a modal (see App\Native\NativeConfiguration): no bottom navigation. #}
-{% block nav %}{% if not ux_is_native() %}<twig:BottomNav active="home"/>{% endif %}{% endblock %}
+{% block nav %}{% if not ux_is_native() %}<twig:BottomNav active="ledger"/>{% endif %}{% endblock %}

@@ -14,7 +14,6 @@
             <p class="eyebrow">{{ app.user.household.name }}</p>
             <h1 class="page-title mt-1">Ce qui manque</h1>
         </div>
-        <a href="{{ ux_is_native() ? '/recede_historical_location' : path('app_home') }}" aria-label="Retour à l’accueil" class="head-button"><twig:Icon name="arrow-left" size="20" stroke="2"/></a>
     </header>
 
     <section id="ajouter" class="sheet flex flex-col gap-3.5 p-4" aria-label="Dire ce qui manque">
@@ -110,4 +109,4 @@
     {% endif %}
 {% endblock %}
 
-{% block nav %}<twig:BottomNav active="home"/>{% endblock %}
+{% block nav %}<twig:BottomNav active="shopping"/>{% endblock %}

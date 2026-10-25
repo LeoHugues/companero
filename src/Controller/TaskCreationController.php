@@ -9,6 +9,7 @@ use App\Enum\TaskKind;
 use App\Form\LogCompletionType;
 use App\Form\TaskType;
 use App\Repository\CatalogItemRepository;
+use App\Shopping\ShoppingListBuilder;
 use App\Task\TaskBoardBuilder;
 use App\Task\TaskCompleter;
 use App\Task\TaskNotAvailable;
@@ -24,9 +25,9 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
 
 /**
- * The "+" button: first say what it is about, then fill in only what matters for it.
- * Something to do once (maybe from the catalogue), a new template that comes back on its own,
- * or noting what was already done.
+ * The "+" button: a sheet says what can be added — something to do once (maybe from the catalogue, or an occasional
+ * task that happens), what was already done, an expense, a template that comes back on its own — and takes what is
+ * missing right there. Each form asks only what matters for it, the rest folded away.
  */
 #[Route('/taches/nouvelle')]
 final class TaskCreationController extends AbstractController
@@ -40,20 +41,30 @@ final class TaskCreationController extends AbstractController
     ) {
     }
 
+    /**
+     * The sheet "Ajouter": loaded into the sheet of the bottom bar (a Turbo Frame), or a page of its own (in the app,
+     * without scripts). What is missing goes back to the page it was said on.
+     */
     #[Route('', name: 'task_new', methods: ['GET'])]
-    public function choose(#[MapQueryParameter] ?int $modele = null): Response
+    public function choose(#[CurrentUser] Member $member, Request $request, ShoppingListBuilder $lists, #[MapQueryParameter] ?int $modele = null): Response
     {
         // Old links to a catalogue item: straight to the task to do.
         if (null !== $modele) {
             return $this->redirectToRoute('task_new_one_off', ['modele' => $modele]);
         }
+        $inSheet = 'add-sheet' === $request->headers->get('Turbo-Frame');
+        $from = parse_url((string) $request->headers->get('referer'));
+        $back = $inSheet && ($from['host'] ?? null) === $request->getHost() ? ($from['path'] ?? '/').(isset($from['query']) ? '?'.$from['query'] : '') : $this->generateUrl('task_new');
 
-        return $this->render('task/new_choose.html.twig');
+        return $this->render($inSheet ? 'task/add_sheet.html.twig' : 'task/new_choose.html.twig', [
+            'suggestions' => \array_slice($lists->build($member->getHousehold())->suggestions, 0, 5),
+            'back' => $back,
+        ]);
     }
 
     /**
-     * Something to do: first pick it among the tasks the house already knows (the catalogue, the
-     * occasional tasks asleep), or else create a new one — which joins the catalogue for next time.
+     * Something to do, in a few words: what, when, who. As it is typed, the tasks the house already knows show up
+     * (the catalogue, launched as it is; the occasional ones asleep, raised in one tap). The rest is folded away.
      */
     #[Route('/a-faire', name: 'task_new_one_off', methods: ['GET', 'POST'])]
     public function oneOff(
@@ -63,15 +74,9 @@ final class TaskCreationController extends AbstractController
         TaskBoardBuilder $boards,
         #[MapQueryParameter] ?int $modele = null,
         #[MapQueryParameter] bool $fait = false,
-        #[MapQueryParameter] bool $nouvelle = false,
         #[MapQueryParameter] ?string $titre = null,
     ): Response {
         $household = $member->getHousehold();
-        $items = $catalog->findForHousehold($household);
-        $dormant = $boards->build($household)->dormant();
-        if ($request->isMethod('GET') && null === $modele && !$fait && !$nouvelle && ([] !== $items || [] !== $dormant)) {
-            return $this->render('task/new_pick.html.twig', ['catalog' => $items, 'dormant' => $dormant]);
-        }
 
         $task = new Task($household, $member, $this->clock->now());
         $task->setKind(TaskKind::OneOff);
@@ -106,7 +111,8 @@ final class TaskCreationController extends AbstractController
         return $this->render('task/new_one_off.html.twig', [
             'form' => $form,
             'template' => $template,
-            'can_pick' => [] !== $items || [] !== $dormant,
+            'catalog' => null === $template ? $catalog->findForHousehold($household) : [],
+            'dormant' => null === $template ? $boards->build($household)->dormant() : [],
         ]);
     }
 
@@ -161,14 +167,20 @@ final class TaskCreationController extends AbstractController
         $this->entityManager->persist($task);
         $this->entityManager->flush();
 
+        // Back where it shows: done, the Casa thanks; taken, it is in my hand; free, in the list of the coloc.
         if (null !== $doneAt) {
             $this->celebrate($this->completer->complete($task, $member, $doneAt), $member);
+            $route = 'app_home';
         } elseif ($task->getKind()->isRecurring()) {
-            $this->addFlash('success', \sprintf('Le modèle « %s » est créé : ses tâches arriveront ici quand ce sera le moment.', $task->getTitle()));
+            // An express one is on the home page, "En un geste"; the others come to the list when it is time.
+            $this->addFlash('success', \sprintf('Le modèle « %s » est créé : ses tâches arriveront quand ce sera le moment.', $task->getTitle()));
+            $route = TaskKind::Quick === $task->getKind() ? 'app_home' : 'task_board';
         } else {
-            $this->addFlash('success', \sprintf('« %s » est dans la liste. %s', $task->getTitle(), $task->reservedByAt($this->clock->now()) ? 'Tu t’en occupes.' : 'Je préviens la coloc.'));
+            $mine = null !== $task->reservedByAt($this->clock->now());
+            $this->addFlash('success', \sprintf('« %s » est dans la liste. %s', $task->getTitle(), $mine ? 'Tu t’en occupes.' : 'Je préviens la coloc.'));
+            $route = $mine ? 'app_home' : 'task_board';
         }
 
-        return $this->redirectToRoute('app_home', status: Response::HTTP_SEE_OTHER);
+        return $this->redirectToRoute($route, status: Response::HTTP_SEE_OTHER);
     }
 }

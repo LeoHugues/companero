@@ -1,0 +1,72 @@
+{#
+    "Chez nous", at the bottom of the home page: the rest of the house at a glance, a row each. What is missing (the
+    urgent in coral, a coral dot on the cart) and "+" to say something else is; where I stand in the accounts (account
+    by account when there are several) and "+" to note an expense; the week's review — ready on Sunday evening and on
+    Monday, otherwise the house's points so far.
+    Variables: missing, ledgers, standing, review, team.
+#}
+{% set unsettled = ledgers|filter(ledger => standing[ledger.id] != 0) %}
+<section class="flex flex-col gap-2" aria-labelledby="summary-title">
+    <h2 id="summary-title" class="group-label">Chez nous</h2>
+    <ul class="list-sheet home-summary">
+        <li id="summary-missing">
+            <a href="{{ path('shopping_index') }}" class="list-row min-w-0 flex-1">
+                <span class="tile tile-lilac relative" aria-hidden="true">
+                    <twig:Icon name="cart" size="20" stroke="1.8"/>
+                    {% if missing|filter(item => item.urgent) is not empty %}<span class="tile-dot"></span>{% endif %}
+                </span>
+                <span class="flex min-w-0 flex-1 flex-col gap-0.5">
+                    <span class="row-title">{{ missing is empty ? 'Il ne manque rien' : 'Il manque ' ~ missing|length ~ ' chose' ~ (missing|length > 1 ? 's') }}</span>
+                    <span class="row-meta truncate">
+                        {%- if missing is empty -%}
+                            Le premier qui voit le fond d’un flacon le note
+                        {%- else -%}
+                            {%- for item in missing -%}
+                                {% if not loop.first %} · {% endif %}<span class="{{ item.urgent ? 'font-semibold text-danger-ink' }}">{{ item.name }}</span>
+                            {%- endfor -%}
+                        {%- endif -%}
+                    </span>
+                </span>
+            </a>
+            <a href="{{ path('shopping_index', {ajouter: 1}) }}" class="summary-add" aria-label="Il manque quelque chose : le noter" title="Il manque quelque chose" data-haptic="press"><twig:Icon name="plus" size="19" stroke="2.4"/></a>
+        </li>
+        <li id="summary-ledger">
+            <a href="{{ ledger_tab_path() }}" class="list-row min-w-0 flex-1">
+                <span class="tile tile-sage" aria-hidden="true"><twig:Icon name="coins" size="20" stroke="1.8"/></span>
+                <span class="flex min-w-0 flex-1 flex-col gap-0.5">
+                    {% if ledgers is empty %}
+                        <span class="row-title">Les comptes</span>
+                        <span class="row-meta">Qui a payé quoi, et qui rembourse qui</span>
+                    {% elseif unsettled is empty %}
+                        <span class="row-title">Tu es quitte</span>
+                        <span class="row-meta truncate">{{ ledgers|map(ledger => ledger.name)|join(' · ') }}</span>
+                    {% elseif ledgers|length == 1 %}
+                        {% set cents = standing[(ledgers|first).id] %}
+                        <span class="row-title {{ cents > 0 ? 'text-ok-ink' : 'text-clay-dark' }}">{{ cents > 0 ? 'On te doit ' ~ cents|money((ledgers|first).currency) : 'Tu dois ' ~ (-cents)|money((ledgers|first).currency) }}</span>
+                        <span class="row-meta truncate">{{ (ledgers|first).name }}</span>
+                    {% else %}
+                        <span class="row-title">Les comptes</span>
+                        <span class="row-meta truncate">
+                            {%- for ledger in unsettled -%}
+                                {%- set cents = standing[ledger.id] -%}
+                                {%- if not loop.first %} · {% endif %}{{ ledger.name }} <span class="font-semibold {{ cents > 0 ? 'text-ok-ink' : 'text-clay-dark' }}">{{ cents|money(ledger.currency, true) }}</span>
+                            {%- endfor -%}
+                        </span>
+                    {% endif %}
+                </span>
+            </a>
+            <a href="{{ path('ledger_expense_any') }}" class="summary-add" aria-label="Noter une dépense partagée" title="Une dépense" data-haptic="press"><twig:Icon name="plus" size="19" stroke="2.4"/></a>
+        </li>
+        <li id="summary-review">
+            <a href="{{ path('review_show', {week: review.week.start|date('Y-m-d')}) }}" class="list-row min-w-0 flex-1">
+                <span class="tile tile-sun" aria-hidden="true"><twig:Icon name="chart" size="20" stroke="2"/></span>
+                <span class="flex min-w-0 flex-1 flex-col gap-0.5">
+                    <span class="row-title">{{ review.ready ? 'Le bilan de la semaine est prêt' : 'Le bilan de la semaine' }}</span>
+                    <span class="row-meta">Semaine {{ review.week.number }}{{ review.ready ? ' · qui a gagné les titres ?' : ' · ' ~ team.points ~ ' / ' ~ team.goal ~ ' pts pour la maison' }}</span>
+                </span>
+                {% if review.ready %}<span class="summary-badge">Nouveau</span>{% endif %}
+                <twig:Icon name="chevron-right" size="18" class="row-chevron"/>
+            </a>
+        </li>
+    </ul>
+</section>

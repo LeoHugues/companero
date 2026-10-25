@@ -6,12 +6,9 @@
 {% block main_class %}{{ ux_is_native() ? 'pb-6' : 'pb-28' }}{% endblock %}
 
 {% block body %}
-    {{ include('task/_tunnel.html.twig', {
-        step: 2,
+    {{ include('task/_add_head.html.twig', {
         title: 'J’ai fait quelque chose',
-        icon: 'clock',
-        tile: 'tile-sage',
-        what: 'Choisis parmi les modèles de la maison. La tâche repart de ce moment-là, et les points comptent ce jour-là.'
+        lede: 'La tâche repart de ce moment-là, et ses points comptent ce jour-là.',
     }) }}
 
     {{ form_start(form, {attr: {class: 'flex flex-col gap-4'}}) }}

@@ -76,10 +76,10 @@ Une coquille [Hotwire Native](https://native.hotwired.dev/android/) (Kotlin,
 l'appli (`ux_is_native()` dans Twig) et sert ses règles de navigation,
 déclarées dans `src/Native/NativeConfiguration.php` :
 
-- Accueil, Tâches, Bilan, Profil et la connexion **remplacent** l'écran au lieu de
-  s'empiler ;
-- les formulaires de tâche s'ouvrent en **modale** (sans barre du bas, la croix
-  ferme la modale) ;
+- les onglets (Accueil, Tâches et ses modèles, Courses, Comptes) et la connexion
+  **remplacent** l'écran au lieu de s'empiler ;
+- les formulaires (tâche, dépense, compte) s'ouvrent en **modale** (sans barre du bas,
+  la croix ferme la modale) ;
 - tirer vers le bas rafraîchit la page.
 
 Elle **se met à jour toute seule** : la CI compile et publie chaque nouvelle version sur le serveur
@@ -152,11 +152,12 @@ passe les tests est mis en production automatiquement (voir
 | `src/Native`, `android/` | Appli Android : règles de navigation et coquille Hotwire Native |
 | `scripts/`, `dev.cmd` | Environnement local sous Windows |
 
-Deux notions à ne pas mélanger : les **modèles** (onglet *Modèles* : ce qui revient tout seul,
-les express, le catalogue) et les **tâches à faire** (l'accueil : les cartes, avec leur bouton
-« C'est fait »). Une tâche qui revient n'est qu'une ligne en base : son modèle, dont la tâche à
-faire du moment est calculée. Le bouton + demande d'abord ce qu'on ajoute : une tâche à faire,
-ce qu'on a déjà fait, ou un nouveau modèle.
+Deux notions à ne pas mélanger : les **modèles** (onglet *Tâches › Modèles* : ce qui revient tout
+seul, les express, le catalogue) et les **tâches à faire** (onglet *Tâches › À faire*, et ma main
+sur l'accueil : les cartes, avec leur bouton « C'est fait »). Une tâche qui revient n'est qu'une
+ligne en base : son modèle, dont la tâche à faire du moment est calculée. Le bouton + ouvre une
+feuille : une tâche à faire, ce qu'on a déjà fait, une dépense, un nouveau modèle, ou ce qui
+manque, tapé sur place.
 
 Le statut d'une tâche n'est jamais stocké : il est **calculé** à partir de ses
 règles et de sa dernière réalisation. Les points forment un **journal** : chaque

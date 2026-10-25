@@ -2,62 +2,12 @@
 
 {% block title %}Ajouter · Companero{% endblock %}
 
+{#
+    "Ajouter" as a page of its own: in the app (a modal, see App\Native\NativeConfiguration) and without scripts. In a
+    browser, the "+" of the bottom bar opens the same choices in a sheet, over the page.
+#}
 {% block body %}
-    {{ include('task/_tunnel.html.twig', {step: 1, title: 'Qu’est-ce que tu veux ajouter ?'}) }}
-
-    {% set choices = [
-        {
-            route: 'task_new_one_off', icon: 'check', tile: 'tile-sun',
-            title: 'Une tâche à faire',
-            text: 'Une chose à faire une fois : une que la maison connaît déjà, ou une nouvelle. Elle arrive sur l’accueil et disparaît une fois faite.',
-            example: 'Appeler le proprio, monter l’étagère, tailler la haie…',
-        },
-        {
-            route: 'task_log', icon: 'clock', tile: 'tile-sage',
-            title: 'J’ai fait quelque chose',
-            text: 'Noter une tâche déjà faite, maintenant ou il y a quelques jours. Les points comptent ce jour-là.',
-            example: 'L’aspirateur passé mardi, le chat nourri hier soir…',
-        },
-        {
-            route: 'task_new_template', icon: 'repeat', tile: 'tile-sky',
-            title: 'Un nouveau modèle',
-            text: 'Une tâche qui revient. La maison crée toute seule les tâches à faire, quand c’est le moment.',
-            example: 'La serpillière tous les 7 jours, les poubelles le mardi soir…',
-        },
-        {
-            route: 'shopping_index', params: {ajouter: 1}, icon: 'cart', tile: 'tile-lilac',
-            title: 'Il manque quelque chose',
-            text: 'Ce qu’il faut racheter pour la maison. Ça rejoint la liste de ce qui manque, que tout le monde voit sur l’accueil.',
-            example: 'Du papier toilette, des éponges, l’ampoule de l’entrée…',
-        },
-        {
-            route: 'ledger_expense_any', icon: 'coins', tile: 'tile-sage',
-            title: 'Une dépense partagée',
-            text: 'Ce que quelqu’un a payé pour plusieurs. Les comptes disent qui doit combien à qui, et qui rembourse qui.',
-            example: 'Les courses du marché, la facture d’électricité, les pizzas…',
-        },
-    ] %}
-    <ul class="flex flex-col gap-3">
-        {% for choice in choices %}
-            <li class="animate-rise" style="animation-delay: {{ loop.index0 * 70 }}ms">
-                <a href="{{ path(choice.route, choice.params ?? {}) }}" class="sheet flex items-start gap-3.5 p-4 text-ink no-underline transition hover:-translate-y-0.5 hover:text-ink active:scale-[.985]">
-                    <span class="tile {{ choice.tile }} size-12 rounded-[14px]" aria-hidden="true"><twig:Icon :name="choice.icon" size="23" stroke="1.9"/></span>
-                    <span class="flex min-w-0 flex-1 flex-col gap-1">
-                        <span class="text-[17px] leading-tight font-semibold">{{ choice.title }}</span>
-                        <span class="text-[13.5px] leading-snug text-ink-soft">{{ choice.text }}</span>
-                        <span class="text-[12.5px] leading-snug text-muted italic">{{ choice.example }}</span>
-                    </span>
-                    <twig:Icon name="chevron-right" size="18" class="row-chevron mt-3.5"/>
-                </a>
-            </li>
-        {% endfor %}
-    </ul>
-
-    <div class="mt-1 flex items-end gap-2.5">
-        <twig:CasaMini :size="58" class="shrink-0"/>
-        <p class="bubble mb-7 text-[13.5px]">Un <strong class="font-semibold">modèle</strong>, c’est la règle (« tous les 7 jours »). Une <strong class="font-semibold">tâche à faire</strong>, c’est ce qui attend sur l’accueil, avec sa carte.</p>
-    </div>
+    {{ include('task/_add_choices.html.twig', {in_sheet: false}) }}
 {% endblock %}
 
-{# In the Android app this tunnel is a modal (see App\Native\NativeConfiguration): no bottom navigation. #}
 {% block nav %}{% if not ux_is_native() %}<twig:BottomNav active="new"/>{% endif %}{% endblock %}

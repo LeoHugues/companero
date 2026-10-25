@@ -41,7 +41,7 @@ final class PetTest extends AppTestCase
             'task[assignee]' => (string) $leo->getId(),
             'task[backup]' => (string) $robin->getId(),
         ]);
-        self::assertResponseRedirects('/');
+        self::assertResponseRedirects('/taches');
         $task = static::getContainer()->get(TaskRepository::class)->findOneBy(['title' => 'Nourrir les chats']);
         self::assertSame('Tishka', $task?->getPet()?->getName());
 

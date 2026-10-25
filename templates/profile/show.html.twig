@@ -7,7 +7,11 @@
     my titles, and the ways to the household's settings, the tour and my account.
 #}
 {% block body %}
-    <header class="flex items-center gap-4 pt-1">
+    <div class="page-head">
+        <a href="{{ ux_is_native() ? '/recede_historical_location' : path('app_home') }}" aria-label="Retour à l’accueil" class="head-button"><twig:Icon name="arrow-left" size="20" stroke="2"/></a>
+        <a href="{{ path('household_edit') }}" class="head-link"><twig:Icon name="settings" size="16" stroke="1.9"/>La coloc</a>
+    </div>
+    <header class="flex items-center gap-4">
         <twig:LevelRing :member="member" :level="level"/>
         <div class="flex min-w-0 flex-1 flex-col gap-1">
             <h1 class="page-title truncate">{{ member.name }}</h1>
@@ -280,4 +284,4 @@
     <a href="{{ path('app_logout') }}" class="btn-link self-center" data-turbo="false"><twig:Icon name="logout" size="17" stroke="1.9"/>Se déconnecter</a>
 {% endblock %}
 
-{% block nav %}<twig:BottomNav active="profile"/>{% endblock %}
+{% block nav %}<twig:BottomNav active="home"/>{% endblock %}

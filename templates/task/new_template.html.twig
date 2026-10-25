@@ -6,12 +6,9 @@
 {% block main_class %}{{ ux_is_native() ? 'pb-6' : 'pb-28' }}{% endblock %}
 
 {% block body %}
-    {{ include('task/_tunnel.html.twig', {
-        step: 2,
-        title: 'Un nouveau modèle',
-        icon: 'repeat',
-        tile: 'tile-sky',
-        what: 'La règle d’une tâche qui revient. Ses tâches à faire arriveront toutes seules sur l’accueil, quand ce sera le moment.'
+    {{ include('task/_add_head.html.twig', {
+        title: 'Un modèle qui revient',
+        lede: 'La règle d’une tâche qui revient : ses tâches à faire arriveront toutes seules, quand ce sera le moment.',
     }) }}
 
     {{ include('task/_form.html.twig', {submit_label: 'Créer le modèle'}) }}
