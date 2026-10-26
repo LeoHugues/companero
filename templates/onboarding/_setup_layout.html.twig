@@ -1,0 +1,36 @@
+{% extends 'base.html.twig' %}
+{#
+    A step of setting up the coloc just created (OnboardingController): where we are among the four (the coloc, its
+    house, its first chores, its colocs; the tour comes after), the Casa saying what it is about, the step itself,
+    and at the bottom "Retour" and what goes on. Variables: step (2 to 4), household.
+#}
+{% block title %}{{ block('heading') }} · {{ household.name }}{% endblock %}
+{% block main_class %}pb-32{% endblock %}
+
+{% block body %}
+    {% set steps = ['La coloc', 'La maison', 'Pour commencer', 'Les colocs'] %}
+    <header class="flex flex-col gap-2">
+        <ol class="flex items-center gap-1.5" aria-label="Étape {{ step }} sur {{ steps|length }} : {{ steps[step - 1] }}">
+            {% for label in steps %}
+                <li class="h-1.5 flex-1 rounded-full {{ loop.index <= step ? 'bg-clay' : 'bg-track' }}"{% if loop.index == step %} aria-current="step"{% endif %}><span class="sr-only">{{ label }}</span></li>
+            {% endfor %}
+        </ol>
+        <p class="eyebrow">{{ household.name }} · {{ step }} sur {{ steps|length }}</p>
+    </header>
+
+    <div class="flex items-end gap-2.5">
+        <twig:CasaMini :size="62" :happy="true" class="shrink-0"/>
+        <p class="bubble animate-pop mb-7">{% block speech %}{% endblock %}</p>
+    </div>
+
+    <h1 class="page-title -mt-2">{% block heading %}{% endblock %}</h1>
+
+    {% block content %}{% endblock %}
+
+    <nav class="tour-bar" aria-label="Étapes">
+        <div class="mx-auto flex h-[76px] max-w-md items-center justify-between gap-3 px-5">
+            {% block back %}<span></span>{% endblock %}
+            {% block next %}{% endblock %}
+        </div>
+    </nav>
+{% endblock %}

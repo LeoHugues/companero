@@ -13,9 +13,8 @@ class FoundingType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        $builder
-            ->add('householdName', TextType::class, ['empty_data' => '', 'label' => 'Le nom de la coloc', 'attr' => ['placeholder' => 'La coloc des Lilas']])
-            ->add('cleaningDay', WeekdayType::class, ['label' => 'Le jour de ménage']);
+        // Its cleaning day is chosen with its rooms, right after (OnboardingController::house).
+        $builder->add('householdName', TextType::class, ['empty_data' => '', 'label' => 'Le nom de la coloc', 'attr' => ['placeholder' => 'La coloc des Lilas']]);
     }
 
     public function getParent(): string

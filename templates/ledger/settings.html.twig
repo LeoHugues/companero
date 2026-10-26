@@ -77,7 +77,7 @@
             <form method="post" action="{{ path('ledger_participant_add', {id: ledger.id}) }}" class="flex items-center gap-2">
                 <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
                 <label for="guest-name" class="sr-only">Le prénom d’un invité</label>
-                <input type="text" id="guest-name" name="name" class="input" placeholder="Quelqu’un d’autre : son prénom" maxlength="{{ constant('App\\Entity\\Participant::NAME_MAX_LENGTH') }}" autocomplete="off" enterkeyhint="send" required>
+                <input type="text" id="guest-name" name="name" class="input" placeholder="Prénom d’un invité" maxlength="{{ constant('App\\Entity\\Participant::NAME_MAX_LENGTH') }}" autocomplete="off" enterkeyhint="send" required>
                 <button type="submit" class="btn-soft h-12 px-4" data-haptic="success"><twig:Icon name="plus" size="17" stroke="2.4"/>Ajouter</button>
             </form>
         </div>

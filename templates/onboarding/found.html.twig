@@ -3,22 +3,46 @@
 {% block title %}Créer la coloc · Companero{% endblock %}
 {% block main_class %}pb-10{% endblock %}
 
+{#
+    Creating the coloc, one question at a time (steps_controller.js), the Casa saying each one: its name, then yours,
+    then what will log you in again. Its rooms, animals and chores come right after (OnboardingController::house).
+#}
 {% block body %}
-    {{ include('_casa_hero.html.twig', {mood: enum('App\\Enum\\CasaMood').Radiant, speech: 'Salut ! Moi c’est la Casa. On s’organise ensemble ?'}) }}
+    {{ include('_casa_hero.html.twig', {mood: enum('App\\Enum\\CasaMood').Radiant, speech: 'Salut ! Moi, c’est la Casa. On s’organise ensemble ?'}) }}
 
-    {{ form_start(form, {attr: {class: 'hero-sheet'}}) }}
-        <div>
-            <h1 class="home-title">Créer la coloc</h1>
-            <p class="mt-1 text-[13.5px] text-muted">Tu pourras inviter tes colocs juste après.</p>
+    {{ form_start(form, {attr: {class: 'hero-sheet', 'data-controller': 'steps', 'data-action': 'keydown->steps#enter'}}) }}
+        <div class="steps-head">
+            <button type="button" class="steps-back" data-steps-target="back" data-action="steps#back" hidden><twig:Icon name="chevron-left" size="17" stroke="2.2"/>Retour</button>
+            <ol class="steps-dots" aria-hidden="true">
+                {% for i in 1..3 %}<li data-steps-target="dot"{% if i == 1 %} class="is-done"{% endif %}></li>{% endfor %}
+            </ol>
         </div>
-        {{ form_row(form.householdName) }}
-        {{ form_row(form.cleaningDay, {help: 'Un rendez-vous, pas une obligation : ce qui est fait ce jour-là rapporte un petit bonus.'}) }}
-        <p class="eyebrow -mb-2 border-t border-line/70 pt-4">Et toi</p>
-        {{ form_row(form.name) }}
-        {{ form_row(form.username) }}
-        {{ form_row(form.plainPassword) }}
-        <button type="submit" class="btn-primary h-[52px] w-full text-[16px]">C’est parti</button>
+
+        <section class="steps-step" data-steps-target="step" data-speech="Salut ! Moi, c’est la Casa. On commence par le nom de votre coloc ?">
+            <div>
+                <h1 class="home-title">Créer votre coloc</h1>
+                <p class="mt-1 text-[13.5px] leading-snug text-muted">Trois questions, et la maison est à vous. Tes colocs, tu les invites juste après.</p>
+            </div>
+            {{ form_row(form.householdName, {label: 'Comment s’appelle-t-elle ?', attr: {autocomplete: 'off'}}) }}
+            <button type="button" class="btn-primary h-[52px] w-full text-[16px]" data-steps-target="next" data-action="steps#next" hidden>Suivant<twig:Icon name="chevron-right" size="19" stroke="2.4"/></button>
+        </section>
+
+        <section class="steps-step" data-steps-target="step" data-speech="« {householdName} », j’adore ! Et toi, comment tu t’appelles ?">
+            <h2 class="home-title">Et toi ?</h2>
+            {{ form_row(form.name, {label: 'Ton prénom', help: 'C’est lui que tes colocs verront, sur les cartes et les comptes.'}) }}
+            <button type="button" class="btn-primary h-[52px] w-full text-[16px]" data-steps-target="next" data-action="steps#next" hidden>Suivant<twig:Icon name="chevron-right" size="19" stroke="2.4"/></button>
+        </section>
+
+        <section class="steps-step" data-steps-target="step" data-speech="Enchantée, {name} ! Dernière chose : de quoi te reconnecter.">
+            <div>
+                <h2 class="home-title">Pour te reconnecter</h2>
+                <p class="mt-1 text-[13.5px] leading-snug text-muted">Sur ce téléphone, tu restes connecté : tu n’en auras besoin que sur un autre.</p>
+            </div>
+            {{ form_row(form.username) }}
+            {{ form_row(form.plainPassword, {help: 'Au moins 8 caractères.', attr: {minlength: 8}}) }}
+            <button type="submit" class="btn-primary h-[52px] w-full text-[16px]" data-haptic="success" data-turbo-submits-with="La Casa prépare la maison…">C’est parti<twig:Icon name="chevron-right" size="19" stroke="2.4"/></button>
+        </section>
     {{ form_end(form) }}
 
-    <p class="text-center text-[13.5px] text-muted">Déjà inscrit ? <a href="{{ path('app_login') }}" class="font-semibold">Se connecter</a></p>
+    <p class="text-center text-[13.5px] text-muted">Déjà un compte ? <a href="{{ path('app_login') }}" class="font-semibold">Se connecter</a></p>
 {% endblock %}

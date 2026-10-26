@@ -5,20 +5,29 @@
 {% block heading %}Une tâche, une carte{% endblock %}
 
 {% block content %}
-    {{ include('onboarding/tour/_demo_card.html.twig') }}
+    <p class="-mt-1 text-[15px] leading-relaxed text-ink-soft">
+        La plupart n’ont pas de date : elles ont un rythme, et <strong class="font-semibold text-ink">glissent</strong>. Plus le temps passe depuis la
+        dernière fois, plus la carte devient pressante. Fais glisser le temps, puis joue-la :
+    </p>
+
+    {{ include('onboarding/tour/_demo_card.html.twig', {glide: true, age: 1}) }}
+
+    {# The words of the home page's groups, in their colours. #}
+    <ul class="sheet grid grid-cols-2 gap-x-3 gap-y-3 p-4" aria-label="Les états d’une carte">
+        <li class="care-group-title is-fresh mt-0"><span class="care-group-dot"></span>Fraîche</li>
+        <li class="care-group-title is-soon mt-0"><span class="care-group-dot"></span>Bientôt</li>
+        <li class="care-group-title is-due mt-0"><span class="care-group-dot"></span>C’est le moment</li>
+        <li class="care-group-title is-late mt-0"><span class="care-group-dot"></span>En retard</li>
+    </ul>
 
     <ul class="list-sheet">
-        <li class="flex items-start gap-3 py-3.5">
-            <span class="tile tile-sand text-[15px] font-bold">20</span>
-            <p class="text-[14px] leading-snug text-ink-soft"><strong class="font-semibold text-ink">Le coin</strong>, comme une carte à jouer : ce qu’elle rapporte, et sa catégorie. Plus bas, un fil qui se vide avec le temps.</p>
-        </li>
         <li class="flex items-start gap-3 py-3.5">
             <span class="tile bg-[#FCE6D6]"><span class="seat-empty size-7"><twig:Icon name="plus" size="12" stroke="2.6"/></span></span>
             <p class="text-[14px] leading-snug text-ink-soft"><strong class="font-semibold text-ink">Je prends</strong> : les autres voient que tu t’en occupes.</p>
         </li>
         <li class="flex items-start gap-3 py-3.5">
             <span class="tile bg-[#F1C75A] shadow-[inset_0_-2px_0_rgba(46,30,20,.14)]"><twig:Icon name="check" size="18" stroke="2.4"/></span>
-            <p class="text-[14px] leading-snug text-ink-soft"><strong class="font-semibold text-ink">C’est fait</strong> : un appui, et ses points sont à toi. Oublié sur le moment ? On peut le noter après coup.</p>
+            <p class="text-[14px] leading-snug text-ink-soft"><strong class="font-semibold text-ink">C’est fait</strong> : ses points sont à toi, et elle repart à zéro. Pas besoin d’attendre qu’elle soit due, et pas de punition en retard : elle rapporte autant.</p>
         </li>
         <li class="flex items-start gap-3 py-3.5">
             <span class="tile tile-sky"><twig:Icon name="settings" size="18" stroke="1.9"/></span>

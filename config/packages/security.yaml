@@ -33,7 +33,9 @@ security:
                 target: app_login
 
     access_control:
-        - { path: ^/(connexion|bienvenue|rejoindre), roles: PUBLIC_ACCESS }
+        - { path: ^/bienvenue/, roles: ROLE_USER }
+        # (Logging out once already out leads to the login page, without making it the place to go back to after.)
+        - { path: ^/(connexion|deconnexion|bienvenue|rejoindre), roles: PUBLIC_ACCESS }
         - { path: ^/, roles: ROLE_USER }
 
 when@test:

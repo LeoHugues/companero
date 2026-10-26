@@ -35,8 +35,9 @@ symfony serve                               # ou tout serveur PHP pointant sur p
 Coloc de démo (la nôtre : zones, tâches du dimanche, chats…) : pseudo `leo`, mot de passe `companero`
 (aussi `lea`, `robin`, `gab`).
 
-Sinon, ouvrez `/bienvenue` pour créer votre coloc, puis partagez le lien
-d'invitation affiché dans *Profil › La coloc*.
+Sinon, ouvrez l'appli et choisissez « Créer notre coloc » (`/bienvenue`) : trois questions, puis la Casa
+fait choisir les pièces, les animaux et les premières tâches, et donne le lien d'invitation à envoyer
+(il reste dans *Réglages de la coloc*).
 
 ### Sous Windows, sans rien installer
 
@@ -76,8 +77,8 @@ Une coquille [Hotwire Native](https://native.hotwired.dev/android/) (Kotlin,
 l'appli (`ux_is_native()` dans Twig) et sert ses règles de navigation,
 déclarées dans `src/Native/NativeConfiguration.php` :
 
-- les onglets (Accueil, Tâches et ses modèles, Courses, Comptes) et la connexion
-  **remplacent** l'écran au lieu de s'empiler ;
+- les onglets (Accueil, Tâches et ses modèles, Courses, Comptes), la connexion, la mise en place
+  d'une nouvelle coloc et la découverte **remplacent** l'écran au lieu de s'empiler ;
 - les formulaires (tâche, dépense, compte) s'ouvrent en **modale** (sans barre du bas,
   la croix ferme la modale) ;
 - tirer vers le bas rafraîchit la page.

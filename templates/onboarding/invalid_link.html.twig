@@ -1,0 +1,26 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Lien d’invitation · Companero{% endblock %}
+{% block main_class %}pb-10{% endblock %}
+
+{#
+    An invitation link that leads to no coloc: mistyped, cut short, or replaced since in the coloc's settings ("Nouveau
+    lien"). The Casa says so gently and how to get a good one; it can be pasted right here.
+#}
+{% block body %}
+    {{ include('_casa_hero.html.twig', {mood: enum('App\\Enum\\CasaMood').Dusty, speech: 'Oups… Cette porte-là ne s’ouvre plus.'}) }}
+
+    <section class="hero-sheet" aria-labelledby="invalid-title">
+        <div>
+            <h1 id="invalid-title" class="home-title">Ce lien ne marche plus</h1>
+            <p class="mt-1 text-[13.5px] leading-snug text-muted">Il a peut-être été remplacé par un nouveau, ou il lui manque un bout. Demande à ta coloc de te le renvoyer, puis ouvre-le ou colle-le ici.</p>
+        </div>
+        <form method="get" action="{{ path('onboarding_link') }}" class="flex flex-col gap-2.5">
+            <label for="invite-link" class="sr-only">Le lien d’invitation</label>
+            <input type="text" id="invite-link" name="lien" class="input" placeholder="Colle le nouveau lien ici" inputmode="url" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" enterkeyhint="go" required>
+            <button type="submit" class="btn-primary w-full">Rejoindre la coloc<twig:Icon name="chevron-right" size="18" stroke="2.4"/></button>
+        </form>
+    </section>
+
+    <p class="text-center text-[13.5px] text-muted">Ou bien <a href="{{ path('onboarding_found') }}" class="font-semibold">créer votre coloc</a> · <a href="{{ path('app_login') }}" class="font-semibold">se connecter</a></p>
+{% endblock %}

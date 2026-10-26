@@ -1,0 +1,82 @@
+{% extends 'onboarding/_setup_layout.html.twig' %}
+{#
+    The house of the coloc just created: its rooms (the usual ones ticked, another typed), its animals, its cleaning day.
+    The chores offered next go through those rooms, and look after those animals.
+#}
+{% set step = 2 %}
+
+{% block speech %}Fais-moi visiter ! Quelles pièces y a-t-il chez vous ?{% endblock %}
+{% block heading %}Votre maison{% endblock %}
+
+{% block content %}
+    <form method="post" id="house-form" class="flex flex-col gap-5">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
+
+        <section class="flex flex-col gap-2" aria-labelledby="rooms-title">
+            <h2 id="rooms-title" class="group-label">Les pièces</h2>
+            <div class="sheet flex flex-col gap-3.5 p-4">
+                <ul class="choice-chips" aria-label="Les pièces de la maison">
+                    {% for room in rooms %}
+                        <li>
+                            <input type="checkbox" id="room-{{ loop.index }}" name="pieces[]" value="{{ room }}" {{ room in chosen ? 'checked' }}>
+                            <label for="room-{{ loop.index }}">{{ room }}</label>
+                        </li>
+                    {% endfor %}
+                </ul>
+                <div class="flex flex-col gap-2 border-t border-line/70 pt-3.5">
+                    <label for="room-other" class="field-label">Une autre ?</label>
+                    <input type="text" id="room-other" name="autre" class="input" placeholder="Le grenier, la chambre d’amis…" autocomplete="off">
+                    <p class="text-[12.5px] leading-snug text-muted">Plusieurs ? Sépare-les d’une virgule. Les chambres de chacun peuvent attendre : elles s’ajoutent quand on veut.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="flex flex-col gap-2" aria-labelledby="pets-title">
+            <h2 id="pets-title" class="group-label">Des animaux ?</h2>
+            <div class="sheet flex flex-col gap-3 p-4">
+                {% if household.pets is not empty %}
+                    <ul class="choice-chips" aria-label="Les animaux de la maison">
+                        {% for pet in household.pets %}
+                            <li>
+                                <input type="checkbox" id="pet-{{ pet.id }}" name="garder[]" value="{{ pet.id }}" checked>
+                                <label for="pet-{{ pet.id }}"><twig:Icon name="paw" size="15" stroke="2"/>{{ pet.name }}</label>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+                {% for i in 0..1 %}
+                    <div class="flex items-center gap-2">
+                        <label for="pet-name-{{ i }}" class="sr-only">Le nom d’un animal</label>
+                        <input type="text" id="pet-name-{{ i }}" name="animaux[{{ i }}][nom]" class="input" placeholder="{{ i == 0 ? 'Son nom' : 'Un autre ?' }}" maxlength="40" autocomplete="off">
+                        <label for="pet-species-{{ i }}" class="sr-only">Son espèce</label>
+                        <select id="pet-species-{{ i }}" name="animaux[{{ i }}][espece]" class="input w-[108px] shrink-0">
+                            <option value="cat">Un chat</option>
+                            <option value="dog">Un chien</option>
+                            <option value="other">Un autre</option>
+                        </select>
+                    </div>
+                {% endfor %}
+                <p class="text-[12.5px] leading-snug text-muted">La Casa leur réserve leurs tâches : la litière, les gamelles, la promenade.</p>
+            </div>
+        </section>
+
+        <section class="flex flex-col gap-2" aria-labelledby="day-title">
+            <h2 id="day-title" class="group-label">Le jour de ménage</h2>
+            <div class="sheet flex flex-col gap-3 p-4">
+                <ul class="choice-chips grid grid-cols-7 gap-1.5" aria-label="Le jour de ménage">
+                    {% for day in 1..7 %}
+                        <li>
+                            <input type="radio" id="day-{{ day }}" name="jour" value="{{ day }}" {{ household.cleaningDay == day ? 'checked' }}>
+                            <label for="day-{{ day }}" class="w-full justify-center px-0">{{ weekday_name(day)|capitalize|slice(0, 3) }}<span class="sr-only">{{ weekday_name(day)|slice(3) }}</span></label>
+                        </li>
+                    {% endfor %}
+                </ul>
+                <p class="text-[12.5px] leading-snug text-muted">Un rendez-vous, pas une obligation : ce qui est fait ce jour-là rapporte un petit bonus.</p>
+            </div>
+        </section>
+    </form>
+{% endblock %}
+
+{% block next %}
+    <button type="submit" form="house-form" class="btn-primary h-[52px] px-6 text-[16px]" data-haptic="tick" data-turbo-submits-with="Un instant…">Suivant<twig:Icon name="chevron-right" size="19" stroke="2.4"/></button>
+{% endblock %}

@@ -1,30 +1,91 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Connexion · Companero{% endblock %}
+{% block title %}Bienvenue · Companero{% endblock %}
 {% block main_class %}pb-10{% endblock %}
 
+{#
+    The way in, where the app opens before anyone is logged in: the Casa says hello, then the three doors — creating a
+    coloc, joining one by its invitation link (pasted here: in the app, a link opens the browser, not the app), and
+    logging in. After a wrong password, logging in comes first.
+#}
 {% block body %}
-    {{ include('_casa_hero.html.twig', {mood: enum('App\\Enum\\CasaMood').Okay, speech: 'Te revoilà ! Connecte-toi pour retrouver la coloc.'}) }}
+    {% set invite_error = app.flashes('invite_error')|first %}
 
-    <form method="post" class="hero-sheet">
-        <h1 class="home-title">Connexion</h1>
+    {% set doors %}
+        <ul class="flex flex-col" aria-label="Commencer">
+            <li>
+                <a href="{{ path('onboarding_found') }}" class="welcome-door">
+                    <span class="tile tile-clay size-12 rounded-[14px]" aria-hidden="true"><twig:Icon name="home" size="22" stroke="1.9"/></span>
+                    <span class="flex min-w-0 flex-1 flex-col gap-0.5">
+                        <span class="row-title text-[16px]">Créer notre coloc</span>
+                        <span class="row-meta">La maison est prête en deux minutes.</span>
+                    </span>
+                    <twig:Icon name="chevron-right" size="18" stroke="2.2" class="row-chevron"/>
+                </a>
+            </li>
+            <li class="border-t border-line/70">
+                <details id="rejoindre" class="group/join" {{ invite_error ? 'open' }}>
+                    <summary class="welcome-door cursor-pointer list-none [&::-webkit-details-marker]:hidden">
+                        <span class="tile tile-sky size-12 rounded-[14px]" aria-hidden="true"><twig:Icon name="link" size="22" stroke="1.9"/></span>
+                        <span class="flex min-w-0 flex-1 flex-col gap-0.5">
+                            <span class="row-title text-[16px]">J’ai un lien d’invitation</span>
+                            <span class="row-meta">Ta coloc te l’a envoyé ? Ouvre-le, ou colle-le ici.</span>
+                        </span>
+                        <twig:Icon name="chevron-down" size="18" stroke="2.2" class="row-chevron group-open/join:rotate-180"/>
+                    </summary>
+                    <form method="get" action="{{ path('onboarding_link') }}" class="welcome-paste">
+                        {% if invite_error %}
+                            <p class="flex items-center gap-2 rounded-xl bg-danger-soft px-3 py-2 text-[13.5px] font-medium text-danger-ink" role="alert"><twig:Icon name="alarm" size="16" stroke="2" class="shrink-0"/>{{ invite_error }}</p>
+                        {% endif %}
+                        <label for="invite-link" class="sr-only">Le lien d’invitation</label>
+                        <input type="text" id="invite-link" name="lien" class="input" placeholder="Colle le lien ici" inputmode="url" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" enterkeyhint="go" required>
+                        <button type="submit" class="btn-primary w-full">Rejoindre la coloc<twig:Icon name="chevron-right" size="18" stroke="2.4"/></button>
+                    </form>
+                </details>
+            </li>
+        </ul>
+    {% endset %}
 
-        {% if error %}
-            <p class="-mt-2 flex items-center gap-2 rounded-xl bg-danger-soft px-3 py-2 text-[13.5px] font-medium text-danger-ink" role="alert"><twig:Icon name="alarm" size="16" stroke="2" class="shrink-0"/>Pseudo ou mot de passe incorrect.</p>
-        {% endif %}
+    {% set login %}
+        <form method="post" action="{{ path('app_login') }}" class="flex flex-col gap-4">
+            {% if error %}
+                <p class="flex items-center gap-2 rounded-xl bg-danger-soft px-3 py-2 text-[13.5px] font-medium text-danger-ink" role="alert"><twig:Icon name="alarm" size="16" stroke="2" class="shrink-0"/>Pseudo ou mot de passe incorrect.</p>
+            {% endif %}
+            <div class="flex flex-col gap-2">
+                <label for="pseudo" class="field-label">Pseudo</label>
+                <input type="text" id="pseudo" name="pseudo" value="{{ last_username }}" class="input" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" required>
+            </div>
+            <div class="flex flex-col gap-2">
+                <label for="password" class="field-label">Mot de passe</label>
+                <input type="password" id="password" name="password" class="input" autocomplete="current-password" required {{ error ? 'autofocus' }}>
+            </div>
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+            <button type="submit" class="btn-primary h-[52px] w-full text-[16px]" data-turbo-submits-with="Connexion…">Se connecter</button>
+        </form>
+    {% endset %}
 
-        <div class="flex flex-col gap-2">
-            <label for="pseudo" class="field-label">Pseudo</label>
-            <input type="text" id="pseudo" name="pseudo" value="{{ last_username }}" class="input" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" required autofocus>
-        </div>
-        <div class="flex flex-col gap-2">
-            <label for="password" class="field-label">Mot de passe</label>
-            <input type="password" id="password" name="password" class="input" autocomplete="current-password" required>
-        </div>
-        <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
-
-        <button type="submit" class="btn-primary h-[52px] w-full text-[16px]">Se connecter</button>
-    </form>
-
-    <p class="text-center text-[13.5px] text-muted">Pas encore de coloc ? <a href="{{ path('onboarding_found') }}" class="font-semibold">Créer la vôtre</a></p>
+    {% if error %}
+        {{ include('_casa_hero.html.twig', {mood: enum('App\\Enum\\CasaMood').Okay, speech: 'Hmm, ça ne me dit rien… On réessaie ?'}) }}
+        <section class="hero-sheet" aria-labelledby="login-title">
+            <h1 id="login-title" class="home-title">Connexion</h1>
+            {{ login }}
+        </section>
+        <section class="flex flex-col gap-2" aria-labelledby="welcome-title">
+            <h2 id="welcome-title" class="group-label">Pas encore de compte ?</h2>
+            <div class="sheet px-4">{{ doors }}</div>
+        </section>
+    {% else %}
+        {{ include('_casa_hero.html.twig', {mood: enum('App\\Enum\\CasaMood').Radiant, speech: 'Salut ! Moi, c’est la Casa. Bienvenue à la maison !'}) }}
+        <section class="hero-sheet gap-3" aria-labelledby="welcome-title">
+            <div>
+                <h1 id="welcome-title" class="home-title">Toute la coloc, au même endroit</h1>
+                <p class="mt-1 text-[13.5px] leading-snug text-muted">Les tâches en cartes à se partager, les courses, les comptes. Et moi, je rayonne quand la maison brille.</p>
+            </div>
+            <div class="-mb-1 border-t border-line/70">{{ doors }}</div>
+        </section>
+        <section class="flex flex-col gap-2" aria-labelledby="login-title">
+            <h2 id="login-title" class="group-label">Déjà un compte ?</h2>
+            <div class="sheet p-4">{{ login }}</div>
+        </section>
+    {% endif %}
 {% endblock %}

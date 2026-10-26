@@ -3,17 +3,21 @@
 {% block title %}Les comptes · Companero{% endblock %}
 
 {#
-    The household's accounts, the whole coloc's first: who is in each, what was spent, and where I stand. None yet:
+    The household's accounts, the whole coloc's first: who is in each, and where I stand. None yet:
     the coloc's opens in one tap (with everyone, in euros), another one (a weekend away) has its form. From "+ Une
     dépense" (?depense=1), a tap on an account opens its expense form.
 #}
 {% block body %}
-    <header class="page-head items-end">
-        <div class="min-w-0">
-            <p class="eyebrow">{{ app.user.household.name }}</p>
-            <h1 class="page-title mt-1">{{ adding and ledgers is not empty ? 'Dans quel compte ?' : 'Les comptes' }}</h1>
-        </div>
-    </header>
+    {% if adding and ledgers is not empty %}
+        {{ include('task/_add_head.html.twig', {title: 'Dans quel compte ?', lede: 'La dépense s’y ajoute, avec ceux qui y sont.'}) }}
+    {% else %}
+        <header class="page-head items-end">
+            <div class="min-w-0">
+                <p class="eyebrow">{{ app.user.household.name }}</p>
+                <h1 class="page-title mt-1">Les comptes</h1>
+            </div>
+        </header>
+    {% endif %}
 
     {% if ledgers is empty %}
         <div class="flex items-end gap-2.5">
@@ -42,19 +46,18 @@
                         <span class="tile {{ ledger.everyone ? 'tile-sage' : 'tile-lilac' }}" aria-hidden="true"><twig:Icon :name="ledger.everyone ? 'home' : 'coins'" size="20" stroke="1.8"/></span>
                         <span class="flex min-w-0 flex-1 flex-col gap-1">
                             <span class="row-title">{{ ledger.name }}</span>
-                            <span class="flex items-center gap-2">
+                            <span class="flex min-w-0 items-center gap-2" title="{{ (totals[ledger.id] ?? 0)|money(ledger.currency) }} de dépenses en tout">
                                 <span class="faces" aria-hidden="true">
                                     {% for participant in ledger.participants|slice(0, 5) %}<twig:Avatar :member="participant" size="20"/>{% endfor %}
                                 </span>
-                                <span class="row-meta">{{ (totals[ledger.id] ?? 0)|money(ledger.currency) }} de dépenses</span>
+                                {% if balance is not null %}
+                                    <span class="ledger-standing {{ balance > 0 ? 'is-owed' : (balance < 0 ? 'is-owing') }}">{{ balance > 0 ? 'On te doit ' ~ balance|money(ledger.currency) : (balance < 0 ? 'Tu dois ' ~ (-balance)|money(ledger.currency) : 'Tu es quitte') }}</span>
+                                {% else %}
+                                    <span class="row-meta truncate">{{ (totals[ledger.id] ?? 0)|money(ledger.currency) }} de dépenses</span>
+                                {% endif %}
                             </span>
                         </span>
-                        {% if adding %}
-                            <twig:Icon name="plus" size="18" stroke="2.2" class="row-chevron"/>
-                        {% else %}
-                            {% if balance is not null %}<span class="ledger-balance {{ balance > 0 ? 'is-owed' : (balance < 0 ? 'is-owing') }}">{{ balance ? balance|money(ledger.currency, true) : 'Quitte' }}</span>{% endif %}
-                            <twig:Icon name="chevron-right" size="18" class="row-chevron"/>
-                        {% endif %}
+                        <twig:Icon :name="adding ? 'plus' : 'chevron-right'" size="18" :stroke="adding ? 2.2 : 2" class="row-chevron"/>
                     </a>
                 </li>
             {% endfor %}

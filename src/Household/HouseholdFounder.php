@@ -13,8 +13,6 @@ use Psr\Clock\ClockInterface;
 /** Creates a household, with sensible defaults (zones, catalogue) unless told otherwise, its charter and its first member. */
 final readonly class HouseholdFounder
 {
-    private const ZONES = ['Cuisine', 'Salon', 'Salle de bain', 'WC', 'Entrée'];
-
     private const CATALOG = [
         ['Tailler la haie', TaskCategory::Garden, 100],
         ['Tondre la pelouse', TaskCategory::Garden, 60],
@@ -41,7 +39,8 @@ final readonly class HouseholdFounder
         Charter::seed($household);
 
         if ($withDefaults) {
-            foreach (self::ZONES as $name) {
+            // The usual rooms; the founder chooses theirs right after (OnboardingController::house).
+            foreach (array_keys(array_filter(StarterKit::ROOMS)) as $name) {
                 new Zone($household, $name);
             }
             foreach (self::CATALOG as [$title, $category, $points]) {

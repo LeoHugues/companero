@@ -4,12 +4,12 @@
 
 ## 1. Intention
 
-Aujourd'hui, on crée la coloc ou on la rejoint, puis on tombe directement sur l'accueil. L'objectif
-perso reste à 70 points sans qu'on l'ait choisi, la présence à 7 jours, tous les rappels sont
-activés, et rien n'explique la Casa, les cartes ni les objectifs.
+Arriver dans Companero doit être accueillant : la Casa reçoit, une question à la fois, et la maison est
+prête avant même qu'on la voie. L'onboarding doit :
 
-L'onboarding doit :
-
+- **ouvrir les bonnes portes** : créer sa coloc, la rejoindre par son lien (même collé), se reconnecter ;
+- **mettre la maison en place** pour celui qui la crée : ses pièces, ses animaux, ses premières tâches, et
+  l'invitation des autres ;
 - dire **à quoi sert l'appli** : gérer l'intendance de la maison, s'organiser ensemble, se motiver ;
 - expliquer **comment marchent les cartes**, et surtout le **glissement** ;
 - présenter **les deux objectifs**, celui de la maison et celui de chacun ;
@@ -20,68 +20,96 @@ On garde le mot « tâche ». Pas de classement, pas de contrôle : on n'en parl
 
 ## 2. Qui le voit
 
-| Qui | Quand |
-|---|---|
-| Celui qui crée la coloc (`/bienvenue`) | Juste après la création |
-| Celui qui rejoint (`/rejoindre/{token}`) | Juste après l'étape « Qui es-tu ? » |
-| Les membres déjà inscrits | À leur prochaine visite, une seule fois |
+| Qui | Par où | Puis |
+|---|---|---|
+| Celui qui crée la coloc | L'accueil › « Créer notre coloc » (`/bienvenue`) | La mise en place, puis la découverte |
+| Celui qui rejoint | Le lien d'invitation (`/rejoindre/{token}`), ouvert ou collé sur l'accueil | La découverte |
+| Les membres déjà inscrits | À leur prochaine visite, une seule fois | La découverte |
 
-**Il est obligatoire, et court.** Tant qu'il n'est pas terminé, toute page de l'appli y ramène
-(`RequireOnboardingListener`), sauf la déconnexion et ce que l'appli Android demande toute seule
-(`/api`). Interrompu, il reprend au début ; l'adhésion à la charte, elle, est gardée.
+**La découverte est obligatoire, et courte.** Tant qu'elle n'est pas terminée, toute page de l'appli y ramène
+(`RequireOnboardingListener`), sauf la déconnexion, l'accueil, la mise en place et ce que l'appli Android demande
+toute seule (`/api`). Interrompue, elle reprend au début ; l'adhésion à la charte, elle, est gardée.
 
 On peut **relire la partie A** à tout moment depuis le Profil (« Comment ça marche »), et la
 **charte** depuis les réglages de la coloc.
 
 ## 3. Le déroulé
 
-Chaque écran est raconté par la Casa (sa bulle BD), avec une idée par écran, des points de
-progression en haut et un bouton « Suivant » en bas. On peut revenir en arrière.
+Chaque écran est raconté par la Casa (sa bulle BD), avec une idée par écran, où l'on en est en haut et
+« Suivant » en bas. On peut revenir en arrière.
 
-### 0. Qui es-tu ? (uniquement quand on rejoint)
+### L'accueil (`/connexion`)
 
-> « Bienvenue ! On t'attendait. Tu es… ? »
+C'est là que s'ouvre l'appli tant qu'on n'est pas connecté. La Casa dit bonjour, une phrase dit ce qu'est
+Companero (« Toute la coloc, au même endroit »), puis trois portes :
 
-- Les **profils à réclamer** de la coloc, en grands boutons avec leur avatar et leur couleur :
-  « Léa », « Robin », « Gab ».
-- « **Je suis quelqu'un d'autre** » : on saisit un prénom, et un nouveau profil est créé.
-- Dans tous les cas, on choisit ensuite **un pseudo et un mot de passe**. Pas d'e-mail : le pseudo
-  suffit pour se connecter, sans tenir compte des majuscules (« Léo » ou « léo »).
+- **Créer notre coloc** : « La maison est prête en deux minutes. »
+- **J'ai un lien d'invitation** : se déplie sur un champ où **coller le lien**. Dans l'appli Android, un lien
+  ouvre le navigateur, pas l'appli : on le colle donc ici. Le message entier peut être collé, le lien y est
+  retrouvé (`/rejoindre?lien=…`). Un lien qui ne mène à aucune coloc revient ici, le champ ouvert et l'erreur dite.
+- **Déjà un compte ?** : pseudo et mot de passe. Après une erreur, la connexion passe en premier.
+
+### Créer la coloc (`/bienvenue`)
+
+Trois questions, une à la fois (`steps_controller.js`), la Casa reprenant ce qu'on vient d'écrire :
+
+1. le nom de la coloc (« « Les Lilas », j'adore ! ») ;
+2. son prénom ;
+3. un pseudo (proposé d'après le prénom : « Léa Martin » donne `lea.martin`) et un mot de passe.
+
+« Entrée » passe à la question suivante. Revenu avec une erreur, le formulaire s'ouvre sur la question qui en a
+une. Sans JavaScript, les trois questions s'affichent l'une sous l'autre.
+
+### La mise en place (seulement pour celui qui crée)
+
+Quatre segments en haut (La coloc, La maison, Pour commencer, Les colocs), la Casa en petit qui raconte :
+
+1. **La maison** (`/bienvenue/maison`) : les pièces, en puces (les habituelles cochées, une autre à écrire),
+   les animaux (un nom et une espèce), le jour de ménage.
+2. **Pour commencer** (`/bienvenue/pour-commencer`) : les tâches que font presque toutes les colocs
+   (`App\Household\StarterKit`), chacune avec son rythme, ses pièces et ses points, les habituelles cochées.
+   N'apparaissent que celles des pièces et des animaux de la maison ; un animal seul est nommé (« Changer la
+   litière de Tishka »). Chaque tâche cochée devient une carte, et leurs premières échéances s'étalent
+   (`Task.firstDueAt`) : les plus fréquentes (tous les 3 jours ou moins) tout de suite, les autres le jour de
+   ménage, les plus rares une semaine après. La maison démarre avec de quoi faire, et la Casa sourit.
+3. **Les colocs** (`/bienvenue/inviter`) : le lien d'invitation, à envoyer par le partage du téléphone,
+   WhatsApp ou copié, et les profils à préparer par leur prénom (chacun le réclamera avec le lien).
+
+Une fois les tâches créées, la mise en place est derrière : on n'y revient plus (la maison et le lien se
+règlent ensuite dans les réglages de la coloc).
+
+### 0. Rejoindre
+
+> « Bienvenue chez Les Lilas ! Tu t'appelles comment ? »
+
+- S'il y a des **profils à réclamer**, ils viennent d'abord, en grands boutons avec leur avatar :
+  « Je suis Léa », « Je suis Robin ». Puis « **Je suis quelqu'un d'autre** ».
+- Quelqu'un de nouveau répond à deux questions, une à la fois comme à la création : son prénom (on voit qui est
+  déjà là), puis **un pseudo et un mot de passe**. Pas d'e-mail : le pseudo suffit pour se connecter, sans
+  tenir compte des majuscules (« Léo » ou « léo »).
+- Un lien inconnu (mal copié, ou remplacé par « Nouveau lien ») mène à une page qui le dit gentiment, et où
+  coller le bon.
+- Déjà connecté, on revient à l'accueil de sa coloc.
 
 Réclamer un profil, c'est récupérer **tout ce qui y est attaché** : réalisations, points, niveau,
 tâches dont on a la charge, animaux dont on est le maître, couleur.
-
-Sans profil à réclamer, l'étape se réduit au formulaire actuel.
 
 ### A. Comprendre
 
 **A1. L'esprit**
 
-> « Salut, moi c'est la Casa ! Ici, on s'occupe de l'intendance de la maison : le ménage, le linge,
-> les poubelles, le jardin, les animaux, les petites réparations… Je vous aide à vous organiser
-> ensemble, à voir ce qui attend, et à vous motiver un peu. Plus vous prenez soin de moi, plus je
-> rayonne. »
+> « Salut Léo ! Moi, c'est la Casa. »
 
-La Casa passe de poussiéreuse à rayonnante pendant que la bulle s'affiche.
+La grande Casa, rayonnante. Ceux avec qui on vit (leurs avatars, « Avec Robin et Inès »), puis ce qu'il y a
+dans l'appli : les tâches en cartes, les courses, les comptes, et la Casa, qui rayonne quand la maison brille.
 
-**A2. Une carte**
+**A2. Une tâche, une carte**
 
-> « Chaque chose à faire est une carte. Elle dit ce qu'il faut faire, où, et ce que ça rapporte. »
+> « Chaque chose à faire est une carte. Essaie celle-ci : elle ne compte pas pour de vrai. »
 
-Une **fausse carte**, la même que les vraies, qu'on peut toucher, présentée avec ses repères :
-
-- **le coin**, comme une carte à jouer : ce qu'elle rapporte et sa catégorie ; dessous, un fil qui se vide avec le temps ;
-- **« Je prends »** : je dis aux autres que je m'en occupe ;
-- **« C'est fait »** : les étoiles, les points, et la Casa réagit.
-
-**A3. Le glissement**
-
-> « La plupart des tâches glissent : elles n'ont pas de date, elles ont un rythme. L'aspirateur ou
-> le coup de balai du salon, c'est environ tous les 2 jours. Plus le temps passe depuis la dernière
-> fois, plus la carte devient pressante. »
-
-Un **curseur « depuis la dernière fois »** (de 0 à 4 jours, par demi-journée) fait vivre une carte
-« Aspirateur ou balai au salon, tous les 2 jours » :
+La plupart des tâches **glissent** : elles n'ont pas de date, elles ont un rythme. Une **fausse carte**, la même
+que les vraies, « Aspirateur ou balai au salon, tous les 2 jours », et un **curseur « Le temps passe… »** (de 0 à
+4 jours, par demi-journée) qui la fait vieillir :
 
 | Depuis | État de la carte |
 |---|---|
@@ -90,12 +118,11 @@ Un **curseur « depuis la dernière fois »** (de 0 à 4 jours, par demi-journé
 | 2 jours | due |
 | 3 jours et plus | en retard (corail) |
 
-Un bouton « C'est fait » sur la carte la remet à zéro, et le curseur revient à 0.
+Puis ses repères : **« Je prends »** (les autres voient que je m'en occupe), **« C'est fait »** (ses points sont
+à moi, elle repart à zéro ; pas besoin d'attendre qu'elle soit due, et en retard elle rapporte autant),
+**toucher la carte** (sa page, ses réglages).
 
-> « Pas besoin d'attendre qu'elle soit due : on peut la faire quand on veut, ça remet le compteur à
-> zéro. »
-
-**A4. Les autres rythmes**
+**A3. Les autres rythmes**
 
 > « Certaines tâches marchent autrement. »
 
@@ -113,25 +140,21 @@ Une ligne, une icône et un exemple pour chaque rythme :
 
 > « Et parfois, une carte cache une surprise. La première personne qui la fait la trouve. »
 
-**A5. Les points**
+**A4. Les points et les objectifs**
 
-> « Chaque tâche rapporte des points : environ 10 points pour 5 minutes, un peu plus quand c'est
-> une corvée. Le jour de ménage, tout rapporte un peu plus. Les points, c'est vous qui les réglez :
-> si un barème vous semble injuste, changez-le. »
+> « Chaque tâche rapporte des points. Pas pour se comparer : pour avancer ensemble. »
 
-**A6. Les deux objectifs**
+Environ 10 points pour 5 minutes, un peu plus quand c'est une corvée. Le jour de ménage, tout rapporte un peu
+plus. Les points, c'est vous qui les réglez : si un barème vous semble injuste, changez-le. Puis les deux
+objectifs de la semaine :
 
-> « Il y a deux objectifs chaque semaine. »
+- **Celui de la maison** (sa vraie valeur, par exemple 250 pts) : les points de tout le monde
+  comptent. S'il est atteint, chaque membre présent gagne +50 XP (pour le niveau, pas pour l'objectif perso).
+  Il se règle dans les réglages de la coloc.
+- **Le tien** : ce que tu vises toi, au prorata de tes jours de présence. Une série compte les
+  semaines où tu l'atteins. Tu le choisis juste après.
 
-- **L'objectif de la maison** (sa vraie valeur, par exemple 250 pts) : les points de tout le monde
-  comptent. S'il est atteint, chaque membre présent gagne +50 XP (pour le niveau, pas pour l'objectif perso). Il se règle dans les réglages de
-  la coloc.
-- **Ton objectif** : ce que tu vises toi, au prorata de tes jours de présence. Une série compte les
-  semaines où tu l'atteins.
-
-Tu le choisis à l'étape suivante.
-
-**A7. La charte de la coloc**
+**A5. La charte de la coloc**
 
 > « Avant de commencer, les règles de la maison. Rien à voir avec l'appli : c'est juste comme ça
 > qu'on vit bien ensemble. »
@@ -180,7 +203,7 @@ Une nouvelle coloc démarre avec ces règles :
 8. Mes affaires ne s'installent pas dans les pièces communes.
 9. Si je ne peux pas faire ce que j'avais pris, je préviens, ou je passe en « Pas là ».
 
-**Adhésion.** Chaque membre adhère à l'étape A7. La page de la charte montre à qui elle va.
+**Adhésion.** Chaque membre adhère à l'étape A5. La page de la charte montre à qui elle va.
 Quand une règle est ajoutée, réécrite ou retirée, celui qui l'a changée y adhère d'office ; les
 autres voient sur l'accueil « La charte de la coloc a changé », jusqu'à ce qu'ils la relisent et
 disent « Ça me va ». Rien n'est bloqué pour autant. Changer l'ordre des règles ne demande rien à
@@ -197,8 +220,9 @@ Sources de la règle 6 :
 Un membre peut exister **sans compte** : un prénom, une couleur, et rien d'autre. Il peut avoir des
 tâches, être maître d'un animal, apparaître dans les barres collectives. Il ne peut pas se connecter.
 
-- **Créer** : *Réglages de la coloc › Les colocs › Ajouter quelqu'un*, avec le prénom seulement.
-  Pratique pour tout préparer avant d'envoyer le lien.
+- **Créer** : à la mise en place (« Les colocs »), ou dans *Réglages de la coloc › Les colocs › Préparer le
+  profil d'un coloc*, avec le prénom seulement (deux colocs ne portent pas le même). Pratique pour tout
+  préparer avant d'envoyer le lien.
 - **Réclamer** : l'étape 0 de l'onboarding. On choisit son profil, puis un pseudo et un mot de
   passe.
 - **Libérer** un compte existant, pour réparer une erreur ou remettre en état la prod :
@@ -227,8 +251,8 @@ actuel est demandé).
 ## 7. Hors périmètre
 
 - Les bulles d'aide contextuelles (« première visite sur la page Plan… »).
-- Un assistant de mise en place pour le créateur (pièces, animaux, objectif de la maison) : les
-  valeurs par défaut et les réglages suffisent pour l'instant.
+- L'objectif de la maison à la mise en place : sa valeur par défaut suffit, il se règle ensuite.
+- Les liens qui ouvrent l'appli Android (deep links) : on colle le lien sur l'accueil.
 - Le renommage de « tâche » en « quête ».
 
 ## 8. Décisions
@@ -236,5 +260,5 @@ actuel est demandé).
 1. Une charte modifiée est signalée sur l'accueil à ceux qui n'y ont pas encore adhéré ; elle
    ne bloque rien.
 2. « Qui es-tu ? » n'apparaît que pour rejoindre une coloc qui a des profils à réclamer.
-3. Les explications (A1 à A6) se relisent depuis *Profil › Comment ça marche* ; la charte, depuis
+3. Les explications (A1 à A4) se relisent depuis *Profil › Comment ça marche* ; la charte, depuis
    *Réglages de la coloc › La charte*.

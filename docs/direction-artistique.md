@@ -276,10 +276,12 @@ dans un seul.
 ### La feuille « Ajouter »
 
 Un appui sur **« Ajouter »** fait monter une feuille du bas, sur la page assombrie, sans la quitter :
-sa poignée, « Ajouter » et une croix ; **quatre grandes tuiles** (une tâche à faire, j'ai fait quelque
-chose, une dépense, un modèle qui revient), chacune son dessin sur sa tuile pastel, un mot et un
-exemple ; puis **« Il manque quelque chose »**, le champ et ses puces de ce qu'on achète souvent, qui
-ramènent à la page d'où l'on vient. Tout se voit sans faire défiler. Elle se ferme par la croix, un
+toute la largeur, sa poignée, « Ajouter » et une croix ; **quatre lignes d'une seule feuille**, collées et
+séparées d'un filet (une tâche à faire, j'ai fait quelque chose, une dépense, un modèle qui revient), chacune
+son dessin sur sa tuile pastel, un mot et un exemple ; puis **« Il manque quelque chose ? »**, le champ et ses
+puces de ce qu'on achète souvent, qui ramènent à la page d'où l'on vient (la feuille se ferme, la page le montre aussitôt,
+et rouverte, le champ est vide). Tout se voit sans faire défiler. Elle est chargée en avance et gardée d'une
+page à l'autre : elle s'ouvre sans attendre. Elle se ferme par la croix, un
 appui à côté ou dès qu'un choix est suivi. Dans l'appli (et sans scripts), c'est une page.
 
 Les formulaires qu'elle ouvre ne demandent que l'essentiel, le reste replié :
@@ -303,7 +305,7 @@ dimanche soir et le lundi ; sinon les points de la maison).
 ## L'onglet Tâches
 
 Deux faces sous le contrôle segmenté : **À faire** — « Ça arrive ? » et ses puces, puis tout, par
-urgence, « Plus tard » replié ; « Afficher » en petites puces (pour moi, libres, tout) — et
+urgence, « Plus tard » replié ; en petites puces, pour moi, libres ou tout — et
 **Modèles**, rangés par pièce, type ou fréquence (« Ranger par » en petites puces). Le plan est à un
 appui, en haut.
 
@@ -315,10 +317,11 @@ Ce qu'il faut racheter, dans le calme de l'accueil :
   lilas (la couleur des courses), une pastille corail dans son coin s'il y a de l'urgent ; « Il manque
   3 choses » ; dessous, les noms à la suite (« Papier toilette · Éponges ·… »), l'urgent en corail. À
   droite, un **+** dans le sable. Vide : « Il ne manque rien ».
-- **La page** : en tête, une feuille pour le dire — le champ « Il manque… », la puce « Urgent » (à
-  filet, l'encre une fois choisie) et « Ajouter », le seul bouton terre cuite ; sous un filet,
-  « SOUVENT » et ses puces, chacune un **+** terre cuite foncée et un nom.
-- **La liste** : « URGENT » avec son point corail, puis « À ACHETER ». Une ligne par chose : son
+- **La page** dit d'abord combien il y a à acheter, en toutes lettres : « 3 choses à acheter, dont 1
+  urgente » (l'urgent en corail). Puis **la liste**, ce qu'on vient chercher, et seulement après le champ
+  pour en ajouter : au magasin, on coche ; on ajoute plus rarement.
+- **La liste** : « À ACHETER », et à droite « Coche ce qui est acheté ». L'urgent en tête, une pastille
+  corail « Urgent » après son nom et sa case cerclée de corail. Une ligne par chose : son
   dessin sur sa tuile pastel, deviné de son nom (`App\Shopping\ItemArt`) — un rouleau (lilas) pour le
   papier, une éponge ou un flacon (jaune ménage) pour l'entretien, un sac (sable), une ampoule, une
   pile ou une clé (bleu bricolage), une tasse (sable) pour le café, un panier (sauge) pour ce qui se
@@ -326,6 +329,9 @@ Ce qu'il faut racheter, dans le calme de l'accueil :
   (« Robin · jeudi ») ; au bout, une **case ronde** cerclée de sable.
 - **Cochée**, sans attendre le serveur, la case se remplit de sauge d'un petit rebond et lance
   quelques étoiles, le nom se barre, la ligne pâlit ; la liste revient sans elle.
+- **« Il manque autre chose ? »** : le champ « Il manque… » et son **+** terre cuite, la puce « C'est
+  urgent » (à filet, l'encre une fois choisie) ; sous un filet, « SOUVENT » et ses puces, chacune un **+**
+  terre cuite foncée et un nom. Entrée ajoute, le champ se vide et garde le clavier.
 - **Acheté ces derniers jours** : un volet replié ou non, une coche sauge sur sa tuile, qui l'a acheté
   et quand, « Remettre » dans le sable.
 - **Vide**, la Casa : « Il ne manque rien : mes placards sont pleins ! Le premier qui voit le fond d'un

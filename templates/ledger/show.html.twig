@@ -134,25 +134,26 @@
                         {% for settlement in settlements %}
                             {% set amount = settlement.amount|money(currency) %}
                             {% set sentence = settlement.from is same as(me) ? 'Tu dois ' ~ amount ~ ' à ' ~ settlement.to.name : (settlement.to is same as(me) ? settlement.from.name ~ ' te doit ' ~ amount : settlement.from.name ~ ' doit ' ~ amount ~ ' à ' ~ settlement.to.name) %}
+                            {# Who pays whom, in a sentence across the row; beneath, another amount (the row opens it) and "Régler". #}
                             <li class="settle-row {{ settlement.from is same as(me) ? 'is-mine' }}" id="settle-{{ settlement.from.id }}-{{ settlement.to.id }}">
-                                <a href="{{ path('expense_new', {id: ledger.id, type: 'transfert', de: settlement.from.id, a: settlement.to.id, montant: settlement.amount}) }}" class="list-row min-w-0 flex-1" aria-label="{{ sentence }} : noter un autre montant">
-                                    <span class="settle-faces" aria-hidden="true">
-                                        <twig:Avatar :member="settlement.from" size="30"/>
-                                        <twig:Icon name="arrow-right" size="15" stroke="2.4" class="text-dust"/>
-                                        <twig:Avatar :member="settlement.to" size="30"/>
-                                    </span>
-                                    <span class="flex min-w-0 flex-col gap-0.5">
-                                        <span class="row-title">{{ sentence }}</span>
+                                <span class="settle-faces" aria-hidden="true">
+                                    <twig:Avatar :member="settlement.from" size="30"/>
+                                    <span class="settle-arrow"><twig:Icon name="arrow-right" size="11" stroke="2.8"/></span>
+                                    <twig:Avatar :member="settlement.to" size="30"/>
+                                </span>
+                                <div class="flex min-w-0 flex-1 flex-col gap-1">
+                                    <a href="{{ path('expense_new', {id: ledger.id, type: 'transfert', de: settlement.from.id, a: settlement.to.id, montant: settlement.amount}) }}" class="row-title text-ink no-underline after:absolute after:inset-0 after:content-[''] hover:text-ink" aria-label="{{ sentence }} : noter un autre montant">{{ sentence }}</a>
+                                    <div class="flex items-center justify-between gap-2">
                                         <span class="row-meta">Un autre montant ?</span>
-                                    </span>
-                                </a>
-                                <form method="post" action="{{ path('ledger_settle', {id: ledger.id}) }}" data-action="submit->settle#settle">
+                                        <form method="post" action="{{ path('ledger_settle', {id: ledger.id}) }}" class="relative z-[1]" data-action="submit->settle#settle">
                                     <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
                                     <input type="hidden" name="from" value="{{ settlement.from.id }}">
                                     <input type="hidden" name="to" value="{{ settlement.to.id }}">
                                     <input type="hidden" name="amount" value="{{ settlement.amount }}">
                                     <button type="submit" class="settle-button" data-haptic="press" aria-label="Régler : {{ settlement.from.name }} rembourse {{ amount }} à {{ settlement.to.name }}"><twig:Icon name="check" size="16" stroke="2.6"/>Régler</button>
-                                </form>
+                                        </form>
+                                    </div>
+                                </div>
                             </li>
                         {% endfor %}
                     </ul>

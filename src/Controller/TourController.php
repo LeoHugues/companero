@@ -28,7 +28,7 @@ use Symfony\Component\Security\Http\Attribute\IsCsrfTokenValid;
 final class TourController extends AbstractController
 {
     /** The explanations, in order; then come the charter and the settings. */
-    public const STEPS = ['esprit', 'carte', 'glissement', 'rythmes', 'points', 'objectifs'];
+    public const STEPS = ['esprit', 'carte', 'rythmes', 'points'];
 
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
@@ -42,7 +42,7 @@ final class TourController extends AbstractController
         return $this->redirectToRoute('tour_step', ['step' => self::STEPS[0]]);
     }
 
-    #[Route('/{step}', name: 'tour_step', requirements: ['step' => 'esprit|carte|glissement|rythmes|points|objectifs'], methods: ['GET'])]
+    #[Route('/{step}', name: 'tour_step', requirements: ['step' => 'esprit|carte|rythmes|points'], methods: ['GET'])]
     public function step(string $step, #[CurrentUser] Member $member): Response
     {
         $index = (int) array_search($step, self::STEPS, true);

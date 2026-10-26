@@ -172,6 +172,11 @@ final class HouseholdController extends AbstractController
 
             return $this->redirectToRoute('household_edit', status: Response::HTTP_SEE_OTHER);
         }
+        if (null !== $namesake = $member->getHousehold()->memberNamed($name)) {
+            $this->addFlash('success', \sprintf('%s est déjà dans la coloc.', $namesake->getName()));
+
+            return $this->redirectToRoute('household_edit', status: Response::HTTP_SEE_OTHER);
+        }
         $registrar->addUnclaimed($member->getHousehold(), $name);
         $this->addFlash('success', \sprintf('Le profil de %s est prêt : envoie-lui le lien d’invitation pour le réclamer.', $name));
 

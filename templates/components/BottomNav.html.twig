@@ -72,15 +72,17 @@
     </ul>
 
     {#
-        What can be added, rising from the bottom: its content (task/new_choose.html.twig) is loaded the first time it
-        opens. A tap outside, the cross or "back" closes it.
+        What can be added, rising from the bottom: its content (task/add_sheet.html.twig) is loaded once, soon after the
+        first page, and kept from page to page (data-turbo-permanent): it opens at once. A tap outside, the cross or
+        "back" closes it.
     #}
-    <dialog class="add-sheet" aria-labelledby="add-sheet-title" data-add-sheet-target="dialog" data-action="click->add-sheet#backdrop close->add-sheet#closed">
+    <dialog class="add-sheet" id="add-sheet-dialog" data-turbo-permanent aria-labelledby="add-sheet-title" data-add-sheet-target="dialog"
+            data-action="click->add-sheet#backdrop close->add-sheet#closed turbo:click->add-sheet#close submit->add-sheet#stamp turbo:submit-start->add-sheet#close turbo:submit-end->add-sheet#sent">
         {# Focused when it opens, so that no button of it is lit up before a tap. #}
         <div class="add-sheet-panel" tabindex="-1" autofocus>
             <span class="add-sheet-grip" aria-hidden="true"></span>
-            <turbo-frame id="add-sheet" src="{{ path('task_new') }}" loading="lazy" target="_top">
-                <div class="add-sheet-loading" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+            <turbo-frame id="add-sheet" class="add-sheet-body" src="{{ path('task_new') }}" loading="lazy" target="_top" data-add-sheet-target="frame">
+                <div class="add-sheet-loading" aria-hidden="true"><span></span><span></span><span></span></div>
             </turbo-frame>
         </div>
     </dialog>

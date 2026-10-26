@@ -1,8 +1,8 @@
 {% props view = null %}
 {#
     The deck at the end of "À toi de jouer": a pile of cards face down, the size of a card. A tap deals one,
-    the most pressing free card, late ones first (TaskBoard::draw), and puts it in the hand — at once, copied from its card
-    in "Prendre soin de la Casa" while the page is asked for (card_motion.js). Nothing free left: an empty spot.
+    the most pressing free card, late ones first (TaskBoard::draw), and puts it in the hand — at once, copied from the card
+    the home page keeps ready for it while the page is asked for (card_motion.js). Nothing free left: an empty spot.
 #}
 {% if view %}
     <form method="post" action="{{ path('task_reserve', {id: view.task.id}) }}" class="h-full" data-card-motion="deal" data-task="{{ view.task.id }}">

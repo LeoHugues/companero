@@ -49,23 +49,7 @@
                 </li>
             {% endfor %}
         </ul>
-        <div class="sheet flex flex-col gap-3 p-4" data-controller="copy">
-            <p class="flex items-center gap-3">
-                <span class="tile tile-sky"><twig:Icon name="link" size="19" stroke="1.9"/></span>
-                <span class="flex flex-col gap-0.5">
-                    <span class="text-[15px] font-semibold">Inviter quelqu’un</span>
-                    <span class="text-[12.5px] leading-snug text-muted">Envoie ce lien à ton nouveau coloc{{ household.unclaimedMembers is not empty ? ' (on y choisit son profil s’il est déjà prêt)' }}.</span>
-                </span>
-            </p>
-            <input type="text" readonly class="input text-[13.5px] text-ink-soft" value="{{ url('onboarding_join', {token: household.inviteToken}) }}" data-copy-target="source" aria-label="Lien d’invitation">
-            <div class="flex items-center justify-between gap-3">
-                <button type="button" class="btn-soft" data-action="copy#copy" data-haptic="tick"><twig:Icon name="link" size="16" stroke="2"/><span data-copy-target="label">Copier le lien</span></button>
-                <form method="post" action="{{ path('household_invite_reset') }}" data-turbo-confirm="L’ancien lien ne marchera plus. Continuer ?">
-                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
-                    <button type="submit" class="btn-link h-10 text-[13px]"><twig:Icon name="repeat" size="15" stroke="1.9"/>Nouveau lien</button>
-                </form>
-            </div>
-        </div>
+        {{ include('household/_invite_link.html.twig', {renew: true}) }}
         <form method="post" action="{{ path('household_member_add') }}" class="sheet flex flex-col gap-3 p-4">
             <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
             <label for="new-member" class="field-label">Préparer le profil d’un coloc</label>

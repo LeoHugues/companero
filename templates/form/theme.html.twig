@@ -32,7 +32,7 @@
 
 {%- block form_errors -%}
     {%- for error in errors -%}
-        <p class="flex items-start gap-1.5 text-[13px] leading-snug font-semibold text-danger-ink">{{ component('Icon', {name: 'alarm', size: 15, stroke: 2.2, class: 'mt-px shrink-0'}) }}{{ error.message }}</p>
+        <p class="flex items-start gap-1.5 text-[13px] leading-snug font-semibold text-danger-ink" data-form-error>{{ component('Icon', {name: 'alarm', size: 15, stroke: 2.2, class: 'mt-px shrink-0'}) }}{{ error.message }}</p>
     {%- endfor -%}
 {%- endblock form_errors -%}
 

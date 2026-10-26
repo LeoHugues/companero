@@ -31,7 +31,7 @@ final class TourTest extends AppTestCase
         $this->client->followRedirect();
         self::assertSelectorTextContains('h1', 'Bienvenue dans La coloc');
 
-        foreach (['carte' => 'Une tâche, une carte', 'glissement' => 'Le glissement', 'rythmes' => 'Les autres rythmes', 'points' => 'Les points', 'objectifs' => 'Les objectifs'] as $step => $heading) {
+        foreach (['carte' => 'Une tâche, une carte', 'rythmes' => 'Les autres rythmes', 'points' => 'Les points et les objectifs'] as $step => $heading) {
             $this->client->clickLink('Suivant');
             self::assertResponseIsSuccessful();
             self::assertSame('/decouverte/'.$step, $this->client->getRequest()->getPathInfo());
@@ -79,7 +79,7 @@ final class TourTest extends AppTestCase
         $this->client->followRedirect();
         self::assertSelectorTextContains('h1', 'Comment ça marche');
 
-        $this->client->request('GET', '/decouverte/objectifs');
+        $this->client->request('GET', '/decouverte/points');
         self::assertSelectorExists('nav a[href="/profil"]');
         self::assertSelectorTextContains('nav', 'Terminer');
 

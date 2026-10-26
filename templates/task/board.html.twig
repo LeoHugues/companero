@@ -26,8 +26,7 @@
 
     <section class="flex flex-col gap-3.5" aria-labelledby="todo-title" data-controller="care" data-action="turbo:morph@window->care#apply">
         <h2 id="todo-title" class="sr-only">Prendre soin de la Casa</h2>
-        <div class="flex flex-wrap items-center gap-1.5 px-1" role="group" aria-label="Afficher">
-            <span class="mr-1 text-[12.5px] font-medium text-muted">Afficher</span>
+        <div class="flex flex-wrap items-center gap-1.5" role="group" aria-label="Afficher">
             {% for filter, label in {mine: 'Pour moi', free: 'Libres', all: 'Tout'} %}
                 <button type="button" class="sort-chip" aria-pressed="{{ filter == 'all' ? 'true' : 'false' }}" data-care-target="button" data-action="care#show" data-care-filter-param="{{ filter }}" data-haptic="tick">
                     {{ label }}&nbsp;<span class="font-medium opacity-60">{{ counts[filter] }}</span>

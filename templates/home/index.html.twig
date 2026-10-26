@@ -134,6 +134,14 @@
             {% endfor %}
             <li class="hand-card" id="hand-deck"><twig:Deck :view="draw"/></li>
         </ul>
+        {# The cards the quests and the deck would deal, ready to slide into the hand at the tap (card_motion.js). #}
+        {% set dealt = [] %}
+        {% for view in quests|merge(draw ? [draw] : [])|filter(view => view.task.id not in mine|map(v => v.task.id)) %}
+            {% if view.task.id not in dealt %}
+                <template data-dealt="{{ view.task.id }}"><twig:TaskCard :view="view" :member="app.user"/></template>
+                {% set dealt = dealt|merge([view.task.id]) %}
+            {% endif %}
+        {% endfor %}
         <a href="{{ path('task_board') }}" class="home-more">
             <span>{{ todo_count ? 'Tout ce qu’il y a à faire' : 'Rien d’autre à faire : la Casa est contente' }}</span>
             {% if todo_count %}<span class="font-semibold text-dust">{{ todo_count }}</span>{% endif %}

@@ -536,10 +536,11 @@ body > .casa-particle { position: absolute; z-index: 60; }
 .team-drawer-chevron { transition: transform 300ms cubic-bezier(.3, 1.5, .5, 1); }
 .team-drawer[open] .team-drawer-chevron { transform: rotate(180deg); }
 .team-drawer-body { @apply flex flex-col gap-1 px-1 pb-1; }
-.team-drawer[open] .team-drawer-body { animation: drawer-open 360ms cubic-bezier(.2, 1.1, .4, 1) both; }
+.team-drawer[open] .team-drawer-body { animation: drawer-open 360ms cubic-bezier(.2, 1.1, .4, 1) backwards; }
 .team-drawer-day { @apply pt-2.5 pb-0.5 text-[11px] font-extrabold tracking-wide text-muted uppercase; }
 .team-drawer-row { @apply flex items-center gap-2.5 border-b border-line/70 py-1.5 last:border-b-0; }
 .team-drawer[open] .team-drawer-row { animation: rise 420ms cubic-bezier(.2, 1.3, .4, 1) calc(var(--i, 0) * 35ms + 80ms) both; }
+/* Played "backwards" only: its clip, held once open, cut the shadow of the sheet into a hard rectangle. */
 @keyframes drawer-open { from { opacity: 0; transform: translateY(-8px); clip-path: inset(0 0 100% 0); } to { opacity: 1; transform: none; clip-path: inset(0); } }
 @supports selector(::details-content) {
   .team-drawer { interpolate-size: allow-keywords; }
@@ -826,7 +827,7 @@ body > .casa-particle { position: absolute; z-index: 60; }
 .fold-chevron { @apply ml-auto shrink-0 text-dust transition; transition: transform 300ms cubic-bezier(.3, 1.5, .5, 1), color 150ms; }
 .fold-summary:hover .fold-chevron { @apply text-ink; }
 .fold:not([open]) .fold-chevron { transform: rotate(-90deg); }
-.fold[open] > ul { animation: drawer-open 320ms cubic-bezier(.2, 1.1, .4, 1) both; }
+.fold[open] > ul { animation: drawer-open 320ms cubic-bezier(.2, 1.1, .4, 1) backwards; }
 
 /*
  * The home page: the Casa planted across the whole width, the card of the house's state straddling
@@ -1068,7 +1069,13 @@ main:has(> p[role="status"]) .home-hero { margin-top: 0; }
  * where a card snaps to: without it, the first card snapped back against the screen's edge.
  */
 .hand { @apply -mx-5 flex snap-x snap-mandatory scroll-px-5 gap-3 overflow-x-auto px-5 pt-1 pb-4 [scrollbar-width:none]; }
-.hand-card { @apply w-[300px] max-w-[85%] shrink-0 snap-start; }
+/*
+ * A card of the hand is at least as wide as its foot needs: the seat and "C'est fait" side by side, never one under
+ * the other. Its words and notes take the width they are given (contain), so that only the foot widens it.
+ */
+.hand-card { @apply min-w-[min(300px,100%)] shrink-0 snap-start; }
+.hand-card .play-card-words, .hand-card .play-card-notes { contain: inline-size; }
+.hand-card .task-actions { container-type: normal; flex-wrap: nowrap; }
 .hand-card > .play-card { height: 100%; }
 .hand-card > .play-card > .play-card-face { height: 100%; }
 
@@ -1203,6 +1210,9 @@ details[open] .care-group-fold::after { content: 'Replier'; font-size: 12.5px; }
 .suggestion svg { @apply text-clay-dark; }
 /* A row of the list, and its round box: ticked, it was bought — at once, before the list comes back (shopping_controller.js). */
 .shopping-row { @apply flex items-center gap-2; }
+/* Urgent: there is none left at all — a coral word beside its name, its box ringed in coral. */
+.urgent-pill { @apply rounded-full bg-danger-soft px-2 py-px text-[10.5px] font-bold tracking-[.08em] text-danger-ink uppercase; }
+.shopping-row.is-urgent .buy-button { @apply border-danger/60; }
 .buy-button {
   @apply flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-full border-2 border-sand text-transparent transition hover:border-ok hover:text-ok active:scale-90;
 }
@@ -1226,6 +1236,10 @@ details[open] .care-group-fold::after { content: 'Replier'; font-size: 12.5px; }
 .ledger-totals dt { @apply text-[12.5px] leading-tight text-muted; }
 .ledger-totals dd { @apply text-[17px] leading-tight font-bold tracking-tight tabular-nums; }
 .ledger-balance { @apply shrink-0 text-[14px] font-semibold whitespace-nowrap text-muted tabular-nums; }
+/* In the list of accounts, where I stand, in words, beside the faces. */
+.ledger-standing { @apply min-w-0 truncate text-[13px] font-semibold text-muted tabular-nums; }
+.ledger-standing.is-owed { @apply text-ok-ink; }
+.ledger-standing.is-owing { @apply text-clay-dark; }
 .ledger-balance.is-owed, .ledger-summary-balance.is-owed { @apply text-ok-ink; }
 .ledger-balance.is-owing, .ledger-summary-balance.is-owing { @apply text-clay-dark; }
 /* A few faces side by side, overlapping a little, ringed with the sheet. */
@@ -1250,9 +1264,12 @@ details[open] .care-group-fold::after { content: 'Replier'; font-size: 12.5px; }
 @keyframes balance-grow { from { transform: scaleX(0); } }
 
 /* Who reimburses whom: the two faces and an arrow, the sentence, "Régler" in the sand of the sheet. */
-.settle-row { @apply flex items-center gap-2; }
+.settle-row { @apply relative flex items-start gap-3 py-3; }
 .settle-row.is-mine .row-title { @apply text-clay-dark; }
-.settle-faces { @apply flex shrink-0 items-center gap-1; }
+/* The two faces side by side, a small arrow between them, from who pays to who is paid. */
+.settle-faces { @apply relative flex shrink-0 items-center pt-0.5; }
+.settle-faces > :last-child { @apply -ml-1.5 ring-2 ring-surface; }
+.settle-arrow { @apply relative z-[1] -ml-1.5 flex size-[18px] items-center justify-center rounded-full bg-surface text-muted shadow-[0_0_0_1px_var(--color-line)]; }
 .settle-button {
   @apply inline-flex h-9 shrink-0 cursor-pointer items-center gap-1.5 rounded-[11px] bg-track/60 px-3 text-[13px] font-semibold text-ink transition hover:bg-ok-soft hover:text-ok-ink active:scale-95;
 }
@@ -1272,14 +1289,15 @@ details[open] .care-group-fold::after { content: 'Replier'; font-size: 12.5px; }
 .split-list { @apply -mx-1 flex flex-col; }
 .split-list > li + li { @apply border-t border-line/70; }
 .split-row { @apply flex min-h-14 items-center gap-2.5 px-1 py-2; }
-.split-check {
+/* (The same round box ticks the chores a new coloc starts with: .starter-check.) */
+.split-check, .starter-check {
   @apply relative size-7 shrink-0 cursor-pointer appearance-none rounded-full border-2 border-sand bg-surface transition checked:border-ok checked:bg-ok focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23FFF6E9' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12l5 5 9-10'/%3E%3C/svg%3E");
   background-position: center;
   background-repeat: no-repeat;
   background-size: 0;
 }
-.split-check:checked { background-size: 16px; }
+.split-check:checked, .starter-check:checked { background-size: 16px; }
 .split-who { @apply flex min-w-0 flex-1 cursor-pointer items-center gap-2.5; }
 .split-row.is-out .split-who { @apply opacity-55; }
 .split-weight, .split-amount { @apply hidden shrink-0 items-center gap-1; }
@@ -1614,6 +1632,39 @@ a.list-row, .list-row > a { @apply transition hover:text-ink active:scale-[.985]
 /* The sheet of a page under the Casa in her landscape (templates/_casa_hero.html.twig): it straddles her ground. */
 .hero-sheet { @apply sheet relative z-[2] -mt-[60px] flex flex-col gap-5 px-4 pt-5 pb-4; }
 
+/*
+ * A form told one question at a time (steps_controller.js: creating the coloc, joining it): "Retour" on the left,
+ * where we are on the right (a dash grows for each step reached), each step sliding in from the side it comes from.
+ */
+.steps-head { @apply flex min-h-9 items-center justify-between gap-3; }
+.steps-back { @apply -ml-1.5 inline-flex h-9 cursor-pointer items-center gap-1 rounded-[10px] px-1.5 text-[13.5px] font-semibold text-muted transition hover:text-ink active:scale-95; }
+.steps-dots { @apply ml-auto flex items-center gap-1.5; }
+.steps-dots > li { @apply h-1.5 w-1.5 rounded-full bg-track transition-[width,background-color] duration-300; }
+.steps-dots > li.is-done { @apply w-5 bg-clay; }
+.steps-step { @apply flex flex-col gap-5; }
+.steps-step:not([hidden]) { animation: step-in 340ms cubic-bezier(.2, 1, .3, 1) both; }
+.steps-step.is-back:not([hidden]) { animation-name: step-in-back; }
+@keyframes step-in { from { opacity: 0; transform: translateX(22px); } }
+@keyframes step-in-back { from { opacity: 0; transform: translateX(-22px); } }
+
+/* The welcome page's ways in: creating a coloc, joining one by its link, logging in (security/login.html.twig). */
+.welcome-door { @apply flex min-h-[72px] items-center gap-3.5 py-3 text-ink no-underline transition hover:text-ink active:scale-[.985]; }
+.welcome-door:hover .row-chevron { @apply translate-x-0.5 text-ink; }
+.welcome-paste { @apply flex flex-col gap-2.5 pb-4; }
+
+/* A chore offered to a new coloc (onboarding/starter.html.twig): the whole row ticks it; left out, it pales. */
+.starter-row { @apply flex min-h-16 cursor-pointer items-center gap-3 py-2.5 select-none; }
+.starter-row .tile, .starter-row .row-title { @apply transition; }
+.starter-row:has(.starter-check:not(:checked)) .tile { @apply opacity-45 grayscale-[.6]; }
+.starter-row:has(.starter-check:not(:checked)) .row-title { @apply text-ink-soft; }
+
+/* The coloc's members, as they are added (onboarding, the coloc's page): their faces and first names in a chip. */
+.member-chip { @apply flex h-10 items-center gap-2 rounded-full bg-track/45 pr-3.5 pl-1.5 text-[14px] font-semibold; }
+
+@media (prefers-reduced-motion: reduce) {
+  .steps-step:not([hidden]) { animation: none; }
+}
+
 /* The bottom of a step of the tour: "Retour" and "Suivant", on the surface, like the bottom bar. */
 .tour-bar {
   position: fixed;
@@ -1638,8 +1689,12 @@ a.list-row, .list-row > a { @apply transition hover:text-ink active:scale-[.985]
 }
 .add-sheet-panel:focus { outline: none; }
 .add-sheet-grip { @apply mx-auto block h-1.5 w-10 shrink-0 rounded-full bg-track; }
-.add-sheet-loading { @apply grid grid-cols-2 gap-3 py-12; }
-.add-sheet-loading > span { @apply block h-[92px] rounded-[20px] bg-track/50; animation: sheet-pulse 1.2s ease-in-out infinite alternate; }
+/* Its content in a column, as on a page; while it loads, the shapes of what is coming. */
+.add-sheet-body { @apply flex flex-col gap-4; }
+.add-sheet-loading { @apply flex flex-col gap-4; }
+.add-sheet-loading > span { @apply block h-[118px] rounded-[20px] bg-track/50; animation: sheet-pulse 1.2s ease-in-out infinite alternate; }
+.add-sheet-loading > span:first-child { @apply h-[30px] w-32 rounded-xl; }
+.add-sheet-loading > span:nth-child(2) { @apply h-[272px]; }
 html.has-sheet { overflow: hidden; }
 @keyframes sheet-rise { from { transform: translateY(100%); } }
 @keyframes sheet-fade { from { opacity: 0; } }
@@ -1649,14 +1704,9 @@ html.has-sheet { overflow: hidden; }
   .add-sheet-panel { @apply rounded-[26px] pt-5 pb-5; }
   .add-sheet-grip { @apply hidden; }
 }
-/* A choice of the sheet: a big tile, its drawing, a word, an example. */
-.add-choices { @apply grid grid-cols-2 gap-3; }
-.add-choice {
-  @apply sheet flex h-full min-h-[104px] flex-col items-start justify-between gap-2 p-3.5 text-ink no-underline transition hover:-translate-y-0.5 hover:text-ink active:scale-[.97];
-}
-.add-choice-title { @apply text-[15.5px] leading-tight font-semibold; }
-.add-choice-hint { @apply text-[12px] leading-snug text-muted; }
-.add-choice.is-minor { @apply min-h-0 flex-row items-center justify-start gap-3 py-3 shadow-none ring-1 ring-line; }
+/* The choices of the sheet: four rows of one sheet, their drawing on its pastel tile, a word, an example. */
+.add-choice { @apply min-h-[66px] transition hover:text-ink active:scale-[.98]; }
+.add-choice:hover .row-chevron { @apply translate-x-0.5 text-ink; }
 @media (prefers-reduced-motion: reduce) {
   .add-sheet[open], .add-sheet::backdrop, .add-sheet-loading > span { animation: none; }
 }

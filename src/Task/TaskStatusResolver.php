@@ -47,8 +47,8 @@ final class TaskStatusResolver
     {
         $rhythm = max(1, (int) $task->getRhythmDays()) * self::DAY;
         $margin = $task->getMarginHours() * self::HOUR;
-        // Never done yet: it is due from the moment it is created.
-        $reference = $lastCompletedAt ?? $task->getCreatedAt()->modify(\sprintf('-%d seconds', $rhythm));
+        // Never done yet: it is due from the moment it is created, or from the day it was given to come due.
+        $reference = $lastCompletedAt ?? ($task->getFirstDueAt() ?? $task->getCreatedAt())->modify(\sprintf('-%d seconds', $rhythm));
         $elapsed = $now->getTimestamp() - $reference->getTimestamp();
         $dueAt = $reference->modify(\sprintf('+%d seconds', $rhythm));
         // Orange from this long after it was done: set on the task, or at 60 % of the rhythm.

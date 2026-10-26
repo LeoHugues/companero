@@ -117,6 +117,10 @@ class Task
     #[ORM\Column]
     private \DateTimeImmutable $createdAt;
 
+    /** Never done yet, a rolling task is due from then (the chores a new house starts with, spread out), else at once. */
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $firstDueAt = null;
+
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $lastCompletedAt = null;
 
@@ -605,6 +609,16 @@ class Task
     public function getCreatedAt(): \DateTimeImmutable
     {
         return $this->createdAt;
+    }
+
+    public function getFirstDueAt(): ?\DateTimeImmutable
+    {
+        return $this->firstDueAt;
+    }
+
+    public function setFirstDueAt(?\DateTimeImmutable $firstDueAt): void
+    {
+        $this->firstDueAt = $firstDueAt;
     }
 
     public function getLastCompletedAt(): ?\DateTimeImmutable

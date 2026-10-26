@@ -1,6 +1,7 @@
 {#
-    What can be added, all of it at a glance, without scrolling: four big tiles, then what is missing, typed right there
-    (or one of what is often bought, in one tap) — it goes back to the page it was said on.
+    What can be added, all of it at a glance, without scrolling: four rows in one sheet — a task to do, something already
+    done, an expense, a template —, then what is missing, typed right there (or one of what is often bought, in one tap):
+    it goes back to the page it was said on.
     Variables: suggestions (names), back (where "Il manque" leads back), in_sheet (in the sheet of the bottom bar).
 #}
 <div class="flex items-center justify-between gap-3">
@@ -12,46 +13,50 @@
     {% endif %}
 </div>
 
-<ul class="add-choices">
+<ul class="list-sheet add-choices" aria-label="Ce qu’on peut ajouter">
     {% for choice in [
         {route: 'task_new_one_off', icon: 'check', tile: 'tile-sun', title: 'Une tâche à faire', hint: 'Une fois, puis elle disparaît'},
-        {route: 'task_log', icon: 'clock', tile: 'tile-sage', title: 'J’ai fait quelque chose', hint: 'Les points comptent ce jour-là'},
+        {route: 'task_log', icon: 'clock', tile: 'tile-sage', title: 'J’ai fait quelque chose', hint: 'Ses points comptent ce jour-là'},
         {route: 'ledger_expense_any', icon: 'coins', tile: 'tile-sky', title: 'Une dépense', hint: 'Qui a payé, et pour qui'},
         {route: 'task_new_template', icon: 'repeat', tile: 'tile-lilac', title: 'Un modèle qui revient', hint: 'Tous les 7 jours, le mardi soir…'},
     ] %}
         <li>
-            <a href="{{ path(choice.route) }}" class="add-choice" data-haptic="tick">
+            <a href="{{ path(choice.route) }}" class="list-row add-choice" data-haptic="tick">
                 <span class="tile {{ choice.tile }}" aria-hidden="true"><twig:Icon :name="choice.icon" size="20" stroke="1.9"/></span>
-                <span class="flex flex-col gap-0.5">
-                    <span class="add-choice-title">{{ choice.title }}</span>
-                    <span class="add-choice-hint">{{ choice.hint }}</span>
+                <span class="flex min-w-0 flex-1 flex-col gap-0.5">
+                    <span class="row-title">{{ choice.title }}</span>
+                    <span class="row-meta">{{ choice.hint }}</span>
                 </span>
+                <twig:Icon name="chevron-right" size="18" class="row-chevron"/>
             </a>
         </li>
     {% endfor %}
 </ul>
 
-<section class="sheet flex flex-col gap-3 p-4" aria-labelledby="add-missing-title">
-    <h2 id="add-missing-title" class="eyebrow flex items-center gap-2"><twig:Icon name="cart" size="15" stroke="2" class="text-epic-ink"/>Il manque quelque chose</h2>
-    <form method="post" action="{{ path('shopping_add') }}" class="flex items-center gap-2">
-        <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
-        <input type="hidden" name="_retour" value="{{ back }}">
-        <label for="add-missing-name" class="sr-only">Ce qui manque</label>
-        <input type="text" id="add-missing-name" name="name" class="input" placeholder="Il manque…" maxlength="{{ constant('App\\Entity\\ShoppingItem::NAME_MAX_LENGTH') }}" autocomplete="off" enterkeyhint="send" required>
-        <button type="submit" class="btn-primary h-12 w-12 shrink-0 px-0" data-haptic="success"><twig:Icon name="plus" size="20" stroke="2.4"/><span class="sr-only">Ajouter à ce qui manque</span></button>
-    </form>
-    {% if suggestions is not empty %}
-        <ul class="flex flex-wrap gap-2" aria-label="Souvent">
-            {% for name in suggestions %}
-                <li>
-                    <form method="post" action="{{ path('shopping_add') }}">
-                        <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
-                        <input type="hidden" name="_retour" value="{{ back }}">
-                        <input type="hidden" name="name" value="{{ name }}">
-                        <button type="submit" class="suggestion" aria-label="Il manque : {{ name }}"><twig:Icon name="plus" size="14" stroke="2.4"/>{{ name }}</button>
-                    </form>
-                </li>
-            {% endfor %}
-        </ul>
-    {% endif %}
+<section class="flex flex-col gap-2" aria-labelledby="add-missing-title">
+    <h2 id="add-missing-title" class="group-label flex items-center gap-2"><twig:Icon name="cart" size="14" stroke="2.2" class="text-epic-ink"/>Il manque quelque chose ?</h2>
+    <div class="sheet flex flex-col gap-3 p-3.5">
+        {# Its way back is the page the sheet is open on, written when it is sent (add_sheet_controller.js). #}
+        <form method="post" action="{{ path('shopping_add') }}" class="flex items-center gap-2">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
+            <input type="hidden" name="_retour" value="{{ back }}" data-add-sheet-back>
+            <label for="add-missing-name" class="sr-only">Ce qui manque</label>
+            <input type="text" id="add-missing-name" name="name" class="input" placeholder="Il manque…" maxlength="{{ constant('App\\Entity\\ShoppingItem::NAME_MAX_LENGTH') }}" autocomplete="off" enterkeyhint="send" required>
+            <button type="submit" class="btn-primary h-12 w-12 shrink-0 px-0" data-haptic="success"><twig:Icon name="plus" size="20" stroke="2.4"/><span class="sr-only">Ajouter à ce qui manque</span></button>
+        </form>
+        {% if suggestions is not empty %}
+            <ul class="flex flex-wrap gap-2" aria-label="Souvent">
+                {% for name in suggestions %}
+                    <li>
+                        <form method="post" action="{{ path('shopping_add') }}">
+                            <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
+                            <input type="hidden" name="_retour" value="{{ back }}" data-add-sheet-back>
+                            <input type="hidden" name="name" value="{{ name }}">
+                            <button type="submit" class="suggestion" aria-label="Il manque : {{ name }}"><twig:Icon name="plus" size="14" stroke="2.4"/>{{ name }}</button>
+                        </form>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
 </section>

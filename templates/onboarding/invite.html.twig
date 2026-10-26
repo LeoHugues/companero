@@ -1,0 +1,40 @@
+{% extends 'onboarding/_setup_layout.html.twig' %}
+{#
+    Inviting the others, the last step of setting up the coloc: the link to send them (the phone's sharing, WhatsApp, or
+    copied), and their profiles, prepared by their first names: chores can be given to them at once, and each one
+    claims theirs with the link. Then the tour.
+#}
+{% set step = 4 %}
+
+{% block speech %}Une maison, c’est mieux à plusieurs ! Envoie ce lien à tes colocs : il les amène ici.{% endblock %}
+{% block heading %}Tes colocs{% endblock %}
+
+{% block content %}
+    {{ include('household/_invite_link.html.twig') }}
+
+    <section class="flex flex-col gap-2" aria-labelledby="members-title">
+        <h2 id="members-title" class="group-label">Préparer leurs profils</h2>
+        <div class="sheet flex flex-col gap-3 p-4">
+            <ul class="flex flex-wrap gap-2" aria-label="La coloc">
+                {% for member in household.members %}
+                    <li class="member-chip">
+                        <twig:Avatar :member="member" size="28"/>{{ member.name }}{% if member is same as(app.user) %} <span class="font-medium text-muted">(toi)</span>{% elseif not member.claimed %} <span class="text-[12px] font-medium text-muted">· à réclamer</span>{% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
+            <form method="post" class="flex items-center gap-2">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
+                <label for="new-member" class="sr-only">Le prénom d’un coloc</label>
+                <input type="text" id="new-member" name="prenom" class="input" placeholder="Son prénom" maxlength="40" autocomplete="off" enterkeyhint="send" required>
+                <button type="submit" class="btn-soft h-12 px-4" data-haptic="success"><twig:Icon name="plus" size="17" stroke="2.4"/>Ajouter</button>
+            </form>
+            <p class="text-[12.5px] leading-snug text-muted">Tu peux déjà leur confier des tâches. Avec le lien, chacun choisira « Je suis… » et retrouvera tout ce qui l’attend.</p>
+        </div>
+    </section>
+{% endblock %}
+
+{% block back %}<span class="text-[12.5px] text-muted">Ça peut attendre : le lien est dans les réglages de la coloc.</span>{% endblock %}
+
+{% block next %}
+    <a href="{{ path('tour_start') }}" class="btn-primary h-[52px] shrink-0 px-6 text-[16px]" data-haptic="tick">Suivant<twig:Icon name="chevron-right" size="19" stroke="2.4"/></a>
+{% endblock %}

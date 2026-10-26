@@ -1,0 +1,29 @@
+{#
+    The invitation link, to send to a coloc: the phone's sharing (a message, WhatsApp, a mail…), WhatsApp straight away,
+    or copied. Whoever opens it creates their account there, or claims the profile waiting for them.
+    Variables: household; renew (true: "Nouveau lien", which makes the old one stop working — the coloc's settings).
+#}
+{% set link = url('onboarding_join', {token: household.inviteToken}) %}
+{% set message = app.user.name ~ ' t’invite dans « ' ~ household.name ~ ' » sur Companero, pour s’organiser à la maison :' %}
+<section class="sheet flex flex-col gap-3.5 p-4" aria-labelledby="invite-title" data-controller="copy" data-copy-title-value="Rejoins {{ household.name }}" data-copy-text-value="{{ message }}">
+    <div class="flex items-center gap-3">
+        <span class="tile tile-sky" aria-hidden="true"><twig:Icon name="link" size="19" stroke="1.9"/></span>
+        <div class="flex min-w-0 flex-col gap-0.5">
+            <h3 id="invite-title" class="text-[15px] font-semibold">Le lien d’invitation</h3>
+            <p class="text-[12.5px] leading-snug text-muted">Chacun y crée son compte{{ household.unclaimedMembers is not empty ? ', ou y choisit son profil s’il est déjà prêt' }}.</p>
+        </div>
+    </div>
+    <input type="text" readonly class="input text-[13.5px] text-ink-soft" value="{{ link }}" data-copy-target="source" aria-label="Lien d’invitation">
+    <button type="button" class="btn-primary w-full" data-action="copy#share" data-haptic="success"><twig:Icon name="send" size="18" stroke="2"/>Envoyer l’invitation</button>
+    <div class="flex items-center gap-2">
+        <a href="https://wa.me/?text={{ (message ~ ' ' ~ link)|url_encode }}" class="btn-soft flex-1" target="_blank" rel="noopener"><twig:Icon name="chat" size="16" stroke="2"/>WhatsApp</a>
+        <button type="button" class="btn-soft flex-1" data-action="copy#copy" data-haptic="tick"><twig:Icon name="copy" size="16" stroke="2"/><span data-copy-target="label">Copier le lien</span></button>
+    </div>
+    {% if renew ?? false %}
+        <form method="post" action="{{ path('household_invite_reset') }}" class="-mb-1 flex items-center justify-between gap-3 border-t border-line/70 pt-1" data-turbo-confirm="L’ancien lien ne marchera plus. Continuer ?">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
+            <span class="text-[12.5px] leading-snug text-muted">Un lien a circulé trop loin ?</span>
+            <button type="submit" class="btn-link h-10 text-[13px]"><twig:Icon name="repeat" size="15" stroke="1.9"/>Nouveau lien</button>
+        </form>
+    {% endif %}
+</section>

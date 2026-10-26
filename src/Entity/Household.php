@@ -217,6 +217,12 @@ class Household
         return array_values(array_filter($this->members->toArray(), static fn (Member $member): bool => !$member->isClaimed()));
     }
 
+    /** The coloc already going by this first name (case aside), if any: two Robins could not be told apart on the cards. */
+    public function memberNamed(string $name): ?Member
+    {
+        return $this->members->findFirst(static fn (int $key, Member $member): bool => mb_strtolower($member->getName()) === mb_strtolower(trim($name)));
+    }
+
     /** @return Collection<int, Zone> */
     public function getZones(): Collection
     {

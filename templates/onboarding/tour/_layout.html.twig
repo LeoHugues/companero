@@ -8,7 +8,7 @@
 {% block main_class %}pb-32{% endblock %}
 
 {% block body %}
-    {% set steps = replay ? 6 : 8 %}
+    {% set steps = replay ? 4 : 6 %}
     <header class="page-head">
         <ol class="flex flex-1 items-center gap-1.5" aria-label="Étape {{ index + 1 }} sur {{ steps }}">
             {% for i in 0..(steps - 1) %}

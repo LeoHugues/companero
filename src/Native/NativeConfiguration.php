@@ -29,8 +29,8 @@ final class NativeConfiguration
                 'pull_to_refresh_enabled' => false,
             ]),
             // The tabs of the bottom bar (Accueil, Tâches and its templates, Courses, Comptes or the only account), the
-            // login and the steps of the tour switch screens instead of piling them up.
-            new Rule(patterns: ['^/?$', '^/taches(/modeles)?/?(\?.*)?$', '^/courses/?(\?.*)?$', '^/comptes(/\d+)?/?(\?.*)?$', '^/connexion', '^/deconnexion', '^/decouverte'], properties: [
+            // login, the steps of setting up a new coloc and those of the tour switch screens instead of piling them up.
+            new Rule(patterns: ['^/?$', '^/taches(/modeles)?/?(\?.*)?$', '^/courses/?(\?.*)?$', '^/comptes(/\d+)?/?(\?.*)?$', '^/connexion', '^/deconnexion', '^/bienvenue/', '^/decouverte'], properties: [
                 'presentation' => 'replace_root',
             ]),
             // The review's other weeks (and its ± buttons that redirect to a dated week) take the place of the one shown.

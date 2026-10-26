@@ -85,7 +85,7 @@
                     <span class="tile tile-sand" aria-hidden="true"><twig:Icon name="users" size="19" stroke="1.9"/></span>
                     <span class="flex min-w-0 flex-1 flex-col gap-0.5">
                         <span class="text-[15px] font-semibold" data-split-target="summary">{{ everyone ? 'Tout le monde' : 'Quelques-uns' }} · {{ draft.splitMode.label|lower }}</span>
-                        <span class="row-meta" data-split-target="each"></span>
+                        <span class="row-meta empty:hidden" data-split-target="each"></span>
                     </span>
                     <span class="split-summary-edit" aria-hidden="true"></span>
                 </summary>

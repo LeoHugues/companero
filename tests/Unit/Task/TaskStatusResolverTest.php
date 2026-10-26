@@ -79,6 +79,16 @@ final class TaskStatusResolverTest extends TestCase
         self::assertSame(Urgency::Due, $status->urgency);
     }
 
+    public function testNeverDoneRollingTaskGivenItsFirstDayWaitsForIt(): void
+    {
+        $task = $this->rollingTask(7, null);
+        $task->setFirstDueAt(new \DateTimeImmutable('2026-01-06 09:00'));
+
+        self::assertSame(Urgency::Fresh, $this->resolver->resolve($task, new \DateTimeImmutable('2026-01-01 08:00'), self::SATURDAY)->urgency);
+        self::assertSame(Urgency::Soon, $this->resolver->resolve($task, new \DateTimeImmutable('2026-01-04 12:00'), self::SATURDAY)->urgency);
+        self::assertSame(Urgency::Due, $this->resolver->resolve($task, new \DateTimeImmutable('2026-01-06 10:00'), self::SATURDAY)->urgency);
+    }
+
     public function testUnmetWeeklyCommitmentIsSoonBeforeTheCleaningDay(): void
     {
         $task = $this->rollingTask(7, '2026-10-01 10:00', weeklyCommitment: 1);

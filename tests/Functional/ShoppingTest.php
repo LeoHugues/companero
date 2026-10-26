@@ -27,8 +27,9 @@ final class ShoppingTest extends AppTestCase
         self::assertResponseRedirects('/courses?ajouter=1');
         $this->client->followRedirect();
         self::assertSelectorTextContains('main', 'C’est noté : papier toilette.');
-        self::assertSelectorTextContains('[aria-labelledby="shopping-urgent-title"]', 'Papier toilette');
-        self::assertSelectorTextContains('[aria-labelledby="shopping-urgent-title"]', 'Léo · aujourd’hui');
+        self::assertSelectorTextContains('#shopping-count', '1 chose à acheter, dont 1 urgente');
+        self::assertSelectorTextContains('.shopping-row.is-urgent', 'Papier toilette');
+        self::assertSelectorTextContains('.shopping-row.is-urgent', 'Léo · aujourd’hui');
 
         // The same thing, whatever its capitals, accents or plural, is not written twice.
         $this->client->submitForm('Ajouter', ['name' => 'Éponge']);
@@ -52,7 +53,8 @@ final class ShoppingTest extends AppTestCase
         self::assertResponseRedirects('/courses');
         $this->client->followRedirect();
         self::assertSelectorTextContains('main', 'Merci Robin ! Papier toilette : c’est réglé.');
-        self::assertSelectorNotExists('[aria-labelledby="shopping-urgent-title"]');
+        self::assertSelectorNotExists('.shopping-row.is-urgent');
+        self::assertSelectorTextContains('#shopping-count', '1 chose à acheter');
         self::assertSelectorTextContains('#shopping-bought', 'Papier toilette');
         self::assertSelectorTextContains('#shopping-bought', 'Robin · aujourd’hui');
         self::assertSame(['Éponge'], array_map(static fn (ShoppingItem $item): string => $item->getName(), $this->missing($leo)));

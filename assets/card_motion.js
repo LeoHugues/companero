@@ -186,7 +186,9 @@ function take(form, id, undo) {
     }
     turnSeats(id, 'mine', undo);
     const hand = document.querySelector(HAND);
-    const card = document.querySelector(`[data-care-target="item"] > #task-${CSS.escape(id)}`);
+    // Its card in "Prendre soin de la Casa", or the one the home page keeps ready for a quest or the deck.
+    const card = document.querySelector(`[data-care-target="item"] > #task-${CSS.escape(id)}`)
+        ?? document.querySelector(`template[data-dealt="${CSS.escape(id)}"]`)?.content.querySelector('.play-card');
     if (!hand || !card || document.getElementById(`hand-${id}`)) {
         return;
     }
@@ -202,6 +204,8 @@ function take(form, id, undo) {
     hand.insertBefore(slot, next);
     hand.insertBefore(blank, next);
     undo.push(() => { slot.remove(); blank.remove(); });
+    // A card kept ready still says "Je prends": it comes with my name.
+    turnSeats(id, 'mine', undo);
     track(bringIn([slot]));
 }
 

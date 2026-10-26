@@ -2,7 +2,7 @@
 
 {% block speech %}Chaque tâche rapporte des points. Pas pour se comparer : pour avancer ensemble.{% endblock %}
 
-{% block heading %}Les points{% endblock %}
+{% block heading %}Les points et les objectifs{% endblock %}
 
 {% block content %}
     <div class="sheet flex items-center justify-center gap-5 p-5">
@@ -12,11 +12,30 @@
     </div>
 
     <ul class="list-sheet text-[14px] leading-snug text-ink-soft">
-        <li class="flex items-start gap-3 py-3.5"><span class="tile tile-blush"><twig:Icon name="flame" size="19" stroke="1.9"/></span><p class="pt-0.5">Les points mêlent le temps et la pénibilité : les toilettes valent plus que leurs 5 minutes.</p></li>
-        {% if household.cleaningDayBoost %}
-            <li class="flex items-start gap-3 py-3.5"><span class="tile tile-sun"><twig:Icon name="bolt" size="19" stroke="1.9"/></span><p class="pt-0.5">Le jour de ménage ({{ weekday_name(household.cleaningDay) }}), un boost ajoute +1 point tous les 3 points.</p></li>
-        {% endif %}
+        <li class="flex items-start gap-3 py-3.5"><span class="tile tile-blush"><twig:Icon name="flame" size="19" stroke="1.9"/></span><p class="pt-0.5">Les points mêlent le temps et la pénibilité : les toilettes valent plus que leurs 5 minutes.{% if household.cleaningDayBoost %} Le {{ weekday_name(household.cleaningDay) }}, jour de ménage, tout rapporte un peu plus.{% endif %}</p></li>
         <li class="flex items-start gap-3 py-3.5"><span class="tile tile-sky"><twig:Icon name="edit" size="18" stroke="1.9"/></span><p class="pt-0.5">Les barèmes sont à vous : un point te semble injuste ? Change-le dans la tâche. Plus dur que d’habitude cette fois ? Ajoute 5 points à ce que tu as fait.</p></li>
         <li class="flex items-start gap-3 py-3.5"><span class="tile tile-lilac"><twig:Icon name="trophy" size="19" stroke="1.9"/></span><p class="pt-0.5">Tes points te font aussi monter de niveau, et chaque niveau ouvre un cadeau.</p></li>
     </ul>
+
+    <h2 class="group-label -mb-1">Chaque semaine, deux objectifs</h2>
+    <section class="sheet flex flex-col gap-3 p-4" aria-labelledby="house-goal">
+        <div class="flex items-center justify-between gap-2">
+            <h3 id="house-goal" class="flex items-center gap-2.5 text-[16px] font-semibold"><span class="tile tile-clay size-9 rounded-[11px]"><twig:Icon name="home" size="18" stroke="1.9"/></span>Celui de la maison</h3>
+            <span class="text-[16px] font-bold text-clay-dark">{{ household.weeklyGoal }} pts</span>
+        </div>
+        <div class="track h-2"><div class="h-full w-2/3 rounded-full bg-[#E3A92E]"></div></div>
+        <p class="text-[13.5px] leading-snug text-ink-soft">Les points de toute la coloc comptent. Atteint, il rapporte <strong class="font-semibold text-ink">+{{ team_xp }} XP</strong> à chacun des présents, et fait avancer la série de la coloc. Il se règle dans les réglages de la coloc.</p>
+    </section>
+
+    <section class="sheet flex flex-col gap-3 p-4" aria-labelledby="my-goal">
+        <div class="flex items-center justify-between gap-2">
+            <h3 id="my-goal" class="flex items-center gap-2.5 text-[16px] font-semibold"><twig:Avatar :member="app.user" size="36"/>Le tien</h3>
+            <span class="text-[13px] font-medium text-muted">de 5 à 20 min/j</span>
+        </div>
+        <div class="track h-2"><div class="h-full w-1/2 rounded-full bg-sun"></div></div>
+        <p class="text-[13.5px] leading-snug text-ink-soft">Ce que tu vises, toi. Il suit tes jours de présence : là 4 jours sur 7, c’est 4/7 de ton objectif. {{ replay ? 'Il se règle dans ton profil.' : 'Tu le choisis juste après.' }}</p>
+        <p class="rounded-xl bg-track/45 px-3 py-2 text-[13.5px] leading-snug font-medium text-ink">Pour que la maison atteigne ses {{ household.weeklyGoal }} pts à {{ household.members|length }}, ça fait environ {{ share }} pts chacun.</p>
+    </section>
+
+    <p class="flex items-start gap-3 px-1 text-[13.5px] leading-snug text-ink-soft"><twig:Icon name="chart" size="18" stroke="1.9" class="mt-px shrink-0 text-clay-dark"/>Le dimanche soir, le bilan : ce que chacun a fait, et un titre pour tout le monde.</p>
 {% endblock %}

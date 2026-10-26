@@ -7,18 +7,31 @@
 {% block heading %}{{ replay ? 'Comment ça marche' : 'Bienvenue dans ' ~ household.name }}{% endblock %}
 
 {% block content %}
-    <p class="-mt-1 text-[15.5px] leading-relaxed text-ink-soft">
-        Companero, c’est l’outil de la coloc pour l’intendance de la maison : le ménage, le linge, les poubelles,
-        le jardin, les animaux, les petites réparations, les courses qui manquent…
+    {% set others = household.members|filter(m => m is not same as(app.user)) %}
+    {% if not replay and others is not empty %}
+        <div class="-mt-1 flex items-center gap-3">
+            <p class="flex shrink-0 pl-0.5">
+                {% for member in household.members|slice(0, 5) %}<twig:Avatar :member="member" size="32" class="-ml-2 ring-2 ring-cream first:ml-0"/>{% endfor %}
+            </p>
+            {% set here = others|filter(m => m.claimed)|map(m => m.name)|join(', ', ' et ') %}
+            {% set coming = others|filter(m => not m.claimed)|map(m => m.name)|join(', ', ' et ') %}
+            <p class="text-[14px] leading-snug text-ink-soft">{{ here ? 'Avec ' ~ here ~ (coming ? ', et bientôt ' ~ coming) : 'Bientôt avec ' ~ coming }}.</p>
+        </div>
+    {% endif %}
+
+    <p class="text-[15.5px] leading-relaxed text-ink-soft">
+        Companero, c’est l’intendance de la coloc, au même endroit : le ménage, le linge, les poubelles, les animaux,
+        les courses qui manquent, et les comptes entre vous.
     </p>
 
     <ul class="list-sheet">
         {% for item in [
-            {icon: 'list', tile: 'tile-sun', title: 'Voir ce qui attend', text: 'Toutes les tâches de la maison, et depuis quand elles n’ont pas été faites.'},
-            {icon: 'calendar', tile: 'tile-sky', title: 'S’organiser ensemble', text: 'Qui s’en occupe, le jour de ménage, un rappel au bon moment.'},
-            {icon: 'star', tile: 'tile-blush', title: 'Se motiver', text: 'Des points, des objectifs, et une Casa qui rayonne quand on prend soin d’elle.'},
+            {icon: 'card', tile: 'tile-sun', title: 'Les tâches, en cartes', text: 'Celles de la maison, qui deviennent pressantes avec le temps. On en prend une, on la fait, elle rapporte.'},
+            {icon: 'cart', tile: 'tile-sage', title: 'Les courses', text: 'Ce qui manque, noté par n’importe qui, coché au magasin.'},
+            {icon: 'coins', tile: 'tile-sky', title: 'Les comptes', text: 'Qui a payé quoi, qui doit combien, et on règle d’un geste.'},
+            {icon: 'heart', tile: 'tile-blush', title: 'Et moi, la Casa', text: 'Je rayonne quand la maison brille, je prends la poussière sinon. Des points et des objectifs pour avancer ensemble.'},
         ] %}
-            <li class="flex items-start gap-3 py-3.5 animate-rise" style="animation-delay: {{ loop.index0 * 120 }}ms">
+            <li class="flex items-start gap-3 py-3.5 animate-rise" style="animation-delay: {{ loop.index0 * 110 }}ms">
                 <span class="tile {{ item.tile }}"><twig:Icon :name="item.icon" size="20" stroke="1.9"/></span>
                 <span class="flex flex-col gap-0.5">
                     <span class="row-title">{{ item.title }}</span>
@@ -28,5 +41,5 @@
         {% endfor %}
     </ul>
 
-    {% if not replay %}<p class="text-center text-[13px] text-muted">Deux minutes de visite, et c’est parti.</p>{% endif %}
+    {% if not replay %}<p class="text-center text-[13px] text-muted">Encore trois écrans, la charte de la maison, tes réglages, et c’est parti.</p>{% endif %}
 {% endblock %}

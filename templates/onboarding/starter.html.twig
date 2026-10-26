@@ -1,0 +1,41 @@
+{% extends 'onboarding/_setup_layout.html.twig' %}
+{#
+    The chores the coloc starts with (StarterKit): those nearly every coloc shares, the usual ones ticked, each with its
+    rhythm, the rooms it goes through and its points. Ticked, it becomes a card of the house at once; everything
+    changes later, and the rest is added with "+".
+#}
+{% set step = 3 %}
+
+{% block speech %}Voici ce que font presque toutes les colocs. Coche ce qui vous ressemble : tout se change ensuite.{% endblock %}
+{% block heading %}Pour commencer{% endblock %}
+
+{% block content %}
+    <form method="post" id="starter-form" class="flex flex-col gap-2" data-controller="tally">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
+        <div class="flex items-baseline justify-between gap-3 px-1">
+            <h2 class="eyebrow">Les tâches de la maison</h2>
+            <p class="text-[12.5px] font-semibold text-muted" aria-live="polite"><span data-tally-target="count">{{ offer|filter(task => task.ticked)|length }}</span> choisies</p>
+        </div>
+        <ul class="list-sheet">
+            {% for task in offer %}
+                <li>
+                    <label class="starter-row">
+                        <span class="tile {{ task.category.value == 'pets' ? 'tile-blush' : (task.category.value == 'garden' ? 'tile-sage' : 'tile-sun') }}" aria-hidden="true"><twig:Icon :name="task.category.icon" size="19" stroke="1.9"/></span>
+                        <span class="flex min-w-0 flex-1 flex-col gap-0.5">
+                            <span class="row-title">{{ task.title }}</span>
+                            <span class="row-meta">{{ task.rule }}{{ task.rooms is not empty ? ' · ' ~ task.rooms|join(', ') }} · {{ task.points }} pts</span>
+                        </span>
+                        <input type="checkbox" name="taches[]" value="{{ task.key }}" class="starter-check" {{ task.ticked ? 'checked' }} data-action="tally#count">
+                    </label>
+                </li>
+            {% endfor %}
+        </ul>
+        <p class="px-1 text-[12.5px] leading-snug text-muted">Chacune devient une carte de la maison. Leur rythme, leurs points, qui s’en charge : tout se règle sur la carte. Le reste s’ajoute avec le « + ».</p>
+    </form>
+{% endblock %}
+
+{% block back %}<a href="{{ path('onboarding_house') }}" class="btn-link"><twig:Icon name="chevron-left" size="18" stroke="2"/>Retour</a>{% endblock %}
+
+{% block next %}
+    <button type="submit" form="starter-form" class="btn-primary h-[52px] px-6 text-[16px]" data-haptic="success" data-turbo-submits-with="Je distribue les cartes…">C’est noté<twig:Icon name="chevron-right" size="19" stroke="2.4"/></button>
+{% endblock %}

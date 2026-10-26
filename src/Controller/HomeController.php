@@ -43,8 +43,11 @@ final class HomeController extends AbstractController
         $doneThisWeek = $completions->findForHousehold($household, $week->start, $week->end());
         // Where I stand in the accounts I am in.
         $myLedgers = $ledgers->forMember($member);
-        // The week's review is ready on Sunday evening, and still on Monday for the week just closed.
-        $reviewReady = '7' === $now->format('N') && (int) $now->format('G') >= NoticeBoard::REVIEW_HOUR || '1' === $now->format('N');
+        // The week's review is ready on Sunday evening, and still on Monday for the week just closed — if the household
+        // already lived in it: a coloc created on a Monday has no review of the week before.
+        $reviewWeek = '1' === $now->format('N') ? $week->previous() : $week;
+        $reviewReady = ('7' === $now->format('N') && (int) $now->format('G') >= NoticeBoard::REVIEW_HOUR || '1' === $now->format('N'))
+            && $household->getCreatedAt() < $reviewWeek->end();
 
         return $this->render('home/index.html.twig', [
             'mine' => $mine,
@@ -62,7 +65,7 @@ final class HomeController extends AbstractController
             'cleanliness' => $board->cleanliness(),
             'mood' => CasaMood::fromCleanliness($board->cleanliness()),
             'team' => $teamProgress->build($household, $week),
-            'review' => ['week' => '1' === $now->format('N') ? $week->previous() : $week, 'ready' => $reviewReady],
+            'review' => ['week' => $reviewReady ? $reviewWeek : $week, 'ready' => $reviewReady],
             'done_this_week' => ['completions' => $doneThisWeek, 'points' => $points->sumByCompletion($doneThisWeek)],
             'level' => $levels->levelOf($member),
             'is_cleaning_day' => $household->isCleaningDay($now),

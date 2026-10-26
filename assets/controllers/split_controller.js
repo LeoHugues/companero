@@ -144,7 +144,8 @@ export default class extends Controller {
             const names = this.rowTargets.filter((_, i) => included[i]).map((row) => row.dataset.name);
             const who = count === this.rowTargets.length ? 'Tout le monde' : (count === 0 ? 'Personne' : names.join(', '));
             this.summaryTarget.textContent = `${who} · ${{ equal: 'à parts égales', shares: 'par parts', amounts: 'par montants' }[mode]}`;
-            this.eachTarget.textContent = remainder;
+            // Before the amount, how many it is shared between.
+            this.eachTarget.textContent = remainder || (count > 0 ? `${count} personne${count > 1 ? 's' : ''}` : '');
         }
     }
 

@@ -46,7 +46,7 @@ final class TaskController extends AbstractController
     }
 
     /** How the list of templates can be sorted: by room, by kind of work, by how they come back. */
-    private const GROUPINGS = ['piece' => 'Pièce', 'categorie' => 'Catégorie', 'frequence' => 'Fréquence'];
+    private const GROUPINGS = ['piece' => 'Pièce', 'categorie' => 'Type', 'frequence' => 'Fréquence'];
 
     /**
      * "Tâches", the tab: everything there is to do, by urgency — the fresh ones folded under "Plus tard" —, filtered

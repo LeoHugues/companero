@@ -49,7 +49,7 @@ sudo -u www-data php bin/console app:coloc:creer config/coloc/notre-coloc.yaml -
 ```
 
 Le mot de passe est demandé, puis la commande affiche le lien d'invitation à envoyer aux
-autres colocs (il est aussi dans *Réglages de la coloc › Inviter quelqu'un*). Tout se modifie
+autres colocs (il est aussi dans *Réglages de la coloc › Le lien d'invitation*). Tout se modifie
 ensuite dans l'appli. On s'y connecte avec un **pseudo** (`leo`, peu importe les majuscules) et
 un mot de passe.
 
@@ -60,8 +60,10 @@ pour quelqu'un d'autre se remet « à réclamer » sans rien perdre (points, tâ
 
 ```bash
 sudo -u www-data php bin/console app:membre:a-reclamer Gab Robin Léa
-``` Pour une coloc sans fichier de description, `https://votre-domaine/bienvenue`
-la crée avec quelques zones et un catalogue par défaut.
+```
+
+Pour une coloc sans fichier de description, `https://votre-domaine/bienvenue` la crée, puis fait
+choisir ses pièces, ses animaux et ses premières tâches (un catalogue par défaut vient avec).
 
 Ensuite :
 

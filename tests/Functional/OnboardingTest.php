@@ -3,7 +3,9 @@
 namespace App\Tests\Functional;
 
 use App\Entity\Member;
+use App\Entity\Pet;
 use App\Entity\Task;
+use App\Entity\Zone;
 use App\Enum\TaskKind;
 use App\Household\Charter;
 use App\Household\MemberRegistrar;
@@ -22,21 +24,91 @@ final class OnboardingTest extends AppTestCase
         self::assertResponseRedirects('/connexion');
     }
 
-    public function testFoundingAHouseholdLeadsToTheTour(): void
+    public function testTheWelcomePageOpensEveryDoor(): void
+    {
+        $this->client->request('GET', '/connexion');
+
+        self::assertSelectorExists('a[href="/bienvenue"]');
+        self::assertSelectorExists('form[action="/rejoindre"] input[name=lien]');
+        self::assertSelectorExists('form[action="/connexion"] input[name=pseudo]');
+    }
+
+    public function testFoundingAHouseholdLeadsToItsSettingUp(): void
     {
         $this->client->request('GET', '/bienvenue');
         $this->client->submitForm('C’est parti', [
             'founding[householdName]' => 'La coloc des Lilas',
-            'founding[cleaningDay]' => '6',
             'founding[name]' => 'Léo',
             'founding[username]' => 'Léo',
             'founding[plainPassword]' => 'companero',
         ]);
 
-        self::assertResponseRedirects('/decouverte');
+        self::assertResponseRedirects('/bienvenue/maison');
         $leo = $this->member('léo');
         self::assertFalse($leo->isOnboarded());
         self::assertCount(\count(Charter::DEFAULT_RULES), $leo->getHousehold()->getCharterRules());
+    }
+
+    public function testSettingUpTheHouseThenItsChoresThenInviting(): void
+    {
+        $leo = $this->foundHousehold(onboarded: false);
+        $this->client->loginUser($leo);
+
+        // The house: its rooms, its animals, its cleaning day.
+        $crawler = $this->client->request('GET', '/bienvenue/maison');
+        self::assertSelectorTextContains('h1', 'Votre maison');
+        self::assertCount(5, $crawler->filter('input[name="pieces[]"]:checked'));
+        $this->client->request('POST', '/bienvenue/maison', [
+            '_csrf_token' => $crawler->filter('input[name=_csrf_token]')->attr('value'),
+            'pieces' => ['Cuisine', 'Salon', 'Salle de bain', 'WC'],
+            'autre' => 'grenier, Chambre d’amis',
+            'animaux' => [['nom' => 'Tishka', 'espece' => 'cat'], ['nom' => '', 'espece' => 'dog']],
+            'jour' => '3',
+        ]);
+        self::assertResponseRedirects('/bienvenue/pour-commencer');
+        $household = $this->reload($leo)->getHousehold();
+        self::assertEqualsCanonicalizing(['Cuisine', 'Salon', 'Salle de bain', 'WC', 'Grenier', 'Chambre d’amis'], array_map(static fn (Zone $zone): string => $zone->getName(), array_values($household->getZones()->toArray())));
+        self::assertSame(['Tishka'], array_map(static fn (Pet $pet): string => $pet->getName(), array_values($household->getPets()->toArray())));
+        self::assertSame(3, $household->getCleaningDay());
+
+        // Its first chores, the usual ones ticked: the cat's are there, named after her.
+        $this->client->followRedirect();
+        self::assertSelectorTextContains('main', 'Changer la litière de Tishka');
+        self::assertSelectorTextNotContains('main', 'Promener');
+        $ticked = $this->client->getCrawler()->filter('input[name="taches[]"]:checked')->count();
+        $this->client->submitForm('C’est noté');
+        self::assertResponseRedirects('/bienvenue/inviter');
+        $tasks = static::getContainer()->get(TaskRepository::class)->findBy(['household' => $household]);
+        self::assertCount($ticked, $tasks);
+        $litter = array_values(array_filter($tasks, static fn (Task $task): bool => 'Changer la litière de Tishka' === $task->getTitle()));
+        self::assertSame('Tishka', $litter[0]->getPet()?->getName());
+
+        // Once the chores are there, the setting up is behind: on to inviting.
+        $this->client->request('GET', '/bienvenue/maison');
+        self::assertResponseRedirects('/bienvenue/inviter');
+
+        // Inviting: the link, and profiles prepared by their first names, once each.
+        $this->client->followRedirect();
+        self::assertSelectorExists('input[value$="/rejoindre/'.$household->getInviteToken().'"]');
+        $this->client->submitForm('Ajouter', ['prenom' => 'Robin']);
+        $this->client->followRedirect();
+        $this->client->submitForm('Ajouter', ['prenom' => 'robin']);
+        $this->client->followRedirect();
+        self::assertSelectorTextContains('body', 'Robin est déjà dans la coloc.');
+        self::assertSame(['Robin'], array_map(static fn (Member $member): string => $member->getName(), $this->reload($leo)->getHousehold()->getUnclaimedMembers()));
+
+        $this->client->clickLink('Suivant');
+        self::assertResponseRedirects('/decouverte/esprit');
+    }
+
+    public function testTheSettingUpIsOnlyForAHouseholdBeingCreated(): void
+    {
+        $this->client->loginUser($this->foundHousehold());
+
+        $this->client->request('GET', '/bienvenue/maison');
+        self::assertResponseRedirects('/');
+        $this->client->request('GET', '/bienvenue/inviter');
+        self::assertResponseRedirects('/coloc');
     }
 
     public function testFoundingFormIsValidated(): void
@@ -65,6 +137,18 @@ final class OnboardingTest extends AppTestCase
         self::assertResponseRedirects('http://localhost/');
         $this->client->followRedirect();
         self::assertSelectorTextContains('h1', 'La Casa');
+    }
+
+    public function testLoggingOutOnceAlreadyOutDoesNotLogOutAgainAfterLoggingIn(): void
+    {
+        $this->foundHousehold();
+
+        $this->client->request('GET', '/deconnexion');
+        self::assertResponseRedirects('http://localhost/connexion');
+        $this->client->followRedirect();
+        $this->client->submitForm('Se connecter', ['pseudo' => 'léo', 'password' => 'companero']);
+
+        self::assertResponseRedirects('http://localhost/');
     }
 
     public function testJoiningWithTheInvitationLink(): void
@@ -204,6 +288,35 @@ final class OnboardingTest extends AppTestCase
         $this->client->request('GET', '/rejoindre/nope');
 
         self::assertResponseStatusCodeSame(404);
+        self::assertSelectorTextContains('h1', 'Ce lien ne marche plus');
+        self::assertSelectorExists('form[action="/rejoindre"] input[name=lien]');
+    }
+
+    public function testPastingTheInvitationLink(): void
+    {
+        $token = $this->foundHousehold()->getHousehold()->getInviteToken();
+
+        // The whole message, as it was sent: the link is found in it.
+        $this->client->request('GET', '/rejoindre', ['lien' => 'Léo t’invite dans « La coloc » : https://companero.example/rejoindre/'.strtoupper($token)]);
+        self::assertResponseRedirects('/rejoindre/'.$token);
+
+        $this->client->request('GET', '/rejoindre', ['lien' => 'https://companero.example/rejoindre/'.str_repeat('0', 32)]);
+        self::assertResponseRedirects('/connexion#rejoindre');
+        $this->client->followRedirect();
+        self::assertSelectorTextContains('#rejoindre [role=alert]', 'Ce lien ne mène à aucune coloc');
+        self::assertSelectorExists('details#rejoindre[open]');
+    }
+
+    public function testOpeningAnInvitationWhenAlreadyIn(): void
+    {
+        $leo = $this->foundHousehold();
+        $this->client->loginUser($leo);
+
+        $this->client->request('GET', '/rejoindre/'.$leo->getHousehold()->getInviteToken());
+
+        self::assertResponseRedirects('/');
+        $this->client->followRedirect();
+        self::assertSelectorTextContains('body', 'Tu es déjà dans La coloc !');
     }
 
     private function member(string $username): Member

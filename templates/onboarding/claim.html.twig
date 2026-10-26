@@ -16,8 +16,8 @@
         </header>
         <p class="-mt-1 text-[13.5px] leading-snug text-muted">Choisis ton pseudo et ton mot de passe : ce sont eux qui te connecteront.</p>
         {{ form_row(form.username) }}
-        {{ form_row(form.plainPassword) }}
-        <button type="submit" class="btn-primary h-[52px] w-full text-[16px]">C’est moi</button>
+        {{ form_row(form.plainPassword, {help: 'Au moins 8 caractères.', attr: {minlength: 8}}) }}
+        <button type="submit" class="btn-primary h-[52px] w-full text-[16px]" data-turbo-submits-with="On t’installe…">C’est moi</button>
     {{ form_end(form) }}
 
     <a href="{{ path('onboarding_join', {token: household.inviteToken}) }}" class="btn-link self-center">Ce n’est pas moi</a>
